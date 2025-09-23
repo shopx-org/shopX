@@ -1,0 +1,97 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تأیید OTP</title>
+    <link rel="stylesheet" href="{% static 'css/otpstyle.css' %}">
+</head>
+<body>
+<div class="otp-container">
+    {% if messages %}
+        <div style="width: 100%; text-align: center;">
+            {% for message in messages %}
+                <div class="log_msg">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <h2 class="otp-title">کد تایید را وارد کنید</h2>
+
+
+    {% if phone %}<p>کد تایید برای شماره {{ phone }} ارسال شد.</p>{% endif %}
+    <hr class="otp-separator">
+
+    <div style="margin:6px 0;">
+        <small>تعداد ارسال مجدد باقی‌مانده: {{ resend_left|default:0 }}</small>
+    </div>
+
+
+    <form id="otpForm" method="post" action="{% url 'account:check_otp' %}?token={{ token }}">
+        {% csrf_token %}
+        <div class="otp-inputs">
+            <input type="text" class="otp-input" maxlength="1" required>
+            <input type="text" class="otp-input" maxlength="1" required>
+            <input type="text" class="otp-input" maxlength="1" required>
+            <input type="text" class="otp-input" maxlength="1" required>
+        </div>
+        <input type="hidden" name="code" id="otpCode">
+        <button type="submit" class="otp-button">تایید</button>
+    </form>
+    <div>
+        <small>زمان باقی‌مانده:</small>
+        <span id="countdown" data-seconds="{{ seconds_left|default:0 }}"></span>
+    </div>
+    <form id="resendForm" method="post" action="{% url 'account:check_otp' %}?token={{ token }}"
+          style="margin-top:2px;">
+        {% csrf_token %}
+        <input type="hidden" name="resend" value="1">
+        <button type="submit" id="resendBtn" class="otp-button" disabled>ارسال مجدد کد</button>
+    </form>
+
+    <div style="padding-top: 15px; text-align: center;">
+        <a href="{% url 'account:password_login' %}?token={{ token }}"
+           style="color:#2dddfb;font-weight:bold;">ورود با رمز عبور</a>
+    </div>
+</div>
+
+<script>
+    // Build hidden field from 4 inputs
+    const inputs = document.querySelectorAll('.otp-input');
+    const hidden = document.getElementById('otpCode');
+    inputs.forEach((inp, idx) => {
+        inp.addEventListener('input', e => {
+            if (/\d/.test(inp.value)) {
+                if (idx < inputs.length - 1 && inp.value) inputs[idx + 1].focus();
+            } else {
+                inp.value = '';
+            }
+            hidden.value = Array.from(inputs).map(i => i.value).join('');
+        });
+        inp.addEventListener('keydown', e => {
+            if (e.key === 'Backspace' && !inp.value && idx > 0) inputs[idx - 1].focus();
+        });
+    });
+
+    // Countdown + enable resend
+    const countdownEl = document.getElementById('countdown');
+    const resendBtn = document.getElementById('resendBtn');
+    let seconds = parseInt(countdownEl?.dataset?.seconds || '0', 10);
+
+    function tick() {
+        const m = String(Math.floor(seconds / 60)).padStart(2, '0');
+        const s = String(seconds % 60).padStart(2, '0');
+        if (countdownEl) countdownEl.textContent = `${m}:${s}`;
+        if (seconds <= 0) {
+            resendBtn && (resendBtn.disabled = false);
+            return;
+        }
+        seconds -= 1;
+        setTimeout(tick, 1000);
+    }
+
+    tick();
+</script>
+</body>
+</html>

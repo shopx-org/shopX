@@ -1,0 +1,2494 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fa" data-nav-layout="vertical" data-theme-mode="light" data-header-styles="light" data-width="fullwidth"
+      data-menu-styles="light" data-toggled="close">
+
+<head>
+
+    {% include 'dashboards/dash_partials/references.html' %}
+
+</head>
+
+<body dir="rtl">
+
+<!-- SWITCHER -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="switcher-canvas" aria-labelledby="offcanvasRightLabel">
+    <div class="offcanvas-header border-bottom d-block p-0">
+        <div class="d-flex align-items-center justify-content-between p-3">
+            <h5 class="offcanvas-title text-default" id="offcanvasRightLabel">تنظیمات</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <nav class="border-top border-block-start-dashed">
+            <div class="nav nav-tabs nav-justified" id="switcher-main-tab" role="tablist">
+                <button class="nav-link active" id="switcher-home-tab" data-bs-toggle="tab"
+                        data-bs-target="#switcher-home" type="button" role="tab" aria-controls="switcher-home"
+                        aria-selected="true">تنظیمات قالب
+                </button>
+                <button class="nav-link" id="switcher-profile-tab" data-bs-toggle="tab"
+                        data-bs-target="#switcher-profile" type="button" role="tab" aria-controls="switcher-profile"
+                        aria-selected="false">رنگ قالب
+                </button>
+            </div>
+        </nav>
+    </div>
+    <div class="offcanvas-body">
+        <div class="tab-content" id="nav-tabContent">
+            <div class="tab-pane fade show active border-0" id="switcher-home" role="tabpanel"
+                 aria-labelledby="switcher-home-tab" tabindex="0">
+                <div class="">
+                    <p class="switcher-style-head">حالت رنگ قالب:</p>
+                    <div class="row switcher-style gx-0">
+                        <div class="col-4">
+                            <div class="form-check switch-select">
+                                <label class="form-check-label" for="switcher-light-theme">
+                                    روشن
+                                </label>
+                                <input class="form-check-input" type="radio" name="theme-style"
+                                       id="switcher-light-theme" checked="">
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-check switch-select">
+                                <label class="form-check-label" for="switcher-dark-theme">
+                                    تیره
+                                </label>
+                                <input class="form-check-input" type="radio" name="theme-style"
+                                       id="switcher-dark-theme">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="">
+                    <p class="switcher-style-head">جهت:</p>
+                    <div class="row switcher-style gx-0">
+                        <div class="col-4">
+                            <div class="form-check switch-select">
+                                <label class="form-check-label" for="switcher-ltr">
+                                    چپ به راست
+                                </label>
+                                <input class="form-check-input" type="radio" name="direction" id="switcher-ltr"
+                                       checked="">
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-check switch-select">
+                                <label class="form-check-label" for="switcher-rtl">
+                                    راست به چپ
+                                </label>
+                                <input class="form-check-input" type="radio" name="direction" id="switcher-rtl">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="">
+                    <p class="switcher-style-head">قالب ناوبری:</p>
+                    <div class="row switcher-style gx-0">
+                        <div class="col-4">
+                            <div class="form-check switch-select">
+                                <label class="form-check-label" for="switcher-vertical">
+                                    عمودی
+                                </label>
+                                <input class="form-check-input" type="radio" name="navigation-style"
+                                       id="switcher-vertical" checked="">
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-check switch-select">
+                                <label class="form-check-label" for="switcher-horizontal">
+                                    افقی
+                                </label>
+                                <input class="form-check-input" type="radio" name="navigation-style"
+                                       id="switcher-horizontal">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="navigation-menu-styles">
+                    <p class="switcher-style-head">سبک های منوی عمودی و افقی:</p>
+                    <div class="row switcher-style gx-0 pb-2 gy-2">
+                        <div class="col-4">
+                            <div class="form-check switch-select">
+                                <label class="form-check-label" for="switcher-menu-click">
+                                    منو کلیک کنید
+                                </label>
+                                <input class="form-check-input" type="radio" name="navigation-menu-styles"
+                                       id="switcher-menu-click">
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-check switch-select">
+                                <label class="form-check-label" for="switcher-menu-hover">
+                                    منو شناور
+                                </label>
+                                <input class="form-check-input" type="radio" name="navigation-menu-styles"
+                                       id="switcher-menu-hover">
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-check switch-select">
+                                <label class="form-check-label" for="switcher-icon-click">
+                                    نماد کلیک کنید
+                                </label>
+                                <input class="form-check-input" type="radio" name="navigation-menu-styles"
+                                       id="switcher-icon-click">
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-check switch-select">
+                                <label class="form-check-label" for="switcher-icon-hover">
+                                    نماد شناور
+                                </label>
+                                <input class="form-check-input" type="radio" name="navigation-menu-styles"
+                                       id="switcher-icon-hover">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="sidemenu-layout-styles">
+                    <p class="switcher-style-head">سبک های چیدمان منوی جانبی:</p>
+                    <div class="row switcher-style gx-0 pb-2 gy-2">
+                        <div class="col-sm-6">
+                            <div class="form-check switch-select">
+                                <label class="form-check-label" for="switcher-default-menu">
+                                    پیش فرض
+                                </label>
+                                <input class="form-check-input" type="radio" name="sidemenu-layout-styles"
+                                       id="switcher-default-menu" checked="">
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-check switch-select">
+                                <label class="form-check-label" for="switcher-closed-menu">
+                                    منو بسته
+                                </label>
+                                <input class="form-check-input" type="radio" name="sidemenu-layout-styles"
+                                       id="switcher-closed-menu">
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-check switch-select">
+                                <label class="form-check-label" for="switcher-icontext-menu">
+                                    آیکن متنی
+                                </label>
+                                <input class="form-check-input" type="radio" name="sidemenu-layout-styles"
+                                       id="switcher-icontext-menu">
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-check switch-select">
+                                <label class="form-check-label" for="switcher-icon-overlay">
+                                    آیکن
+                                </label>
+                                <input class="form-check-input" type="radio" name="sidemenu-layout-styles"
+                                       id="switcher-icon-overlay">
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-check switch-select">
+                                <label class="form-check-label" for="switcher-detached">
+                                    جدا شده
+                                </label>
+                                <input class="form-check-input" type="radio" name="sidemenu-layout-styles"
+                                       id="switcher-detached">
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-check switch-select">
+                                <label class="form-check-label" for="switcher-double-menu">
+                                    منو جفتی
+                                </label>
+                                <input class="form-check-input" type="radio" name="sidemenu-layout-styles"
+                                       id="switcher-double-menu">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="">
+                    <p class="switcher-style-head">سبک های صفحه:</p>
+                    <div class="row switcher-style gx-0">
+                        <div class="col-4">
+                            <div class="form-check switch-select">
+                                <label class="form-check-label" for="switcher-regular">
+                                    منظم
+                                </label>
+                                <input class="form-check-input" type="radio" name="page-styles"
+                                       id="switcher-regular"
+                                       checked="">
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-check switch-select">
+                                <label class="form-check-label" for="switcher-classic">
+                                    کلاسیک
+                                </label>
+                                <input class="form-check-input" type="radio" name="page-styles"
+                                       id="switcher-classic">
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-check switch-select">
+                                <label class="form-check-label" for="switcher-modern">
+                                    مدرن
+                                </label>
+                                <input class="form-check-input" type="radio" name="page-styles"
+                                       id="switcher-modern">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="">
+                    <p class="switcher-style-head">سبک های عرض طرح:</p>
+                    <div class="row switcher-style gx-0">
+                        <div class="col-4">
+                            <div class="form-check switch-select">
+                                <label class="form-check-label" for="switcher-default-width">
+                                    فشرده
+                                </label>
+                                <input class="form-check-input" type="radio" name="layout-width"
+                                       id="switcher-default-width">
+                            </div>
+                        </div>
+                        <div class="col-5">
+                            <div class="form-check switch-select">
+                                <label class="form-check-label" for="switcher-full-width">
+                                    تمام صفحه
+                                </label>
+                                <input class="form-check-input" type="radio" name="layout-width"
+                                       id="switcher-full-width" checked="">
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="form-check switch-select">
+                                <label class="form-check-label" for="switcher-boxed">
+                                    جعبه ای
+                                </label>
+                                <input class="form-check-input" type="radio" name="layout-width"
+                                       id="switcher-boxed">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="">
+                    <p class="switcher-style-head">موقعیت های منو:</p>
+                    <div class="row switcher-style gx-0">
+                        <div class="col-4">
+                            <div class="form-check switch-select">
+                                <label class="form-check-label" for="switcher-menu-fixed">
+                                    ثابت
+                                </label>
+                                <input class="form-check-input" type="radio" name="menu-positions"
+                                       id="switcher-menu-fixed" checked="">
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-check switch-select">
+                                <label class="form-check-label" for="switcher-menu-scroll">
+                                    قابل پیمایش
+                                </label>
+                                <input class="form-check-input" type="radio" name="menu-positions"
+                                       id="switcher-menu-scroll">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="">
+                    <p class="switcher-style-head">موقعیت های سرصفحه:</p>
+                    <div class="row switcher-style gx-0">
+                        <div class="col-4">
+                            <div class="form-check switch-select">
+                                <label class="form-check-label" for="switcher-header-fixed">
+                                    ثابت
+                                </label>
+                                <input class="form-check-input" type="radio" name="header-positions"
+                                       id="switcher-header-fixed" checked="">
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-check switch-select">
+                                <label class="form-check-label" for="switcher-header-scroll">
+                                    قابل پیمایش
+                                </label>
+                                <input class="form-check-input" type="radio" name="header-positions"
+                                       id="switcher-header-scroll">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="">
+                    <p class="switcher-style-head">لودر:</p>
+                    <div class="row switcher-style gx-0">
+                        <div class="col-4">
+                            <div class="form-check switch-select">
+                                <label class="form-check-label" for="switcher-loader-enable">
+                                    فعال
+                                </label>
+                                <input class="form-check-input" type="radio" name="page-loader"
+                                       id="switcher-loader-enable">
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-check switch-select">
+                                <label class="form-check-label" for="switcher-loader-disable">
+                                    غیرفعال
+                                </label>
+                                <input class="form-check-input" type="radio" name="page-loader"
+                                       id="switcher-loader-disable" checked="">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade border-0" id="switcher-profile" role="tabpanel"
+                 aria-labelledby="switcher-profile-tab" tabindex="0">
+                <div>
+                    <div class="theme-colors">
+                        <p class="switcher-style-head">رنگ های منو:</p>
+                        <div class="d-flex switcher-style pb-2">
+                            <div class="form-check switch-select me-3">
+                                <input class="form-check-input color-input color-white" data-bs-toggle="tooltip"
+                                       data-bs-placement="top" title="Light Menu" type="radio" name="menu-colors"
+                                       id="switcher-menu-light" checked="">
+                            </div>
+                            <div class="form-check switch-select me-3">
+                                <input class="form-check-input color-input color-dark" data-bs-toggle="tooltip"
+                                       data-bs-placement="top" title="Dark Menu" type="radio" name="menu-colors"
+                                       id="switcher-menu-dark">
+                            </div>
+                            <div class="form-check switch-select me-3">
+                                <input class="form-check-input color-input color-primary" data-bs-toggle="tooltip"
+                                       data-bs-placement="top" title="Color Menu" type="radio" name="menu-colors"
+                                       id="switcher-menu-primary">
+                            </div>
+                            <div class="form-check switch-select me-3">
+                                <input class="form-check-input color-input color-gradient" data-bs-toggle="tooltip"
+                                       data-bs-placement="top" title="Gradient Menu" type="radio" name="menu-colors"
+                                       id="switcher-menu-gradient">
+                            </div>
+                            <div class="form-check switch-select me-3">
+                                <input class="form-check-input color-input color-transparent"
+                                       data-bs-toggle="tooltip"
+                                       data-bs-placement="top" title="Transparent Menu" type="radio"
+                                       name="menu-colors"
+                                       id="switcher-menu-transparent">
+                            </div>
+                        </div>
+                        <div class="px-4 pb-3 text-muted fs-11">
+                            توجه: اگر می خواهید رنگ را تغییر دهید، منو به صورت پویا تغییر می کند از زیر انتخابگر رنگ
+                            اصلی تم
+                        </div>
+                    </div>
+                    <div class="theme-colors">
+                        <p class="switcher-style-head">رنگ‌های سرصفحه:</p>
+                        <div class="d-flex switcher-style pb-2">
+                            <div class="form-check switch-select me-3">
+                                <input class="form-check-input color-input color-white" data-bs-toggle="tooltip"
+                                       data-bs-placement="top" title="Light Header" type="radio"
+                                       name="header-colors"
+                                       id="switcher-header-light" checked="">
+                            </div>
+                            <div class="form-check switch-select me-3">
+                                <input class="form-check-input color-input color-dark" data-bs-toggle="tooltip"
+                                       data-bs-placement="top" title="Dark Header" type="radio" name="header-colors"
+                                       id="switcher-header-dark">
+                            </div>
+                            <div class="form-check switch-select me-3">
+                                <input class="form-check-input color-input color-primary" data-bs-toggle="tooltip"
+                                       data-bs-placement="top" title="Color Header" type="radio"
+                                       name="header-colors"
+                                       id="switcher-header-primary">
+                            </div>
+                            <div class="form-check switch-select me-3">
+                                <input class="form-check-input color-input color-gradient" data-bs-toggle="tooltip"
+                                       data-bs-placement="top" title="Gradient Header" type="radio"
+                                       name="header-colors"
+                                       id="switcher-header-gradient">
+                            </div>
+                            <div class="form-check switch-select me-3">
+                                <input class="form-check-input color-input color-transparent"
+                                       data-bs-toggle="tooltip"
+                                       data-bs-placement="top" title="Transparent Header" type="radio"
+                                       name="header-colors" id="switcher-header-transparent">
+                            </div>
+                        </div>
+                        <div class="px-4 pb-3 text-muted fs-11">
+                            توجه: اگر می‌خواهید رنگ هدر را به صورت پویا تغییر دهید، از انتخابگر رنگ اصلی قالب در زیر
+                            تغییر دهید.
+                        </div>
+                    </div>
+                    <div class="theme-colors">
+                        <p class="switcher-style-head">رنگ اصلی:</p>
+                        <div class="d-flex flex-wrap align-items-center switcher-style">
+                            <div class="form-check switch-select me-3">
+                                <input class="form-check-input color-input color-primary-1" type="radio"
+                                       name="theme-primary" id="switcher-primary">
+                            </div>
+                            <div class="form-check switch-select me-3">
+                                <input class="form-check-input color-input color-primary-2" type="radio"
+                                       name="theme-primary" id="switcher-primary1">
+                            </div>
+                            <div class="form-check switch-select me-3">
+                                <input class="form-check-input color-input color-primary-3" type="radio"
+                                       name="theme-primary" id="switcher-primary2">
+                            </div>
+                            <div class="form-check switch-select me-3">
+                                <input class="form-check-input color-input color-primary-4" type="radio"
+                                       name="theme-primary" id="switcher-primary3">
+                            </div>
+                            <div class="form-check switch-select me-3">
+                                <input class="form-check-input color-input color-primary-5" type="radio"
+                                       name="theme-primary" id="switcher-primary4">
+                            </div>
+                            <div class="form-check switch-select ps-0 mt-1 color-primary-light">
+                                <div class="theme-container-primary"></div>
+                                <div class="pickr-container-primary" onchange="updateChartColor(this.value)"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="theme-colors">
+                        <p class="switcher-style-head">قالب پس زمینه:</p>
+                        <div class="d-flex flex-wrap align-items-center switcher-style">
+                            <div class="form-check switch-select me-3">
+                                <input class="form-check-input color-input color-bg-1" type="radio"
+                                       name="theme-background" id="switcher-background">
+                            </div>
+                            <div class="form-check switch-select me-3">
+                                <input class="form-check-input color-input color-bg-2" type="radio"
+                                       name="theme-background" id="switcher-background1">
+                            </div>
+                            <div class="form-check switch-select me-3">
+                                <input class="form-check-input color-input color-bg-3" type="radio"
+                                       name="theme-background" id="switcher-background2">
+                            </div>
+                            <div class="form-check switch-select me-3">
+                                <input class="form-check-input color-input color-bg-4" type="radio"
+                                       name="theme-background" id="switcher-background3">
+                            </div>
+                            <div class="form-check switch-select me-3">
+                                <input class="form-check-input color-input color-bg-5" type="radio"
+                                       name="theme-background" id="switcher-background4">
+                            </div>
+                            <div class="form-check switch-select ps-0 mt-1 tooltip-static-demo color-bg-transparent">
+                                <div class="theme-container-background"></div>
+                                <div class="pickr-container-background"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="menu-image mb-3">
+                        <p class="switcher-style-head">منو با تصویر پس زمینه:</p>
+                        <div class="d-flex flex-wrap align-items-center switcher-style">
+                            <div class="form-check switch-select m-2">
+                                <input class="form-check-input bgimage-input bg-img1" type="radio"
+                                       name="menu-background" id="switcher-bg-img">
+                            </div>
+                            <div class="form-check switch-select m-2">
+                                <input class="form-check-input bgimage-input bg-img2" type="radio"
+                                       name="menu-background" id="switcher-bg-img1">
+                            </div>
+                            <div class="form-check switch-select m-2">
+                                <input class="form-check-input bgimage-input bg-img3" type="radio"
+                                       name="menu-background" id="switcher-bg-img2">
+                            </div>
+                            <div class="form-check switch-select m-2">
+                                <input class="form-check-input bgimage-input bg-img4" type="radio"
+                                       name="menu-background" id="switcher-bg-img3">
+                            </div>
+                            <div class="form-check switch-select m-2">
+                                <input class="form-check-input bgimage-input bg-img5" type="radio"
+                                       name="menu-background" id="switcher-bg-img4">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex justify-content-between canvas-footer flex-nowrap gap-2">
+                <a href="https://1.envato.market/7axOmV" target="_blank"
+                   class="btn btn-primary text-nowrap">خرید</a>
+                <a href="https://1.envato.market/MGEaN" target="_blank" class="btn btn-secondary text-nowrap">نمونه
+                    کار</a>
+                <a href="javascript:void(0);" id="reset-all" class="btn btn-danger text-nowrap">بازنشانی</a>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- END SWITCHER -->
+
+<!-- LOADER -->
+<div id="loader">
+    <img src="{% static 'dashboard_assets/images/media/loader.svg' %}" alt="">
+</div>
+<!-- END LOADER -->
+
+<!-- PAGE -->
+<div class="page">
+
+    <!-- HEADER -->
+
+    <header class="app-header sticky" id="header">
+
+        <!-- Start::main-header-container -->
+        <div class="main-header-container container-fluid">
+
+            <!-- Start::header-content-left -->
+            <div class="header-content-left">
+
+                <!-- Start::header-element -->
+                <div class="header-element">
+                    <div class="horizontal-logo">
+                        <a href="{% url 'home:home' %}" class="header-logo">
+                            <img src="{% static 'dashboard_assets/images/brand-logos/desktop-logo.png' %}" alt="logo" class="desktop-logo">
+                            <img src="{% static 'dashboard_assets/images/brand-logos/toggle-logo.png' %}" alt="logo" class="toggle-logo">
+                            <img src="{% static 'dashboard_assets/images/brand-logos/desktop-dark.png' %}" alt="logo" class="desktop-dark">
+                            <img src="{% static 'dashboard_assets/images/brand-logos/toggle-dark.png' %}" alt="logo" class="toggle-dark">
+                        </a>
+                    </div>
+                </div>
+                <!-- End::header-element -->
+
+                <!-- Start::header-element -->
+                <div class="header-element">
+                    <!-- Start::header-link -->
+                    <a aria-label="Hide Sidebar" class="sidemenu-toggle header-link" data-bs-toggle="sidebar"
+                       href="javascript:void(0);">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="header-link-icon menu-btn" width="32"
+                             height="32"
+                             fill="#000000" viewbox="0 0 256 256">
+                            <path d="M224,128a8,8,0,0,1-8,8H40a8,8,0,0,1,0-16H216A8,8,0,0,1,224,128ZM40,72H216a8,8,0,0,0,0-16H40a8,8,0,0,0,0,16ZM216,184H40a8,8,0,0,0,0,16H216a8,8,0,0,0,0-16Z">
+                            </path>
+                        </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="header-link-icon menu-btn-close" width="32"
+                             height="32" fill="#000000" viewbox="0 0 256 256">
+                            <path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z">
+                            </path>
+                        </svg>
+                    </a>
+                    <!-- End::header-link -->
+                </div>
+                <!-- End::header-element -->
+
+
+            </div>
+            <!-- End::header-content-left -->
+
+            <!-- Start::header-content-right -->
+            <ul class="header-content-right">
+
+                <!-- Start::header-element -->
+                <li class="header-element d-md-none d-block">
+                    <a href="javascript:void(0);" class="header-link" data-bs-toggle="modal"
+                       data-bs-target="#header-responsive-search">
+                        <!-- Start::header-link-icon -->
+                        <i class="bi bi-search header-link-icon"></i>
+                        <!-- End::header-link-icon -->
+                    </a>
+                </li>
+                <!-- End::header-element -->
+
+                <!-- Start::header-element -->
+                <li class="header-element search-dropdown dropdown d-md-block d-none">
+                    <!-- Start::header-link|dropdown-toggle -->
+                    <a href="javascript:void(0);" class="header-link dropdown-toggle" data-bs-auto-close="outside"
+                       data-bs-toggle="dropdown">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="header-link-icon" width="32" height="32"
+                             fill="#000000" viewbox="0 0 256 256">
+                            <path d="M228.24,219.76l-51.38-51.38a86.15,86.15,0,1,0-8.48,8.48l51.38,51.38a6,6,0,0,0,8.48-8.48ZM38,112a74,74,0,1,1,74,74A74.09,74.09,0,0,1,38,112Z">
+                            </path>
+                        </svg>
+                    </a>
+                    <ul class="main-header-dropdown dropdown-menu dropdown-menu-end overflow-visible"
+                        data-popper-placement="none">
+                        <li class="px-3 py-2">
+                            <div class="header-element header-search d-md-block d-none my-auto">
+                                <!-- Start::header-link -->
+                                <input type="text" class="header-search-bar form-control" id="header-search"
+                                       placeholder="جستجو" spellcheck="false" autocomplete="off"
+                                       autocapitalize="off">
+                                <a href="javascript:void(0);" class="header-search-icon border-0">
+                                    <i class="bi bi-search"></i>
+                                </a>
+                                <!-- End::header-link -->
+                            </div>
+                        </li>
+                    </ul>
+                </li>
+                <!-- End::header-element -->
+
+                <!-- Start::header-element -->
+                <li class="header-element country-selector dropdown">
+                    <!-- Start::header-link|dropdown-toggle -->
+                    <a href="javascript:void(0);" class="header-link dropdown-toggle" data-bs-auto-close="outside"
+                       data-bs-toggle="dropdown">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="header-link-icon" viewbox="0 0 256 256">
+                            <rect width="256" height="256" fill="none"></rect>
+                            <polyline points="240 216 184 104 128 216" fill="none" stroke="currentColor"
+                                      stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></polyline>
+                            <line x1="144" y1="184" x2="224" y2="184" fill="none" stroke="currentColor"
+                                  stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></line>
+                            <line x1="96" y1="32" x2="96" y2="56" fill="none" stroke="currentColor"
+                                  stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></line>
+                            <line x1="32" y1="56" x2="160" y2="56" fill="none" stroke="currentColor"
+                                  stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></line>
+                            <path d="M128,56a96,96,0,0,1-96,96" fill="none" stroke="currentColor"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round" stroke-width="16"></path>
+                            <path d="M69.47,88A96,96,0,0,0,160,152" fill="none" stroke="currentColor"
+                                  stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></path>
+                        </svg>
+                    </a>
+                    <!-- End::header-link|dropdown-toggle -->
+                    <ul class="main-header-dropdown dropdown-menu dropdown-menu-end" data-popper-placement="none">
+                        <li>
+                            <div class="py-2 px-3">
+                                <input class="form-control form-control-sm" type="text" placeholder="جستجو"
+                                       aria-label=".form-control-sm example">
+                            </div>
+                        </li>
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center justify-content-between"
+                               href="javascript:void(0);">
+                                <div class="d-flex align-items-center">
+                                            <span class="avatar avatar-rounded avatar-xs lh-1 me-2">
+                                                <img src="{% static 'dashboard_assets/images/flags/us_flag.jpg' %}" alt="img">
+                                            </span>
+                                    انگلیسی
+                                </div>
+                                <span class="text-muted fs-12">(US)</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center justify-content-between"
+                               href="javascript:void(0);">
+                                <div class="d-flex align-items-center">
+                                            <span class="avatar avatar-rounded avatar-xs lh-1 me-2">
+                                                <img src="{% static 'dashboard_assets/images/flags/spain_flag.jpg' %}" alt="img">
+                                            </span>
+                                    اسپانیایی
+                                </div>
+                                <span class="text-muted fs-12">(ES)</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center justify-content-between"
+                               href="javascript:void(0);">
+                                <div class="d-flex align-items-center">
+                                            <span class="avatar avatar-rounded avatar-xs lh-1 me-2">
+                                                <img src="{% static 'dashboard_assets/images/flags/french_flag.jpg' %}" alt="img">
+                                            </span>
+                                    فرانسوی
+                                </div>
+                                <span class="text-muted fs-12">(FR)</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center justify-content-between"
+                               href="javascript:void(0);">
+                                <div class="d-flex align-items-center">
+                                            <span class="avatar avatar-rounded avatar-xs lh-1 me-2">
+                                                <img src="{% static 'dashboard_assets/images/flags/uae_flag.jpg' %}" alt="img">
+                                            </span>
+                                    عربي
+                                </div>
+                                <span class="text-muted fs-12">(AE)</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center justify-content-between"
+                               href="javascript:void(0);">
+                                <div class="d-flex align-items-center">
+                                            <span class="avatar avatar-rounded avatar-xs lh-1 me-2">
+                                                <img src="{% static 'dashboard_assets/images/flags/germany_flag.jpg' %}" alt="img">
+                                            </span>
+                                    آلمانی
+                                </div>
+                                <span class="text-muted fs-12">(US)</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center justify-content-between"
+                               href="javascript:void(0);">
+                                <div class="d-flex align-items-center">
+                                            <span class="avatar avatar-rounded avatar-xs lh-1 me-2">
+                                                <img src="{% static 'dashboard_assets/images/flags/china_flag.jpg' %}" alt="img">
+                                            </span>
+                                    چینی
+                                </div>
+                                <span class="text-muted fs-12">(CN)</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <!-- End::header-element -->
+
+                <!-- Start::header-element -->
+                <li class="header-element header-theme-mode">
+                    <!-- Start::header-link|layout-setting -->
+                    <a href="javascript:void(0);" class="header-link layout-setting">
+                                <span class="light-layout">
+                                    <!-- Start::header-link-icon -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="header-link-icon"
+                                         viewbox="0 0 256 256">
+                                        <rect width="256" height="256" fill="none"></rect>
+                                        <path d="M108.11,28.11A96.09,96.09,0,0,0,227.89,147.89,96,96,0,1,1,108.11,28.11Z"
+                                              fill="none" stroke="currentColor" stroke-linecap="round"
+                                              stroke-linejoin="round" stroke-width="16"></path>
+                                    </svg>
+                                    <!-- End::header-link-icon -->
+                                </span>
+                        <span class="dark-layout">
+                                    <!-- Start::header-link-icon -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="header-link-icon"
+                                         viewbox="0 0 256 256">
+                                        <rect width="256" height="256" fill="none"></rect>
+                                        <line x1="128" y1="40" x2="128" y2="32" fill="none" stroke="currentColor"
+                                              stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></line>
+                                        <circle cx="128" cy="128" r="56" fill="none" stroke="currentColor"
+                                                stroke-linecap="round" stroke-linejoin="round"
+                                                stroke-width="16"></circle>
+                                        <line x1="64" y1="64" x2="56" y2="56" fill="none" stroke="currentColor"
+                                              stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></line>
+                                        <line x1="64" y1="192" x2="56" y2="200" fill="none" stroke="currentColor"
+                                              stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></line>
+                                        <line x1="192" y1="64" x2="200" y2="56" fill="none" stroke="currentColor"
+                                              stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></line>
+                                        <line x1="192" y1="192" x2="200" y2="200" fill="none" stroke="currentColor"
+                                              stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></line>
+                                        <line x1="40" y1="128" x2="32" y2="128" fill="none" stroke="currentColor"
+                                              stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></line>
+                                        <line x1="128" y1="216" x2="128" y2="224" fill="none" stroke="currentColor"
+                                              stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></line>
+                                        <line x1="216" y1="128" x2="224" y2="128" fill="none" stroke="currentColor"
+                                              stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></line>
+                                    </svg>
+                            <!-- End::header-link-icon -->
+                                </span>
+                    </a>
+                    <!-- End::header-link|layout-setting -->
+                </li>
+                <!-- End::header-element -->
+
+                <!-- Start::header-element -->
+                <li class="header-element cart-dropdown dropdown">
+                    <!-- Start::header-link|dropdown-toggle -->
+                    <a href="javascript:void(0);" class="header-link dropdown-toggle" data-bs-auto-close="outside"
+                       data-bs-toggle="dropdown">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="header-link-icon" viewbox="0 0 256 256">
+                            <rect width="256" height="256" fill="none"></rect>
+                            <rect x="32" y="48" width="192" height="160" rx="8" fill="none" stroke="currentColor"
+                                  stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></rect>
+                            <path d="M168,88a40,40,0,0,1-80,0" fill="none" stroke="currentColor"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round" stroke-width="16"></path>
+                        </svg>
+                        <span class="badge bg-primary rounded-pill header-icon-badge" id="cart-icon-badge">5</span>
+                    </a>
+                    <!-- End::header-link|dropdown-toggle -->
+                    <!-- Start::main-header-dropdown -->
+                    <div class="main-header-dropdown dropdown-menu dropdown-menu-end" data-popper-placement="none">
+                        <div class="p-3">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <p class="mb-0 fs-16">موارد سبد خرید</p>
+                                <span class="badge bg-success-transparent ms-1 fs-12" id="cart-data">5 مورد</span>
+                            </div>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <ul class="list-unstyled mb-0" id="header-cart-items-scroll">
+                            <li class="dropdown-item">
+                                <div class="cart-dropdown-item">
+                                    <div class="d-flex align-items-center  gap-3 mb-2">
+                                        <div class="lh-1">
+                                                    <span class="avatar avatar-xl p-1 bg-primary-transparent">
+                                                        <img src="{% static 'dashboard_assets/images/ecommerce/png/1.png' %}" alt="img">
+                                                    </span>
+                                        </div>
+                                        <div class="flex-fill">
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <p class="fs-11 fw-medium mb-0 text-muted">نایک</p>
+                                                <h6 class="fw-semibold mb-0 mt-1">75<span
+                                                        class="text-decoration-line-through text-muted fw-normal ms-1 fs-13 d-inline-block">99</span>
+                                                </h6>
+                                            </div>
+                                            <a href="cart.html" class="fw-semibold">صندلی</a>
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                        <span class="text-muted">تعداد : <span
+                                                                class="text-default fs-14 fw-medium">4
+                                                                ✕
+                                                                32</span></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div class="d-flex rounded flex-nowrap order-qnt me-1">
+                                            <a href="javascript:void(0);"
+                                               class="badge bg-white p-1 border text-muted fs-13 me-2 product-quantity-minus"><i
+                                                    class="ri-subtract-line"></i> </a> <input type="text"
+                                                                                              class="form-control form-control-cart border-0 text-center w-100"
+                                                                                              aria-label="quantity"
+                                                                                              id="product-qty1"
+                                                                                              value="3"> <a
+                                                href="javascript:void(0);"
+                                                class="badge bg-white p-1 border text-muted fs-13 me-2 product-quantity-plus"><i
+                                                class="ri-add-line"></i> </a></div>
+                                        <div class="d-flex gap-2">
+                                            <a href="wishlist.html"
+                                               class="btn btn-primary-light btn-sm btn-wave waves-effect waves-light border"
+                                               data-bs-toggle="tooltip" data-bs-placement="top"
+                                               data-bs-title="علاقه مندی"><i class="ri-heart-line"></i></a>
+                                            <a href="javascript:void(0);"
+                                               class="header-cart-remove dropdown-item-close btn btn-sm btn-icon btn-danger-light"><i
+                                                    class="ri-close-line fs-15"></i></a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="dropdown-item">
+                                <div class="cart-dropdown-item">
+                                    <div class="d-flex align-items-center  gap-3 mb-2">
+                                        <div class="lh-1">
+                                                    <span class="avatar avatar-xl p-1 bg-secondary-transparent">
+                                                        <img src="{% static 'dashboard_assets/images/ecommerce/png/14.png' %}" alt="img">
+                                                    </span>
+                                        </div>
+                                        <div class="flex-fill">
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <p class="fs-11 fw-medium mb-0 text-muted">نایک</p>
+                                                <h6 class="fw-semibold mb-0 mt-1">120<span
+                                                        class="text-decoration-line-through text-muted fw-normal ms-1 fs-13 d-inline-block">149</span>
+                                                </h6>
+                                            </div>
+                                            <a href="cart.html" class="fw-semibold">دوربین</a>
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                        <span class="text-muted">تعداد : <span
+                                                                class="text-default fs-13 fw-medium">12 ✕
+                                                                112</span></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div class="d-flex rounded flex-nowrap order-qnt me-1"><a
+                                                href="javascript:void(0);"
+                                                class="badge bg-white p-1 border text-muted fs-13 me-2 product-quantity-minus"><i
+                                                class="ri-subtract-line"></i> </a> <input type="text"
+                                                                                          class="form-control form-control-cart border-0 text-center w-100"
+                                                                                          aria-label="quantity"
+                                                                                          id="product-qty2"
+                                                                                          value="2">
+                                            <a href="javascript:void(0);"
+                                               class="badge bg-white p-1 border text-muted fs-13 me-2 product-quantity-plus"><i
+                                                    class="ri-add-line"></i> </a></div>
+                                        <div class="d-flex gap-2">
+                                            <a href="wishlist.html"
+                                               class="btn btn-primary-light btn-sm btn-wave waves-effect waves-light border"
+                                               data-bs-toggle="tooltip" data-bs-placement="top"
+                                               data-bs-title="علاقه مندی"><i class="ri-heart-line"></i></a>
+                                            <a href="javascript:void(0);"
+                                               class="header-cart-remove dropdown-item-close btn btn-sm btn-icon btn-danger-light"><i
+                                                    class="ri-close-line fs-15"></i></a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="dropdown-item">
+                                <div class="cart-dropdown-item">
+                                    <div class="d-flex align-items-center  gap-3 mb-2">
+                                        <div class="lh-1">
+                                                    <span class="avatar avatar-xl p-1 bg-success-transparent">
+                                                        <img src="{% static 'dashboard_assets/images/ecommerce/png/33.png' %}" alt="img">
+                                                    </span>
+                                        </div>
+                                        <div class="flex-fill">
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <p class="fs-11 fw-medium mb-0 text-muted">نایک</p>
+                                                <h6 class="fw-semibold mb-0 mt-1">30<span
+                                                        class="text-decoration-line-through text-muted fw-normal ms-1 fs-13 d-inline-block">49</span>
+                                                </h6>
+                                            </div>
+                                            <a href="cart.html" class="fw-semibold">عطر</a>
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                        <span class="text-muted">تعداد : <span
+                                                                class="text-default fs-13 fw-medium">9 ✕
+                                                                64</span></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div class="d-flex rounded flex-nowrap order-qnt me-1"><a
+                                                href="javascript:void(0);"
+                                                class="badge bg-white p-1 border text-muted fs-13 me-2 product-quantity-minus"><i
+                                                class="ri-subtract-line"></i> </a> <input type="text"
+                                                                                          class="form-control form-control-cart border-0 text-center w-100"
+                                                                                          aria-label="quantity"
+                                                                                          id="product-qty3"
+                                                                                          value="4">
+                                            <a href="javascript:void(0);"
+                                               class="badge bg-white p-1 border text-muted fs-13 me-2 product-quantity-plus"><i
+                                                    class="ri-add-line"></i> </a></div>
+                                        <div class="d-flex gap-2">
+                                            <a href="wishlist.html"
+                                               class="btn btn-primary-light btn-sm btn-wave waves-effect waves-light border"
+                                               data-bs-toggle="tooltip" data-bs-placement="top"
+                                               data-bs-title="علاقه مندی"><i class="ri-heart-line"></i></a>
+                                            <a href="javascript:void(0);"
+                                               class="header-cart-remove dropdown-item-close btn btn-sm btn-icon btn-danger-light"><i
+                                                    class="ri-close-line fs-15"></i></a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="dropdown-item">
+                                <div class="cart-dropdown-item">
+                                    <div class="d-flex align-items-center  gap-3 mb-2">
+                                        <div class="lh-1">
+                                                    <span class="avatar avatar-xl p-1 bg-warning-transparent">
+                                                        <img src="{% static 'dashboard_assets/images/ecommerce/png/34.png' %}" alt="img">
+                                                    </span>
+                                        </div>
+                                        <div class="flex-fill">
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <p class="fs-11 fw-medium mb-0 text-muted">نایک</p>
+                                                <h6 class="fw-semibold mb-0 mt-1">70<span
+                                                        class="text-decoration-line-through text-muted fw-normal ms-1 fs-13 d-inline-block">129</span>
+                                                </h6>
+                                            </div>
+                                            <a href="cart.html" class="fw-semibold">کیف</a>
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                        <span class="text-muted">تعداد : <span
+                                                                class="text-default fs-13 fw-medium">7 ✕
+                                                                230</span></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div class="d-flex rounded flex-nowrap order-qnt me-1"><a
+                                                href="javascript:void(0);"
+                                                class="badge bg-white p-1 border text-muted fs-13 me-2 product-quantity-minus"><i
+                                                class="ri-subtract-line"></i> </a> <input type="text"
+                                                                                          class="form-control form-control-cart border-0 text-center w-100"
+                                                                                          aria-label="quantity"
+                                                                                          id="product-qty4"
+                                                                                          value="1">
+                                            <a href="javascript:void(0);"
+                                               class="badge bg-white p-1 border text-muted fs-13 me-2 product-quantity-plus"><i
+                                                    class="ri-add-line"></i> </a></div>
+                                        <div class="d-flex gap-2">
+                                            <a href="wishlist.html"
+                                               class="btn btn-primary-light btn-sm btn-wave waves-effect waves-light border"
+                                               data-bs-toggle="tooltip" data-bs-placement="top"
+                                               data-bs-title="علاقه مندی"><i class="ri-heart-line"></i></a>
+                                            <a href="javascript:void(0);"
+                                               class="header-cart-remove dropdown-item-close btn btn-sm btn-icon btn-danger-light"><i
+                                                    class="ri-close-line fs-15"></i></a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="dropdown-item">
+                                <div class="cart-dropdown-item">
+                                    <div class="d-flex align-items-center  gap-3 mb-2">
+                                        <div class="lh-1">
+                                                    <span class="avatar avatar-xl p-1 bg-pink-transparent">
+                                                        <img src="{% static 'dashboard_assets/images/ecommerce/png/31.png' %}" alt="img">
+                                                    </span>
+                                        </div>
+                                        <div class="flex-fill">
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <p class="fs-11 fw-medium mb-0 text-muted">نایک</p>
+                                                <h6 class="fw-semibold mb-0 mt-1">200<span
+                                                        class="text-decoration-line-through text-muted fw-normal ms-1 fs-13 d-inline-block">249</span>
+                                                </h6>
+                                            </div>
+                                            <a href="cart.html" class="fw-semibold">کیف</a>
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                        <span class="text-muted">تعداد : <span
+                                                                class="text-default fs-13 fw-medium">5 ✕
+                                                                52</span></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div class="d-flex rounded flex-nowrap order-qnt me-1"><a
+                                                href="javascript:void(0);"
+                                                class="badge bg-white p-1 border text-muted fs-13 me-2 product-quantity-minus"><i
+                                                class="ri-subtract-line"></i> </a> <input type="text"
+                                                                                          class="form-control form-control-cart border-0 text-center w-100"
+                                                                                          aria-label="quantity"
+                                                                                          id="product-qty5"
+                                                                                          value="3">
+                                            <a href="javascript:void(0);"
+                                               class="badge bg-white p-1 border text-muted fs-13 me-2 product-quantity-plus"><i
+                                                    class="ri-add-line"></i> </a></div>
+                                        <div class="d-flex gap-2">
+                                            <a href="wishlist.html"
+                                               class="btn btn-primary-light btn-sm btn-wave waves-effect waves-light border"
+                                               data-bs-toggle="tooltip" data-bs-placement="top"
+                                               data-bs-title="علاقه مندی"><i class="ri-heart-line"></i></a>
+                                            <a href="javascript:void(0);"
+                                               class="header-cart-remove dropdown-item-close btn btn-sm btn-icon btn-danger-light"><i
+                                                    class="ri-close-line fs-15"></i></a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                        <div class="p-3 empty-header-item border-top">
+                            <div class="text-center d-grid">
+                                <a href="checkout.html" class="text-primary text-decoration-underline">ادامه برای
+                                    تسویه
+                                    حساب
+                                    <i class="ri-arrow-right-line"></i></a>
+                            </div>
+                        </div>
+                        <div class="p-5 empty-item d-none">
+                            <div class="text-center">
+                                        <span class="avatar avatar-xl avatar-rounded bg-primary-transparent">
+                                            <span class="avatar avatar-lg avatar-rounded bg-primary">
+                                                <i class="ri-shopping-cart-2-line fs-2"></i>
+                                            </span>
+                                        </span>
+                                <h6 class="fw-semibold mb-1 mt-3">سبد خرید خالی است</h6>
+                                <span class="mb-3 fw-normal fs-13 d-block">محصول اضافه کنید</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- End::main-header-dropdown -->
+                </li>
+                <!-- End::header-element -->
+
+                <!-- Start::header-element -->
+                <li class="header-element notifications-dropdown d-xl-block d-none dropdown">
+                    <!-- Start::header-link|dropdown-toggle -->
+                    <a href="javascript:void(0);" class="header-link dropdown-toggle" data-bs-toggle="dropdown"
+                       data-bs-auto-close="outside" id="messageDropdown" aria-expanded="false">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="header-link-icon animate-bell"
+                             viewbox="0 0 256 256">
+                            <rect width="256" height="256" fill="none"></rect>
+                            <path d="M96,192a32,32,0,0,0,64,0" fill="none" stroke="currentColor"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round" stroke-width="16"></path>
+                            <path d="M184,24a102.71,102.71,0,0,1,36.29,40" fill="none" stroke="currentColor"
+                                  stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></path>
+                            <path d="M35.71,64A102.71,102.71,0,0,1,72,24" fill="none" stroke="currentColor"
+                                  stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></path>
+                            <path d="M56,112a72,72,0,0,1,144,0c0,35.82,8.3,56.6,14.9,68A8,8,0,0,1,208,192H48a8,8,0,0,1-6.88-12C47.71,168.6,56,147.81,56,112Z"
+                                  fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                  stroke-width="16"></path>
+                        </svg>
+                        <span class="header-icon-pulse bg-secondary rounded pulse pulse-secondary"></span>
+                    </a>
+                    <!-- End::header-link|dropdown-toggle -->
+                    <!-- Start::main-header-dropdown -->
+                    <div class="main-header-dropdown dropdown-menu dropdown-menu-end" data-popper-placement="none">
+                        <div class="p-3">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <p class="mb-0 fs-16">هشدارها</p>
+                                <a href="javascript:void(0);" class="badge bg-secondary-transparent"
+                                   id="notifiation-data">15 خوانده نشده</a>
+                            </div>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <div class="pb-0 px-3">
+                            <ul class="nav nav-tabs mb-0 tab-style-8 scaleX" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="activity-tab" data-bs-toggle="tab"
+                                            data-bs-target="#activity-tab-pane" type="button" role="tab"
+                                            aria-controls="activity-tab-pane" aria-selected="true">فعالیت ها
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="notes-tab" data-bs-toggle="tab"
+                                            data-bs-target="#notes-tab-pane" type="button" role="tab"
+                                            aria-controls="notes-tab-pane" aria-selected="false" tabindex="-1">
+                                        یادداشت
+                                        ها
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="alert-tab" data-bs-toggle="tab"
+                                            data-bs-target="#alert-tab-pane" type="button" role="tab"
+                                            aria-controls="alert-tab-pane" aria-selected="false" tabindex="-1">
+                                        هشدارها
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <div class="tab-content">
+                            <div class="tab-pane show active p-0 border-0" id="activity-tab-pane" role="tabpanel"
+                                 aria-labelledby="activity-tab" tabindex="0">
+                                <ul class="list-unstyled mb-0" id="header-notification-scroll1">
+                                    <li class="dropdown-item">
+                                        <div class="d-flex align-items-start">
+                                            <div class="pe-2 lh-1"> <span
+                                                    class="avatar avatar-md avatar-rounded svg-white">
+                                                            <img src="{% static 'dashboard_assets/images/faces/2.jpg' %}" alt="img"> </span>
+                                            </div>
+                                            <div class="flex-grow-1 d-flex align-items-start justify-content-between">
+                                                <div>
+                                                    <p class="mb-0 fw-semibold">محمد</p>
+                                                    <div class="fw-normal fs-13 header-notification-text text-truncate">
+                                                        بروز رسانی اطلاعات سفارش
+                                                    </div>
+                                                    <span class="text-muted fs-12">2 دقیقه پیش</span>
+
+                                                </div>
+                                                <div><a href="javascript:void(0);"
+                                                        class="min-w-fit-content text-muted dropdown-item-close1"><i
+                                                        class="ri-close-line fs-5"></i></a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li class="dropdown-item">
+                                        <div class="d-flex align-items-start">
+                                            <div class="pe-2 lh-1"> <span
+                                                    class="avatar avatar-md bg-primary-transparent avatar-rounded svg-white">
+                                                        SM </span>
+                                            </div>
+                                            <div class="flex-grow-1 d-flex align-items-start justify-content-between">
+                                                <div>
+                                                    <p class="mb-0 fw-semibold">محمد</p>
+                                                    <div class="fw-normal fs-13 header-notification-text text-truncate">
+                                                        بروز رسانی اطلاعات سفارش
+                                                    </div>
+                                                    <span class="text-muted fs-12">5 دقیقه پیش</span>
+
+                                                </div>
+                                                <div><a href="javascript:void(0);"
+                                                        class="min-w-fit-content text-muted dropdown-item-close1"><i
+                                                        class="ri-close-line fs-5"></i></a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li class="dropdown-item">
+                                        <div class="d-flex align-items-start">
+                                            <div class="pe-2 lh-1"> <span
+                                                    class="avatar avatar-md avatar-rounded svg-white">
+                                                            <img src="{% static 'dashboard_assets/images/faces/6.jpg' %}" alt="img"> </span>
+                                            </div>
+                                            <div class="flex-grow-1 d-flex align-items-start justify-content-between">
+                                                <div>
+                                                    <p class="mb-0 fw-semibold">محمد</p>
+                                                    <div class="fw-normal fs-13 header-notification-text text-truncate">
+                                                        بروز رسانی اطلاعات سفارش
+                                                    </div>
+                                                    <span class="text-muted fs-12">دیروز</span>
+                                                </div>
+                                                <div><a href="javascript:void(0);"
+                                                        class="min-w-fit-content text-muted dropdown-item-close1"><i
+                                                        class="ri-close-line fs-5"></i></a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li class="dropdown-item">
+                                        <div class="d-flex align-items-start">
+                                            <div class="pe-2 lh-1"> <span
+                                                    class="avatar avatar-md bg-secondary-transparent avatar-rounded svg-white">
+                                                            TR </span>
+                                            </div>
+                                            <div class="flex-grow-1 d-flex align-items-start justify-content-between">
+                                                <div>
+                                                    <p class="mb-0 fw-semibold">محمد</p>
+                                                    <div class="fw-normal fs-13 header-notification-text text-truncate">
+                                                        بروز رسانی اطلاعات سفارش
+                                                    </div>
+                                                    <span class="text-muted fs-12">2 روز پیش</span>
+                                                </div>
+                                                <div><a href="javascript:void(0);"
+                                                        class="min-w-fit-content text-muted dropdown-item-close1"><i
+                                                        class="ri-close-line fs-5"></i></a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li class="dropdown-item">
+                                        <div class="d-flex align-items-start">
+                                            <div class="pe-2 lh-1"> <span
+                                                    class="avatar avatar-md avatar-rounded svg-white">
+                                                            <img src="{% static 'dashboard_assets/images/faces/14.jpg' %}" alt="img"> </span>
+                                            </div>
+                                            <div class="flex-grow-1 d-flex align-items-start justify-content-between">
+                                                <div>
+                                                    <p class="mb-0 fw-semibold">محمد</p>
+                                                    <div class="fw-normal fs-13 header-notification-text text-truncate">
+                                                        بروز رسانی اطلاعات سفارش
+                                                    </div>
+                                                    <span class="text-muted fs-12">1 ساعت پیش</span>
+                                                </div>
+                                                <div><a href="javascript:void(0);"
+                                                        class="min-w-fit-content text-muted dropdown-item-close1"><i
+                                                        class="ri-close-line fs-5"></i></a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="tab-pane p-0 border-0" id="notes-tab-pane" role="tabpanel"
+                                 aria-labelledby="notes-tab" tabindex="0">
+                                <ul class="list-unstyled mb-0" id="header-notification-scroll2">
+                                    <li class="dropdown-item">
+                                        <div class="d-flex align-items-start">
+                                            <div class="pe-2 lh-1"> <span
+                                                    class="avatar avatar-md avatar-rounded bg-primary">
+                                                            <i class="ri-file-text-line fs-16"></i> </span>
+                                            </div>
+                                            <div class="flex-grow-1 d-flex align-items-start justify-content-between">
+                                                <div>
+                                                    <p class="mb-0 fw-semibold"><a href="javascript:void(0);">
+                                                        محمد</a></p>
+                                                    <div class="fw-normal fs-13 header-notification-text text-truncate">
+                                                        بروز رسانی اطلاعات سفارش
+                                                    </div>
+                                                    <span class="fs-13 text-muted">2 دقیقه پیش</span>
+                                                </div>
+                                                <div>
+                                                    <a href="javascript:void(0);"
+                                                       class="min-w-fit-content text-muted dropdown-item-close1"><i
+                                                            class="ri-close-line fs-5"></i></a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li class="dropdown-item">
+                                        <div class="d-flex align-items-start">
+                                            <div class="pe-2 lh-1"> <span
+                                                    class="avatar avatar-md avatar-rounded bg-secondary">
+                                                            <i class="ri-box-3-line fs-16"></i></span>
+                                            </div>
+                                            <div class="flex-grow-1 d-flex align-items-start justify-content-between">
+                                                <div>
+                                                    <p class="mb-0 fw-semibold">محمد</p>
+                                                    <div class="fw-normal fs-13 header-notification-text text-truncate">
+                                                        بروز رسانی اطلاعات سفارش
+                                                    </div>
+                                                    <span class="fs-13 text-muted">2 دقیقه پیش</span>
+                                                </div>
+                                                <div><a href="javascript:void(0);"
+                                                        class="min-w-fit-content text-muted dropdown-item-close1"><i
+                                                        class="ri-close-line fs-5"></i></a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li class="dropdown-item">
+                                        <div class="d-flex align-items-start">
+                                            <div class="pe-2 lh-1"> <span
+                                                    class="avatar avatar-md avatar-rounded bg-success">
+                                                            <i class="ri-mail-open-line fs-16"></i> </span>
+                                            </div>
+                                            <div class="flex-grow-1 d-flex align-items-start justify-content-between">
+                                                <div>
+                                                    <p class="mb-0 fw-semibold"><a href="javascript:void(0);">
+                                                        محسن</a></p>
+                                                    <div class="fw-normal fs-13 header-notification-text text-truncate">
+                                                        بروز رسانی سفارش
+                                                    </div>
+                                                    <span class="fs-13 text-muted">10 روز پیش</span>
+                                                </div>
+                                                <div><a href="javascript:void(0);"
+                                                        class="min-w-fit-content text-muted dropdown-item-close1"><i
+                                                        class="ri-close-line fs-5"></i></a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li class="dropdown-item">
+                                        <div class="d-flex align-items-start">
+                                            <div class="pe-2 lh-1"> <span
+                                                    class="avatar avatar-md avatar-rounded bg-info">
+                                                            <i class="ri-bank-card-line fs-16"></i> </span>
+                                            </div>
+                                            <div class="flex-grow-1 d-flex align-items-start justify-content-between">
+                                                <div>
+                                                    <p class="mb-0 fw-semibold"><a href="javascript:void(0);">
+                                                        محمد</a></p>
+                                                    <div class="fw-normal fs-13 header-notification-text text-truncate">
+                                                        بروزرسانی
+                                                    </div>
+                                                    <span class="fs-13 text-muted">دیروز</span>
+                                                </div>
+                                                <div><a href="javascript:void(0);"
+                                                        class="min-w-fit-content text-muted dropdown-item-close1"><i
+                                                        class="ri-close-line fs-5"></i></a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li class="dropdown-item">
+                                        <div class="d-flex align-items-start">
+                                            <div class="pe-2 lh-1"> <span
+                                                    class="avatar avatar-md avatar-rounded bg-warning">
+                                                            <i class="ri-group-line fs-16"></i> </span>
+                                            </div>
+                                            <div class="flex-grow-1 d-flex align-items-start justify-content-between">
+                                                <div>
+                                                    <p class="mb-0 fw-semibold"><a href="javascript:void(0);">
+                                                        احسان</a></p>
+                                                    <div class="fw-normal fs-13 header-notification-text text-truncate">
+                                                        بروزرسانی
+                                                    </div>
+                                                    <span class="fs-13 text-muted">2 روز پیش</span>
+                                                </div>
+                                                <div><a href="javascript:void(0);"
+                                                        class="min-w-fit-content text-muted dropdown-item-close1"><i
+                                                        class="ri-close-line fs-5"></i></a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="tab-pane p-0 border-0" id="alert-tab-pane" role="tabpanel"
+                                 aria-labelledby="alert-tab" tabindex="0">
+                                <ul class="list-unstyled mb-0" id="header-notification-scroll3">
+                                    <li class="dropdown-item">
+                                        <div class="d-flex align-items-start">
+                                            <div class="pe-2 lh-1"> <span
+                                                    class="avatar avatar-md avatar-rounded bg-primary-transparent">
+                                                            <i class="ri-mail-line fs-16"></i> </span>
+                                            </div>
+                                            <div class="flex-grow-1 d-flex align-items-start justify-content-between">
+                                                <div>
+                                                    <p class="mb-0 fw-semibold"><a href="javascript:void(0);">
+                                                        محمد</a></p>
+                                                    <div class="fw-normal fs-13 header-notification-text text-truncate">
+                                                        بروزرسانی
+                                                    </div>
+                                                    <span class="fs-13 text-muted">2 دقیقه پیش</span>
+                                                </div>
+                                                <div><a href="javascript:void(0);"
+                                                        class="min-w-fit-content text-muted dropdown-item-close1"><i
+                                                        class="ri-close-line fs-5"></i></a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li class="dropdown-item">
+                                        <div class="d-flex align-items-start">
+                                            <div class="pe-2 lh-1"> <span
+                                                    class="avatar avatar-md avatar-rounded bg-secondary-transparent">
+                                                            <i class="ri-folder-warning-line fs-16"></i></span>
+                                            </div>
+                                            <div class="flex-grow-1 d-flex align-items-start justify-content-between">
+                                                <div>
+                                                    <p class="mb-0 fw-semibold"><a href="javascript:void(0);">
+                                                        محمد</a></p>
+                                                    <div class="fw-normal fs-13 header-notification-text text-truncate">
+                                                        بروزرسانی
+                                                    </div>
+                                                    <span class="fs-13 text-muted">15 دقیقه پیش</span>
+                                                </div>
+                                                <div><a href="javascript:void(0);"
+                                                        class="min-w-fit-content text-muted dropdown-item-close1"><i
+                                                        class="ri-close-line fs-5"></i></a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li class="dropdown-item">
+                                        <div class="d-flex align-items-start">
+                                            <div class="pe-2 lh-1"> <span
+                                                    class="avatar avatar-md avatar-rounded bg-success-transparent">
+                                                            <i class="ri-database-2-line fs-16"></i> </span>
+                                            </div>
+                                            <div class="flex-grow-1 d-flex align-items-start justify-content-between">
+                                                <div>
+                                                    <p class="mb-0 fw-semibold"><a href="javascript:void(0);">
+                                                        محمد</a></p>
+                                                    <div class="fw-normal fs-13 header-notification-text text-truncate">
+                                                        بروزرسانی
+                                                    </div>
+                                                    <span class="fs-13 text-muted">23 دقیقه پیش</span>
+                                                </div>
+                                                <div><a href="javascript:void(0);"
+                                                        class="min-w-fit-content text-muted dropdown-item-close1"><i
+                                                        class="ri-close-line fs-5"></i></a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li class="dropdown-item">
+                                        <div class="d-flex align-items-start">
+                                            <div class="pe-2 lh-1"> <span
+                                                    class="avatar avatar-md avatar-rounded bg-info-transparent">
+                                                            <i class="ri-bank-card-line fs-16"></i> </span>
+                                            </div>
+                                            <div class="flex-grow-1 d-flex align-items-start justify-content-between">
+                                                <div>
+                                                    <p class="mb-0 fw-semibold"><a href="javascript:void(0);">
+                                                        محمد</a></p>
+                                                    <div class="fw-normal fs-13 header-notification-text text-truncate">
+                                                        بروزرسانی
+                                                    </div>
+                                                    <span class="fs-13 text-muted">دیروز</span>
+                                                </div>
+                                                <div><a href="javascript:void(0);"
+                                                        class="min-w-fit-content text-muted dropdown-item-close1"><i
+                                                        class="ri-close-line fs-5"></i></a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li class="dropdown-item">
+                                        <div class="d-flex align-items-start">
+                                            <div class="pe-2 lh-1"> <span
+                                                    class="avatar avatar-md avatar-rounded bg-warning-transparent">
+                                                            <i class="ri-stack-line fs-16"></i> </span>
+                                            </div>
+                                            <div class="flex-grow-1 d-flex align-items-start justify-content-between">
+                                                <div>
+                                                    <p class="mb-0 fw-semibold"><a href="javascript:void(0);">
+                                                        محمد</a></p>
+                                                    <div class="fw-normal fs-13 header-notification-text text-truncate">
+                                                        بروزرسانی
+                                                    </div>
+                                                    <span class="fs-13 text-muted">2 روز پیش</span>
+                                                </div>
+                                                <div><a href="javascript:void(0);"
+                                                        class="min-w-fit-content text-muted dropdown-item-close1"><i
+                                                        class="ri-close-line fs-5"></i></a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="p-3 empty-header-item1 border-top">
+                            <div class="d-grid text-center">
+                                <a href="checkout.html" class="text-primary text-decoration-underline">مشاهده همه<i
+                                        class="ri-arrow-right-line"></i></a>
+                            </div>
+                        </div>
+                        <div class="p-5 empty-item1 d-none">
+                            <div class="text-center">
+                                        <span class="avatar avatar-xl avatar-rounded bg-secondary-transparent">
+                                            <i class="ri-notification-off-line fs-2"></i>
+                                        </span>
+                                <h6 class="fw-medium mt-3">هشداری وجود ندارد</h6>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- End::main-header-dropdown -->
+                </li>
+                <!-- End::header-element -->
+
+                <!-- Start::header-element -->
+                <li class="header-element header-fullscreen">
+                    <!-- Start::header-link -->
+                    <a onclick="openFullscreen();" href="javascript:void(0);" class="header-link">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="full-screen-open header-link-icon"
+                             viewbox="0 0 256 256">
+                            <rect width="256" height="256" fill="none"></rect>
+                            <polyline points="168 48 208 48 208 88" fill="none" stroke="currentColor"
+                                      stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></polyline>
+                            <polyline points="88 208 48 208 48 168" fill="none" stroke="currentColor"
+                                      stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></polyline>
+                            <polyline points="208 168 208 208 168 208" fill="none" stroke="currentColor"
+                                      stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></polyline>
+                            <polyline points="48 88 48 48 88 48" fill="none" stroke="currentColor"
+                                      stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></polyline>
+                        </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="full-screen-close header-link-icon d-none"
+                             viewbox="0 0 256 256">
+                            <rect width="256" height="256" fill="none"></rect>
+                            <polyline points="160 48 208 48 208 96" fill="none" stroke="currentColor"
+                                      stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></polyline>
+                            <line x1="144" y1="112" x2="208" y2="48" fill="none" stroke="currentColor"
+                                  stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></line>
+                            <polyline points="96 208 48 208 48 160" fill="none" stroke="currentColor"
+                                      stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></polyline>
+                            <line x1="112" y1="144" x2="48" y2="208" fill="none" stroke="currentColor"
+                                  stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></line>
+                        </svg>
+                    </a>
+                    <!-- End::header-link -->
+                </li>
+                <!-- End::header-element -->
+
+                <!-- Start::header-element -->
+                <li class="header-element dropdown">
+                    <!-- Start::header-link|dropdown-toggle -->
+                    <a href="javascript:void(0);" class="header-link dropdown-toggle" id="mainHeaderProfile"
+                       data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                        <div class="d-flex align-items-center">
+                            <div class="me-xl-2 me-0">
+                                <img src="{% static 'dashboard_assets/images/faces/2.jpg' %}" alt="img"
+                                     class="avatar avatar-sm avatar-rounded">
+                            </div>
+                            <div class="d-xl-block d-none lh-1">
+                                <span class="fw-medium lh-1">محسن</span>
+                            </div>
+                        </div>
+                    </a>
+                    <!-- End::header-link|dropdown-toggle -->
+                    <ul class="main-header-dropdown dropdown-menu pt-0 overflow-hidden header-profile-dropdown dropdown-menu-end"
+                        aria-labelledby="mainHeaderProfile">
+                        <li>
+                            <div class="py-2 px-3 text-center"><span class="fw-semibold"> محسن </span> <span
+                                    class="d-block fs-12 text-muted">طراح</span></div>
+                        </li>
+                        <li><a class="dropdown-item d-flex align-items-center" href="profile.html"><i
+                                class="ti ti-user text-primary me-2 fs-16"></i>حساب کاربری</a>
+                        </li>
+                        <li><a class="dropdown-item d-flex align-items-center" href="mail.html"> <i
+                                class="ti ti-mail text-secondary me-2 fs-16"></i>ایمیل</a>
+                        </li>
+                        <li><a class="dropdown-item d-flex align-items-center" href="todo-list.html"><i
+                                class="ti ti-checklist text-success me-2 fs-16"></i>
+                            لیست وظایف</a></li>
+                        <li><a class="dropdown-item d-flex align-items-center" href="mail-settings.html"><i
+                                class="ti ti-settings text-info me-2 fs-16"></i>تنظیمات</a>
+                        </li>
+                        <li><a class="dropdown-item d-flex align-items-center" href="chat.html"><i
+                                class="ti ti-headset text-warning me-2 fs-16"></i>پشتیبانی</a>
+                        </li>
+                        <li class="py-2 px-3"><a class="btn btn-primary btn-sm w-100"
+                                                 href="signup-basic.html">خروج</a>
+                        </li>
+                    </ul>
+                </li>
+                <!-- End::header-element -->
+
+                <!-- Start::header-element -->
+                <li class="header-element">
+                    <!-- Start::header-link|switcher-icon -->
+                    <a href="javascript:void(0);" class="header-link switcher-icon" data-bs-toggle="offcanvas"
+                       data-bs-target="#switcher-canvas">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="header-link-icon" viewbox="0 0 256 256">
+                            <rect width="256" height="256" fill="none"></rect>
+                            <circle cx="128" cy="128" r="40" fill="none" stroke="currentColor"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round" stroke-width="16"></circle>
+                            <path d="M41.43,178.09A99.14,99.14,0,0,1,31.36,153.8l16.78-21a81.59,81.59,0,0,1,0-9.64l-16.77-21a99.43,99.43,0,0,1,10.05-24.3l26.71-3a81,81,0,0,1,6.81-6.81l3-26.7A99.14,99.14,0,0,1,102.2,31.36l21,16.78a81.59,81.59,0,0,1,9.64,0l21-16.77a99.43,99.43,0,0,1,24.3,10.05l3,26.71a81,81,0,0,1,6.81,6.81l26.7,3a99.14,99.14,0,0,1,10.07,24.29l-16.78,21a81.59,81.59,0,0,1,0,9.64l16.77,21a99.43,99.43,0,0,1-10,24.3l-26.71,3a81,81,0,0,1-6.81,6.81l-3,26.7a99.14,99.14,0,0,1-24.29,10.07l-21-16.78a81.59,81.59,0,0,1-9.64,0l-21,16.77a99.43,99.43,0,0,1-24.3-10l-3-26.71a81,81,0,0,1-6.81-6.81Z"
+                                  fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                  stroke-width="16"></path>
+                        </svg>
+                    </a>
+                    <!-- End::header-link|switcher-icon -->
+                </li>
+                <!-- End::header-element -->
+
+            </ul>
+            <!-- End::header-content-right -->
+
+        </div>
+        <!-- End::main-header-container -->
+
+    </header>
+
+    <div class="modal fade" id="header-responsive-search" tabindex="-1" aria-labelledby="header-responsive-search"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div class="input-group">
+                        <input type="text" class="form-control border-end-0" placeholder="جستجو" aria-label="جستجو"
+                               aria-describedby="button-addon2">
+                        <button class="btn btn-primary" type="button" id="button-addon2"><i
+                                class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END HEADER -->
+
+    <!-- SIDEBAR -->
+
+    <aside class="app-sidebar sticky" id="sidebar">
+
+        <!-- Start::main-sidebar-header -->
+        <div class="main-sidebar-header">
+            <a href="index.html" class="header-logo">
+                <img src="{% static 'dashboard_assets/images/brand-logos/desktop-logo.png' %}" alt="logo" class="desktop-logo">
+                <img src="{% static 'dashboard_assets/images/brand-logos/toggle-dark.png' %}" alt="logo" class="toggle-dark">
+                <img src="{% static 'dashboard_assets/images/brand-logos/desktop-dark.png' %}" alt="logo" class="desktop-dark">
+                <img src="{% static 'dashboard_assets/images/brand-logos/toggle-logo.png' %}" alt="logo" class="toggle-logo">
+            </a>
+        </div>
+        <!-- End::main-sidebar-header -->
+
+        <!-- Start::main-sidebar -->
+        <div class="main-sidebar" id="sidebar-scroll">
+
+            <!-- Start::nav -->
+            <nav class="main-menu-container nav nav-pills flex-column sub-open">
+                <div class="slide-left" id="slide-left">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="#7b8191" width="24" height="24"
+                         viewbox="0 0 24 24">
+                        <path d="M13.293 6.293 7.586 12l5.707 5.707 1.414-1.414L10.414 12l4.293-4.293z"></path>
+                    </svg>
+                </div>
+                <ul class="main-menu">
+                    <!-- Start::slide__category -->
+                    <li class="slide__category"><span class="category-name">داشبورد ها</span></li>
+                    <!-- End::slide__category -->
+
+                    <!-- Start::slide -->
+                    <li class="slide has-sub">
+                        <a href="{% url 'dashboards:dashboard' %}" class="side-menu__item">
+                            <i class="ri-arrow-right-s-line side-menu__angle"></i>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="side-menu__icon" viewbox="0 0 256 256">
+                                <rect width="256" height="256" fill="none"></rect>
+                                <path d="M104,216V152h48v64h64V120a8,8,0,0,0-2.34-5.66l-80-80a8,8,0,0,0-11.32,0l-80,80A8,8,0,0,0,40,120v96Z"
+                                      fill="none" stroke="currentColor" stroke-linecap="round"
+                                      stroke-linejoin="round"
+                                      stroke-width="16"></path>
+                            </svg>
+                            <span class="side-menu__label">داشبورد ها</span>
+                        </a>
+                        <ul class="slide-menu child1">
+                            <li class="slide side-menu__label1">
+                                <a href="{% url 'dashboards:dashboard' %}">داشبورد ها</a>
+                            </li>
+                        </ul>
+                    </li>
+                    <!-- End::slide -->
+
+                    <!-- Start::slide__category -->
+                    <li class="slide__category"><span class="category-name">حساب کاربری</span></li>
+                    <!-- End::slide__category -->
+
+                    <!-- Start::slide -->
+                    <li class="slide has-sub">
+                        <a href="{% url 'dashboards:user_profile' %}" class="side-menu__item">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="side-menu__icon" viewbox="0 0 256 256">
+                                <rect width="256" height="256" fill="none"></rect>
+                                <rect x="48" y="48" width="64" height="64" rx="8" fill="none" stroke="currentColor"
+                                      stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></rect>
+                                <rect x="144" y="48" width="64" height="64" rx="8" fill="none" stroke="currentColor"
+                                      stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></rect>
+                                <rect x="48" y="144" width="64" height="64" rx="8" fill="none" stroke="currentColor"
+                                      stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></rect>
+                                <rect x="144" y="144" width="64" height="64" rx="8" fill="none"
+                                      stroke="currentColor"
+                                      stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></rect>
+                            </svg>
+                            <span class="side-menu__label">تنظیمات حساب کاربری</span>
+                            <i class="ri-arrow-right-s-line side-menu__angle"></i>
+                        </a>
+                        <ul class="slide-menu child1">
+                            <li class="slide side-menu__label1">
+                                <a href="{% url 'dashboards:user_profile' %}">حساب کاربری</a>
+                            </li>
+                            <li class="slide">
+                                <a href="full-calendar.html" class="side-menu__item">تقویم</a>
+                            </li>
+                            <li class="slide">
+                                <a href="gallery.html" class="side-menu__item">گالری</a>
+                            </li>
+                            <li class="slide">
+                                <a href="sweet-alerts.html" class="side-menu__item">هشدارها</a>
+                            </li>
+                            <li class="slide has-sub">
+                                <a href="javascript:void(0);" class="side-menu__item">فروشگاه
+                                    <i class="ri-arrow-right-s-line side-menu__angle"></i></a>
+                                <ul class="slide-menu child2">
+                                    <li class="slide">
+                                        <a href="add-product.html" class="side-menu__item">افزودن محصول</a>
+                                    </li>
+                                    <li class="slide">
+                                        <a href="cart.html" class="side-menu__item">سبد خرید</a>
+                                    </li>
+                                    <li class="slide">
+                                        <a href="checkout.html" class="side-menu__item">تسویه حساب</a>
+                                    </li>
+                                    <li class="slide">
+                                        <a href="edit-product.html" class="side-menu__item">ویرایش محصول</a>
+                                    </li>
+                                    <li class="slide">
+                                        <a href="order-details.html" class="side-menu__item">جزئیات سفارش</a>
+                                    </li>
+                                    <li class="slide">
+                                        <a href="orders.html" class="side-menu__item">سفارش‌ها</a>
+                                    </li>
+                                    <li class="slide">
+                                        <a href="products.html" class="side-menu__item">محصولات</a>
+                                    </li>
+                                    <li class="slide">
+                                        <a href="product-details.html" class="side-menu__item">جزئیات محصول</a>
+                                    </li>
+                                    <li class="slide">
+                                        <a href="products-list.html" class="side-menu__item">لیست محصولات</a>
+                                    </li>
+                                    <li class="slide">
+                                        <a href="wishlist.html" class="side-menu__item">لیست علاقه‌مندی‌ها</a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="slide has-sub">
+                                <a href="javascript:void(0);" class="side-menu__item">پروژه ها
+                                    <i class="ri-arrow-right-s-line side-menu__angle"></i></a>
+                                <ul class="slide-menu child2">
+                                    <li class="slide">
+                                        <a href="projects-list.html" class="side-menu__item">لیست پروژه‌ها</a>
+                                    </li>
+                                    <li class="slide">
+                                        <a href="projects-overview.html" class="side-menu__item">نمای کلی
+                                            پروژه‌ها</a>
+                                    </li>
+                                    <li class="slide">
+                                        <a href="projects-create.html" class="side-menu__item">ایجاد پروژه</a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="slide has-sub">
+                                <a href="javascript:void(0);" class="side-menu__item">وظایف
+                                    <i class="ri-arrow-right-s-line side-menu__angle"></i></a>
+                                <ul class="slide-menu child2">
+                                    <li class="slide">
+                                        <a href="task-kanban-board.html" class="side-menu__item">تابلو وظایف</a>
+                                    </li>
+                                    <li class="slide">
+                                        <a href="task-list-view.html" class="side-menu__item">لیست وظیفه‌ها</a>
+                                    </li>
+                                    <li class="slide">
+                                        <a href="task-details.html" class="side-menu__item">جزئیات وظیفه</a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="slide has-sub">
+                                <a href="javascript:void(0);" class="side-menu__item">شغل
+                                    <i class="ri-arrow-right-s-line side-menu__angle"></i></a>
+                                <ul class="slide-menu child2">
+                                    <li class="slide">
+                                        <a href="job-details.html" class="side-menu__item">جزئیات شغل</a>
+                                    </li>
+                                    <li class="slide">
+                                        <a href="job-company-search.html" class="side-menu__item">جستجوی شرکت</a>
+                                    </li>
+                                    <li class="slide">
+                                        <a href="job-search.html" class="side-menu__item">جستجوی شغل‌ها</a>
+                                    </li>
+                                    <li class="slide">
+                                        <a href="job-post.html" class="side-menu__item">درج آگهی شغلی</a>
+                                    </li>
+                                    <li class="slide">
+                                        <a href="job-list.html" class="side-menu__item">فهرست شغل‌ها</a>
+                                    </li>
+                                    <li class="slide">
+                                        <a href="job-candidate-search.html" class="side-menu__item">جستجوی
+                                            کاندیدا</a>
+                                    </li>
+                                    <li class="slide">
+                                        <a href="job-candidate-details.html" class="side-menu__item">جزئیات
+                                            کاندید</a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="slide has-sub">
+                                <a href="javascript:void(0);" class="side-menu__item">NFT
+                                    <i class="ri-arrow-right-s-line side-menu__angle"></i></a>
+                                <ul class="slide-menu child2">
+                                    <li class="slide">
+                                        <a href="nft-marketplace.html" class="side-menu__item">بازار</a>
+                                    </li>
+                                    <li class="slide">
+                                        <a href="nft-details.html" class="side-menu__item">جزئیات NFT</a>
+                                    </li>
+                                    <li class="slide">
+                                        <a href="nft-create.html" class="side-menu__item">ایجاد NFT</a>
+                                    </li>
+                                    <li class="slide">
+                                        <a href="nft-wallet-integration.html" class="side-menu__item">ادغام کیف
+                                            پول</a>
+                                    </li>
+                                    <li class="slide">
+                                        <a href="nft-live-auction.html" class="side-menu__item">حراج زنده</a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="slide has-sub">
+                                <a href="javascript:void(0);" class="side-menu__item">مدیریت ارتباط با مشتری
+                                    <i class="ri-arrow-right-s-line side-menu__angle"></i></a>
+                                <ul class="slide-menu child2">
+                                    <li class="slide">
+                                        <a href="crm-contacts.html" class="side-menu__item">دفترچه مخاطبین</a>
+                                    </li>
+                                    <li class="slide">
+                                        <a href="crm-companies.html" class="side-menu__item">شرکت‌ها</a>
+                                    </li>
+                                    <li class="slide">
+                                        <a href="crm-deals.html" class="side-menu__item">معاملات</a>
+                                    </li>
+                                    <li class="slide">
+                                        <a href="crm-leads.html" class="side-menu__item">سرنخ‌ها</a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="slide has-sub">
+                                <a href="javascript:void(0);" class="side-menu__item">ارز دیجیتال
+                                    <i class="ri-arrow-right-s-line side-menu__angle"></i></a>
+                                <ul class="slide-menu child2">
+                                    <li class="slide">
+                                        <a href="crypto-transactions.html" class="side-menu__item">تراکنش‌ها</a>
+                                    </li>
+                                    <li class="slide">
+                                        <a href="crypto-currency-exchange.html" class="side-menu__item">تبدیل
+                                            ارز</a>
+                                    </li>
+                                    <li class="slide">
+                                        <a href="crypto-buy-sell.html" class="side-menu__item">خرید و فروش</a>
+                                    </li>
+                                    <li class="slide">
+                                        <a href="crypto-marketcap.html" class="side-menu__item">ارزش بازار</a>
+                                    </li>
+                                    <li class="slide">
+                                        <a href="crypto-wallet.html" class="side-menu__item">کیف پول</a>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <!-- End::slide -->
+
+                    <!-- Start::slide -->
+                    <li class="slide has-sub">
+                        <a href="javascript:void(0);" class="side-menu__item">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="side-menu__icon" viewbox="0 0 256 256">
+                                <rect width="256" height="256" fill="none"></rect>
+                                <polyline points="32 176 128 232 224 176" fill="none" stroke="currentColor"
+                                          stroke-linecap="round" stroke-linejoin="round"
+                                          stroke-width="16"></polyline>
+                                <polyline points="32 128 128 184 224 128" fill="none" stroke="currentColor"
+                                          stroke-linecap="round" stroke-linejoin="round"
+                                          stroke-width="16"></polyline>
+                                <polygon points="32 80 128 136 224 80 128 24 32 80" fill="none"
+                                         stroke="currentColor"
+                                         stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></polygon>
+                            </svg>
+                            <span class="side-menu__label">زیرمنو</span>
+                            <i class="ri-arrow-right-s-line side-menu__angle"></i>
+                        </a>
+                        <ul class="slide-menu child1">
+                            <li class="slide side-menu__label1">
+                                <a href="javascript:void(0)">زیرمنو</a>
+                            </li>
+                            <li class="slide">
+                                <a href="javascript:void(0);" class="side-menu__item">زیر منو-1</a>
+                            </li>
+                            <li class="slide has-sub">
+                                <a href="javascript:void(0);" class="side-menu__item">زیر منو-2
+                                    <i class="ri-arrow-right-s-line side-menu__angle"></i></a>
+                                <ul class="slide-menu child2">
+                                    <li class="slide">
+                                        <a href="javascript:void(0);" class="side-menu__item">زیر منو-2.1</a>
+                                    </li>
+                                    <li class="slide has-sub">
+                                        <a href="javascript:void(0);" class="side-menu__item">زیر منو-2.2
+                                            <i class="ri-arrow-right-s-line side-menu__angle"></i></a>
+                                        <ul class="slide-menu child3">
+                                            <li class="slide">
+                                                <a href="javascript:void(0);" class="side-menu__item">زیر
+                                                    منو-2.2.1</a>
+                                            </li>
+                                            <li class="slide">
+                                                <a href="javascript:void(0);" class="side-menu__item">زیر
+                                                    منو-2.2.2</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <!-- End::slide -->
+
+                    <!-- Start::slide__category -->
+                    <li class="slide__category"><span class="category-name">ساخته شده</span></li>
+                    <!-- End::slide__category -->
+
+                    <!-- Start::slide -->
+                    <li class="slide has-sub">
+                        <a href="javascript:void(0);" class="side-menu__item">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="side-menu__icon" viewbox="0 0 256 256">
+                                <rect width="256" height="256" fill="none"></rect>
+                                <rect x="40" y="88" width="176" height="128" rx="8" fill="none"
+                                      stroke="currentColor"
+                                      stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></rect>
+                                <circle cx="128" cy="152" r="12"></circle>
+                                <path d="M88,88V56a40,40,0,0,1,80,0V88" fill="none" stroke="currentColor"
+                                      stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></path>
+                            </svg>
+                            <span class="side-menu__label">احراز هویت</span>
+                            <i class="ri-arrow-right-s-line side-menu__angle"></i>
+                        </a>
+                        <ul class="slide-menu child1">
+                            <li class="slide side-menu__label1">
+                                <a href="javascript:void(0)">احراز هویت</a>
+                            </li>
+                            <li class="slide">
+                                <a href="comingsoon.html" class="side-menu__item">به‌زودی</a>
+                            </li>
+                            <li class="slide has-sub">
+                                <a href="javascript:void(0);" class="side-menu__item">ایجاد رمزعبور
+                                    <i class="ri-arrow-right-s-line side-menu__angle"></i></a>
+                                <ul class="slide-menu child2">
+                                    <li class="slide">
+                                        <a href="create-password-basic.html" class="side-menu__item">ساده</a>
+                                    </li>
+                                    <li class="slide">
+                                        <a href="create-password-cover.html" class="side-menu__item">کاور</a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="slide has-sub">
+                                <a href="javascript:void(0);" class="side-menu__item">قفل صفحه
+                                    <i class="ri-arrow-right-s-line side-menu__angle"></i></a>
+                                <ul class="slide-menu child2">
+                                    <li class="slide">
+                                        <a href="lockscreen-basic.html" class="side-menu__item">ساده</a>
+                                    </li>
+                                    <li class="slide">
+                                        <a href="lockscreen-cover.html" class="side-menu__item">کاور</a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="slide has-sub">
+                                <a href="javascript:void(0);" class="side-menu__item">بازیابی رمزعبور
+                                    <i class="ri-arrow-right-s-line side-menu__angle"></i></a>
+                                <ul class="slide-menu child2">
+                                    <li class="slide">
+                                        <a href="reset-password-basic.html" class="side-menu__item">ساده</a>
+                                    </li>
+                                    <li class="slide">
+                                        <a href="reset-password-cover.html" class="side-menu__item">کاور</a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="slide has-sub">
+                                <a href="javascript:void(0);" class="side-menu__item">ثبت نام
+                                    <i class="ri-arrow-right-s-line side-menu__angle"></i></a>
+                                <ul class="slide-menu child2">
+                                    <li class="slide">
+                                        <a href="signup-basic.html" class="side-menu__item">ساده</a>
+                                    </li>
+                                    <li class="slide">
+                                        <a href="signup-cover.html" class="side-menu__item">کاور</a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="slide has-sub">
+                                <a href="javascript:void(0);" class="side-menu__item">ورود
+                                    <i class="ri-arrow-right-s-line side-menu__angle"></i></a>
+                                <ul class="slide-menu child2">
+                                    <li class="slide">
+                                        <a href="signin-basic.html" class="side-menu__item">ساده</a>
+                                    </li>
+                                    <li class="slide">
+                                        <a href="signin-cover.html" class="side-menu__item">کاور</a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="slide has-sub">
+                                <a href="javascript:void(0);" class="side-menu__item">ورود دو مرحله ای
+                                    <i class="ri-arrow-right-s-line side-menu__angle"></i></a>
+                                <ul class="slide-menu child2">
+                                    <li class="slide">
+                                        <a href="twostep-verification-basic.html" class="side-menu__item">ساده</a>
+                                    </li>
+                                    <li class="slide">
+                                        <a href="twostep-verification-cover.html" class="side-menu__item">کاور</a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="slide">
+                                <a href="under-maintenance.html" class="side-menu__item">در حال تعمیر</a>
+                            </li>
+                        </ul>
+                    </li>
+                    <!-- End::slide -->
+
+
+                    <!-- Start::slide -->
+                    <li class="slide has-sub">
+                        <a href="javascript:void(0);" class="side-menu__item">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="side-menu__icon" viewbox="0 0 256 256">
+                                <rect width="256" height="256" fill="none"></rect>
+                                <rect x="32" y="48" width="192" height="160" rx="8" fill="none"
+                                      stroke="currentColor"
+                                      stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></rect>
+                                <line x1="80" y1="96" x2="176" y2="96" fill="none" stroke="currentColor"
+                                      stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></line>
+                                <line x1="80" y1="128" x2="176" y2="128" fill="none" stroke="currentColor"
+                                      stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></line>
+                                <line x1="80" y1="160" x2="176" y2="160" fill="none" stroke="currentColor"
+                                      stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></line>
+                            </svg>
+                            <span class="side-menu__label">صفحات</span>
+                            <i class="ri-arrow-right-s-line side-menu__angle"></i>
+                        </a>
+                        <ul class="slide-menu child1 pages-ul">
+                            <li class="slide side-menu__label1">
+                                <a href="javascript:void(0)">Pages</a>
+                            </li>
+                            <li class="slide has-sub">
+                                <a href="javascript:void(0);" class="side-menu__item">وبلاگ
+                                    <i class="ri-arrow-right-s-line side-menu__angle"></i></a>
+                                <ul class="slide-menu child2">
+                                    <li class="slide">
+                                        <a href="blog.html" class="side-menu__item">وبلاگ</a>
+                                    </li>
+                                    <li class="slide">
+                                        <a href="blog-details.html" class="side-menu__item">جزئیات وبلاگ</a>
+                                    </li>
+                                    <li class="slide">
+                                        <a href="blog-create.html" class="side-menu__item">ایجاد وبلاگ</a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="slide">
+                                <a href="chat.html" class="side-menu__item">چت</a>
+                            </li>
+                            <li class="slide has-sub">
+                                <a href="javascript:void(0);" class="side-menu__item">ایمیل
+                                    <i class="ri-arrow-right-s-line side-menu__angle"></i></a>
+                                <ul class="slide-menu child2">
+                                    <li class="slide">
+                                        <a href="mail.html" class="side-menu__item">برنامه ایمیل</a>
+                                    </li>
+                                    <li class="slide">
+                                        <a href="mail-settings.html" class="side-menu__item">تنظیمات ایمیل</a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="slide">
+                                <a href="dash_base.html" class="side-menu__item">خالی</a>
+                            </li>
+                            <li class="slide">
+                                <a href="faqs.html" class="side-menu__item">سوالات متداول</a>
+                            </li>
+                            <li class="slide">
+                                <a href="file-manager.html" class="side-menu__item">مدیریت فایل</a>
+                            </li>
+                            <li class="slide has-sub">
+                                <a href="javascript:void(0);" class="side-menu__item">فاکتور
+                                    <i class="ri-arrow-right-s-line side-menu__angle"></i></a>
+                                <ul class="slide-menu child2">
+                                    <li class="slide">
+                                        <a href="invoice-create.html" class="side-menu__item">ایجاد فاکتور</a>
+                                    </li>
+                                    <li class="slide">
+                                        <a href="invoice-details.html" class="side-menu__item">جزئیات فاکتور</a>
+                                    </li>
+                                    <li class="slide">
+                                        <a href="invoice-list.html" class="side-menu__item">لیست فاکتورها</a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="slide">
+                                <a href="pricing.html" class="side-menu__item">قیمت‌گذاری</a>
+                            </li>
+                            <li class="slide">
+                                <a href="profile.html" class="side-menu__item">حساب کاربری</a>
+                            </li>
+                            <li class="slide">
+                                <a href="profile-settings.html" class="side-menu__item">تنظیمات پروفایل</a>
+                            </li>
+                            <li class="slide">
+                                <a href="landing.html" class="side-menu__item">صفحه لندینگ</a>
+                            </li>
+                            <li class="slide">
+                                <a href="reviews.html" class="side-menu__item">نظرات</a>
+                            </li>
+                            <li class="slide">
+                                <a href="search-results.html" class="side-menu__item">جستجو</a>
+                            </li>
+                            <li class="slide">
+                                <a href="team.html" class="side-menu__item">تیم</a>
+                            </li>
+                            <li class="slide">
+                                <a href="terms-conditions.html" class="side-menu__item">شرایط و ضوابط</a>
+                            </li>
+                            <li class="slide">
+                                <a href="timeline.html" class="side-menu__item">جدول زمانی</a>
+                            </li>
+                            <li class="slide">
+                                <a href="todo-list.html" class="side-menu__item">فهرست کارها</a>
+                            </li>
+                        </ul>
+                    </li>
+                    <!-- End::slide -->
+
+                    <!-- Start::slide__category -->
+                    <li class="slide__category"><span class="category-name">افزونه ها</span></li>
+                    <!-- End::slide__category -->
+
+                    <!-- Start::slide -->
+                    <li class="slide has-sub">
+                        <a href="javascript:void(0);" class="side-menu__item">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="side-menu__icon" viewbox="0 0 256 256">
+                                <rect width="256" height="256" fill="none"></rect>
+                                <path d="M32,216V56a8,8,0,0,1,8-8H216a8,8,0,0,1,8,8V216l-32-16-32,16-32-16L96,216,64,200Z"
+                                      fill="none" stroke="currentColor" stroke-linecap="round"
+                                      stroke-linejoin="round"
+                                      stroke-width="16"></path>
+                                <line x1="144" y1="112" x2="192" y2="112" fill="none" stroke="currentColor"
+                                      stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></line>
+                                <line x1="144" y1="144" x2="192" y2="144" fill="none" stroke="currentColor"
+                                      stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></line>
+                                <rect x="64" y="96" width="48" height="64" fill="none" stroke="currentColor"
+                                      stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></rect>
+                            </svg>
+                            <span class="side-menu__label">فرم ها</span>
+                            <i class="ri-arrow-right-s-line side-menu__angle"></i>
+                        </a>
+                        <ul class="slide-menu child1">
+                            <li class="slide side-menu__label1">
+                                <a href="javascript:void(0)">فرم ها</a>
+                            </li>
+                            <li class="slide">
+                                <a href="form-advanced.html" class="side-menu__item">فرم پیشرفته</a>
+                            </li>
+                            <li class="slide has-sub">
+                                <a href="javascript:void(0);" class="side-menu__item">عناصر فرم
+                                    <i class="ri-arrow-right-s-line side-menu__angle"></i></a>
+                                <ul class="slide-menu child2">
+                                    <li class="slide">
+                                        <a href="form-inputs.html" class="side-menu__item">ورودی‌ها</a>
+                                    </li>
+                                    <li class="slide">
+                                        <a href="form-check-radios.html" class="side-menu__item">چک‌باکس‌ها و
+                                            رادیوها</a>
+                                    </li>
+                                    <li class="slide">
+                                        <a href="form-input-group.html" class="side-menu__item">گروه ورودی</a>
+                                    </li>
+                                    <li class="slide">
+                                        <a href="form-select.html" class="side-menu__item">انتخاب فرم</a>
+                                    </li>
+                                    <li class="slide">
+                                        <a href="form-range.html" class="side-menu__item">اسلایدر محدوده</a>
+                                    </li>
+                                    <li class="slide">
+                                        <a href="form-input-masks.html" class="side-menu__item">ماسک‌های ورودی</a>
+                                    </li>
+                                    <li class="slide">
+                                        <a href="form-file-uploads.html" class="side-menu__item">بارگذاری فایل</a>
+                                    </li>
+                                    <li class="slide">
+                                        <a href="form-datetime-pickers.html" class="side-menu__item">انتخابگرهای
+                                            تاریخ و
+                                            زمان</a>
+                                    </li>
+                                    <li class="slide">
+                                        <a href="form-color-pickers.html" class="side-menu__item">انتخابگر رنگ</a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="slide">
+                                <a href="floating-labels.html" class="side-menu__item">برچسب‌های شناور</a>
+                            </li>
+                            <li class="slide">
+                                <a href="form-layout.html" class="side-menu__item">چیدمان فرم‌ها</a>
+                            </li>
+                            <li class="slide">
+                                <a href="form-wizards.html" class="side-menu__item">فرم های ویزارد</a>
+                            </li>
+                            <li class="slide">
+                                <a href="quill-editor.html" class="side-menu__item">ویرایشگر Quill</a>
+                            </li>
+                            <li class="slide">
+                                <a href="form-validation.html" class="side-menu__item">اعتبارسنجی</a>
+                            </li>
+                            <li class="slide">
+                                <a href="form-select2.html" class="side-menu__item">کتابخانه Select2</a>
+                            </li>
+                        </ul>
+                    </li>
+                    <!-- End::slide -->
+
+
+
+                    <!-- Start::slide -->
+                    <li class="slide has-sub">
+                        <a href="javascript:void(0);" class="side-menu__item">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="side-menu__icon" viewbox="0 0 256 256">
+                                <rect width="256" height="256" fill="none"></rect>
+                                <path d="M40.49,205.52,93,61.14a7.79,7.79,0,0,1,12.84-2.85l91.88,91.88A7.79,7.79,0,0,1,194.86,163L50.48,215.51A7.79,7.79,0,0,1,40.49,205.52Z"
+                                      fill="none" stroke="currentColor" stroke-linecap="round"
+                                      stroke-linejoin="round"
+                                      stroke-width="16"></path>
+                                <path d="M168,72s0-24,24-24,24-24,24-24" fill="none" stroke="currentColor"
+                                      stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></path>
+                                <line x1="144" y1="16" x2="144" y2="40" fill="none" stroke="currentColor"
+                                      stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></line>
+                                <line x1="216" y1="112" x2="232" y2="128" fill="none" stroke="currentColor"
+                                      stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></line>
+                                <line x1="216" y1="80" x2="240" y2="72" fill="none" stroke="currentColor"
+                                      stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></line>
+                                <line x1="78.09" y1="102.09" x2="153.91" y2="177.91" fill="none"
+                                      stroke="currentColor"
+                                      stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></line>
+                                <line x1="101.11" y1="197.11" x2="58.89" y2="154.89" fill="none"
+                                      stroke="currentColor"
+                                      stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></line>
+                            </svg>
+                            <span class="side-menu__label">رابط کاربری پیشرفته</span>
+                            <i class="ri-arrow-right-s-line side-menu__angle"></i>
+                        </a>
+
+                    </li>
+                    <!-- End::slide -->
+
+
+                    <!-- End::slide -->
+
+                    <!-- Start::slide -->
+                    <li class="slide">
+                        <a href="widgets.html" class="side-menu__item">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="side-menu__icon" viewbox="0 0 256 256">
+                                <rect width="256" height="256" fill="none"></rect>
+                                <rect x="32" y="80" width="192" height="48" rx="8" fill="none" stroke="currentColor"
+                                      stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></rect>
+                                <path d="M208,128v72a8,8,0,0,1-8,8H56a8,8,0,0,1-8-8V128" fill="none"
+                                      stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                      stroke-width="16"></path>
+                                <line x1="128" y1="80" x2="128" y2="208" fill="none" stroke="currentColor"
+                                      stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></line>
+                                <path d="M176.79,31.21c9.34,9.34,9.89,25.06,0,33.82C159.88,80,128,80,128,80s0-31.88,15-48.79C151.73,21.32,167.45,21.87,176.79,31.21Z"
+                                      fill="none" stroke="currentColor" stroke-linecap="round"
+                                      stroke-linejoin="round"
+                                      stroke-width="16"></path>
+                                <path d="M79.21,31.21c-9.34,9.34-9.89,25.06,0,33.82C96.12,80,128,80,128,80s0-31.88-15-48.79C104.27,21.32,88.55,21.87,79.21,31.21Z"
+                                      fill="none" stroke="currentColor" stroke-linecap="round"
+                                      stroke-linejoin="round"
+                                      stroke-width="16"></path>
+                            </svg>
+                            <span class="side-menu__label">ویجت‌ها</span>
+                        </a>
+                    </li>
+                    <!-- End::slide -->
+
+                    <!-- Start::slide__category -->
+                    <li class="slide__category"><span class="category-name">ابزارها</span></li>
+                    <!-- End::slide__category -->
+
+                    <!-- Start::slide -->
+                    <li class="slide has-sub">
+                        <a href="javascript:void(0);" class="side-menu__item">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="side-menu__icon" viewbox="0 0 256 256">
+                                <rect width="256" height="256" fill="none"></rect>
+                                <circle cx="128" cy="128" r="96" fill="none" stroke="currentColor"
+                                        stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></circle>
+                                <polygon points="176 80 112 112 80 176 144 144 176 80" fill="none"
+                                         stroke="currentColor"
+                                         stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></polygon>
+                            </svg>
+                            <span class="side-menu__label">نقشه ها</span>
+                            <i class="ri-arrow-right-s-line side-menu__angle"></i>
+                        </a>
+                        <ul class="slide-menu child1">
+                            <li class="slide side-menu__label1">
+                                <a href="javascript:void(0)">نقشه ها</a>
+                            </li>
+                            <li class="slide">
+                                <a href="vector-maps.html" class="side-menu__item">نقشه‌های وکتور</a>
+                            </li>
+                            <li class="slide">
+                                <a href="leaflet-maps.html" class="side-menu__item">نقشه‌های Leaflet</a>
+                            </li>
+                            <li class="slide">
+                                <a href="google-maps.html" class="side-menu__item">نقشه‌های گوگل</a>
+                            </li>
+                        </ul>
+                    </li>
+                    <!-- End::slide -->
+
+                    <!-- Start::slide -->
+                    <li class="slide">
+                        <a href="icons.html" class="side-menu__item">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="side-menu__icon" viewbox="0 0 256 256">
+                                <rect width="256" height="256" fill="none"></rect>
+                                <polyline points="48 139.59 48 216 208 216 208 139.59" fill="none"
+                                          stroke="currentColor"
+                                          stroke-linecap="round" stroke-linejoin="round"
+                                          stroke-width="16"></polyline>
+                                <path d="M54,40H202a8,8,0,0,1,7.69,5.8L224,96H32L46.34,45.8A8,8,0,0,1,54,40Z"
+                                      fill="none" stroke="currentColor" stroke-linecap="round"
+                                      stroke-linejoin="round"
+                                      stroke-width="16"></path>
+                                <path d="M96,96v16a32,32,0,0,1-64,0V96" fill="none" stroke="currentColor"
+                                      stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></path>
+                                <path d="M160,96v16a32,32,0,0,1-64,0V96" fill="none" stroke="currentColor"
+                                      stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></path>
+                                <path d="M224,96v16a32,32,0,0,1-64,0V96" fill="none" stroke="currentColor"
+                                      stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></path>
+                            </svg>
+                            <span class="side-menu__label">آیکون ها</span>
+                        </a>
+                    </li>
+                    <!-- End::slide -->
+
+                    <!-- Start::slide -->
+                    <li class="slide has-sub">
+                        <a href="javascript:void(0);" class="side-menu__item">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="side-menu__icon" viewbox="0 0 256 256">
+                                <rect width="256" height="256" fill="none"></rect>
+                                <polyline points="224 208 32 208 32 48" fill="none" stroke="currentColor"
+                                          stroke-linecap="round" stroke-linejoin="round"
+                                          stroke-width="16"></polyline>
+                                <polyline points="200 72 128 144 96 112 32 176" fill="none" stroke="currentColor"
+                                          stroke-linecap="round" stroke-linejoin="round"
+                                          stroke-width="16"></polyline>
+                                <polyline points="200 112 200 72 160 72" fill="none" stroke="currentColor"
+                                          stroke-linecap="round" stroke-linejoin="round"
+                                          stroke-width="16"></polyline>
+                            </svg>
+                            <span class="side-menu__label">بخش ۵</span>
+                            <i class="ri-arrow-right-s-line side-menu__angle"></i>
+                        </a>
+                        <ul class="slide-menu child1">
+                            <li class="slide side-menu__label1">
+                                <a href="javascript:void(0)">بخش 5</a>
+                            </li>
+                            <li class="slide has-sub">
+
+                                <ul class="slide-menu child2">
+                                    <li class="slide">
+                                        <a href="" class="side-menu__item">نمودارهای خطی</a>
+                                    </li>
+
+
+                                </ul>
+                        </ul>
+                    </li>
+                    <!-- End::slide -->
+
+                    <!-- Start::slide -->
+                    <li class="slide has-sub">
+                        <a href="javascript:void(0);" class="side-menu__item">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="side-menu__icon" viewbox="0 0 256 256">
+                                <rect width="256" height="256" fill="none"></rect>
+                                <path d="M32,56H224a0,0,0,0,1,0,0V192a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V56A0,0,0,0,1,32,56Z"
+                                      fill="none" stroke="currentColor" stroke-linecap="round"
+                                      stroke-linejoin="round"
+                                      stroke-width="16"></path>
+                                <line x1="32" y1="104" x2="224" y2="104" fill="none" stroke="currentColor"
+                                      stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></line>
+                                <line x1="32" y1="152" x2="224" y2="152" fill="none" stroke="currentColor"
+                                      stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></line>
+                                <line x1="88" y1="104" x2="88" y2="200" fill="none" stroke="currentColor"
+                                      stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></line>
+                            </svg>
+                            <span class="side-menu__label">جداول</span>
+                            <i class="ri-arrow-right-s-line side-menu__angle"></i>
+                        </a>
+                        <ul class="slide-menu child1">
+                            <li class="slide side-menu__label1">
+                                <a href="javascript:void(0)">جداول</a>
+                            </li>
+                            <li class="slide">
+                                <a href="tables.html" class="side-menu__item">جداول</a>
+                            </li>
+                            <li class="slide">
+                                <a href="grid-tables.html" class="side-menu__item">جداول گرید JS</a>
+                            </li>
+                            <li class="slide">
+                                <a href="data-tables.html" class="side-menu__item">جداول داده</a>
+                            </li>
+                        </ul>
+                    </li>
+                    <!-- End::slide -->
+
+                </ul>
+                <div class="slide-right" id="slide-right">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="#7b8191" width="24" height="24"
+                         viewbox="0 0 24 24">
+                        <path d="M10.707 17.707 16.414 12l-5.707-5.707-1.414 1.414L13.586 12l-4.293 4.293z"></path>
+                    </svg>
+                </div>
+            </nav>
+            <!-- End::nav -->
+
+        </div>
+        <!-- End::main-sidebar -->
+
+    </aside>
+    <!-- END SIDEBAR -->
+
+    <!-- MAIN-CONTENT -->
+
+    <!-- Start::app-content -->
+    <div class="main-content app-content">
+        <div class="container-fluid">
+
+            <!-- Page Header -->
+            <div class="my-4 page-header-breadcrumb d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <div>
+                    <h1 class="page-title fw-medium fs-18 mb-2">خالی</h1>
+                    <div class="">
+                        <nav>
+                            <ol class="breadcrumb mb-0">
+                                <li class="breadcrumb-item"><a href="javascript:void(0);">صفحات</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">خالی</li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+                <div class="btn-list">
+                    <button class="btn btn-primary-light btn-wave me-2">
+                        <i class="bx bx-crown align-middle"></i> ارتقاء پلن
+                    </button>
+                    <button class="btn btn-secondary-light btn-wave me-0">
+                        <i class="ri-upload-cloud-line align-middle"></i> خروجی گزارش
+                    </button>
+                </div>
+            </div>
+            <!-- Page Header Close -->
+
+            {#                <!-- Start::row-1 -->#}
+            {#                <div class="row">#}
+            {#                    <div class="col-xl-12">#}
+            {#                        <div class="card custom-card">#}
+            {#                            <div class="card-body">#}
+            {#                                <h6 class="mb-0">کارت خالی</h6>#}
+            {#                            </div>#}
+            {#                        </div>#}
+            {#                    </div>#}
+            {#                </div>#}
+            {#                <!--End::row-1 -->#}
+
+            <!-- Main content-->
+            {% block main %}
+            {% endblock %}
+
+
+            <!-- End Main content-->
+
+        </div>
+    </div>
+
+    <!-- End::app-content -->
+
+    <!-- END MAIN-CONTENT -->
+
+    <!-- FOOTER -->
+
+    <footer class="footer mt-auto py-3 bg-white text-center">
+        <div class="container">
+                    <span class="text-muted"> <span id="year"></span>
+                        طراحی با  <span class="bi bi-heart-fill text-danger"></span> توسط <a href="" target="_blank">
+                            <span class="fw-medium text-primary">Zynix</span>
+                        </a>
+
+
+                    </span>
+        </div>
+    </footer>
+    <!-- END FOOTER -->
+
+</div>
+<!-- END PAGE-->
+
+
+<!-- SCROLL-TO-TOP -->
+<div class="scrollToTop">
+    <span class="arrow lh-1"><i class="ti ti-arrow-big-up fs-16"></i></span>
+</div>
+<div id="responsive-overlay"></div>
+
+</body>
+</html>

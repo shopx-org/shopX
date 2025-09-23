@@ -1,0 +1,191 @@
+{% extends 'dashboards/dash_base.html' %}
+{% load static %}
+{% block main %}
+<div class="col-xl-9">
+    <div class="card custom-card">
+        <div class="p-3 border-bottom border-top border-block-end-dashed tab-content">
+            <div class="tab-pane show active overflow-hidden p-0 border-0" id="account-pane" role="tabpanel"
+                 aria-labelledby="account" tabindex="0">
+                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-1">
+                    <div class="fw-semibold d-block fs-15">تنظیمات حساب کاربری :</div>
+                    <div class="btn btn-primary btn-sm"><i class="ri-loop-left-line lh-1 me-2"></i>بازگردانی تغییرات
+                    </div>
+                </div>
+                <div class="row gy-3">
+                    <div class="col-xl-12">
+                        <div class="d-flex align-items-start flex-wrap gap-3">
+                            <div>
+                                                        <span class="avatar avatar-xxl">
+                                                            <img src="{% static 'dashboard_assets/images/faces/9.jpg' %}.\assets\" alt="">
+                                                        </span>
+                            </div>
+                            <div>
+                                <span class="fw-medium d-block mb-2">تصویر پروفایل</span>
+                                <div class="btn-list mb-1">
+                                    <button class="btn btn-sm btn-primary btn-wave"><i
+                                            class="ri-upload-2-line me-1"></i>تغییر تصویر
+                                    </button>
+                                    <button class="btn btn-sm btn-danger btn-wave"><i
+                                            class="ri-delete-bin-line me-1"></i>حذف
+                                    </button>
+                                </div>
+                                <span class="d-block fs-12 text-muted">از فرمت‌های JPEG، PNG یا GIF استفاده کنید. اندازه پیشنهادی: ۲۰۰x۲۰۰ پیکسل. کمتر از ۵ مگابایت</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-6">
+                        <label for="profile-user-name" class="form-label">نام کاربری :</label>
+                        <input type="text" class="form-control" id="profile-user-name" value=""
+                               placeholder="نام را وارد کنید">
+                    </div>
+                    <div class="col-xl-6">
+                        <label for="profile-email" class="form-label">ایمیل :</label>
+                        <input type="email" class="form-control" id="profile-email" value=""
+                               placeholder="ایمیل را وارد کنید">
+                    </div>
+                    <div class="col-xl-6">
+                        <label for="profile-designation" class="form-label">عنوان شغلی :</label>
+                        <input type="text" class="form-control" id="profile-designation" value=""
+                               placeholder="عنوان را وارد کنید">
+                    </div>
+                    <div class="col-xl-6">
+                        <label for="profile-language" class="form-label">زبان :</label>
+                        <select class="form-control" data-trigger="" id="profile-language">
+                            <option>انگلیسی آمریکا</option>
+                            <option>عربی</option>
+                            <option>کره‌ای</option>
+                        </select>
+                    </div>
+                    <div class="col-xl-6">
+                        <label for="profile-phn-no" class="form-label">شماره تماس :</label>
+                        <input type="text" class="form-control" id="profile-phn-no" value=""
+                               placeholder="شماره را وارد کنید">
+                    </div>
+                    <div class="col-xl-6">
+                        <label for="website" class="form-label">وب‌سایت :</label>
+                        <input type="text" class="form-control bg-light" id="website" placeholder="https://"
+                               value="https://www.website.com">
+                    </div>
+                    <div class="col-xl-12">
+                        <label for="profile-address" class="form-label">آدرس :</label>
+                        <textarea class="form-control" id="profile-address" rows="3" placeholder="آدرس"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- اعلان‌ها -->
+            <div class="tab-pane overflow-hidden p-0 border-0" id="notification-tab-pane" role="tabpanel"
+                 aria-labelledby="notification-tab" tabindex="0">
+                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-1">
+                    <div class="fw-semibold d-block fs-15">تنظیمات اعلان‌ها:</div>
+                    <div class="btn btn-primary btn-sm"><i class="ri-loop-left-line lh-1 me-2"></i>بازگردانی تغییرات
+                    </div>
+                </div>
+                <div class="row gx-5 gy-3">
+                    <div class="col-xl-12">
+                        <p class="fs-14 mb-1 fw-medium">پیکربندی هشدارها</p>
+                        <p class="fs-12 mb-0 text-muted">کاربران می‌توانند دریافت هشدارها را بر اساس رویدادهای مورد نظر
+                            خود تنظیم کنند.</p>
+                    </div>
+                    <div class="col-xl-12">
+                        <div class="d-flex align-items-top justify-content-between mt-3">
+                            <div class="mail-notification-settings">
+                                <p class="fs-14 mb-1 fw-medium">هشدارهای فشاری</p>
+                                <p class="fs-12 mb-0 text-muted">هشدارهایی که به دستگاه یا دسکتاپ کاربر ارسال
+                                    می‌شود.</p>
+                            </div>
+                            <div class="toggle on toggle-success mb-0 float-sm-end" id="push-notifications">
+                                <span></span>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-top justify-content-between mt-3">
+                            <div class="mail-notification-settings">
+                                <p class="fs-14 mb-1 fw-medium">هشدارهای ایمیلی</p>
+                                <p class="fs-12 mb-0 text-muted">پیام‌هایی که به ایمیل کاربر ارسال می‌شود.</p>
+                            </div>
+                            <div class="toggle toggle-success mb-0 float-sm-end" id="email-notifications">
+                                <span></span>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-top justify-content-between mt-3">
+                            <div class="mail-notification-settings">
+                                <p class="fs-14 mb-1 fw-medium">هشدارهای درون برنامه‌ای</p>
+                                <p class="fs-12 mb-0 text-muted">هشدارهایی که در داخل برنامه نمایش داده می‌شوند.</p>
+                            </div>
+                            <div class="toggle toggle-success mb-0 float-sm-end" id="in-app-notifications">
+                                <span></span>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-top justify-content-between mt-3">
+                            <div class="mail-notification-settings">
+                                <p class="fs-14 mb-1 fw-medium">هشدارهای پیامکی</p>
+                                <p class="fs-12 mb-0 text-muted">پیامک‌هایی که به شماره موبایل کاربر ارسال می‌شود.</p>
+                            </div>
+                            <div class="toggle toggle-success on mb-0 float-sm-end" id="sms-notifications">
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- امنیت -->
+            <div class="tab-pane overflow-hidden p-0 border-0" id="security-tab-pane" role="tabpanel"
+                 aria-labelledby="security-tab" tabindex="0">
+                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-1">
+                    <div class="fw-semibold d-block fs-15">تنظیمات امنیتی :</div>
+                    <div class="btn btn-primary btn-sm"><i class="ri-loop-left-line lh-1 me-2"></i>بازگردانی تغییرات
+                    </div>
+                </div>
+                <div class="d-sm-flex d-block align-items-top justify-content-between">
+                    <div class="w-50">
+                        <p class="fs-14 mb-1 fw-medium">تأییدیه</p>
+                        <p class="fs-12 mb-0 text-muted">نحوه تأیید اطلاعات پروفایل خود را برای اهداف امنیتی کنترل
+                            کنید.</p>
+                    </div>
+                    <div class="d-flex gap-4">
+                        <div class="form-check ">
+                            <input class="form-check-input" type="checkbox" value="" id="email-notifications01"
+                                   checked="">
+                            <label class="form-check-label" for="email-notifications01">ایمیل</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="" id="sms-notifications01">
+                            <label class="form-check-label" for="sms-notifications01">پیامک</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="" id="phone-notifications">
+                            <label class="form-check-label" for="phone-notifications">تلفن</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-sm-flex d-block align-items-top justify-content-between mt-3">
+                    <div class="w-50">
+                        <p class="fs-14 mb-1 fw-medium">تأیید ورود</p>
+                        <p class="fs-12 mb-0 text-muted">این ویژگی از دسترسی غیرمجاز به حساب کاربر جلوگیری می‌کند حتی
+                            اگر رمز عبور افشا شود.</p>
+                    </div>
+                    <a href="javascript:void(0);" class="link-primary text-decoration-underline">راه‌اندازی تأییدیه</a>
+                </div>
+                <div class="d-sm-flex d-block align-items-top justify-content-between mt-3">
+                    <div class="w-50">
+                        <p class="fs-14 mb-1 fw-medium">تأیید رمز عبور</p>
+                        <p class="fs-12 mb-0 text-muted">این مرحله اضافی تضمین می‌کند که فردی که سعی در تغییر اطلاعات
+                            حساب دارد، مالک واقعی حساب است.</p>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="" id="personal-details">
+                        <label class="form-check-label" for="personal-details">نیاز به اطلاعات شخصی</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer border-top-0">
+            <div class="btn-list float-end">
+                <button class="btn btn-secondary btn-wave">غیرفعال‌سازی حساب</button>
+                <button class="btn btn-primary btn-wave">ذخیره تغییرات</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

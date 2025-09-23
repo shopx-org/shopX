@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>قالب Molla - قالب بوت استرپ فروشگاهی</title>
+    <meta name="keywords" content="HTML5 Template">
+    <meta name="description" content="Molla - Bootstrap eCommerce Template">
+    <!-- Favicon -->
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/images/icons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/images/icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/images/icons/favicon-16x16.png">
+    <link rel="manifest" href="assets/images/icons/site.webmanifest">
+    <link rel="mask-icon" href="assets/images/icons/safari-pinned-tab.svg" color="#666666">
+    <link rel="shortcut icon" href="assets/images/icons/favicon.ico">
+    <meta name="apple-mobile-web-app-title" content="Molla">
+    <meta name="application-name" content="Molla">
+    <meta name="msapplication-TileColor" content="#cc9966">
+    <meta name="msapplication-config" content="assets/images/icons/browserconfig.xml">
+    <meta name="theme-color" content="#ffffff">
+    <!-- Plugins CSS File -->
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/bootstrap-rtl.min.css">
+    <link rel="stylesheet" href="assets/vendor/timeTo/timeTo.css">
+    <!-- # CSS File -->
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+
+<body>
+    <div class="soon2">
+        <div class="w-100">
+            <div class="row">
+                <!-- Start coming-soon-content -->
+                <div class="flex-grow-1 d-flex flex-column w-100 align-items-center">
+                    <div class="soon-bg2 d-flex flex-row justify-content-center align-items-center pos-relative">
+                        <div class="d-flex justify-content-center align-items-center">
+                            <div class="w-100 soon-bg-2">
+                                <img class="w-100 d-inline-block" alt=""
+                                    src="assets/images/backgrounds/coming-bg.jpg">
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="soon-content text-center">
+                            <div class="soon-content-wrapper">
+                                <img src="assets/images/logo-icon.png" alt="Logo" class="soon-logo mx-auto">
+                                <h1 class="soon-title">به زودی</h1><!-- End .soon-title -->
+                                <div class="coming-timer mx-auto mt-5 d-flex justify-content-center flex-row">
+                                    <span id="date-str"></span>
+                                    <div class="coming-countdown2"></div>
+                                </div>
+                                <hr class="mt-2 mb-3 mt-md-3">
+                                <p>ما در حال طراحی یک سایت فوق العاده هستیم، برای کسب اطلاعات بیشتر در خبرنامه ما عضو
+                                    شوید.
+                                </p>
+                                <form action="#">
+                                    <div class="input-group mb-5">
+                                        <input type="email" class="form-control bg-transparent"
+                                            placeholder="آدرس ایمیل خود را وارد کنید" required>
+                                        <div class="input-group-append">
+                                            <button class="btn btn-outline-primary-2" type="submit">
+                                                <span>خبرنامه</span>
+                                                <i class="icon-long-arrow-left"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                                <div class="social-icons justify-content-center mb-0">
+                                    <a href="#" class="social-icon" target="_blank" title="فیسبوک"><i
+                                            class="icon-facebook-f"></i></a>
+                                    <a href="#" class="social-icon" target="_blank" title="توییتر"><i
+                                            class="icon-twitter"></i></a>
+                                    <a href="#" class="social-icon" target="_blank" title="اینستاگرام"><i
+                                            class="icon-instagram"></i></a>
+                                    <a href="#" class="social-icon" target="_blank" title="یوتیوب"><i
+                                            class="icon-youtube"></i></a>
+                                    <a href="#" class="social-icon" target="_blank" title="پینترست"><i
+                                            class="icon-pinterest"></i></a>
+                                </div><!-- End .soial-icons -->
+                            </div><!-- End .soon-content-wrapper -->
+                        </div><!-- End .soon-content -->
+                    </div>
+                </div>
+                <!-- End coming-soon-content -->
+            </div><!-- End .row -->
+        </div><!-- End .container -->
+    </div><!-- End .soon -->
+    <!-- Plugins JS File -->
+    <script src="assets/js/jquery.min.js"></script>
+    <script src="assets/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/jquery.plugin.min.js"></script>
+    <script src="assets/vendor/timeTo/jquery.time-to.js"></script>
+    <!-- # JS File -->
+    <script src="assets/js/#.js"></script>
+    <script>
+        var date = getRelativeDate(50);
+
+        document.getElementById('date-str').innerHTML = date.toISOString();
+
+        /**
+         * Set timer countdown to specyfied date
+         */
+        $('.coming-countdown2').timeTo(date, {
+            displayDays: 2,
+            displayCaptions: true,
+            fontSize: 48,
+            captionSize: 14,
+            lang: 'fa'
+        });
+
+        function getRelativeDate(days, hours, minutes) {
+            var d = new Date(Date.now() + 60000 /* milisec */ * 60 /* minutes */ * 24 /* hours */ * 100 /* days */ );
+
+            d.setHours(hours || 0);
+            d.setMinutes(minutes || 0);
+            d.setSeconds(0);
+
+            return d;
+        }
+    </script>
+</body>
+
+</html>

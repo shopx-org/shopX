@@ -1,0 +1,115 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ورود با رمز عبور</title>
+    <link rel="stylesheet" href="{% static 'css/otpstyle.css' %}">
+    <style>
+        body {
+            font-family: Vazirmatn, Tahoma, sans-serif;
+            background: #f8f9fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .login-container {
+            background: #fff;
+            padding: 30px 25px;
+            border-radius: 12px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, .1);
+            width: 100%;
+            max-width: 380px;
+            text-align: center;
+        }
+
+        .login-title {
+            margin-bottom: 20px;
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .login-button {
+            background: #f3be4c;
+            color: #fff;
+            border: none;
+            padding: 8px;
+            width: 100%;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background .2s;
+        }
+
+        .login-button:hover {
+            background: #f3922f;
+        }
+
+        .alert {
+            background: #ffe5e5;
+            color: #d9534f;
+            border: 1px solid #f5c2c2;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        .otp-separator {
+            width: 100%;
+            border: none;
+            border-top: 1px solid #ddd;
+            margin: 12px 0;
+        }
+
+        .login-input {
+
+            width: 100%;
+            padding: 11px 12px;
+            margin: 10px 0;
+            border: 1px solid #f6e5e5;
+            border-radius: 8px;
+            outline: none;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div class="login-container">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <h2 class="login-title">ورود با رمز عبور</h2>
+
+
+    <p style="margin-bottom: 10px; font-size: 22px;">
+        شماره موبایل: <strong>{{ phone }}</strong>
+    </p>
+    <hr class="otp-separator">
+    <form method="post">
+        {% csrf_token %}
+        <div style="margin: 10px 0">
+            {{ form.password }}
+        </div>
+
+        <button style="margin: 10px 0" type="submit" class="login-button">ورود</button>
+
+    </form>
+    <div style="margin-top:8px; font-size:14px; display:flex; gap:6px; justify-content:center;">
+        <a href="{% url 'account:forgot_password' %}" style="color:#1a8cff; font-weight:bold; text-decoration:none;">
+            فراموشی رمز عبور
+        </a>
+
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" dir="rtl">
+
+<head>
+    {% include 'partials/header_reference.html' %}
+    {% block CSS-JS %}{% endblock %}
+</head>
+
+<body>
+    <div class="page-wrapper">
+    {% include 'partials/header.html' %}
+
+    {% block content %}
+
+    {% endblock %}
+
+    {% include 'partials/footer.html' %}
+    </div><!-- End .page-wrapper -->
+    <button id="scroll-top" title="بازگشت به بالا"><i class="icon-arrow-up"></i></button>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu-overlay"></div><!-- End .mobil-menu-overlay -->
+
+    {% include 'partials/mobile-menu-container.html' %}
+
+{% include 'partials/footer_reference.html' %}
+
+</body>
+
+</html>

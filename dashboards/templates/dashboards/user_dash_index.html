@@ -1,0 +1,213 @@
+{% extends 'dashboards/dash_base.html' %}
+{% load static %}
+{% block main %}
+<div class="row">
+    <div class="col-xl-12">
+        <div class="card custom-card">
+            <div class="card-header justify-content-between">
+                <div class="card-title">
+                    سفارش های من
+                </div>
+
+                <div class="prism-toggle">
+                    <button class="btn btn-sm btn-primary-light">مشاهده بیشتر<i
+                            class="ri-code-line ms-2 d-inline-block align-middle"></i></button>
+                </div>
+            </div>
+            <div class="card-body">
+
+                <!-- Start:: row-1 -->
+                <div class="row row-cols-xxl-5 row-cols-xl-3 row-cols-md-3 row-cols-1">
+                    <div class="col">
+                        <div class="card custom-card">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start justify-content-between flex-wrap">
+                                    <div>
+                                        <span class="d-block mb-1">کل کارفرمایان</span>
+                                        <h3 class="fw-semibold mb-1">۲۵۶</h3>
+                                        <span class="d-block text-muted fs-13">افزایش یافته  <span
+                                                class="text-success"><i
+                                                class="ti ti-arrow-narrow-up"></i>۳.۳۲٪</span></span>
+                                    </div>
+                                    <div>
+                                            <span class="avatar avatar-lg bg-primary-transparent">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 256 256"><rect
+                                                        width="256" height="256" fill="none"></rect><circle cx="84"
+                                                                                                            cy="108"
+                                                                                                            r="52"
+                                                                                                            fill="none"
+                                                                                                            stroke="currentColor"
+                                                                                                            stroke-linecap="round"
+                                                                                                            stroke-linejoin="round"
+                                                                                                            stroke-width="16"></circle><path
+                                                        d="M10.23,200a88,88,0,0,1,147.54,0" fill="none"
+                                                        stroke="currentColor" stroke-linecap="round"
+                                                        stroke-linejoin="round" stroke-width="16"></path><path
+                                                        d="M172,160a87.93,87.93,0,0,1,73.77,40" fill="none"
+                                                        stroke="currentColor" stroke-linecap="round"
+                                                        stroke-linejoin="round" stroke-width="16"></path><path
+                                                        d="M152.69,59.7A52,52,0,1,1,172,160" fill="none"
+                                                        stroke="currentColor" stroke-linecap="round"
+                                                        stroke-linejoin="round" stroke-width="16"></path></svg>
+                                            </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="card custom-card">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start justify-content-between flex-wrap">
+                                    <div>
+                                        <span class="d-block mb-1">کل داوطلبان</span>
+                                        <h3 class="fw-semibold mb-1">۴,۰۲۶</h3>
+                                        <span class="d-block text-muted fs-13">کاهش یافته  <span
+                                                class="text-danger"><i
+                                                class="ti ti-arrow-narrow-down"></i>۰.۹۰٪</span></span>
+                                    </div>
+                                    <div>
+                                            <span class="avatar avatar-lg bg-secondary-transparent">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 256 256"><rect
+                                                        width="256" height="256" fill="none"></rect><path
+                                                        d="M192,120a59.91,59.91,0,0,1,48,24" fill="none"
+                                                        stroke="currentColor" stroke-linecap="round"
+                                                        stroke-linejoin="round" stroke-width="16"></path><path
+                                                        d="M16,144a59.91,59.91,0,0,1,48-24" fill="none"
+                                                        stroke="currentColor" stroke-linecap="round"
+                                                        stroke-linejoin="round" stroke-width="16"></path><circle
+                                                        cx="128" cy="144" r="40" fill="none" stroke="currentColor"
+                                                        stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="16"></circle><path d="M72,216a65,65,0,0,1,112,0"
+                                                                                         fill="none"
+                                                                                         stroke="currentColor"
+                                                                                         stroke-linecap="round"
+                                                                                         stroke-linejoin="round"
+                                                                                         stroke-width="16"></path><path
+                                                        d="M161,80a32,32,0,1,1,31,40" fill="none" stroke="currentColor"
+                                                        stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="16"></path><path d="M64,120A32,32,0,1,1,95,80"
+                                                                                       fill="none" stroke="currentColor"
+                                                                                       stroke-linecap="round"
+                                                                                       stroke-linejoin="round"
+                                                                                       stroke-width="16"></path></svg>
+                                            </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="card custom-card">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start justify-content-between flex-wrap">
+                                    <div>
+                                        <span class="d-block mb-1">کل مکان‌ها</span>
+                                        <h3 class="fw-semibold mb-1">۴۸</h3>
+                                        <span class="d-block text-muted fs-13">افزایش یافته  <span
+                                                class="text-success"><i
+                                                class="ti ti-arrow-narrow-up"></i>۲.۴۳٪</span></span>
+                                    </div>
+                                    <div>
+                                            <span class="avatar avatar-lg bg-success-transparent">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 256 256"><rect
+                                                        width="256" height="256" fill="none"></rect><circle cx="128"
+                                                                                                            cy="104"
+                                                                                                            r="32"
+                                                                                                            fill="none"
+                                                                                                            stroke="currentColor"
+                                                                                                            stroke-linecap="round"
+                                                                                                            stroke-linejoin="round"
+                                                                                                            stroke-width="16"></circle><path
+                                                        d="M208,104c0,72-80,128-80,128S48,176,48,104a80,80,0,0,1,160,0Z"
+                                                        fill="none" stroke="currentColor" stroke-linecap="round"
+                                                        stroke-linejoin="round" stroke-width="16"></path></svg>
+                                            </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="card custom-card">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start justify-content-between flex-wrap">
+                                    <div>
+                                        <span class="d-block mb-1">ایجاد رزومه</span>
+                                        <h3 class="fw-semibold mb-1">۳۴٪</h3>
+                                        <span class="d-block text-muted fs-13">افزایش یافته  <span
+                                                class="text-success"><i
+                                                class="ti ti-arrow-narrow-up"></i>۰.۵۱٪</span></span>
+                                    </div>
+                                    <div>
+                                            <span class="avatar avatar-lg bg-info-transparent">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 256 256"><rect
+                                                        width="256" height="256" fill="none"></rect><rect x="53.87"
+                                                                                                          y="34.21"
+                                                                                                          width="148.27"
+                                                                                                          height="187.59"
+                                                                                                          rx="8"
+                                                                                                          transform="translate(24.22 -20.31) rotate(10.02)"
+                                                                                                          fill="none"
+                                                                                                          stroke="currentColor"
+                                                                                                          stroke-linecap="round"
+                                                                                                          stroke-linejoin="round"
+                                                                                                          stroke-width="16"></rect><line
+                                                        x1="97.22" y1="59.81" x2="180.2" y2="74.47" fill="none"
+                                                        stroke="currentColor" stroke-linecap="round"
+                                                        stroke-linejoin="round" stroke-width="16"></line><line
+                                                        x1="174.66" y1="105.98" x2="91.67" y2="91.33" fill="none"
+                                                        stroke="currentColor" stroke-linecap="round"
+                                                        stroke-linejoin="round" stroke-width="16"></line><line
+                                                        x1="127.62" y1="130.17" x2="86.13" y2="122.84" fill="none"
+                                                        stroke="currentColor" stroke-linecap="round"
+                                                        stroke-linejoin="round" stroke-width="16"></line></svg>
+                                            </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="card custom-card">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start justify-content-between flex-wrap">
+                                    <div>
+                                        <span class="d-block mb-1">مشترکین فعال</span>
+                                        <h3 class="fw-semibold mb-1">۱,۴۶۸</h3>
+                                        <span class="d-block text-muted fs-13">کاهش یافته  <span
+                                                class="text-danger"><i
+                                                class="ti ti-arrow-narrow-down"></i>۵.۹۵٪</span></span>
+                                    </div>
+                                    <div>
+                                            <span class="avatar avatar-lg bg-warning-transparent">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 256 256"><rect
+                                                        width="256" height="256" fill="none"></rect><circle cx="128"
+                                                                                                            cy="120"
+                                                                                                            r="40"
+                                                                                                            fill="none"
+                                                                                                            stroke="currentColor"
+                                                                                                            stroke-linecap="round"
+                                                                                                            stroke-linejoin="round"
+                                                                                                            stroke-width="16"></circle><rect
+                                                        x="40" y="40" width="176" height="176" rx="8" fill="none"
+                                                        stroke="currentColor" stroke-linecap="round"
+                                                        stroke-linejoin="round" stroke-width="16"></rect><path
+                                                        d="M57.78,216a72,72,0,0,1,140.44,0" fill="none"
+                                                        stroke="currentColor" stroke-linecap="round"
+                                                        stroke-linejoin="round" stroke-width="16"></path></svg>
+                                            </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- End:: row-1 -->
+            </div>
+            <div class="card-footer d-none border-top-0">
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,39 @@
+# Python / Django
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.sqlite3
+/media/
+staticfiles/
+.env
+.env.*
+*.log
+coverage.xml
+htmlcov/
+.cache/
+.mypy_cache/
+.pytest_cache/
+
+# Django collectstatic (اگر جدا از static/ اصلی داری)
+static_root/
+static_collected/
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node (اگر فرانت داری)
+node_modules/
+dist/
+.build/
+
+# Migrations cache (فایل‌های py لازم هستند، اما pyc نه)
+**/*.pyc
+
+# Local DB dumps
+*.sql
+*.dump

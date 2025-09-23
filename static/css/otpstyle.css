@@ -1,0 +1,143 @@
+/* otp.css */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: #ffffff;
+    direction: ltr;
+}
+
+.otp-container {
+    background: #ffffff;
+    padding: 60px;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.otp-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.phone-input {
+  width: 100%;
+  max-width: 320px;
+  padding: 12px 14px;
+  border: 1.5px solid #ddd;
+  border-radius: 10px;
+  font-size: 15px;
+  text-align: center;
+  outline: none;
+  transition: all 0.25s ease;
+  background-color: #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+}
+
+.phone-input:focus {
+  border-color: #f3be4c;
+  box-shadow: 0 0 6px rgba(26,140,255,0.3);
+}
+
+.phone-input::placeholder {
+  color: #aaa;
+  font-size: 14px;
+  letter-spacing: 1px;
+}
+
+.phone-input:valid {
+  border-color: #f6ec28;
+}
+
+.phone-input:invalid {
+  border-color: #dc3545;
+}
+
+.otp-inputs {
+    display: flex;
+    gap: 15px;
+}
+
+.otp-input {
+    width: 60px;
+    height: 60px;
+    text-align: center;
+    font-size: 28px;
+    font-weight: 500;
+    color: #333;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    outline: none;
+    transition: all 0.3s ease;
+    background: #f9f9f9;
+}
+
+.otp-input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
+    background: #ffffff;
+}
+
+.otp-input::placeholder {
+    color: #bbb;
+}
+
+.otp-button {
+    display: block;
+    margin: 20px auto 0;
+    margin-top: 30px;
+    padding: 8px 45px;
+    font-size: 16px;
+    width: 100%;
+    font-weight: bold;
+    background-color:#f3be4c;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.otp-button:hover {
+   background: #f3922f;
+}
+
+.otp-button:active {
+    transform: translateY(0);
+}
+
+@media (max-width: 480px) {
+    .otp-container {
+        padding: 20px;
+    }
+
+    .otp-input {
+        width: 50px;
+        height: 50px;
+        font-size: 24px;
+    }
+
+    .otp-button {
+        padding: 8px 30px;
+        font-size: 16px;
+    }
+}
+
+.otp-separator {
+  width: 100%;
+  border: none;
+  border-top: 1px solid #ddd;
+  margin: 12px 0;
+}
