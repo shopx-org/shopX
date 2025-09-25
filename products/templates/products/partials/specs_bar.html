@@ -1,0 +1,13 @@
+{# products/partials/specs_bar.html #}
+{% if items %}
+<div class="specs-bar">
+  {% for it in items %}
+    <div class="spec">
+      <svg class="ic"><use href="#i-{{ it.icon }}"></use></svg>
+      <span class="val">
+        {{ it.value }}{% if it.unit %}<span class="unit">{{ it.unit }}</span>{% endif %}
+      </span>
+    </div>
+  {% endfor %}
+</div>
+{% endif %}

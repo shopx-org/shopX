@@ -53,6 +53,14 @@ class Category(MPTTModel):
     class MPTTMeta:
         order_insertion_by = ("position", "name")
 
+    @property
+    def slug_path(self) -> str:
+        return "/".join(self.get_ancestors(include_self=True).values_list("slug", flat=True))
+
+    def get_absolute_url(self):
+        # توجه: حتماً با namespace اپ
+        return reverse("products:category", kwargs={"path": self.slug_path})
+
     class Meta:
         verbose_name = "دسته‌بندی"
         verbose_name_plural = "دسته‌بندی‌ها"
@@ -78,12 +86,12 @@ class Category(MPTTModel):
         self.slug = slug
         super().save(*args, **kwargs)
 
-    @property
-    def slug_path(self) -> str:
-        return "/".join(self.get_ancestors(include_self=True).values_list("slug", flat=True))
-
-    def get_absolute_url(self):
-        return reverse("category", kwargs={"path": self.slug_path})
+    # @property
+    # def slug_path(self) -> str:
+    #     return "/".join(self.get_ancestors(include_self=True).values_list("slug", flat=True))
+    #
+    # def get_absolute_url(self):
+    #     return reverse("category", kwargs={"path": self.slug_path})
 
     # ویژگی‌های مؤثر این کتگوری با ارث‌بری از والدین (برای UI/فیلتر)
     def effective_category_attributes(self):
@@ -161,6 +169,8 @@ class Brand(models.Model):
     meta_description = models.CharField(max_length=160, blank=True, verbose_name="توضیحات متا")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="ایجاد")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="به‌روزرسانی")
+
+
 
     class Meta:
         verbose_name = "برند"
@@ -248,7 +258,7 @@ class Product(models.Model):
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):
-        return reverse("product_detail", kwargs={"slug": self.slug})
+        return reverse("products:product_detail", kwargs={"slug": self.slug})
 
     @property
     def cover_image(self) -> Optional["ProductImage"]:

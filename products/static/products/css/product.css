@@ -1753,3 +1753,17 @@ body.no-scroll {
   --point: #e4977f;
   --bg:#ffffff;
 }
+
+
+
+.product-title {
+  direction: rtl;
+  font-weight: 600;
+  font-size: 1.5rem;
+  line-height: 1.25;
+  letter-spacing: -.01em;
+  color: #100e0e;
+  margin-bottom: .7rem;
+  margin-top: .7rem;
+  text-align: right;
+}

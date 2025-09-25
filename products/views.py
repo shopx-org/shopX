@@ -1,49 +1,61 @@
-from django.views.generic import TemplateView
-
 # products/views.py
-from django.db.models import Q, Count, Sum
-from django.db.models.functions import Coalesce
-from django.shortcuts import get_object_or_404, render
-from django.views.generic import ListView, DetailView
-from django.db.models import Prefetch
 from typing import Optional, Iterable
-from .models import Product, Category, Brand, ProductImage, ProductVariant, ProductAttributeValue, AttributeChoice
-from django.db.models import Q, Count, Min, Max
 
-# Prefetch برای ویژگی‌ها
+from django.db.models import Q, Count, Sum, Min, Max, Prefetch
+from django.db.models.functions import Coalesce
+from django.shortcuts import get_object_or_404
+from django.views.generic import ListView, DetailView
+
+from .models import (
+    Product,
+    Category,
+    Brand,
+    ProductImage,
+    ProductVariant,
+    ProductAttributeValue,
+    AttributeChoice,  # اگر فعلاً استفاده نمی‌کنی، می‌تونی حذفش کنی
+)
+
+# ---------- Prefetch Helpers ----------
 def attr_prefetch():
     return Prefetch(
-        "attr_values",
+        "attr_values",  # نام lookup روی مدل
         queryset=(
             ProductAttributeValue.objects
             .select_related("attribute", "value_choice")
             .prefetch_related("values_multi")
             .order_by("attribute__position", "attribute__id")
         ),
-        to_attr="attr_values",  # روی شیء محصول لیست می‌نشیند
+        to_attr="attr_values_list",  # ← اسم جدید که جایی تعریف نشده
     )
 
-def images_prefetch():
+
+def images_prefetch() -> Prefetch:
     return Prefetch(
         "images",
         queryset=ProductImage.objects.select_related("color").order_by("position", "id"),
         to_attr="image_list",
     )
 
+
+# ---------- Base QuerySet Mixin ----------
 class ProductBaseQS:
+    """کویری‌ست پایه برای محصولات فعال و قابل نمایش (+prefetch/annotate حرفه‌ای)."""
     def base_qs(self):
         return (
-            Product.objects.filter(is_active=True)  # به انتخاب خودت: status="pub" هم اضافه کن
+            Product.objects
+            .filter(is_active=True, status="pub")  # اگر status نداری، این بخش را حذف کن
             .select_related("category", "brand_fk")
             .prefetch_related(images_prefetch(), attr_prefetch())
             .annotate(_stock_total=Coalesce(Sum("variants__stock"), 0))
             .distinct()
         )
 
+
+# ---------- Utils ----------
 def _resolve_category_by_path(path: str) -> Optional[Category]:
     """
-    path مثل: 'electronics/mobile'
-    به ترتیب اسلاگ‌ها را با والدشان resolve می‌کند.
+    path مثل: 'electronics/mobile' — به ترتیب، اسلاگ‌ها را با والدشان resolve می‌کند.
     """
     parts = [p for p in (path or "").strip("/").split("/") if p]
     parent = None
@@ -51,69 +63,77 @@ def _resolve_category_by_path(path: str) -> Optional[Category]:
         parent = get_object_or_404(Category, slug=slug, parent=parent)
     return parent
 
-class ProductListView(ListView):
+
+# ---------- Views ----------
+class ProductListView(ProductBaseQS, ListView):
     model = Product
-    template_name = "products/product_list.html"  # همین تمپلیت شما، فقط جایش را این بگذار
+    template_name = "products/product_list.html"
     context_object_name = "products"
     paginate_by = 12
 
-    def _base_qs(self):
-        return (
-            Product.objects.filter(is_active=True, status="pub")
-            .select_related("category", "brand_fk")
-            .prefetch_related("images")
-            .distinct()
-        )
-
+    # -- Category resolver (از ?category=<id> یا از CategoryProductListView با kwargs['path'])
     def get_category(self) -> Optional[Category]:
         path = self.kwargs.get("path")
-        if not path:
-            # همچنین ?category=<id> را هم ساپورت کنیم
-            cat_id = self.request.GET.get("category")
-            if cat_id:
-                try:
-                    return Category.objects.get(id=cat_id)
-                except Category.DoesNotExist:
-                    return None
-            return None
-        return _resolve_category_by_path(path)
+        if path:
+            return _resolve_category_by_path(path)
+
+        cat_id = self.request.GET.get("category")
+        if cat_id:
+            try:
+                return Category.objects.get(id=cat_id)
+            except Category.DoesNotExist:
+                return None
+        return None
 
     def get_queryset(self):
-        qs = self._base_qs()
+        qs = self.base_qs()
 
-        # فیلتر بر اساس دسته و زیردسته‌ها
+        # فیلتر: دسته و زیردسته‌ها (+ دسته‌های اضافی در صورت وجود رابطه)
         category = self.get_category()
         if category:
-            tree_ids = list(category.get_descendants(include_self=True).values_list("id", flat=True))
+            tree_ids = list(
+                category.get_descendants(include_self=True).values_list("id", flat=True)
+            )
             if hasattr(Product, "additional_categories"):
                 qs = qs.filter(Q(category_id__in=tree_ids) | Q(additional_categories__in=tree_ids))
             else:
                 qs = qs.filter(category_id__in=tree_ids)
 
-        # فیلتر برند (brand=1,2,5)
+        # فیلتر: برند (brand=1,2,5)
         brand_str = self.request.GET.get("brand", "").strip()
         if brand_str:
-            ids: Iterable[int] = []
             try:
-                ids = [int(x) for x in brand_str.split(",") if x]
+                ids: Iterable[int] = [int(x) for x in brand_str.split(",") if x]
+                if ids:
+                    qs = qs.filter(brand_fk_id__in=ids)
             except ValueError:
-                ids = []
-            if ids:
-                qs = qs.filter(brand_fk_id__in=ids)
+                pass
 
-        # فیلتر قیمت (min/max)
-        try:
-            price_min = self.request.GET.get("min")
-            price_max = self.request.GET.get("max")
-            if price_min:
-                qs = qs.filter(price__gte=price_min)
-            if price_max:
-                qs = qs.filter(price__lte=price_max)
-        except Exception:
-            pass
+        # فیلتر: بازه قیمت (?min=&max=)
+        price_min = self.request.GET.get("min")
+        price_max = self.request.GET.get("max")
+        if price_min:
+            try:
+                qs = qs.filter(price__gte=int(price_min))
+            except ValueError:
+                pass
+        if price_max:
+            try:
+                qs = qs.filter(price__lte=int(price_max))
+            except ValueError:
+                pass
+
+        # فیلتر: جستجو (در صورت اضافه‌کردن input با name=q)
+        q = self.request.GET.get("q", "").strip()
+        if q:
+            qs = qs.filter(
+                Q(name__icontains=q) |
+                Q(short_description__icontains=q) |
+                Q(description__icontains=q)
+            )
 
         # مرتب‌سازی
-        sort = self.request.GET.get("sort", "pop")  # پیش‌فرض «محبوب‌ترین» (اینجا نمایشی است)
+        sort = self.request.GET.get("sort", "pop")
         if sort == "new":
             qs = qs.order_by("-created_at", "-id")
         elif sort == "price_asc":
@@ -123,8 +143,8 @@ class ProductListView(ListView):
         elif sort == "name":
             qs = qs.order_by("name")
         else:
-            # «محبوب‌ترین» نداریم؛ فعلاً جدیدترین شبیه‌سازی می‌کنیم
-            qs = qs.order_by("-created_at", "-id")
+            # «محبوب‌ترین» اگر فیلد views داری:
+            qs = qs.order_by("-views", "-id") if hasattr(Product, "views") else qs.order_by("-created_at", "-id")
 
         return qs
 
@@ -135,73 +155,302 @@ class ProductListView(ListView):
         ctx["category"] = category
         ctx["ancestors"] = list(category.get_ancestors(include_self=True)) if category else []
 
-        # دسته‌های مرتبط (برای باکس «دسته بندی های مرتبط»): فرزندان دستهٔ فعلی
-        ctx["related_categories"] = list(category.get_children()) if category else Category.objects.filter(parent__isnull=True).order_by("position","name")
-
-        # برندها با شمارش محصول
-        qs = self.object_list
-        brand_counts = (
-            qs.values("brand_fk_id", "brand_fk__name")
-              .annotate(cnt=Count("id"))
-              .order_by("brand_fk__name")
+        ctx["related_categories"] = (
+            list(category.get_children()) if category
+            else Category.objects.filter(parent__isnull=True).order_by("position", "name")
         )
-        ctx["brand_facets"] = brand_counts
-        selected_brands = set()
-        b = self.request.GET.get("brand", "")
-        if b:
-            try:
-                selected_brands = {int(x) for x in b.split(",") if x}
-            except ValueError:
-                selected_brands = set()
-        ctx["selected_brands"] = selected_brands
 
-        # بازه‌ی قیمت برای اسلایدر/گزینه‌ها (از کل نتایج فعلی)
-        agg = qs.aggregate(minp=Min("price"), maxp=Max("price"))
+        # ⬅️ به‌جای object_list (که sliced است)، از qs کامل فیلترشده استفاده کن
+        full_qs = self.get_queryset().order_by()  # order_by() خالی = پاک‌کردن مرتب‌سازی برای انعطاف
+
+        # فیسِت برند بر اساس کل نتایج فیلترشده (بدون اسلایس)
+        brand_facets = (
+            full_qs.values("brand_fk_id", "brand_fk__name")
+            .annotate(cnt=Count("id"))
+            .order_by("brand_fk__name")
+        )
+        ctx["brand_facets"] = brand_facets
+
+        # برندهای قابل انتخاب برای سایدبار
+        ctx["brands"] = Brand.objects.filter(products__is_active=True).distinct().order_by("position", "name")
+
+        # بازه قیمت روی کل نتایج فیلترشده
+        agg = full_qs.aggregate(minp=Min("price"), maxp=Max("price"))
         ctx["price_min"] = agg["minp"]
         ctx["price_max"] = agg["maxp"]
 
-        # برای تولباکس (تعداد)
-        ctx["total_count"] = self.get_queryset().count()
+        # انتخاب‌های فعلی
+        b = self.request.GET.get("brand", "")
+        try:
+            ctx["selected_brands"] = {int(x) for x in b.split(",") if x}
+        except ValueError:
+            ctx["selected_brands"] = set()
 
-        # برای انتخاب «مرتب‌سازی»
+        ctx["q"] = self.request.GET.get("q", "").strip()
         ctx["current_sort"] = self.request.GET.get("sort", "pop")
 
+        # تعداد واقعی کل نتایج (نه فقط صفحه جاری)
+        ctx["total_count"] = full_qs.count()
+
         return ctx
 
-
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        # برندها برای فیلتر سایدبار
-        ctx["brands"] = Brand.objects.filter(products__is_active=True).distinct().order_by("position", "name")
-        ctx["current_sort"] = self.request.GET.get("sort", "")
-        ctx["q"] = self.request.GET.get("q", "")
-        return ctx
 
 class CategoryProductListView(ProductListView):
     """
-    همان لیست با فیلتر دسته‌بندی مسیر-درختی
+    همان لیست، اما دسته از مسیر درختی /c/<path>/ می‌آید.
+    فقط get_category را از والد override می‌کنیم تا از kwargs['path'] استفاده کند.
     """
-    def dispatch(self, request, *args, **kwargs):
-        path = kwargs.get("path", "").rstrip("/")
-        self.category = get_object_or_404(Category, slug=self._last_slug(path))
-        return super().dispatch(request, *args, **kwargs)
+    def get_category(self) -> Optional[Category]:
+        path = self.kwargs.get("path", "")
+        return _resolve_category_by_path(path)
 
-    @staticmethod
-    def _last_slug(path):
-        return path.split("/")[-1] if path else ""
+
+class ProductDetailView(ProductBaseQS, DetailView):
+    template_name = "products/product_detail.html"
+    model = Product
+    slug_field = "slug"
+    slug_url_kwarg = "slug"
 
     def get_queryset(self):
-        qs = super().get_queryset()
-        # همه‌ی نودهای زیرمجموعه‌ی این کتگوری
-        cats = self.category.get_descendants(include_self=True)
-        return qs.filter(category__in=cats)
+        # همان base_qs با prefetch/annotate
+        return self.base_qs()
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx["category"] = self.category
-        ctx["breadcrumbs"] = self.category.get_ancestors(include_self=True)
+        p: Product = self.object
+
+        # تصاویر از prefetch: image_list
+        ctx["images"] = getattr(p, "image_list", [])
+
+        # واریانت‌ها (در صورت وجود)
+        ctx["variants"] = (
+            ProductVariant.objects.filter(product=p, is_active=True)
+            .select_related("color").order_by("id")
+        )
+
+        # نوار مسیر
+        ctx["breadcrumbs"] = p.category.get_ancestors(include_self=True) if p.category_id else []
+
+        # محصولات مرتبط ساده: هم‌دسته
+        ctx["related"] = (
+            Product.objects.filter(category=p.category, is_active=True, status="pub")
+            .exclude(id=p.id)
+            .select_related("brand_fk")
+            .prefetch_related(images_prefetch())
+            .order_by("-created_at")[:8]
+        )
+
         return ctx
 
+
+
+
+
+
+# from django.views.generic import TemplateView
+#
+# # products/views.py
+# from django.db.models import Q, Count, Sum
+# from django.db.models.functions import Coalesce
+# from django.shortcuts import get_object_or_404, render
+# from django.views.generic import ListView, DetailView
+# from django.db.models import Prefetch
+# from typing import Optional, Iterable
+# from .models import Product, Category, Brand, ProductImage, ProductVariant, ProductAttributeValue, AttributeChoice
+# from django.db.models import Q, Count, Min, Max
+#
+# # Prefetch برای ویژگی‌ها
+# def attr_prefetch():
+#     return Prefetch(
+#         "attr_values",
+#         queryset=(
+#             ProductAttributeValue.objects
+#             .select_related("attribute", "value_choice")
+#             .prefetch_related("values_multi")
+#             .order_by("attribute__position", "attribute__id")
+#         ),
+#         to_attr="attr_values",  # روی شیء محصول لیست می‌نشیند
+#     )
+#
+# def images_prefetch():
+#     return Prefetch(
+#         "images",
+#         queryset=ProductImage.objects.select_related("color").order_by("position", "id"),
+#         to_attr="image_list",
+#     )
+#
+# class ProductBaseQS:
+#     def base_qs(self):
+#         return (
+#             Product.objects.filter(is_active=True)  # به انتخاب خودت: status="pub" هم اضافه کن
+#             .select_related("category", "brand_fk")
+#             .prefetch_related(images_prefetch(), attr_prefetch())
+#             .annotate(_stock_total=Coalesce(Sum("variants__stock"), 0))
+#             .distinct()
+#         )
+#
+# def _resolve_category_by_path(path: str) -> Optional[Category]:
+#     """
+#     path مثل: 'electronics/mobile'
+#     به ترتیب اسلاگ‌ها را با والدشان resolve می‌کند.
+#     """
+#     parts = [p for p in (path or "").strip("/").split("/") if p]
+#     parent = None
+#     for slug in parts:
+#         parent = get_object_or_404(Category, slug=slug, parent=parent)
+#     return parent
+#
+# class ProductListView(ListView):
+#     model = Product
+#     template_name = "products/product_list.html"  # همین تمپلیت شما، فقط جایش را این بگذار
+#     context_object_name = "products"
+#     paginate_by = 12
+#
+#     def _base_qs(self):
+#         return (
+#             Product.objects.filter(is_active=True, status="pub")
+#             .select_related("category", "brand_fk")
+#             .prefetch_related("images")
+#             .distinct()
+#         )
+#
+#     def get_category(self) -> Optional[Category]:
+#         path = self.kwargs.get("path")
+#         if not path:
+#             # همچنین ?category=<id> را هم ساپورت کنیم
+#             cat_id = self.request.GET.get("category")
+#             if cat_id:
+#                 try:
+#                     return Category.objects.get(id=cat_id)
+#                 except Category.DoesNotExist:
+#                     return None
+#             return None
+#         return _resolve_category_by_path(path)
+#
+#     def get_queryset(self):
+#         qs = self._base_qs()
+#
+#         # فیلتر بر اساس دسته و زیردسته‌ها
+#         category = self.get_category()
+#         if category:
+#             tree_ids = list(category.get_descendants(include_self=True).values_list("id", flat=True))
+#             if hasattr(Product, "additional_categories"):
+#                 qs = qs.filter(Q(category_id__in=tree_ids) | Q(additional_categories__in=tree_ids))
+#             else:
+#                 qs = qs.filter(category_id__in=tree_ids)
+#
+#         # فیلتر برند (brand=1,2,5)
+#         brand_str = self.request.GET.get("brand", "").strip()
+#         if brand_str:
+#             ids: Iterable[int] = []
+#             try:
+#                 ids = [int(x) for x in brand_str.split(",") if x]
+#             except ValueError:
+#                 ids = []
+#             if ids:
+#                 qs = qs.filter(brand_fk_id__in=ids)
+#
+#         # فیلتر قیمت (min/max)
+#         try:
+#             price_min = self.request.GET.get("min")
+#             price_max = self.request.GET.get("max")
+#             if price_min:
+#                 qs = qs.filter(price__gte=price_min)
+#             if price_max:
+#                 qs = qs.filter(price__lte=price_max)
+#         except Exception:
+#             pass
+#
+#         # مرتب‌سازی
+#         sort = self.request.GET.get("sort", "pop")  # پیش‌فرض «محبوب‌ترین» (اینجا نمایشی است)
+#         if sort == "new":
+#             qs = qs.order_by("-created_at", "-id")
+#         elif sort == "price_asc":
+#             qs = qs.order_by("price", "id")
+#         elif sort == "price_desc":
+#             qs = qs.order_by("-price", "-id")
+#         elif sort == "name":
+#             qs = qs.order_by("name")
+#         else:
+#             # «محبوب‌ترین» نداریم؛ فعلاً جدیدترین شبیه‌سازی می‌کنیم
+#             qs = qs.order_by("-created_at", "-id")
+#
+#         return qs
+#
+#     def get_context_data(self, **kwargs):
+#         ctx = super().get_context_data(**kwargs)
+#
+#         category = self.get_category()
+#         ctx["category"] = category
+#         ctx["ancestors"] = list(category.get_ancestors(include_self=True)) if category else []
+#
+#         # دسته‌های مرتبط (برای باکس «دسته بندی های مرتبط»): فرزندان دستهٔ فعلی
+#         ctx["related_categories"] = list(category.get_children()) if category else Category.objects.filter(parent__isnull=True).order_by("position","name")
+#
+#         # برندها با شمارش محصول
+#         qs = self.object_list
+#         brand_counts = (
+#             qs.values("brand_fk_id", "brand_fk__name")
+#               .annotate(cnt=Count("id"))
+#               .order_by("brand_fk__name")
+#         )
+#         ctx["brand_facets"] = brand_counts
+#         selected_brands = set()
+#         b = self.request.GET.get("brand", "")
+#         if b:
+#             try:
+#                 selected_brands = {int(x) for x in b.split(",") if x}
+#             except ValueError:
+#                 selected_brands = set()
+#         ctx["selected_brands"] = selected_brands
+#
+#         # بازه‌ی قیمت برای اسلایدر/گزینه‌ها (از کل نتایج فعلی)
+#         agg = qs.aggregate(minp=Min("price"), maxp=Max("price"))
+#         ctx["price_min"] = agg["minp"]
+#         ctx["price_max"] = agg["maxp"]
+#
+#         # برای تولباکس (تعداد)
+#         ctx["total_count"] = self.get_queryset().count()
+#
+#         # برای انتخاب «مرتب‌سازی»
+#         ctx["current_sort"] = self.request.GET.get("sort", "pop")
+#
+#         return ctx
+#
+#
+#     def get_context_data(self, **kwargs):
+#         ctx = super().get_context_data(**kwargs)
+#         # برندها برای فیلتر سایدبار
+#         ctx["brands"] = Brand.objects.filter(products__is_active=True).distinct().order_by("position", "name")
+#         ctx["current_sort"] = self.request.GET.get("sort", "")
+#         ctx["q"] = self.request.GET.get("q", "")
+#         return ctx
+#
+# class CategoryProductListView(ProductListView):
+#     """
+#     همان لیست با فیلتر دسته‌بندی مسیر-درختی
+#     """
+#     def dispatch(self, request, *args, **kwargs):
+#         path = kwargs.get("path", "").rstrip("/")
+#         self.category = get_object_or_404(Category, slug=self._last_slug(path))
+#         return super().dispatch(request, *args, **kwargs)
+#
+#     @staticmethod
+#     def _last_slug(path):
+#         return path.split("/")[-1] if path else ""
+#
+#     def get_queryset(self):
+#         qs = super().get_queryset()
+#         # همه‌ی نودهای زیرمجموعه‌ی این کتگوری
+#         cats = self.category.get_descendants(include_self=True)
+#         return qs.filter(category__in=cats)
+#
+#     def get_context_data(self, **kwargs):
+#         ctx = super().get_context_data(**kwargs)
+#         ctx["category"] = self.category
+#         ctx["breadcrumbs"] = self.category.get_ancestors(include_self=True)
+#         return ctx
+#
 # class ProductDetailView(ProductBaseQS, DetailView):
 #     template_name = "products/product_detail.html"
 #     model = Product
@@ -229,7 +478,6 @@ class CategoryProductListView(ProductListView):
 #             .order_by("-created_at")[:8]
 #         )
 #         return ctx
-
-
-def product_detail_view(request):
-    return render(request, "products/product_detail.html")
+#
+#
+#

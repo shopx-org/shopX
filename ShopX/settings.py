@@ -23,7 +23,6 @@ DEBUG = env.bool("DEBUG", default=True)
 
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["127.0.0.1", "localhost"])
 
-# ── Apps ───────────────────────────────────────────────────────────────────────
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -39,14 +38,17 @@ INSTALLED_APPS = [
     "OTP_app.apps.OtpAppConfig",
     "dashboards.apps.DashboardsConfig",
     "products.apps.ProductsConfig",
-    
+    "Core.apps.CoreConfig",
+
     # third-party
     "widget_tweaks",
     "mptt",
     "tree_queries",
     "colorfield",
 
+
 ]
+# ── Apps ───────────────────────────────────────────────────────────────────────
 
 # ── Middleware ─────────────────────────────────────────────────────────────────
 MIDDLEWARE = [
@@ -71,6 +73,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "Core.context_processors.header_categories",
             ],
         },
     },
