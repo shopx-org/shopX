@@ -446,3 +446,148 @@
     // window.updatePriceChart = (labelsFa, values) => { chart.data.labels = labelsFa; chart.data.datasets[0].data = values; chart.update(); };
 
 })();
+
+(function () {
+  'use strict';
+
+  // ---------- Helpers ----------
+  const $  = (sel, root = document) => root.querySelector(sel);
+  const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
+  function readJSON(id) {
+    const el = document.getElementById(id);
+    if (!el) return null;
+    try { return JSON.parse(el.textContent || el.innerText || 'null'); }
+    catch (_e) { return null; }
+  }
+
+  function formatFA(n) {
+    if (typeof n === 'number' && typeof Intl !== 'undefined') {
+      try { return new Intl.NumberFormat('fa-IR').format(n); } catch (_e) {}
+    }
+    return (n == null ? '' : String(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  }
+
+  // ---------- Gallery (stage + thumbs) ----------
+  (function initGallery(){
+    const stage  = $('#tlp-main');
+    const thumbs = $$('.thumbs .thumb');
+    if (!stage || !thumbs.length) return;
+
+    thumbs.forEach(btn => {
+      btn.addEventListener('click', function () {
+        thumbs.forEach(b => {
+          b.classList.remove('is-active');
+          b.setAttribute('aria-pressed', 'false');
+        });
+        btn.classList.add('is-active');
+        btn.setAttribute('aria-pressed', 'true');
+
+        const full = btn.getAttribute('data-full') || $('img', btn)?.getAttribute('src');
+        if (full) stage.src = full;
+
+        const alt = $('img', btn)?.getAttribute('alt');
+        if (alt) stage.alt = alt;
+      });
+    });
+  })();
+
+  // ---------- Variant matrix (price/stock per color+size) ----------
+  const VM = readJSON('variant-matrix'); // ساختار پیشنهادی: { "<color_id>": { "<size>": {price, stock, sku, compare_at?} } }
+
+  (function initVariants(){
+    const swatches   = $$('#color-swatches a[data-color-id]');
+    const sizeSelect = $('#size');
+    const priceNum   = $('#price-num');
+    const compareNum = $('#compare-num');
+    const lowStockEl = $('.low-stock');
+
+    let activeColorId = swatches.find(a => a.classList.contains('active'))?.getAttribute('data-color-id')
+                         || (swatches[0]?.getAttribute('data-color-id') ?? null);
+    let activeSize = (sizeSelect && sizeSelect.value && sizeSelect.value !== '#') ? sizeSelect.value : null;
+
+    function updateByVariant() {
+      if (!VM || !activeColorId) return;
+
+      const byColor = VM[String(activeColorId)] || {};
+      // اگر سایز انتخاب نشده بود، اولین کلید سایز را بردار
+      const sizeKey = activeSize || Object.keys(byColor)[0];
+      const cell = byColor[sizeKey];
+      if (!cell) return;
+
+      if (priceNum && typeof cell.price !== 'undefined') {
+        priceNum.textContent = formatFA(cell.price);
+      }
+      if (compareNum && typeof cell.compare_at !== 'undefined') {
+        compareNum.textContent = formatFA(cell.compare_at);
+      }
+      if (lowStockEl) {
+        if (cell.stock > 0 && cell.stock <= 5) {
+          lowStockEl.style.display = '';
+          lowStockEl.textContent = 'تنها ' + formatFA(cell.stock) + ' عدد در انبار باقی مانده';
+        } else {
+          lowStockEl.style.display = 'none';
+        }
+      }
+    }
+
+    // کلیک روی سواچ رنگ
+    if (swatches.length) {
+      swatches.forEach(a => {
+        a.addEventListener('click', function (e) {
+          e.preventDefault();
+          swatches.forEach(x => x.classList.remove('active'));
+          a.classList.add('active');
+          activeColorId = a.getAttribute('data-color-id');
+          updateByVariant();
+        });
+      });
+    }
+
+    // تغییر سایز
+    if (sizeSelect) {
+      sizeSelect.addEventListener('change', function (e) {
+        const v = e.target.value;
+        activeSize = (v && v !== '#') ? v : null;
+        updateByVariant();
+      });
+    }
+
+    // مقداردهی اولیه
+    updateByVariant();
+  })();
+
+  // ---------- Price Chart (optional) ----------
+  (function initChart(){
+    const data = readJSON('price-chart-data');
+    const cvs  = document.getElementById('priceLineChart');
+    if (!data || !cvs || typeof Chart === 'undefined') return;
+
+    try {
+      new Chart(cvs.getContext('2d'), {
+        type: 'line',
+        data: {
+          labels: data.labels || [],
+          datasets: [{
+            label: 'قیمت',
+            data: data.data || [],
+            tension: 0.3
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: {
+              ticks: { callback: v => formatFA(v) }
+            }
+          }
+        }
+      });
+    } catch (err) { console.warn('Chart init failed:', err); }
+  })();
+
+  // ---------- Prevent dummy links ----------
+  $$('a[href="#"]').forEach(a => a.addEventListener('click', e => e.preventDefault()));
+
+})();

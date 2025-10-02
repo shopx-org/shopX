@@ -1,29 +1,32 @@
 {% load static %}
+{#{% include "partials/svg-sprite.html" %}#}
+
 <div class="header-bottom sticky-header">
     <div class="container">
         <div class="row">
             <div class="col-lg-3">
-                <div class="col-lg-3">
-                    <div class="dropdown category-dropdown">
-                        <a href="#" class="dropdown-toggle" role="button" data-toggle="dropdown"
-                           aria-haspopup="true" aria-expanded="false" data-display="static"
-                           title="فهرست دسته بندی ها">
-                            فهرست دسته‌بندی‌ها
-                        </a>
+                <div class="dropdown category-dropdown">
+                    <a href="#" class="dropdown-toggle" role="button" data-toggle="dropdown"
+                       aria-haspopup="true" aria-expanded="false" data-display="static"
+                       title="فهرست دسته بندی ها">
+                        فهرست دسته‌بندی‌ها
+                    </a>
 
-                        <div class="dropdown-menu">
-                            <nav class="side-nav">
-                                <ul class="menu-vertical sf-arrows" dir="rtl">
+                    <div class="dropdown-menu">
+                        <nav class="side-nav">
+                            <ul class="menu-vertical sf-arrows" dir="rtl">
 
-                                    {# --- Dynamic mode: needs `top_categories` (roots) with children prefetch --- #}
-                                    {% if top_categories %}
-                                        {% for cat in top_categories %}
+                                {# ریشه‌ها: اول از top_categories، اگر نبود از header_categories #}
+                                {% with roots=top_categories|default:header_categories %}
+                                    {% if roots and roots|length %}
+                                        {% for cat in roots %}
                                             <li class="megamenu-container">
                                                 <a class="sf-with-ul"
-                                                   href="{{ cat.get_absolute_url }}">{{ cat.name }}</a>
+                                                   href="{% url 'products:category' path=cat.slug_path|default:cat.slug %}">{{ cat.name }}</a>
 
-                                                {% with c1_list=cat.get_children %}
-                                                    {% if c1_list %}
+                                                {# سطح دوم: اگر c1_list نبود، از children.all بگیر #}
+                                                {% with c1_list=cat.c1_list|default:cat.children.all %}
+                                                    {% if c1_list and c1_list|length %}
                                                         <div class="megamenu">
                                                             <div class="row no-gutters">
                                                                 <div class="col-md-8">
@@ -32,15 +35,17 @@
                                                                             {% for c1 in c1_list %}
                                                                                 <div class="col-md-6">
                                                                                     <div class="menu-title">
-                                                                                        <a href="{{ c1.get_absolute_url }}">{{ c1.name }}</a>
+                                                                                        <a href="{% url 'products:category' path=c1.slug_path|default:c1.slug %}">{{ c1.name }}</a>
                                                                                     </div>
+
                                                                                     <ul>
-                                                                                        {% for c2 in c1.get_children|slice:":8" %}
+                                                                                        {# سطح سوم: همیشه children.all، با محدودکردن به 8 مورد #}
+                                                                                        {% for c2 in c1.children.all|slice:":8" %}
                                                                                             <li>
-                                                                                                <a href="{{ c2.get_absolute_url }}">{{ c2.name }}</a>
+                                                                                                <a href="{% url 'products:category' path=c2.slug_path|default:c2.slug %}">{{ c2.name }}</a>
                                                                                             </li>
                                                                                         {% empty %}
-                                                                                            {# no third level #}
+                                                                                            {# بدون زیرشاخه #}
                                                                                         {% endfor %}
                                                                                     </ul>
                                                                                 </div>
@@ -64,9 +69,8 @@
                                             </li>
                                         {% endfor %}
 
-                                        {# --- Fallback: your original static menu (shown when no `top_categories`) --- #}
                                     {% else %}
-
+                                        {# ——— Fallback استاتیک وقتی هیچ دیتایی نیست ——— #}
                                         <li class="megamenu-container">
                                             <a class="sf-with-ul" href="#">لوازم الکترونیکی</a>
                                             <div class="megamenu">
@@ -122,186 +126,6 @@
                                             </div>
                                         </li>
 
-                                        <li class="megamenu-container">
-                                            <a class="sf-with-ul" href="#">مبلمان</a>
-                                            <div class="megamenu">
-                                                <div class="row no-gutters">
-                                                    <div class="col-md-8">
-                                                        <div class="menu-col">
-                                                            <div class="row">
-                                                                <div class="col-md-6">
-                                                                    <div class="menu-title">اتاق خواب</div>
-                                                                    <ul>
-                                                                        <li><a href="#">تخت خواب</a></li>
-                                                                        <li><a href="#">چراغ خواب</a></li>
-                                                                        <li><a href="#">میز</a></li>
-                                                                    </ul>
-
-                                                                    <div class="menu-title">اتاق نشیمن</div>
-                                                                    <ul>
-                                                                        <li><a href="#">میز قهوه</a></li>
-                                                                        <li><a href="#">صندلی</a></li>
-                                                                        <li><a href="#">میز</a></li>
-                                                                    </ul>
-                                                                </div>
-
-                                                                <div class="col-md-6">
-                                                                    <div class="menu-title">دفتر</div>
-                                                                    <ul>
-                                                                        <li><a href="#">صندلی</a></li>
-                                                                        <li><a href="#">میز</a></li>
-                                                                    </ul>
-
-                                                                    <div class="menu-title">آشپزخانه</div>
-                                                                    <ul>
-                                                                        <li><a href="#">میز نهارخوری</a></li>
-                                                                        <li><a href="#">کابینت</a></li>
-                                                                    </ul>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="col-md-4">
-                                                        <div class="banner banner-overlay">
-                                                            <a href="#" class="banner banner-menu">
-                                                                <img src="{% static 'images/demos/demo-13/menu/banner-2.jpg' %}"
-                                                                     alt="بنر">
-                                                            </a>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </li>
-
-                                        <li class="megamenu-container">
-                                            <a class="sf-with-ul" href="#">آشپزی</a>
-                                            <div class="megamenu">
-                                                <div class="menu-col">
-                                                    <div class="row">
-                                                        <div class="col-md-4">
-                                                            <div class="menu-title">لوازم پخت و پز</div>
-                                                            <ul>
-                                                                <li><a href="#">قابلمه</a></li>
-                                                                <li><a href="#">لوازم الکترونیکی</a></li>
-                                                                <li><a href="#">پاقو</a></li>
-                                                            </ul>
-                                                        </div>
-                                                        <div class="col-md-4">
-                                                            <div class="menu-title">ظروف</div>
-                                                            <ul>
-                                                                <li><a href="#">بشقاب</a></li>
-                                                                <li><a href="#">فنجان</a></li>
-                                                                <li><a href="#">قوه خوری</a></li>
-                                                                <li><a href="#">سینی</a></li>
-                                                                <li><a href="#">نمکو فلفل پاش</a></li>
-                                                            </ul>
-                                                        </div>
-                                                        <div class="col-md-4">
-                                                            <div class="menu-title">لوازم الترونیکی</div>
-                                                            <ul>
-                                                                <li><a href="#">ماکروویو</a></li>
-                                                                <li><a href="#">قهوه ساز</a></li>
-                                                                <li><a href="#">میکسر</a></li>
-                                                                <li><a href="#">آرام پز</a></li>
-                                                                <li><a href="#">تستر</a></li>
-                                                                <li><a href="#">مخلوط کن</a></li>
-                                                            </ul>
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="row menu-banners">
-                                                        <div class="col-md-4">
-                                                            <div class="banner">
-                                                                <a href="#"><img
-                                                                        src="{% static 'images/demos/demo-13/menu/1.jpg' %}"
-                                                                        alt="image"></a>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-md-4">
-                                                            <div class="banner">
-                                                                <a href="#"><img
-                                                                        src="{% static 'images/demos/demo-13/menu/2.jpg' %}"
-                                                                        alt="image"></a>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-md-4">
-                                                            <div class="banner">
-                                                                <a href="#"><img
-                                                                        src="{% static 'images/demos/demo-13/menu/3.jpg' %}"
-                                                                        alt="image"></a>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </li>
-
-                                        <li class="megamenu-container">
-                                            <a class="sf-with-ul" href="#">لباس</a>
-                                            <div class="megamenu">
-                                                <div class="row no-gutters">
-                                                    <div class="col-md-8">
-                                                        <div class="menu-col">
-                                                            <div class="row">
-                                                                <div class="col-md-6">
-                                                                    <div class="menu-title">زنانه</div>
-                                                                    <ul>
-                                                                        <li><a href="#"><strong>محصولات
-                                                                            جدید</strong></a></li>
-                                                                        <li><a href="#"><strong>بیشترین
-                                                                            فروش</strong></a></li>
-                                                                        <li><a href="#"><strong>ویژه</strong></a></li>
-                                                                        <li><a href="#">لباس</a></li>
-                                                                        <li><a href="#">کفش</a></li>
-                                                                        <li><a href="#">کیف</a></li>
-                                                                        <li><a href="#">لوازم جانبی</a></li>
-                                                                    </ul>
-                                                                </div>
-                                                                <div class="col-md-6">
-                                                                    <div class="menu-title">مردانه</div>
-                                                                    <ul>
-                                                                        <li><a href="#"><strong>محصولات
-                                                                            جدید</strong></a></li>
-                                                                        <li><a href="#"><strong>بیشترین
-                                                                            فروش</strong></a></li>
-                                                                        <li><a href="#"><strong>ویژه</strong></a></li>
-                                                                        <li><a href="#">لباس</a></li>
-                                                                        <li><a href="#">کفش</a></li>
-                                                                        <li><a href="#">کیف</a></li>
-                                                                        <li><a href="#">لوازم جانبی</a></li>
-                                                                    </ul>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="col-md-4">
-                                                        <div class="banner banner-overlay">
-                                                            <a href="#" class="banner banner-menu">
-                                                                <img src="{% static 'images/demos/demo-13/menu/banner-3.jpg' %}"
-                                                                     alt="بنر">
-                                                            </a>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div class="menu-col menu-brands">
-                                                    <div class="row">
-                                                        {% for i in "123456" %}
-                                                            <div class="col-lg-2">
-                                                                <a href="#" class="brand">
-                                                                    <img src="
-                                                                            {% static 'images/brands/' %}{{ forloop.counter }}.png"
-                                                                         alt="نام برند">
-                                                                </a>
-                                                            </div>
-                                                        {% endfor %}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </li>
-
                                         <li><a href="#">لوازم خانگی</a></li>
                                         <li><a href="#">زیبایی و سلامت</a></li>
                                         <li><a href="#">کفش و پوتین</a></li>
@@ -309,15 +133,14 @@
                                         <li><a href="#">تلفن هوشمند</a></li>
                                         <li><a href="#">تلویزیون و لوازم صوتی</a></li>
                                         <li><a href="#">هدیه</a></li>
-
                                     {% endif %}
-                                </ul>
-                            </nav>
-                        </div>
+                                {% endwith %}
+                            </ul>
+                        </nav>
                     </div>
                 </div>
-
             </div><!-- End .col-lg-3 -->
+
 
             <div class="col-lg-9">
                 <nav class="main-nav">

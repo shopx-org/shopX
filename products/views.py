@@ -1,20 +1,26 @@
 # products/views.py
 from typing import Optional, Iterable
-
 from django.db.models import Q, Count, Sum, Min, Max, Prefetch
 from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
+from django.views.decorators.http import last_modified
 from django.views.generic import ListView, DetailView
+from dataclasses import asdict, dataclass
+import hashlib, json
+from typing import Dict, List, Any
 
+from django.db.models import Prefetch, Sum, Q
+from django.http import HttpRequest, HttpResponse
+from django.utils.http import http_date
+from django.utils.safestring import mark_safe
+from django.utils.timezone import now
+from django.views.generic import DetailView
+from django.utils.text import slugify
 from .models import (
-    Product,
-    Category,
-    Brand,
-    ProductImage,
-    ProductVariant,
-    ProductAttributeValue,
-    AttributeChoice,  # اگر فعلاً استفاده نمی‌کنی، می‌تونی حذفش کنی
+    Product, ProductVariant, ProductImage, Color, Brand,
+    Category, ProductAttributeValue
 )
+
 
 # ---------- Prefetch Helpers ----------
 def attr_prefetch():
@@ -41,6 +47,7 @@ def images_prefetch() -> Prefetch:
 # ---------- Base QuerySet Mixin ----------
 class ProductBaseQS:
     """کویری‌ست پایه برای محصولات فعال و قابل نمایش (+prefetch/annotate حرفه‌ای)."""
+
     def base_qs(self):
         return (
             Product.objects
@@ -200,54 +207,318 @@ class CategoryProductListView(ProductListView):
     همان لیست، اما دسته از مسیر درختی /c/<path>/ می‌آید.
     فقط get_category را از والد override می‌کنیم تا از kwargs['path'] استفاده کند.
     """
+
     def get_category(self) -> Optional[Category]:
         path = self.kwargs.get("path", "")
         return _resolve_category_by_path(path)
 
 
-class ProductDetailView(ProductBaseQS, DetailView):
-    template_name = "products/product_detail.html"
+# Micro tools
+def _float(v) -> float:
+    try:
+        return float(v)
+    except Exception:
+        return 0.0
+
+
+def _json(data: Any) -> str:
+    return mark_safe(json.dumps(data, ensure_ascii=False, separators=(",", ":")))
+
+
+def _etag_for_product(p: Product) -> str:
+    basis = f"{p.slug} | {p.updated_at.isoformat()} | {p.images.count()} | {p.variants.count()}"
+    return hashlib.md5(basis.encode("utf-8")).hexdigest()
+
+
+@dataclass
+class OfferDTO:
+    price: float
+    price_currency: str
+    availability: str  # "https://schema.org/InStock" یا OutOfStock
+    sku: str | None = None
+
+
+def _float(v) -> float:
+    try:
+        return float(v)
+    except Exception:
+        return 0.0
+
+
+def _json(data: Any) -> str:
+    # اگر قبلاً داری همون رو استفاده کن
+    import json
+    from django.utils.safestring import mark_safe
+    return mark_safe(json.dumps(data, ensure_ascii=False, separators=(",", ":")))
+
+
+def _jsonld(self, product: Product) -> str:
+    # تصاویر
+    imgs = [img.image.url for img in product.images.all() if getattr(img, "image", None)]
+
+    # برند (اختیاری)
+    brand = {"@type": "Brand", "name": product.brand_fk.name} if product.brand_fk_id else None
+
+    # Offerها از واریانت‌ها
+    offers: list[OfferDTO] = []
+    for v in product.variants.all():
+        offers.append(
+            OfferDTO(
+                price=_float(v.get_price()),
+                price_currency="IRR",  # ← snake_case مطابق dataclass
+                availability=("https://schema.org/InStock" if v.stock > 0 else "https://schema.org/OutOfStock"),
+                sku=v.sku or None,
+            )
+        )
+
+    # اگر واریانت نبود، از خود محصول یکی بساز
+    if not offers:
+        offers.append(
+            OfferDTO(
+                price=_float(product.price),
+                price_currency="IRR",
+                availability="https://schema.org/InStock",
+                sku=getattr(product, "sku", None) or None,
+            )
+        )
+
+    # ساخت دایرکتِ JSON-LD (بدون dataclass با کلیدهای @)
+    data = {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        "name": product.name,
+        "description": product.short_description or product.meta_description or (product.description or "")[:160],
+        "image": imgs[:10],
+        "brand": brand,
+        "sku": getattr(product, "sku", None) or None,
+        "offers": [
+            {
+                "@type": "Offer",
+                "price": f"{o.price:.0f}",
+                "priceCurrency": o.price_currency,  # ← اینجا camelCase در خروجی JSON
+                "availability": o.availability,
+                **({"sku": o.sku} if o.sku else {}),
+            }
+            for o in offers
+        ],
+    }
+
+    # حذف مقادیر تهی برای خروجی تمیز
+    data = {k: v for k, v in data.items() if v not in (None, [], {})}
+
+    return _json(data)  # ensure_ascii=False + mark_safe در همین تابع رعایت شود
+
+
+class ProductDetailView(DetailView):
     model = Product
-    slug_field = "slug"
+    template_name = "products/product_detail.html"
+    context_object_name = "product"
     slug_url_kwarg = "slug"
 
     def get_queryset(self):
-        # همان base_qs با prefetch/annotate
-        return self.base_qs()
+        return (
+            Product.objects.filter(is_active=True, status="pub")
+            .select_related("category", "brand_fk")
+            .prefetch_related(
+                Prefetch(
+                    "images",
+                    queryset=ProductImage.objects.order_by("position", "id"),
+                ),
+                Prefetch(
+                    "variants",  # variants color
+                    queryset=ProductVariant.objects.select_related("color").filter(is_active=True),
+                ),
+                Prefetch(
+                    "attr_values",
+                    queryset=ProductAttributeValue.objects.select_related(
+                        "attribute", "value_choice"
+                    ).order_by("attribute__position", "attribute__id"),
+                ),
+            )
+        )
 
+    def render_to_response(self, context, **response_kwargs):
+        resp: HttpResponse = super().render_to_response(context, **response_kwargs)
+        p: Product = self.object
+
+        last_modified = p.updated_at or now()
+        resp.headers["Last-Modified"] = http_date(last_modified.timestamp())
+
+        etag = _etag_for_product(p)
+        resp.headers["ETag"] = etag
+
+        resp.headers.setdefault("Cache-Control", "public, max-age=300")
+
+        resp.headers.setdefault("Link", f'<{p.get_absolute_url()}>; rel="canonical"')
+
+        return resp
+
+    def _variant_matrix(self, product: Product) -> Dict[str, Dict[str, Any]]:
+        matrix: Dict[str, Dict[str, Any]] = {}
+        for v in product.variants.all():
+            ckey = str(v.color_id or 0)
+            size_key = v.size or "OS"
+            matrix.setdefault(ckey, {})
+            matrix[ckey][size_key] = {
+                "price": _float(v.get_price()),
+                "stock": int(v.stock),
+                "sku": v.sku or None
+            }
+        return matrix
+
+    def low_stock_flag(self, product):
+        """
+        وضعیت «کمبود موجودی» برای نمایش پیام هشدار.
+        منطق: کمترین موجودی بین واریانت‌ها یا مجموع موجودی‌ها بررسی می‌شود.
+        """
+        try:
+            variants = list(product.variants.all())
+        except Exception:
+            variants = []
+
+        if variants:
+            total = sum(int(getattr(v, "stock", 0)) for v in variants)
+            min_stock = min((int(getattr(v, "stock", 0)) for v in variants), default=0)
+        else:
+            # اگر واریانت نداری، از فیلد stock خود محصول (اگر داری) استفاده کن
+            total = int(getattr(product, "stock", 0) or 0)
+            min_stock = total
+
+        return {
+            "total_stock": total,
+            "min_stock": min_stock,
+            "is_low": (0 < min_stock <= 5) or (0 < total <= 5),
+        }
+
+    def _price_history(self, product: Product) -> dict:
+        """
+        TODO: در آینده از مدل واقعی تاریخچهٔ قیمت یا سرویس گزارشگیری بخوان.
+        فعلاً دادهٔ نمونه برای Chart.js
+        """
+        labels = ["فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور"]
+        data = [68_800_000, 66_500_000, 64_900_000, 63_200_000, 62_200_000, 61_880_000]
+        return {"labels": labels, "data": data, "currency": "تومان"}
+
+    def _jsonld(self, product: Product) -> str:
+        # تصاویر
+        imgs = [img.image.url for img in product.images.all() if getattr(img, "image", None)]
+
+        # برند (اختیاری)
+        brand = {"@type": "Brand", "name": product.brand_fk.name} if product.brand_fk_id else None
+
+        # Offerها از واریانت‌ها
+        offers: list[OfferDTO] = []
+        for v in product.variants.all():
+            offers.append(
+                OfferDTO(
+                    price=_float(v.get_price()),
+                    price_currency="IRR",  # ← snake_case مطابق dataclass
+                    availability=("https://schema.org/InStock" if v.stock > 0 else "https://schema.org/OutOfStock"),
+                    sku=v.sku or None,
+                )
+            )
+
+        # اگر واریانت نبود، از خود محصول یکی بساز
+        if not offers:
+            offers.append(
+                OfferDTO(
+                    price=_float(product.price),
+                    price_currency="IRR",
+                    availability="https://schema.org/InStock",
+                    sku=getattr(product, "sku", None) or None,
+                )
+            )
+
+        # ساخت دایرکتِ JSON-LD (بدون dataclass با کلیدهای @)
+        data = {
+            "@context": "https://schema.org",
+            "@type": "Product",
+            "name": product.name,
+            "description": product.short_description or product.meta_description or (product.description or "")[:160],
+            "image": imgs[:10],
+            "brand": brand,
+            "sku": getattr(product, "sku", None) or None,
+            "offers": [
+                {
+                    "@type": "Offer",
+                    "price": f"{o.price:.0f}",
+                    "priceCurrency": o.price_currency,  # ← اینجا camelCase در خروجی JSON
+                    "availability": o.availability,
+                    **({"sku": o.sku} if o.sku else {}),
+                }
+                for o in offers
+            ],
+        }
+
+        # حذف مقادیر تهی برای خروجی تمیز
+        data = {k: v for k, v in data.items() if v not in (None, [], {})}
+
+        return _json(data)  # ensure_ascii=False + mark_safe در همین تابع رعایت شود
+
+    def _breadcrumbs(self, product: Product) -> list[dict]:
+        cat = product.category
+        if not isinstance(cat, Category):
+            return []
+        items = []
+        for c in cat.get_ancestors(include_self=True):
+            items.append({"name": c.name, "url": c.get_absolute_url()})
+        return items
+
+    def _related(self, product: Product):
+        # ساده: هم‌دسته‌ای‌ها؛ قابل ارتقاء به محبوبیت/فروش/برد کرامب چندسطحی
+        return (
+            Product.objects.filter(
+                is_active=True, status="pub",
+                category=product.category
+            )
+            .exclude(id=product.id)
+            .select_related("brand_fk")
+            .prefetch_related("images")
+            [:8]
+        )
+
+    # ---- Context ----
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         p: Product = self.object
 
-        # تصاویر از prefetch: image_list
-        ctx["images"] = getattr(p, "image_list", [])
+        # گالری (برای ساخت تامب‌ها و استیج)
+        ctx["gallery_images"] = [
+            {
+                "id": img.id,
+                "url": getattr(img.image, "url", ""),
+                "alt": img.alt or p.name,
+                "color_id": img.color_id,
+                "is_primary": img.is_primary,
+            }
+            for img in p.images.all()
+        ]
 
-        # واریانت‌ها (در صورت وجود)
-        ctx["variants"] = (
-            ProductVariant.objects.filter(product=p, is_active=True)
-            .select_related("color").order_by("id")
-        )
+        # رنگ‌ها برای سواچ (با مدل Color از واریانت‌ها و تصاویر)
+        ctx["colors"] = p.colors
 
-        # نوار مسیر
-        ctx["breadcrumbs"] = p.category.get_ancestors(include_self=True) if p.category_id else []
+        # ماتریس واریانت برای JS (قیمت/موجودی/sku برحسب رنگ/سایز)
+        ctx["variant_matrix_json"] = _json(self._variant_matrix(p))
 
-        # محصولات مرتبط ساده: هم‌دسته
-        ctx["related"] = (
-            Product.objects.filter(category=p.category, is_active=True, status="pub")
-            .exclude(id=p.id)
-            .select_related("brand_fk")
-            .prefetch_related(images_prefetch())
-            .order_by("-created_at")[:8]
-        )
+        # نمودار قیمت
+        ctx["price_chart_json"] = _json(self._price_history(p))
+
+        # وضعیت موجودی برای پیام "تنها X عدد باقی مانده"
+        ctx["stock_info"] = self.low_stock_flag(p)
+
+        # محصولات مرتبط
+        ctx["related_products"] = self._related(p)
+
+        # بردکرامپ + سئو
+        ctx["breadcrumbs"] = self._breadcrumbs(p)
+        ctx["meta_title"] = p.meta_title or p.name
+        ctx["meta_description"] = p.meta_description or (p.short_description or p.description[:160])
+        ctx["canonical_url"] = p.get_absolute_url()
+
+        # JSON-LD
+        ctx["product_jsonld"] = self._jsonld(p)
 
         return ctx
-
-
-
-
-
-
-# from django.views.generic import TemplateView
 #
 # # products/views.py
 # from django.db.models import Q, Count, Sum

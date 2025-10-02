@@ -6,19 +6,19 @@
 }
 
 /* Tokens */
-:root{
-  --g-stage-max: 560px;
-  --g-stage-pad: 10px;
-  --g-gap: 12px;
+:root {
+    --g-stage-max: 560px;
+    --g-stage-pad: 10px;
+    --g-gap: 12px;
 
-  --g-thumb-w-desktop: 92px;
-  --g-thumb-w-tablet: 80px;
-  --g-thumb-w-mobile: 70px;
+    --g-thumb-w-desktop: 92px;
+    --g-thumb-w-tablet: 80px;
+    --g-thumb-w-mobile: 70px;
 
-  --g-thumb-radius: 12px;
-  --g-thumb-border: 1px solid var(--soft, rgba(0,0,0,.06));
-  --g-thumb-active: #111;                 /* حلقه مشکی */
-  --g-thumb-active-glow: rgba(0,0,0,.14); /* هاله لطیف */
+    --g-thumb-radius: 12px;
+    --g-thumb-border: 1px solid var(--soft, rgba(0, 0, 0, .06));
+    --g-thumb-active: #111; /* حلقه مشکی */
+    --g-thumb-active-glow: rgba(0, 0, 0, .14); /* هاله لطیف */
 }
 
 .tlp-product {
@@ -34,14 +34,14 @@
 }
 
 .sec-title {
-    font-weight: 800;
+    font-weight: 400;
     margin: 18px 0 12px
 }
 
 /* هدر محصول */
 .tlp-hero .product-title {
-    font-size: 2.1rem;
-    font-weight: 800;
+    font-size: 1.25rem;
+    font-weight: 400;
     margin-bottom: .4rem
 }
 
@@ -607,382 +607,734 @@
 body.no-scroll {
     overflow: hidden;
 }
+
 /* گالری بیشتر به راست ستون بچسبد */
-@media (min-width: 992px){
-  .tlp-hero .col-lg-6.order-lg-2{ display:flex; justify-content:flex-end; }
+@media (min-width: 992px) {
+    .tlp-hero .col-lg-6.order-lg-2 {
+        display: flex;
+        justify-content: flex-end;
+    }
 }
 
 /* بومِ آمازون سمت راست – نسخه بزرگ‌تر */
-.tlp-gallery.gallery-amz-left{
-  display:grid;
-  grid-template-columns: 84px minmax(560px, 680px); /* thumbs | stage */
-  gap: 14px;
-  justify-content:end;
+.tlp-gallery.gallery-amz-left {
+    display: grid;
+    grid-template-columns: 84px minmax(560px, 680px); /* thumbs | stage */
+    gap: 14px;
+    justify-content: end;
 }
-.tlp-gallery.gallery-amz-left .thumbs{
-  width: 84px;
-  max-height: 680px;            /* ستون بلندتر */
-  overflow:auto;
-  display:flex; flex-direction:column; gap:10px; padding:2px;
+
+.tlp-gallery.gallery-amz-left .thumbs {
+    width: 84px;
+    max-height: 680px; /* ستون بلندتر */
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 2px;
 }
-.tlp-gallery.gallery-amz-left .thumb img{
-  width:72px; height:72px;      /* تامب‌ها درشت‌تر */
-  object-fit:cover; border-radius:10px; display:block;
+
+.tlp-gallery.gallery-amz-left .thumb img {
+    width: 72px;
+    height: 72px; /* تامب‌ها درشت‌تر */
+    object-fit: cover;
+    border-radius: 10px;
+    display: block;
 }
-.tlp-gallery.gallery-amz-left .thumb{
-  border:1px solid var(--soft,#e5e7eb);
-  background:#fff; border-radius:12px; padding:5px; cursor:pointer;
-  transition:box-shadow .2s ease, transform .15s ease;
+
+.tlp-gallery.gallery-amz-left .thumb {
+    border: 1px solid var(--soft, #e5e7eb);
+    background: #fff;
+    border-radius: 12px;
+    padding: 5px;
+    cursor: pointer;
+    transition: box-shadow .2s ease, transform .15s ease;
 }
-.tlp-gallery .thumb.is-active{
-  outline:2px solid var(--accent,#ff5b3c);
-  box-shadow:0 0 0 5px rgba(255,91,60,.14);
+
+.tlp-gallery .thumb.is-active {
+    outline: 2px solid var(--accent, #ff5b3c);
+    box-shadow: 0 0 0 5px rgba(255, 91, 60, .14);
 }
 
 /* استیج بزرگ‌تر + سایهٔ لطیف‌تر */
-.tlp-gallery.gallery-amz-left .stage{
-  border:1px solid var(--soft,#ececec);
-  background:#fff; border-radius:16px; padding:12px;
-  width: min(680px, 52vw);
-  height: min(680px, 52vw);     /* مربعِ بزرگ‌تر */
-  display:flex; align-items:center; justify-content:center;
-  box-shadow:0 18px 60px rgba(0,0,0,.08);
+.tlp-gallery.gallery-amz-left .stage {
+    border: 1px solid var(--soft, #ececec);
+    background: #fff;
+    border-radius: 16px;
+    padding: 12px;
+    width: min(680px, 52vw);
+    height: min(680px, 52vw); /* مربعِ بزرگ‌تر */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 18px 60px rgba(0, 0, 0, .08);
 }
-.tlp-gallery.gallery-amz-left .stage img{
-  width:100%; height:100%; object-fit:contain;
+
+.tlp-gallery.gallery-amz-left .stage img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
 }
 
 /* دکمهٔ +N هم‌اندازهٔ تامب‌ها و درشت‌تر */
-.tlp-gallery.gallery-amz-left .thumb-more{
-  width:72px; height:72px;
-  border:1px dashed var(--soft,#e5e7eb);
-  border-radius:10px; background:#fff;
-  display:flex; align-items:center; justify-content:center;
-  font-weight:900; font-size:1.05rem;
-  color:#333;
+.tlp-gallery.gallery-amz-left .thumb-more {
+    width: 72px;
+    height: 72px;
+    border: 1px dashed var(--soft, #e5e7eb);
+    border-radius: 10px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 1.05rem;
+    color: #333;
 }
 
 /* لایت‌باکس بزرگ‌تر برای حس زوم */
-.amz-lightbox .amz-modal{ width:min(1120px,96vw); padding:18px 56px; }
-.amz-lightbox .amz-stage{ height:min(72vh, 78vw); }
-.amz-lightbox .amz-nav{ width:46px; height:46px; font-size:26px; }
+.amz-lightbox .amz-modal {
+    width: min(1120px, 96vw);
+    padding: 18px 56px;
+}
+
+.amz-lightbox .amz-stage {
+    height: min(72vh, 78vw);
+}
+
+.amz-lightbox .amz-nav {
+    width: 46px;
+    height: 46px;
+    font-size: 26px;
+}
 
 /* ریسپانسیو */
-@media (max-width: 991.98px){
-  .tlp-gallery.gallery-amz-left{
-    grid-template-columns:1fr; justify-content:stretch;
-  }
-  .tlp-gallery.gallery-amz-left .thumbs{
-    flex-direction:row; width:auto; max-height:none; justify-content:center;
-  }
-  .tlp-gallery.gallery-amz-left .thumb img{ width:60px; height:60px; }
-  .tlp-gallery.gallery-amz-left .stage{ width:100%; height:68vw; }
+@media (max-width: 991.98px) {
+    .tlp-gallery.gallery-amz-left {
+        grid-template-columns:1fr;
+        justify-content: stretch;
+    }
+
+    .tlp-gallery.gallery-amz-left .thumbs {
+        flex-direction: row;
+        width: auto;
+        max-height: none;
+        justify-content: center;
+    }
+
+    .tlp-gallery.gallery-amz-left .thumb img {
+        width: 60px;
+        height: 60px;
+    }
+
+    .tlp-gallery.gallery-amz-left .stage {
+        width: 100%;
+        height: 68vw;
+    }
 }
+
 /* --- Gallery: small variant --- */
-.tlp-gallery.gallery-amz-left.gallery-sm{
-  grid-template-columns: 64px minmax(360px, 460px); /* thumbs | stage */
-  gap: 10px;
-  justify-content: end;
+.tlp-gallery.gallery-amz-left.gallery-sm {
+    grid-template-columns: 64px minmax(360px, 460px); /* thumbs | stage */
+    gap: 10px;
+    justify-content: end;
 }
-.tlp-gallery.gallery-amz-left.gallery-sm .thumbs{
-  width: 64px;
-  max-height: 440px;
-  gap: 6px;
+
+.tlp-gallery.gallery-amz-left.gallery-sm .thumbs {
+    width: 64px;
+    max-height: 440px;
+    gap: 6px;
 }
-.tlp-gallery.gallery-amz-left.gallery-sm .thumb{
-  padding: 4px;
-  border-radius: 10px;
+
+.tlp-gallery.gallery-amz-left.gallery-sm .thumb {
+    padding: 4px;
+    border-radius: 10px;
 }
-.tlp-gallery.gallery-amz-left.gallery-sm .thumb img{
-  width: 56px; height: 56px;
-  border-radius: 8px; object-fit: cover; display: block;
+
+.tlp-gallery.gallery-amz-left.gallery-sm .thumb img {
+    width: 56px;
+    height: 56px;
+    border-radius: 8px;
+    object-fit: cover;
+    display: block;
 }
-.tlp-gallery.gallery-amz-left.gallery-sm .thumb-more{
-  width: 56px; height: 56px;
-  font-weight: 900; font-size: 1rem;
+
+.tlp-gallery.gallery-amz-left.gallery-sm .thumb-more {
+    width: 56px;
+    height: 56px;
+    font-weight: 900;
+    font-size: 1rem;
 }
-.tlp-gallery.gallery-amz-left.gallery-sm .stage{
-  padding: 8px;
-  width:  min(460px, 38vw);
-  height: min(460px, 38vw);
-  border-radius: 12px;
+
+.tlp-gallery.gallery-amz-left.gallery-sm .stage {
+    padding: 8px;
+    width: min(460px, 38vw);
+    height: min(460px, 38vw);
+    border-radius: 12px;
 }
 
 /* موبایل بدون تغییر خاص */
-@media (max-width: 991.98px){
-  .tlp-gallery.gallery-amz-left.gallery-sm{
-    grid-template-columns: 1fr;
-  }
-  .tlp-gallery.gallery-amz-left.gallery-sm .thumbs{
-    flex-direction: row; width:auto; max-height:none; justify-content:center;
-  }
-  .tlp-gallery.gallery-amz-left.gallery-sm .stage{
-    width: 100%; height: 58vw;
-  }
+@media (max-width: 991.98px) {
+    .tlp-gallery.gallery-amz-left.gallery-sm {
+        grid-template-columns: 1fr;
+    }
+
+    .tlp-gallery.gallery-amz-left.gallery-sm .thumbs {
+        flex-direction: row;
+        width: auto;
+        max-height: none;
+        justify-content: center;
+    }
+
+    .tlp-gallery.gallery-amz-left.gallery-sm .stage {
+        width: 100%;
+        height: 58vw;
+    }
 }
 
 /* ستون را کنار گالری بچسبانیم */
-@media (min-width: 992px){
-  .tlp-hero .col-xl-6.col-lg-8.order-lg-2 > .tlp-gallery{ width:max-content; margin-left:auto; }
+@media (min-width: 992px) {
+    .tlp-hero .col-xl-6.col-lg-8.order-lg-2 > .tlp-gallery {
+        width: max-content;
+        margin-left: auto;
+    }
 }
 
 /* ستون چسبان (مثل باکس دیجی‌کالا) */
-.sticky-col{ position: sticky; top: 96px; }
-.sticky-gap{ margin-top: 12px; }
+.sticky-col {
+    position: sticky;
+    top: 96px;
+}
+
+.sticky-gap {
+    margin-top: 12px;
+}
 
 /* باکس خرید کناری */
-.dk-buybox .t{ color:#666; font-size:1rem; }
-.dk-buybox .lnk{ color:var(--accent); font-weight:900;display:flex; align-items:center; justify-content:space-between; gap:8px; }
-.dk-badge-ok{ background:#f0fff6; color:#1a7f37; border:1px solid #d2f4e5; border-radius:9px; padding:4px 10px; margin-right:6px;display:compact;  }
-
-.dk-price{ margin:10px 0; }
-.dk-price .num{ font-weight:bold; font-size:5rem; color:#111;
-    font-family: "Vazir", "dana";}
-.dk-price small{ font-size: 2rem; margin-right:4px; color:#444; }
-.dk-price .save{ margin-top:6px; color:#999; }
-.dk-rows{ display:grid; gap:8px; margin:10px 0; }
-.dk-row{ display:flex; align-items:center; justify-content:space-between; gap:8px;font-size: 1.5rem }
-.dk-row label{ color:#666; }
-.dk-qty{ max-width:100px; }
-
-.dk-cta .dk-add{
-  width:100%;
-  background:var(--accent);
-  color:#fff; border:none; border-radius:10px;
-  padding:10px 14px; font-weight:800; display:inline-flex; gap:8px; align-items:center; justify-content:center;
+.dk-buybox .t {
+    color: #666;
+    font-size: 1rem;
 }
 
-.dk-meta{ list-style:none; padding:0; margin:10px 0 0; display:grid; gap:6px; color:#555; }
-.dk-meta i{ margin-left:6px; }
-
-
-/* باکس توضیحات/ارسال */
-.dk-info .dk-row{ display:grid; grid-template-columns:auto 1fr; gap:8px; align-items:start; }
-.dk-info label{ font-weight:800; color:#333; }
-.dk-info .v{ color:#555; }
-
-/* ریسپانسیو */
-@media (max-width:991.98px){
-  .sticky-col{ position:static; top:auto; }
-  .dk-price .num{ font-size:1.5rem; }
+.dk-buybox .lnk {
+    color: var(--accent);
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
 }
 
-/* کارت میانی */
-.dk-section .t{ font-weight:800; color:#333; }
-.swatch{ width:22px; height:22px; border-radius:50%; border:1px solid #e5e7eb; background:var(--c); display:inline-block; }
-
-/* آکاردئون */
-.dk-acc{ overflow:hidden; }
-.dk-acc summary{
-  list-style:none; cursor:pointer;
-  display:flex; align-items:center; justify-content:space-between; gap:12px;
-  font-weight:800; color:#222;
-}
-.dk-acc summary::-webkit-details-marker{ display:none; }
-.dk-acc[open]{ box-shadow:0 8px 28px rgba(0,0,0,.05); }
-
-/* بدنه‌ی آکاردئون */
-.dk-acc-body{ margin-top:10px; display:grid; gap:8px; }
-.dk-acc-body .opt{
-  display:grid; grid-template-columns:auto 1fr auto auto; gap:10px; align-items:center;
-  padding:8px; border:1px solid var(--soft); border-radius:10px; background:#fff;
-}
-.dk-acc-body .opt .ttl{ font-weight:700; }
-.dk-acc-body .opt .off{ background:#fff0ec; color:var(--accent); border:1px solid #ffd9cf; border-radius:8px; padding:2px 6px; }
-.dk-acc-body .opt .price{ font-weight:800; }
-.dk-acc-body .opt .price.muted{ color:#777; font-weight:600; }
-.dk-acc-foot{ display:flex; justify-content:flex-end; }
-.dk-acc .lnk{ color:var(--accent); font-weight:700; }
-
-/* سوییچ */
-.switch{ position:relative; width:42px; height:24px; }
-.switch input{ display:none; }
-.switch .slider{
-  position:absolute; inset:0; background:#e5e7eb; border-radius:999px; transition:.2s;
-}
-.switch .slider::before{
-  content:""; position:absolute; top:3px; inset-inline-start:3px;
-  width:18px; height:18px; border-radius:50%; background:#fff; transition:.2s; box-shadow:0 1px 3px rgba(0,0,0,.2);
-}
-.switch input:checked + .slider{ background:var(--accent); }
-.switch input:checked + .slider::before{ inset-inline-start: calc(100% - 21px); }
-
-/* ریسپانسیو: ستون‌ها زیر هم */
-@media (max-width: 991.98px){
-  .dk-acc summary{ padding-inline-end:0; }
+.dk-badge-ok {
+    background: #f0fff6;
+    color: #1a7f37;
+    border: 1px solid #d2f4e5;
+    border-radius: 9px;
+    padding: 4px 10px;
+    margin-right: 6px;
+    display: compact;
 }
 
-/* کارت بزرگ راست (قابل حذف؛ فقط برای باکس‌بندی ظریف) */
-.wm-main{ padding: 16px; }
-
-/* گالری با تامب‌های سمت راست (RTL) */
-.tlp-gallery.gallery-rtl-right{
-  display:grid;
-  grid-template-columns: minmax(420px, 520px) 72px; /* stage | thumbs */
-  gap: 12px;
-}
-.tlp-gallery.gallery-rtl-right.gallery-sm{
-  grid-template-columns: minmax(360px, 460px) 64px; /* نسخه کوچک */
-  gap: 10px;
+.dk-price {
+    margin: 10px 0;
 }
 
-/* استیج */
-.tlp-gallery.gallery-rtl-right .stage{
-  border:1px solid var(--soft,#ececec);
-  background:#fff; border-radius:14px; padding:10px;
-  width:  min(520px, 44vw);
-  height: min(520px, 44vw);
-  display:flex; align-items:center; justify-content:center;
-}
-.tlp-gallery.gallery-rtl-right.gallery-sm .stage{
-  width:min(460px, 38vw); height:min(460px, 38vw); padding:8px; border-radius:12px;
-}
-.tlp-gallery.gallery-rtl-right .stage img{ width:100%; height:100%; object-fit:contain; }
-
-/* تامب‌ها (ستون راست) */
-.tlp-gallery.gallery-rtl-right .thumbs{
-  width:72px; max-height:520px; overflow:auto;
-  display:flex; flex-direction:column; gap:8px; padding:2px;
-}
-.tlp-gallery.gallery-rtl-right.gallery-sm .thumbs{ width:64px; max-height:460px; gap:6px; }
-
-.tlp-gallery .thumb{
-  border:1px solid var(--soft,#e5e7eb); background:#fff; border-radius:10px; padding:4px; cursor:pointer;
-  transition:box-shadow .2s ease, transform .15s ease;
-}
-.tlp-gallery .thumb.is-active{ outline:2px solid var(--accent,#ff5b3c); box-shadow:0 0 0 4px rgba(255,91,60,.14); }
-.tlp-gallery .thumb img{ width:64px; height:64px; object-fit:cover; border-radius:8px; display:block; }
-.tlp-gallery.gallery-rtl-right.gallery-sm .thumb img{ width:56px; height:56px; }
-.tlp-gallery .thumb-more{ width:64px; height:64px; display:flex; align-items:center; justify-content:center; font-weight:800; }
-.tlp-gallery.gallery-rtl-right.gallery-sm .thumb-more{ width:56px; height:56px; }
-
-/* گالری در ستون راستِ بیرونی، به لبه راست بچسبد */
-@media (min-width: 992px){
-  .tlp-hero .order-lg-2 > .wm-main{ margin-right: 0; }
-  .tlp-hero .order-lg-2 .order-lg-2 > .tlp-gallery{ margin-inline-start:auto; width:max-content; }
-}
-
-/* ستون خرید چسبان */
-.sticky-col{ position: sticky; top: 96px; } /* اگر هدر ثابت داری، عدد را با ارتفاع هدرت تنظیم کن */
-.sticky-gap{ margin-top: 12px; }
-
-
-/* === Hover Zoom (popup) === */
-.tlp-gallery .stage{ cursor: zoom-in; position: relative; }
-
-.zoom-lens{
-  position: absolute;
-  border: 2px solid #1a1c1e;
-  background: rgba(255,255,255,.25);
-  border-radius: 8px;
-  pointer-events: none;
-  display: none; /* هنگام زوم فعال می‌شود */
-  box-shadow: 0 4px 18px rgba(0,0,0,.12) inset;
-}
-
-/* لنز مینیمال */
-.zoom-lens{
-  position:absolute;
-  pointer-events:none;
-  border:1px solid rgba(0,0,0,.10);
-  background: rgba(255,255,255,.08);
-  border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0,0,0,.10), inset 0 0 0 1px rgba(255,255,255,.15);
-  backdrop-filter: saturate(1.1);
-  opacity: 0;
-  transition: opacity .15s ease;
-  will-change: transform, background-position;
-}
-
-/* هنگام زوم، نشانگر پنهان و لنز ظاهر شود */
-.stage.zooming { cursor: none; }
-.stage.zooming .zoom-lens { opacity: 1; }
-
-
-/* ==== Hover Zoom (مینیمال سبک والمارت) ==== */
-.tlp-gallery .stage{ position: relative; cursor: zoom-in; }
-
-/* لنز مثلِ نشانگر (وقتی زوم فعال است، خودِ موس پنهان می‌شود) */
-.stage.zooming { cursor: none; }
-.zoom-lens{
-  position:absolute;
-  pointer-events:none;
-  border:1px solid rgba(0,0,0,.10);
-  background: rgba(255,255,255,.08);
-  border-radius:12px;
-  box-shadow: 0 2px 10px rgba(0,0,0,.10), inset 0 0 0 1px rgba(255,255,255,.15);
-  backdrop-filter: saturate(1.1);
-  opacity:0; transition:opacity .15s ease;
-  will-change: transform;
-}
-.stage.zooming .zoom-lens{ opacity:1; }
-
-/* پنجره زوم کناری */
-.zoom-box{
-  position: fixed;
-  width: 420px;
-  height: 420px;
-  display: none;
-  background: #fff;
-  border: 1px solid rgba(0,0,0,.08);
-  border-radius: 14px;
-  overflow: hidden;
-  box-shadow: 0 18px 60px rgba(0,0,0,.12);
-  z-index: 1300;
-}
-.zoom-box.show{ display:block; }
-
-.zoom-img{
-  width:100%; height:100%;
-  background-repeat:no-repeat;
-  background-position:center;
-}
 .dk-price .num {
-  font-weight: 900;
-  font-size: 2.4rem; /* خواناتر */
-  color: #111;
-  font-family: "DanaFaNum", "Vazir", sans-serif;
+    font-weight: bold;
+    font-size: 5rem;
+    color: #111;
+    font-family: "Vazir", "dana";
 }
 
 .dk-price small {
-  font-size: 1.2rem;
-  margin-right: 4px;
-  color: #444;
+    font-size: 2rem;
+    margin-right: 4px;
+    color: #444;
 }
 
-.dk-seller {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 6px 0 12px;
+.dk-price .save {
+    margin-top: 6px;
+    color: #999;
 }
 
 .dk-rows {
-  display: grid;
-  gap: 12px;
-  margin: 14px 0;
+    display: grid;
+    gap: 8px;
+    margin: 10px 0;
 }
 
-.qty-row input {
-  max-width: 80px;
-  text-align: center;
+.dk-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 1.5rem
+}
+
+.dk-row label {
+    color: #666;
+}
+
+.dk-qty {
+    max-width: 100px;
 }
 
 .dk-cta .dk-add {
-  width: 100%;
-  background: var(--accent);
-  border-radius: 10px;
-  font-weight: 800;
-  padding: 12px;
-  transition: background .2s ease;
-}
-.dk-cta .dk-add:hover {
-  background: #e24c30;
+    width: 100%;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-weight: 800;
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
 }
 
 .dk-meta {
-  font-size: 0.9rem;
-  color: #666;
+    list-style: none;
+    padding: 0;
+    margin: 10px 0 0;
+    display: grid;
+    gap: 6px;
+    color: #555;
+}
+
+.dk-meta i {
+    margin-left: 6px;
+}
+
+
+/* باکس توضیحات/ارسال */
+.dk-info .dk-row {
+    display: grid;
+    grid-template-columns:auto 1fr;
+    gap: 8px;
+    align-items: start;
+}
+
+.dk-info label {
+    font-weight: 800;
+    color: #333;
+}
+
+.dk-info .v {
+    color: #555;
+}
+
+/* ریسپانسیو */
+@media (max-width: 991.98px) {
+    .sticky-col {
+        position: static;
+        top: auto;
+    }
+
+    .dk-price .num {
+        font-size: 1.5rem;
+    }
+}
+
+/* کارت میانی */
+.dk-section .t {
+    font-weight: 800;
+    color: #333;
+}
+
+.swatch {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 1px solid #e5e7eb;
+    background: var(--c);
+    display: inline-block;
+}
+
+/* آکاردئون */
+.dk-acc {
+    overflow: hidden;
+}
+
+.dk-acc summary {
+    list-style: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    font-weight: 800;
+    color: #222;
+}
+
+.dk-acc summary::-webkit-details-marker {
+    display: none;
+}
+
+.dk-acc[open] {
+    box-shadow: 0 8px 28px rgba(0, 0, 0, .05);
+}
+
+/* بدنه‌ی آکاردئون */
+.dk-acc-body {
+    margin-top: 10px;
+    display: grid;
+    gap: 8px;
+}
+
+.dk-acc-body .opt {
+    display: grid;
+    grid-template-columns:auto 1fr auto auto;
+    gap: 10px;
+    align-items: center;
+    padding: 8px;
+    border: 1px solid var(--soft);
+    border-radius: 10px;
+    background: #fff;
+}
+
+.dk-acc-body .opt .ttl {
+    font-weight: 700;
+}
+
+.dk-acc-body .opt .off {
+    background: #fff0ec;
+    color: var(--accent);
+    border: 1px solid #ffd9cf;
+    border-radius: 8px;
+    padding: 2px 6px;
+}
+
+.dk-acc-body .opt .price {
+    font-weight: 800;
+}
+
+.dk-acc-body .opt .price.muted {
+    color: #777;
+    font-weight: 600;
+}
+
+.dk-acc-foot {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.dk-acc .lnk {
+    color: var(--accent);
+    font-weight: 700;
+}
+
+/* سوییچ */
+.switch {
+    position: relative;
+    width: 42px;
+    height: 24px;
+}
+
+.switch input {
+    display: none;
+}
+
+.switch .slider {
+    position: absolute;
+    inset: 0;
+    background: #e5e7eb;
+    border-radius: 999px;
+    transition: .2s;
+}
+
+.switch .slider::before {
+    content: "";
+    position: absolute;
+    top: 3px;
+    inset-inline-start: 3px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    transition: .2s;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .2);
+}
+
+.switch input:checked + .slider {
+    background: var(--accent);
+}
+
+.switch input:checked + .slider::before {
+    inset-inline-start: calc(100% - 21px);
+}
+
+/* ریسپانسیو: ستون‌ها زیر هم */
+@media (max-width: 991.98px) {
+    .dk-acc summary {
+        padding-inline-end: 0;
+    }
+}
+
+/* کارت بزرگ راست (قابل حذف؛ فقط برای باکس‌بندی ظریف) */
+.wm-main {
+    padding: 16px;
+}
+
+/* گالری با تامب‌های سمت راست (RTL) */
+.tlp-gallery.gallery-rtl-right {
+    display: grid;
+    grid-template-columns: minmax(420px, 520px) 72px; /* stage | thumbs */
+    gap: 12px;
+}
+
+.tlp-gallery.gallery-rtl-right.gallery-sm {
+    grid-template-columns: minmax(360px, 460px) 64px; /* نسخه کوچک */
+    gap: 10px;
+}
+
+/* استیج */
+.tlp-gallery.gallery-rtl-right .stage {
+    border: 1px solid var(--soft, #ececec);
+    background: #fff;
+    border-radius: 14px;
+    padding: 10px;
+    width: min(520px, 44vw);
+    height: min(520px, 44vw);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tlp-gallery.gallery-rtl-right.gallery-sm .stage {
+    width: min(460px, 38vw);
+    height: min(460px, 38vw);
+    padding: 8px;
+    border-radius: 12px;
+}
+
+.tlp-gallery.gallery-rtl-right .stage img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* تامب‌ها (ستون راست) */
+.tlp-gallery.gallery-rtl-right .thumbs {
+    width: 72px;
+    max-height: 520px;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 2px;
+}
+
+.tlp-gallery.gallery-rtl-right.gallery-sm .thumbs {
+    width: 64px;
+    max-height: 460px;
+    gap: 6px;
+}
+
+.tlp-gallery .thumb {
+    border: 1px solid var(--soft, #e5e7eb);
+    background: #fff;
+    border-radius: 10px;
+    padding: 4px;
+    cursor: pointer;
+    transition: box-shadow .2s ease, transform .15s ease;
+}
+
+.tlp-gallery .thumb.is-active {
+    outline: 2px solid var(--accent, #ff5b3c);
+    box-shadow: 0 0 0 4px rgba(255, 91, 60, .14);
+}
+
+.tlp-gallery .thumb img {
+    width: 64px;
+    height: 64px;
+    object-fit: cover;
+    border-radius: 8px;
+    display: block;
+}
+
+.tlp-gallery.gallery-rtl-right.gallery-sm .thumb img {
+    width: 56px;
+    height: 56px;
+}
+
+.tlp-gallery .thumb-more {
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+}
+
+.tlp-gallery.gallery-rtl-right.gallery-sm .thumb-more {
+    width: 56px;
+    height: 56px;
+}
+
+/* گالری در ستون راستِ بیرونی، به لبه راست بچسبد */
+@media (min-width: 992px) {
+    .tlp-hero .order-lg-2 > .wm-main {
+        margin-right: 0;
+    }
+
+    .tlp-hero .order-lg-2 .order-lg-2 > .tlp-gallery {
+        margin-inline-start: auto;
+        width: max-content;
+    }
+}
+
+/* ستون خرید چسبان */
+.sticky-col {
+    position: sticky;
+    top: 96px;
+}
+
+/* اگر هدر ثابت داری، عدد را با ارتفاع هدرت تنظیم کن */
+.sticky-gap {
+    margin-top: 12px;
+}
+
+
+/* === Hover Zoom (popup) === */
+.tlp-gallery .stage {
+    cursor: zoom-in;
+    position: relative;
+}
+
+.zoom-lens {
+    position: absolute;
+    border: 2px solid #1a1c1e;
+    background: rgba(255, 255, 255, .25);
+    border-radius: 8px;
+    pointer-events: none;
+    display: none; /* هنگام زوم فعال می‌شود */
+    box-shadow: 0 4px 18px rgba(0, 0, 0, .12) inset;
+}
+
+/* لنز مینیمال */
+.zoom-lens {
+    position: absolute;
+    pointer-events: none;
+    border: 1px solid rgba(0, 0, 0, .10);
+    background: rgba(255, 255, 255, .08);
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, .10), inset 0 0 0 1px rgba(255, 255, 255, .15);
+    backdrop-filter: saturate(1.1);
+    opacity: 0;
+    transition: opacity .15s ease;
+    will-change: transform, background-position;
+}
+
+/* هنگام زوم، نشانگر پنهان و لنز ظاهر شود */
+.stage.zooming {
+    cursor: none;
+}
+
+.stage.zooming .zoom-lens {
+    opacity: 1;
+}
+
+
+/* ==== Hover Zoom (مینیمال سبک والمارت) ==== */
+.tlp-gallery .stage {
+    position: relative;
+    cursor: zoom-in;
+}
+
+/* لنز مثلِ نشانگر (وقتی زوم فعال است، خودِ موس پنهان می‌شود) */
+.stage.zooming {
+    cursor: none;
+}
+
+.zoom-lens {
+    position: absolute;
+    pointer-events: none;
+    border: 1px solid rgba(0, 0, 0, .10);
+    background: rgba(255, 255, 255, .08);
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, .10), inset 0 0 0 1px rgba(255, 255, 255, .15);
+    backdrop-filter: saturate(1.1);
+    opacity: 0;
+    transition: opacity .15s ease;
+    will-change: transform;
+}
+
+.stage.zooming .zoom-lens {
+    opacity: 1;
+}
+
+/* پنجره زوم کناری */
+.zoom-box {
+    position: fixed;
+    width: 420px;
+    height: 420px;
+    display: none;
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, .08);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 18px 60px rgba(0, 0, 0, .12);
+    z-index: 1300;
+}
+
+.zoom-box.show {
+    display: block;
+}
+
+.zoom-img {
+    width: 100%;
+    height: 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.dk-price .num {
+    font-weight: 900;
+    font-size: 2.4rem; /* خواناتر */
+    color: #111;
+    font-family: "DanaFaNum", "Vazir", sans-serif;
+}
+
+.dk-price small {
+    font-size: 1.2rem;
+    margin-right: 4px;
+    color: #444;
+}
+
+.dk-seller {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 6px 0 12px;
+}
+
+.dk-rows {
+    display: grid;
+    gap: 12px;
+    margin: 14px 0;
+}
+
+.qty-row input {
+    max-width: 80px;
+    text-align: center;
+}
+
+.dk-cta .dk-add {
+    width: 100%;
+    background: var(--accent);
+    border-radius: 10px;
+    font-weight: 800;
+    padding: 12px;
+    transition: background .2s ease;
+}
+
+.dk-cta .dk-add:hover {
+    background: #e24c30;
+}
+
+.dk-meta {
+    font-size: 0.9rem;
+    color: #666;
 }
 
 /*!* کنترل تعداد: − | value | +  *!*/
@@ -1028,73 +1380,164 @@ body.no-scroll {
 
 /* استپرهای پیش‌فرض number را مخفی کن (Chrome/Safari/Firefox) */
 .dk-qty-input::-webkit-outer-spin-button,
-.dk-qty-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-.dk-qty-input { -moz-appearance: textfield; }
+.dk-qty-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
 
-
+.dk-qty-input {
+    -moz-appearance: textfield;
+}
 
 
 /* کنترل جدید ما */
-.qty-control{
-  display:inline-grid; grid-template-columns:36px 72px 36px;
-  align-items:stretch; border:1px solid var(--soft); border-radius:10px;
-  overflow:hidden; background:#fff;
+.qty-control {
+    display: inline-grid;
+    grid-template-columns:36px 72px 36px;
+    align-items: stretch;
+    border: 1px solid var(--soft);
+    border-radius: 10px;
+    overflow: hidden;
+    background: #fff;
 }
-.dk-qty-input{ width:72px; text-align:center; border:0; padding:8px 0; font-weight:800; background:transparent; }
-.dk-qty-input:focus{ outline:none; }
-.qty-btn{ appearance:none; -webkit-appearance:none; border:0; background:transparent;
-  display:grid; place-items:center; font-size:1.1rem; line-height:1; cursor:pointer; }
-.qty-btn:not(:disabled):hover{ background:rgba(0,0,0,.05); }
-.qty-btn:disabled{ opacity:.4; cursor:not-allowed; }
+
+.dk-qty-input {
+    width: 72px;
+    text-align: center;
+    border: 0;
+    padding: 8px 0;
+    font-weight: 800;
+    background: transparent;
+}
+
+.dk-qty-input:focus {
+    outline: none;
+}
+
+.qty-btn {
+    appearance: none;
+    -webkit-appearance: none;
+    border: 0;
+    background: transparent;
+    display: grid;
+    place-items: center;
+    font-size: 1.1rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.qty-btn:not(:disabled):hover {
+    background: rgba(0, 0, 0, .05);
+}
+
+.qty-btn:disabled {
+    opacity: .4;
+    cursor: not-allowed;
+}
 
 /* چون صفحه RTL است، ترتیب بصری «راست: + | وسط: مقدار | چپ: −» می‌خواهیم */
-.qty-control{ direction:ltr; }       /* فقط خودِ کنترل را LTR کن تا ستون‌ها قاطی نشوند */
+.qty-control {
+    direction: ltr;
+}
+
+/* فقط خودِ کنترل را LTR کن تا ستون‌ها قاطی نشوند */
 
 
 /* جلوگیری از دوبل شدن علائم روی دکمه‌های +/− */
-.qty-control { direction: ltr; } /* چیدمان سه‌ستونه ثابت بماند */
-.qty-control .qty-btn{
-  appearance:none; -webkit-appearance:none;
-  border:0; background:transparent;
-  display:grid; place-items:center; width:36px; height:36px;
-  cursor:pointer; font-size:0; /* متن احتمالی دکمه مخفی شود */
-  position: relative;
+.qty-control {
+    direction: ltr;
+}
+
+/* چیدمان سه‌ستونه ثابت بماند */
+.qty-control .qty-btn {
+    appearance: none;
+    -webkit-appearance: none;
+    border: 0;
+    background: transparent;
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+    font-size: 0; /* متن احتمالی دکمه مخفی شود */
+    position: relative;
 }
 
 /* خنثی کردن محتوا/آیکن‌هایی که تم روی .plus/.minus می‌سازد */
 .qty-control .plus::before, .qty-control .plus::after,
-.qty-control .minus::before, .qty-control .minus::after { content: none !important; }
+.qty-control .minus::before, .qty-control .minus::after {
+    content: none !important;
+}
 
 /* یک بار، با pseudo-element خودمان بسازیم */
-.qty-control .qty-btn.plus::after  { content: "+"; font-size: 20px; line-height: 1; }
-.qty-control .qty-btn.minus::after { content: "−"; font-size: 20px; line-height: 1; }
+.qty-control .qty-btn.plus::after {
+    content: "+";
+    font-size: 20px;
+    line-height: 1;
+}
+
+.qty-control .qty-btn.minus::after {
+    content: "−";
+    font-size: 20px;
+    line-height: 1;
+}
 
 /* باکس و ورودی */
-.qty-control{
-  display:inline-grid; grid-template-columns:36px 72px 36px;
-  align-items:stretch; border:1px solid var(--soft); border-radius:10px;
-  overflow:hidden; background:#fff;
+.qty-control {
+    display: inline-grid;
+    grid-template-columns:36px 72px 36px;
+    align-items: stretch;
+    border: 1px solid var(--soft);
+    border-radius: 10px;
+    overflow: hidden;
+    background: #fff;
 }
-.dk-qty-input{
-  width:72px; text-align:center; border:0; padding:8px 0; font-weight:800; background:transparent;
+
+.dk-qty-input {
+    width: 72px;
+    text-align: center;
+    border: 0;
+    padding: 8px 0;
+    font-weight: 800;
+    background: transparent;
 }
-.dk-qty-input:focus{ outline:none; }
+
+.dk-qty-input:focus {
+    outline: none;
+}
 
 /* حذف استپرهای پیش‌فرض مرورگر */
 .dk-qty-input::-webkit-outer-spin-button,
-.dk-qty-input::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
-.dk-qty-input{ -moz-appearance:textfield; }
+.dk-qty-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
 
-.qty-control .qty-btn.plus::after  { content:"+" !important; }
-.qty-control .qty-btn.minus::after { content:"−" !important; }
+.dk-qty-input {
+    -moz-appearance: textfield;
+}
+
+.qty-control .qty-btn.plus::after {
+    content: "+" !important;
+}
+
+.qty-control .qty-btn.minus::after {
+    content: "−" !important;
+}
 
 
 /* ============== Quantity (template default) – inside field, RTL ============== */
 
 /* استپرهای پیش‌فرض مرورگر را مخفی کن */
 .qty-native input[type=number]::-webkit-outer-spin-button,
-.qty-native input[type=number]::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
-.qty-native input[type=number]{ -moz-appearance:textfield; }
+.qty-native input[type=number]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.qty-native input[type=number] {
+    -moz-appearance: textfield;
+}
 
 /* --- الگوی 1: قالب‌هایی که این ساختار را می‌سازند:
    <div class="quantity">
@@ -1105,23 +1548,44 @@ body.no-scroll {
       </div>
    </div>
 ---------------------------------------------------------------- */
-.qty-native .quantity{ position: relative; }
-.qty-native .quantity-nav{
-  position: absolute; inset: 0;
-  display: flex; justify-content: space-between; align-items: stretch;
-  pointer-events: none;             /* خود nav کلیک‌پذیر نباشد */
+.qty-native .quantity {
+    position: relative;
 }
-.qty-native .quantity-button{
-  pointer-events: auto;             /* خود دکمه‌ها کلیک‌پذیر باشند */
-  width: 36px; border: 0; background: transparent;
-  display: grid; place-items: center; font-weight: 900; line-height: 1;
-  user-select: none; cursor: pointer;
+
+.qty-native .quantity-nav {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    pointer-events: none; /* خود nav کلیک‌پذیر نباشد */
 }
-.qty-native .quantity-up   { inset-inline-end: 0; }
-.qty-native .quantity-down { inset-inline-start: 0; }
+
+.qty-native .quantity-button {
+    pointer-events: auto; /* خود دکمه‌ها کلیک‌پذیر باشند */
+    width: 36px;
+    border: 0;
+    background: transparent;
+    display: grid;
+    place-items: center;
+    font-weight: 900;
+    line-height: 1;
+    user-select: none;
+    cursor: pointer;
+}
+
+.qty-native .quantity-up {
+    inset-inline-end: 0;
+}
+
+.qty-native .quantity-down {
+    inset-inline-start: 0;
+}
 
 /* هاور ملایم */
-.qty-native .quantity-button:hover{ background: rgba(0,0,0,.05); }
+.qty-native .quantity-button:hover {
+    background: rgba(0, 0, 0, .05);
+}
 
 /* --- الگوی 2: Bootstrap TouchSpin / مشابه
    <div class="bootstrap-touchspin">
@@ -1130,640 +1594,1051 @@ body.no-scroll {
      <span class="input-group-btn bootstrap-touchspin-up">+</span>
    </div>
 ---------------------------------------------------------------- */
-.qty-native .bootstrap-touchspin{ position: relative; }
-.qty-native .bootstrap-touchspin .input-group-btn{
-  position: absolute; top: 0; bottom: 0; width: 36px;
-  display: grid; place-items: center; background: transparent; border: 0;
+.qty-native .bootstrap-touchspin {
+    position: relative;
 }
-.qty-native .bootstrap-touchspin-down{ inset-inline-start: 0; }
-.qty-native .bootstrap-touchspin-up  { inset-inline-end: 0; }
+
+.qty-native .bootstrap-touchspin .input-group-btn {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 36px;
+    display: grid;
+    place-items: center;
+    background: transparent;
+    border: 0;
+}
+
+.qty-native .bootstrap-touchspin-down {
+    inset-inline-start: 0;
+}
+
+.qty-native .bootstrap-touchspin-up {
+    inset-inline-end: 0;
+}
+
 .qty-native .bootstrap-touchspin .btn,
-.qty-native .bootstrap-touchspin .btn:focus{
-  box-shadow: none; border: 0; background: transparent;
+.qty-native .bootstrap-touchspin .btn:focus {
+    box-shadow: none;
+    border: 0;
+    background: transparent;
 }
-.qty-native .bootstrap-touchspin .btn:hover{ background: rgba(0,0,0,.05); }
+
+.qty-native .bootstrap-touchspin .btn:hover {
+    background: rgba(0, 0, 0, .05);
+}
 
 /* اطمینان از نمایش (در صورت قبلاً مخفی‌شدن توسط CSS قدیمی) */
 .qty-row .quantity,
 .qty-row .quantity-nav,
 .qty-row .quantity-button,
 .qty-row .bootstrap-touchspin,
-.qty-row .bootstrap-touchspin .input-group-btn{ display: block !important; }
-
+.qty-row .bootstrap-touchspin .input-group-btn {
+    display: block !important;
+}
 
 
 /* الگوی 1: quantity-nav */
 .qty-row .quantity,
 .qty-row .quantity-nav,
-.qty-row .quantity-button{ display: block !important; }
-.qty-row .quantity{ position: relative; }
-.qty-row .quantity-nav{
-  position:absolute; inset:0;
-  display:flex; justify-content:space-between; align-items:stretch;
-  pointer-events:none;
+.qty-row .quantity-button {
+    display: block !important;
 }
-.qty-row .quantity-button{
-  pointer-events:auto; width:36px; display:grid; place-items:center;
-  background:transparent; border:0; font-weight:900; line-height:1; cursor:pointer;
+
+.qty-row .quantity {
+    position: relative;
 }
-.qty-row .quantity .quantity-down{ inset-inline-start:0; }
-.qty-row .quantity .quantity-up{   inset-inline-end:0; }
+
+.qty-row .quantity-nav {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    pointer-events: none;
+}
+
+.qty-row .quantity-button {
+    pointer-events: auto;
+    width: 36px;
+    display: grid;
+    place-items: center;
+    background: transparent;
+    border: 0;
+    font-weight: 900;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.qty-row .quantity .quantity-down {
+    inset-inline-start: 0;
+}
+
+.qty-row .quantity .quantity-up {
+    inset-inline-end: 0;
+}
 
 /* الگوی 2: Bootstrap TouchSpin */
 .qty-row .bootstrap-touchspin,
-.qty-row .bootstrap-touchspin .input-group-btn{ display:block !important; }
-.qty-row .bootstrap-touchspin{ position:relative; }
-.qty-row .bootstrap-touchspin .input-group-btn{
-  position:absolute; top:0; bottom:0; width:36px; display:grid; place-items:center; background:transparent; border:0;
+.qty-row .bootstrap-touchspin .input-group-btn {
+    display: block !important;
 }
-.qty-row .bootstrap-touchspin-down{ inset-inline-start:0; }
-.qty-row .bootstrap-touchspin-up{   inset-inline-end:0; }
+
+.qty-row .bootstrap-touchspin {
+    position: relative;
+}
+
+.qty-row .bootstrap-touchspin .input-group-btn {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 36px;
+    display: grid;
+    place-items: center;
+    background: transparent;
+    border: 0;
+}
+
+.qty-row .bootstrap-touchspin-down {
+    inset-inline-start: 0;
+}
+
+.qty-row .bootstrap-touchspin-up {
+    inset-inline-end: 0;
+}
 
 
 /* سایز دلخواهِ عکس تامب؛ ارتفاع خودکار می‌شود */
 :root {
-  --thumb-w-desktop: 92px;
-  --thumb-w-mobile: 70px;
+    --thumb-w-desktop: 92px;
+    --thumb-w-mobile: 70px;
 }
 
 /* خودِ دکمهٔ تامب: بدون فضای اضافی */
-.tlp-gallery .thumb{
-  padding: 2px !important;      /* قاب خیلی نازک */
-  line-height: 0;                /* حذف ارتفاع اضافی دکمه */
-  display: inline-block;
-  border-radius: 12px;
-  overflow: hidden;              /* گوشه‌های گرد روی خود عکس اعمال شود */
-  background: #fff;
+.tlp-gallery .thumb {
+    padding: 2px !important; /* قاب خیلی نازک */
+    line-height: 0; /* حذف ارتفاع اضافی دکمه */
+    display: inline-block;
+    border-radius: 12px;
+    overflow: hidden; /* گوشه‌های گرد روی خود عکس اعمال شود */
+    background: #fff;
 }
 
 /* عکس داخل تامب: فقط عرض ثابت؛ ارتفاع AUTO تا تناسب اصلی حفظ شود */
-.tlp-gallery .thumb img{
-  display: block;                /* حذف فاصلهٔ baseline */
-  width: var(--thumb-w-desktop) !important;
-  height: auto !important;       /* دیگر square اجباری نیست */
-  object-fit: contain;           /* عکس به‌طور کامل دیده شود */
-  border-radius: 10px;
+.tlp-gallery .thumb img {
+    display: block; /* حذف فاصلهٔ baseline */
+    width: var(--thumb-w-desktop) !important;
+    height: auto !important; /* دیگر square اجباری نیست */
+    object-fit: contain; /* عکس به‌طور کامل دیده شود */
+    border-radius: 10px;
 }
 
 /* ردیف تامب‌ها هم‌راستای وسط باشد تا ارتفاع‌های متفاوت قشنگ بنشیند */
-.tlp-gallery .thumbs{ align-items: center; }
+.tlp-gallery .thumbs {
+    align-items: center;
+}
 
 /* حالت فعال: رینگ مشکی */
-.tlp-gallery .thumb.is-active{
-  outline: 0.5px solid #111 !important;
-  border-color: #111 !important;
-  box-shadow: 0 0 0 4px rgba(0,0,0,.14) !important;
+.tlp-gallery .thumb.is-active {
+    outline: 0.5px solid #111 !important;
+    border-color: #111 !important;
+    box-shadow: 0 0 0 4px rgba(0, 0, 0, .14) !important;
 }
 
 /* موبایل: تامب‌ها کمی کوچک‌تر؛ همچنان fit-to-image */
-@media (max-width: 991.98px){
-  .tlp-gallery .thumb img{
-    width: var(--thumb-w-mobile) !important;
-  }
-  /* اگر روی موبایل تامب‌ها افقی هستند، کمی فاصله برای لمس */
-  .tlp-gallery .thumbs{ gap: 8px; }
+@media (max-width: 991.98px) {
+    .tlp-gallery .thumb img {
+        width: var(--thumb-w-mobile) !important;
+    }
+
+    /* اگر روی موبایل تامب‌ها افقی هستند، کمی فاصله برای لمس */
+    .tlp-gallery .thumbs {
+        gap: 8px;
+    }
 }
 
 /* اگر جایی قبلاً 64×64 را ست کرده‌ای، اینجا بی‌اثر می‌کنیم */
-.tlp-gallery .thumb img{
-  /* override هر چیزی مثل width:64px;height:64px از استایل‌های قدیمی */
-  max-width: none !important;
-  max-height: none !important;
+.tlp-gallery .thumb img {
+    /* override هر چیزی مثل width:64px;height:64px از استایل‌های قدیمی */
+    max-width: none !important;
+    max-height: none !important;
 }
 
 
 /* Layout دسکتاپ: استیج | تامب‌ها (ستون راست) */
-.tlp-gallery.gallery-rtl-right{
-  display: grid;
-  grid-template-columns: minmax(420px, var(--g-stage-max)) 80px;
-  gap: var(--g-gap);
-  align-items: start;
-  justify-content: end;
+.tlp-gallery.gallery-rtl-right {
+    display: grid;
+    grid-template-columns: minmax(420px, var(--g-stage-max)) 80px;
+    gap: var(--g-gap);
+    align-items: start;
+    justify-content: end;
 }
-.tlp-gallery.gallery-rtl-right .stage{
-  border: 1px solid var(--soft, #ececec);
-  background: #fff;
-  border-radius: 14px;
-  padding: var(--g-stage-pad);
-  aspect-ratio: 1 / 1;                      /* مربع پایدار */
-  width: min(var(--g-stage-max), 46vw);
-  height: auto;
-  display: flex; align-items: center; justify-content: center;
+
+.tlp-gallery.gallery-rtl-right .stage {
+    border: 1px solid var(--soft, #ececec);
+    background: #fff;
+    border-radius: 14px;
+    padding: var(--g-stage-pad);
+    aspect-ratio: 1 / 1; /* مربع پایدار */
+    width: min(var(--g-stage-max), 46vw);
+    height: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
-.tlp-gallery.gallery-rtl-right .stage img{
-  width: 100%; height: 100%; object-fit: contain;
+
+.tlp-gallery.gallery-rtl-right .stage img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
 }
 
 /* ستون تامب‌ها */
-.tlp-gallery.gallery-rtl-right .thumbs{
-  width: 80px;
-  max-height: clamp(360px, 56vh, 640px);
-  overflow: auto;
-  -webkit-overflow-scrolling: touch;
-  display: flex; flex-direction: column; gap: 8px;
-  align-items: center;
-  padding: 0; margin: 6px 0 0;
+.tlp-gallery.gallery-rtl-right .thumbs {
+    width: 80px;
+    max-height: clamp(360px, 56vh, 640px);
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+    padding: 0;
+    margin: 6px 0 0;
 }
 
 /* دکمه تامب – فیت به عکس، بدون فضای اضافه بالا/پایین */
-.tlp-gallery .thumb{
-  display: inline-block;
-  line-height: 0;               /* حذف baseline gap */
-  padding: 2px;                 /* قاب نازک */
-  border: var(--g-thumb-border);
-  border-radius: var(--g-thumb-radius);
-  background: #fff;
-  overflow: hidden;
-  cursor: pointer;
-  transition: box-shadow .2s ease, transform .15s ease;
+.tlp-gallery .thumb {
+    display: inline-block;
+    line-height: 0; /* حذف baseline gap */
+    padding: 2px; /* قاب نازک */
+    border: var(--g-thumb-border);
+    border-radius: var(--g-thumb-radius);
+    background: #fff;
+    overflow: hidden;
+    cursor: pointer;
+    transition: box-shadow .2s ease, transform .15s ease;
 }
-.tlp-gallery .thumb:hover{ transform: translateY(-1px); }
+
+.tlp-gallery .thumb:hover {
+    transform: translateY(-1px);
+}
 
 /* خود تصویر داخل تامب: فقط عرض ثابت؛ ارتفاع خودکار */
-.tlp-gallery .thumb img{
-  display: block;
-  width: var(--g-thumb-w-desktop) !important;
-  height: auto !important;
-  max-width: none !important;
-  max-height: none !important;
-  object-fit: contain;
-  border-radius: calc(var(--g-thumb-radius) - 2px);
+.tlp-gallery .thumb img {
+    display: block;
+    width: var(--g-thumb-w-desktop) !important;
+    height: auto !important;
+    max-width: none !important;
+    max-height: none !important;
+    object-fit: contain;
+    border-radius: calc(var(--g-thumb-radius) - 2px);
 }
 
 /* حالت انتخاب: مشکی */
-.tlp-gallery .thumb.is-active{
-  outline: 2px solid var(--g-thumb-active) !important;
-  border-color: var(--g-thumb-active) !important;
-  box-shadow: 0 0 0 4px var(--g-thumb-active-glow) !important;
+.tlp-gallery .thumb.is-active {
+    outline: 2px solid var(--g-thumb-active) !important;
+    border-color: var(--g-thumb-active) !important;
+    box-shadow: 0 0 0 4px var(--g-thumb-active-glow) !important;
 }
 
 /* لپ‌تاپ <=1200px */
-@media (max-width: 1199.98px){
-  .tlp-gallery.gallery-rtl-right{
-    grid-template-columns: minmax(360px, 480px) 72px;
-    gap: 10px;
-  }
-  .tlp-gallery.gallery-rtl-right .thumbs{ width: 72px; }
-  .tlp-gallery.gallery-rtl-right .stage{ width: min(480px, 54vw); }
-  .tlp-gallery .thumb img{ width: var(--g-thumb-w-tablet) !important; }
+@media (max-width: 1199.98px) {
+    .tlp-gallery.gallery-rtl-right {
+        grid-template-columns: minmax(360px, 480px) 72px;
+        gap: 10px;
+    }
+
+    .tlp-gallery.gallery-rtl-right .thumbs {
+        width: 72px;
+    }
+
+    .tlp-gallery.gallery-rtl-right .stage {
+        width: min(480px, 54vw);
+    }
+
+    .tlp-gallery .thumb img {
+        width: var(--g-thumb-w-tablet) !important;
+    }
 }
 
 /* تبلت و موبایل: یک‌ستونه؛ تامب‌ها افقی زیر استیج */
-@media (max-width: 991.98px){
-  .tlp-gallery.gallery-rtl-right{
-    grid-template-columns: 1fr; gap: 10px; justify-content: stretch;
-  }
-  .tlp-gallery.gallery-rtl-right .stage{
-    width: 100% !important; aspect-ratio: 3 / 4; padding: 6px; /* بزرگ‌تر و عمودی‌تر */
-  }
-  .tlp-gallery.gallery-rtl-right .thumbs{
-    width: auto !important; max-height: none !important;
-    flex-direction: row !important; justify-content: center;
-    overflow-x: auto !important; overflow-y: hidden !important;
-    gap: 8px; padding: 0 2px 6px;
-    scroll-snap-type: x mandatory; scrollbar-gutter: stable both-edges;
-  }
-  .tlp-gallery .thumb{ scroll-snap-align: start; }
-  .tlp-gallery .thumb img{ width: var(--g-thumb-w-mobile) !important; }
+@media (max-width: 991.98px) {
+    .tlp-gallery.gallery-rtl-right {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        justify-content: stretch;
+    }
+
+    .tlp-gallery.gallery-rtl-right .stage {
+        width: 100% !important;
+        aspect-ratio: 3 / 4;
+        padding: 6px; /* بزرگ‌تر و عمودی‌تر */
+    }
+
+    .tlp-gallery.gallery-rtl-right .thumbs {
+        width: auto !important;
+        max-height: none !important;
+        flex-direction: row !important;
+        justify-content: center;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        gap: 8px;
+        padding: 0 2px 6px;
+        scroll-snap-type: x mandatory;
+        scrollbar-gutter: stable both-edges;
+    }
+
+    .tlp-gallery .thumb {
+        scroll-snap-align: start;
+    }
+
+    .tlp-gallery .thumb img {
+        width: var(--g-thumb-w-mobile) !important;
+    }
 }
 
 /* موبایل خیلی کوچک */
-@media (max-width: 575.98px){
-  .tlp-gallery.gallery-rtl-right .stage{ border-radius: 12px; aspect-ratio: 2.9 / 4; padding: 4px; }
+@media (max-width: 575.98px) {
+    .tlp-gallery.gallery-rtl-right .stage {
+        border-radius: 12px;
+        aspect-ratio: 2.9 / 4;
+        padding: 4px;
+    }
 }
 
 
 /* 1) گرید را اجباراً فعال کن و دو ستون مشخص */
-.tlp-gallery.gallery-rtl-right{
-  display: grid !important;
-  grid-template-columns: minmax(420px, 1fr) 84px; /* stage | thumbs */
-  gap: 12px;
-  align-items: start;
-  justify-content: end;
-  isolation: isolate; /* استیج و تامب‌ها استک مستقل بگیرند */
+.tlp-gallery.gallery-rtl-right {
+    display: grid !important;
+    grid-template-columns: minmax(420px, 1fr) 84px; /* stage | thumbs */
+    gap: 12px;
+    align-items: start;
+    justify-content: end;
+    isolation: isolate; /* استیج و تامب‌ها استک مستقل بگیرند */
 }
 
 /* 2) هرگونه position/float قدیمی را خنثی کن */
 .tlp-gallery.gallery-rtl-right .stage,
-.tlp-gallery.gallery-rtl-right .thumbs{
-  position: static !important;
-  float: none !important;
-  clear: none !important;
+.tlp-gallery.gallery-rtl-right .thumbs {
+    position: static !important;
+    float: none !important;
+    clear: none !important;
 }
 
 /* 3) استیج به اندازه ستون خودش باشد (نه بیشتر) */
-.tlp-gallery.gallery-rtl-right .stage{
-  width: 100% !important;     /* جلوی بیرون‌زدن از ستون */
-  aspect-ratio: 1 / 1;        /* مربع پایدار دسکتاپ */
-  height: auto;
-  z-index: 1;                  /* زیرِ تامب‌ها اگر تماس داشتند */
+.tlp-gallery.gallery-rtl-right .stage {
+    width: 100% !important; /* جلوی بیرون‌زدن از ستون */
+    aspect-ratio: 1 / 1; /* مربع پایدار دسکتاپ */
+    height: auto;
+    z-index: 1; /* زیرِ تامب‌ها اگر تماس داشتند */
 }
-.tlp-gallery.gallery-rtl-right .stage img{
-  width: 100%; height: 100%; object-fit: contain;
+
+.tlp-gallery.gallery-rtl-right .stage img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
 }
 
 /* 4) ستون تامب‌ها همیشه رو باشد و هم‌قد تصویرها */
-.tlp-gallery.gallery-rtl-right .thumbs{
-  width: 80px !important;
-  max-height: clamp(360px, 56vh, 640px);
-  overflow: auto;
-  display: flex !important; flex-direction: column !important;
-  gap: 8px; align-items: center; padding: 0; margin-top: 6px;
-  z-index: 2;
+.tlp-gallery.gallery-rtl-right .thumbs {
+    width: 80px !important;
+    max-height: clamp(360px, 56vh, 640px);
+    overflow: auto;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px;
+    align-items: center;
+    padding: 0;
+    margin-top: 6px;
+    z-index: 2;
 }
-.tlp-gallery .thumb{
-  line-height: 0; padding: 2px; border-radius: 12px; overflow: hidden;
-  border: 1px solid var(--soft, rgba(0,0,0,.06)); background:#fff;
+
+.tlp-gallery .thumb {
+    line-height: 0;
+    padding: 2px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--soft, rgba(0, 0, 0, .06));
+    background: #fff;
 }
-.tlp-gallery .thumb img{
-  display: block; width: 92px !important; height: auto !important; object-fit: contain;
+
+.tlp-gallery .thumb img {
+    display: block;
+    width: 92px !important;
+    height: auto !important;
+    object-fit: contain;
 }
-.tlp-gallery .thumb.is-active{
-  outline: 2px solid #111 !important; border-color:#111 !important;
-  box-shadow: 0 0 0 4px rgba(0,0,0,.14) !important;
+
+.tlp-gallery .thumb.is-active {
+    outline: 2px solid #111 !important;
+    border-color: #111 !important;
+    box-shadow: 0 0 0 4px rgba(0, 0, 0, .14) !important;
 }
 
 /* 5) تبلت/موبایل: یک‌ستونه و بدون هم‌پوشانی */
-@media (max-width: 991.98px){
-  .tlp-gallery.gallery-rtl-right{
-    grid-template-columns: 1fr !important; gap: 10px; justify-content: stretch;
-  }
-  .tlp-gallery.gallery-rtl-right .stage{
-    aspect-ratio: 3 / 4; width: 100% !important; padding: 6px;
-  }
-  .tlp-gallery.gallery-rtl-right .thumbs{
-    width: auto !important; max-height: none !important;
-    flex-direction: row !important; justify-content: center;
-    overflow-x: auto !important; overflow-y: hidden !important;
-    gap: 8px; padding: 0 2px 6px;
-  }
-  .tlp-gallery .thumb img{ width: 70px !important; }
+@media (max-width: 991.98px) {
+    .tlp-gallery.gallery-rtl-right {
+        grid-template-columns: 1fr !important;
+        gap: 10px;
+        justify-content: stretch;
+    }
+
+    .tlp-gallery.gallery-rtl-right .stage {
+        aspect-ratio: 3 / 4;
+        width: 100% !important;
+        padding: 6px;
+    }
+
+    .tlp-gallery.gallery-rtl-right .thumbs {
+        width: auto !important;
+        max-height: none !important;
+        flex-direction: row !important;
+        justify-content: center;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        gap: 8px;
+        padding: 0 2px 6px;
+    }
+
+    .tlp-gallery .thumb img {
+        width: 70px !important;
+    }
 }
+
 /* ===== Thumbs: dark overlay on hover (replace black ring) ===== */
-:root{
-  --thumb-hover-mask: rgba(0,0,0,.45); /* طوسی تیرهِ ماسک */
+:root {
+    --thumb-hover-mask: rgba(0, 0, 0, .45); /* طوسی تیرهِ ماسک */
 }
 
 /* خودِ دکمه آمادهٔ ماسک شود */
-.tlp-gallery .thumb{
-  position: relative;         /* برای pseudo-element */
-  overflow: hidden;           /* ماسک داخل قاب بماند */
-  border-color: transparent;  /* قاب مرزی دیده نشود */
+.tlp-gallery .thumb {
+    position: relative; /* برای pseudo-element */
+    overflow: hidden; /* ماسک داخل قاب بماند */
+    border-color: transparent; /* قاب مرزی دیده نشود */
 }
 
 /* حلقه/outline قبلی را خنثی کن */
-.tlp-gallery .thumb.is-active{
-  outline: none !important;
-  box-shadow: none !important;
-  border-color: transparent !important;
+.tlp-gallery .thumb.is-active {
+    outline: none !important;
+    box-shadow: none !important;
+    border-color: transparent !important;
 }
 
 /* ماسک: پیش‌فرض مخفی */
-.tlp-gallery .thumb::after{
-  content: "";
-  position: absolute;
-  inset: 2px;                               /* از قاب سفید 2px فاصله بگیرد */
-  border-radius: inherit;
-  background: var(--thumb-hover-mask);
-  opacity: 0;
-  transition: opacity .15s ease;
-  pointer-events: none;                     /* کلیک/هاور را مزاحم نشود */
+.tlp-gallery .thumb::after {
+    content: "";
+    position: absolute;
+    inset: 2px; /* از قاب سفید 2px فاصله بگیرد */
+    border-radius: inherit;
+    background: var(--thumb-hover-mask);
+    opacity: 0;
+    transition: opacity .15s ease;
+    pointer-events: none; /* کلیک/هاور را مزاحم نشود */
 }
 
 /* هاور/فوکِس: ماسک دیده شود */
 .tlp-gallery .thumb:hover::after,
-.tlp-gallery .thumb:focus-visible::after{
-  opacity: 1;
+.tlp-gallery .thumb:focus-visible::after {
+    opacity: 1;
 }
 
 /* اگر می‌خواهی روی «اکتیو» هم همیشه ماسک باشد، این سطر را باز کن */
 /* .tlp-gallery .thumb.is-active::after{ opacity: 1; } */
 
 /* ===== Thumbs column: stable gutter + pretty scrollbar ===== */
-.tlp-gallery.gallery-rtl-right .thumbs{
-  position: relative;
-  z-index: 2;
-  overflow-y: auto; overflow-x: hidden;
-  display: flex; flex-direction: column; align-items: center; gap: 8px;
+.tlp-gallery.gallery-rtl-right .thumbs {
+    position: relative;
+    z-index: 2;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
 
-  /* فضای ثابت برای اسکرول‌بار تا روِ تامب‌ها ننشینه */
-  scrollbar-gutter: stable both-edges;
-  padding-inline-end: 6px;   /* در RTL معمولاً scrollbar سمت راست است */
-  padding-inline-start: 2px;
-  -webkit-overflow-scrolling: touch;
+    /* فضای ثابت برای اسکرول‌بار تا روِ تامب‌ها ننشینه */
+    scrollbar-gutter: stable both-edges;
+    padding-inline-end: 6px; /* در RTL معمولاً scrollbar سمت راست است */
+    padding-inline-start: 2px;
+    -webkit-overflow-scrolling: touch;
 }
 
 /* Firefox */
-.tlp-gallery.gallery-rtl-right .thumbs{ scrollbar-width: thin; }
+.tlp-gallery.gallery-rtl-right .thumbs {
+    scrollbar-width: thin;
+}
+
 /* WebKit (Chrome/Edge/Safari) */
-.tlp-gallery.gallery-rtl-right .thumbs::-webkit-scrollbar{ width: 8px; }
-.tlp-gallery.gallery-rtl-right .thumbs::-webkit-scrollbar-track{ background: transparent; }
-.tlp-gallery.gallery-rtl-right .thumbs::-webkit-scrollbar-thumb{
-  background-color: rgba(0,0,0,.18);
-  border-radius: 8px;
-  border: 2px solid transparent;  /* تا نازک دیده شود و به محتوا نچسبد */
-  background-clip: content-box;
+.tlp-gallery.gallery-rtl-right .thumbs::-webkit-scrollbar {
+    width: 8px;
+}
+
+.tlp-gallery.gallery-rtl-right .thumbs::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.tlp-gallery.gallery-rtl-right .thumbs::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, .18);
+    border-radius: 8px;
+    border: 2px solid transparent; /* تا نازک دیده شود و به محتوا نچسبد */
+    background-clip: content-box;
 }
 
 /* ===== Thumbs: dark hover mask (no overlap issues) ===== */
-:root{ --thumb-hover-mask: rgba(77, 73, 73, 0.45); }
-
-.tlp-gallery .thumb{
-  position: relative;
-  line-height: 0;
-  padding: 2px;                    /* قاب نازک سفید */
-  border: 1px solid var(--soft, rgba(0,0,0,.06));
-  border-radius: 12px;
-  background:#fff;
-  overflow: hidden;                /* ماسک داخل قاب بماند */
+:root {
+    --thumb-hover-mask: rgba(77, 73, 73, 0.45);
 }
 
-.tlp-gallery .thumb img{
-  display:block;
-  width: var(--g-thumb-w-desktop, 70px) !important;
-  height:auto !important;
-  object-fit: contain;
-  border-radius: 10px;
+.tlp-gallery .thumb {
+    position: relative;
+    line-height: 0;
+    padding: 2px; /* قاب نازک سفید */
+    border: 1px solid var(--soft, rgba(0, 0, 0, .06));
+    border-radius: 12px;
+    background: #fff;
+    overflow: hidden; /* ماسک داخل قاب بماند */
+}
+
+.tlp-gallery .thumb img {
+    display: block;
+    width: var(--g-thumb-w-desktop, 70px) !important;
+    height: auto !important;
+    object-fit: contain;
+    border-radius: 10px;
 }
 
 /* رینگ قبلی خاموش؛ فقط ماسک هاور */
-.tlp-gallery .thumb.is-active{
-  outline: none !important;
-  box-shadow: none !important;
-  border-color: var(--soft, rgba(0,0,0,.06)) !important; /* قاب سفید باقی بماند */
+.tlp-gallery .thumb.is-active {
+    outline: none !important;
+    box-shadow: none !important;
+    border-color: var(--soft, rgba(0, 0, 0, .06)) !important; /* قاب سفید باقی بماند */
 }
 
-.tlp-gallery .thumb::after{
-  content:"";
-  position:absolute;
-  inset: 0;                        /* تمام سطح تامب، نه بیرونِ قاب */
-  border-radius: inherit;
-  background: var(--thumb-hover-mask);
-  opacity:0; transition: opacity .15s ease;
-  pointer-events:none;             /* مزاحم کلیک/اسکرول نشود */
+.tlp-gallery .thumb::after {
+    content: "";
+    position: absolute;
+    inset: 0; /* تمام سطح تامب، نه بیرونِ قاب */
+    border-radius: inherit;
+    background: var(--thumb-hover-mask);
+    opacity: 0;
+    transition: opacity .15s ease;
+    pointer-events: none; /* مزاحم کلیک/اسکرول نشود */
 }
+
 .tlp-gallery .thumb:hover::after,
-.tlp-gallery .thumb:focus-visible::after{ opacity:1; }
+.tlp-gallery .thumb:focus-visible::after {
+    opacity: 1;
+}
 
 /* اندازه‌ها در ریسپانسیو */
-@media (max-width: 1199.98px){
-  .tlp-gallery .thumb img{ width: var(--g-thumb-w-tablet, 80px) !important; }
+@media (max-width: 1199.98px) {
+    .tlp-gallery .thumb img {
+        width: var(--g-thumb-w-tablet, 80px) !important;
+    }
 }
-@media (max-width: 991.98px){
-  .tlp-gallery.gallery-rtl-right .thumbs{
-    flex-direction: row !important; justify-content: center;
-    overflow-x: auto !important; overflow-y: hidden !important;
-    padding-inline: 2px;           /* در حالت افقی padding متقارن */
-  }
-  .tlp-gallery .thumb img{ width: var(--g-thumb-w-mobile, 70px) !important; }
+
+@media (max-width: 991.98px) {
+    .tlp-gallery.gallery-rtl-right .thumbs {
+        flex-direction: row !important;
+        justify-content: center;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        padding-inline: 2px; /* در حالت افقی padding متقارن */
+    }
+
+    .tlp-gallery .thumb img {
+        width: var(--g-thumb-w-mobile, 70px) !important;
+    }
 }
 
 /* ===== Uniform square thumbs (clean, cropped) ===== */
 /* اندازه‌ی سراسری تامب در هر breakpoint */
-:root{ --thumb-size: 92px; }
-@media (max-width: 1199.98px){ :root{ --thumb-size: 80px; } }
-@media (max-width: 991.98px){  :root{ --thumb-size: 70px; } }
+:root {
+    --thumb-size: 92px;
+}
+
+@media (max-width: 1199.98px) {
+    :root {
+        --thumb-size: 80px;
+    }
+}
+
+@media (max-width: 991.98px) {
+    :root {
+        --thumb-size: 70px;
+    }
+}
 
 /* ستون تامب‌ها مطابق اندازه‌ی قاب */
-.tlp-gallery.gallery-rtl-right .thumbs{
-  width: calc(var(--thumb-size) + 6px) !important; /* 2px قاب + 1px بوردر هر طرف */
-  align-items: center;
-  scrollbar-gutter: stable both-edges;
+.tlp-gallery.gallery-rtl-right .thumbs {
+    width: calc(var(--thumb-size) + 6px) !important; /* 2px قاب + 1px بوردر هر طرف */
+    align-items: center;
+    scrollbar-gutter: stable both-edges;
 }
 
 /* خود تامب: قاب ثابت و مربعی */
-.tlp-gallery .thumb{
-  width: var(--thumb-size);
-  height: var(--thumb-size);
-  padding: 0;                          /* قاب با border، نه padding */
-  border: 1px solid var(--soft, rgba(0,0,0,.06));
-  border-radius: 12px;
-  background: #fff;
-  display: grid; place-items: center;
-  overflow: hidden;
-  line-height: 0;
-  position: relative;                  /* برای ماسک */
+.tlp-gallery .thumb {
+    width: var(--thumb-size);
+    height: var(--thumb-size);
+    padding: 0; /* قاب با border، نه padding */
+    border: 1px solid var(--soft, rgba(0, 0, 0, .06));
+    border-radius: 12px;
+    background: #fff;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    line-height: 0;
+    position: relative; /* برای ماسک */
 }
 
 /* تصویر داخل تامب: پرکردن قاب با کراپ نرم */
-.tlp-gallery .thumb img{
-  width: 100%;
-  height: 100%;
-  object-fit: cover;                    /* یکنواخت، کراپ تمیز */
-  border-radius: inherit;
-  display: block;
+.tlp-gallery .thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* یکنواخت، کراپ تمیز */
+    border-radius: inherit;
+    display: block;
 }
 
 /* ماسک هاور تیره (به‌جای بردر مشکی) */
-:root{ --thumb-hover-mask: rgba(0,0,0,.45); }
-.tlp-gallery .thumb::after{
-  content:""; position:absolute; inset:0; border-radius:inherit;
-  background: var(--thumb-hover-mask); opacity:0; transition:opacity .15s ease;
-  pointer-events:none;
+:root {
+    --thumb-hover-mask: rgba(0, 0, 0, .45);
 }
+
+.tlp-gallery .thumb::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--thumb-hover-mask);
+    opacity: 0;
+    transition: opacity .15s ease;
+    pointer-events: none;
+}
+
 .tlp-gallery .thumb:hover::after,
-.tlp-gallery .thumb:focus-visible::after{ opacity:1; }
+.tlp-gallery .thumb:focus-visible::after {
+    opacity: 1;
+}
 
 /* حالت فعال: قاب مینیمال؛ بدون رینگ ضخیم */
-.tlp-gallery .thumb.is-active{
-  outline: none !important;
-  box-shadow: 0 0 0 0 transparent !important;
-  border-color: #111;                  /* اگر خواستی مشکی‌تر دیده شود */
+.tlp-gallery .thumb.is-active {
+    outline: none !important;
+    box-shadow: 0 0 0 0 transparent !important;
+    border-color: #111; /* اگر خواستی مشکی‌تر دیده شود */
 }
 
 /* وقتی تامب‌ها افقی زیر استیج هستند (موبایل) ستون پهنای آزاد داشته باشد */
-@media (max-width: 991.98px){
-  .tlp-gallery.gallery-rtl-right .thumbs{
-    width: auto !important;
-  }
+@media (max-width: 991.98px) {
+    .tlp-gallery.gallery-rtl-right .thumbs {
+        width: auto !important;
+    }
 }
+
 /* ==== Sidebar (buy box) – remove sticky + even gaps ==== */
 
 /* 1) فقط در سکشن محصول، چسبندگی باکس خرید را خاموش کن */
-.tlp-hero aside .sticky-col{
-  position: static !important;
-  top: auto !important;
+.tlp-hero aside .sticky-col {
+    position: static !important;
+    top: auto !important;
 }
 
 /* 2) فاصله بین کارت‌های ستون چپ یکنواخت با gap */
-.tlp-hero aside{
-  display: grid;
-  grid-auto-rows: min-content;
-  gap: 16px;                   /* فاصله یکسان بین همه بلوک‌ها */
+.tlp-hero aside {
+    display: grid;
+    grid-auto-rows: min-content;
+    gap: 16px; /* فاصله یکسان بین همه بلوک‌ها */
 }
 
 /* 3) هر margin دستی (مثل mt-1 بوت‌استرپ) و فاصله‌های قدیمی را خنثی کن تا فقط gap اعمال شود */
-.tlp-hero aside > *{
-  margin: 0 !important;
+.tlp-hero aside > * {
+    margin: 0 !important;
 }
-.tlp-hero aside .sticky-gap{ margin: 0 !important; }
+
+.tlp-hero aside .sticky-gap {
+    margin: 0 !important;
+}
 
 /* 4) کمی پالیش ظاهری برای هماهنگی کارت‌ها (اختیاری اما خوش‌استایل‌تر) */
 .tlp-hero aside .card-like,
 .tlp-hero aside .dk-acc,
-.tlp-hero aside .dk-info{
-  border-radius: 12px;
-  box-shadow: 0 8px 28px rgba(0,0,0,.05);
+.tlp-hero aside .dk-info {
+    border-radius: 12px;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, .05);
 }
 
 /* عدد تعداد باریک نشود */
-.tlp-hero aside .product-details-quantity .form-control{
-  min-width: 84px;
-  text-align: center;
+.tlp-hero aside .product-details-quantity .form-control {
+    min-width: 84px;
+    text-align: center;
 }
 
 
 /* ====== Compact thumbs: first 4 + "+N" tile ====== */
 
 /* آیتم‌های مخفی */
-.tlp-gallery .thumb.is-hidden{ display: none !important; }
-
-/* کاشی "+N" هم‌اندازهٔ تامب‌ها، مدرن و واضح */
-:root{
-  --thumb-size: 64px;            /* دسکتاپِ پیش‌فرض پروژه‌ات */
-  --thumb-size-tablet: 56px;
-  --thumb-size-mobile: 56px;
+.tlp-gallery .thumb.is-hidden {
+    display: none !important;
 }
 
-.tlp-gallery .thumb-more{
-  width: var(--thumb-size);
-  height: var(--thumb-size);
-  display: grid;
-  place-items: center;
-  font-weight: 900;
-  font-size: 1rem;
-  color: #333;
-  background: #fff;
-  border: 1px dashed var(--soft, #e5e7eb);
-  border-radius: 10px;
-  cursor: pointer;
-  line-height: 1;
-  position: relative;
-  overflow: hidden;
+/* کاشی "+N" هم‌اندازهٔ تامب‌ها، مدرن و واضح */
+:root {
+    --thumb-size: 64px; /* دسکتاپِ پیش‌فرض پروژه‌ات */
+    --thumb-size-tablet: 56px;
+    --thumb-size-mobile: 56px;
+}
+
+.tlp-gallery .thumb-more {
+    width: var(--thumb-size);
+    height: var(--thumb-size);
+    display: grid;
+    place-items: center;
+    font-weight: 900;
+    font-size: 1rem;
+    color: #333;
+    background: #fff;
+    border: 1px dashed var(--soft, #e5e7eb);
+    border-radius: 10px;
+    cursor: pointer;
+    line-height: 1;
+    position: relative;
+    overflow: hidden;
 }
 
 /* اگر ستون عمودی است (حالت دسکتاپ RTL)، +N بچسبد به انتهای ستون (هم‌تراز انتهای کادر/استیج) */
-.tlp-gallery.gallery-rtl-right .thumbs{
-  display: flex;                 /* ستون عمودی */
-  flex-direction: column;
+.tlp-gallery.gallery-rtl-right .thumbs {
+    display: flex; /* ستون عمودی */
+    flex-direction: column;
 }
-.tlp-gallery.gallery-rtl-right .thumbs .thumb-more[data-anchor="bottom"]{
-  margin-top: auto;              /* می‌چسبه به پایین ستون */
+
+.tlp-gallery.gallery-rtl-right .thumbs .thumb-more[data-anchor="bottom"] {
+    margin-top: auto; /* می‌چسبه به پایین ستون */
 }
 
 /* حالت افقی موبایل: +N آخرِ ردیف قرار بگیره (هم‌تراز انتهای ردیف) */
-@media (max-width: 991.98px){
-  .tlp-gallery.gallery-rtl-right .thumbs{
-    flex-direction: row !important;
-    justify-content: center;
-  }
-  .tlp-gallery.gallery-rtl-right .thumbs .thumb-more[data-anchor="bottom"]{
-    margin-top: 0;               /* در ردیف افقی نیازی به auto نیست */
-  }
+@media (max-width: 991.98px) {
+    .tlp-gallery.gallery-rtl-right .thumbs {
+        flex-direction: row !important;
+        justify-content: center;
+    }
+
+    .tlp-gallery.gallery-rtl-right .thumbs .thumb-more[data-anchor="bottom"] {
+        margin-top: 0; /* در ردیف افقی نیازی به auto نیست */
+    }
 }
 
 /* اندازه‌ها در برک‌پوینت‌ها */
-@media (max-width: 1199.98px){
-  .tlp-gallery .thumb-more{ width: var(--thumb-size-tablet); height: var(--thumb-size-tablet); }
+@media (max-width: 1199.98px) {
+    .tlp-gallery .thumb-more {
+        width: var(--thumb-size-tablet);
+        height: var(--thumb-size-tablet);
+    }
 }
-@media (max-width: 991.98px){
-  .tlp-gallery .thumb-more{ width: var(--thumb-size-mobile); height: var(--thumb-size-mobile); }
+
+@media (max-width: 991.98px) {
+    .tlp-gallery .thumb-more {
+        width: var(--thumb-size-mobile);
+        height: var(--thumb-size-mobile);
+    }
 }
 
 /* افکت هاور (هماهنگ با ماسک تیره‌ای که قبلاً خواستی) */
-.tlp-gallery .thumb-more::after{
-  content:"";
-  position:absolute; inset:0;
-  background: rgba(0,0,0,.08);
-  opacity:0; transition:opacity .15s ease;
+.tlp-gallery .thumb-more::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, .08);
+    opacity: 0;
+    transition: opacity .15s ease;
 }
-.tlp-gallery .thumb-more:hover::after{ opacity:.6; }
+
+.tlp-gallery .thumb-more:hover::after {
+    opacity: .6;
+}
 
 /* اگر تامب‌ها مربعِ یک‌قد هستند و از object-fit: cover استفاده می‌کنی، این اندازه‌ها با آن ست می‌شود */
 /* اگر هنوز تامب‌ها 64×64/56×56 هستند، همین‌ها فیت‌اند */
-:root{
-  --accent: #ff5b3c;
-  --soft: rgba(0,0,0,.06);
+:root {
+    --accent: #ff5b3c;
+    --soft: rgba(0, 0, 0, .06);
 }
 
-.price-chart-card{
-  border-radius: 14px;
-  overflow: hidden;
-  padding: 12px 12px 10px;
+.price-chart-card {
+    border-radius: 14px;
+    overflow: hidden;
+    padding: 12px 12px 10px;
 }
-.price-chart-card .pc-head{
-  display:flex; align-items:center; justify-content:space-between; gap:10px;
-  margin-bottom: 8px;
-}
-.pc-title{ font-weight:800; margin:0; font-size:1.05rem; }
-.pc-range{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
-.pc-btn{
-  border:1px solid var(--soft); background:#fff; border-radius:10px; padding:6px 10px; cursor:pointer;
-}
-.pc-btn.is-active{ border-color: var(--accent); color:#111; box-shadow:0 0 0 3px rgba(255,91,60,.12); }
-.pc-date{ border:1px solid var(--soft); border-radius:10px; padding:6px 8px; background:#fff; }
-.pc-apply{ border:0; background:var(--accent); color:#fff; border-radius:10px; padding:6px 10px; }
-.pc-sep{ color:#666; margin:0 2px; }
 
-.price-chart-card .pc-body{ position:relative; padding: 4px 2px; }
-.price-chart-card .pc-foot{
-  display:flex; align-items:center; justify-content:space-between; color:#555; margin-top:8px;
+.price-chart-card .pc-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 8px;
 }
-#pc-last b{ color:#111; font-weight:900; }
-#pc-change.up{ color:#1a7f37; }
-#pc-change.down{ color:#b3261e; }
+
+.pc-title {
+    font-weight: 800;
+    margin: 0;
+    font-size: 1.05rem;
+}
+
+.pc-range {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.pc-btn {
+    border: 1px solid var(--soft);
+    background: #fff;
+    border-radius: 10px;
+    padding: 6px 10px;
+    cursor: pointer;
+}
+
+.pc-btn.is-active {
+    border-color: var(--accent);
+    color: #111;
+    box-shadow: 0 0 0 3px rgba(255, 91, 60, .12);
+}
+
+.pc-date {
+    border: 1px solid var(--soft);
+    border-radius: 10px;
+    padding: 6px 8px;
+    background: #fff;
+}
+
+.pc-apply {
+    border: 0;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 10px;
+    padding: 6px 10px;
+}
+
+.pc-sep {
+    color: #666;
+    margin: 0 2px;
+}
+
+.price-chart-card .pc-body {
+    position: relative;
+    padding: 4px 2px;
+}
+
+.price-chart-card .pc-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: #555;
+    margin-top: 8px;
+}
+
+#pc-last b {
+    color: #111;
+    font-weight: 900;
+}
+
+#pc-change.up {
+    color: #1a7f37;
+}
+
+#pc-change.down {
+    color: #b3261e;
+}
 
 /* Chart.js canvas قرینه RTL نباشد */
-.price-chart-card canvas{ direction:ltr; }
+.price-chart-card canvas {
+    direction: ltr;
+}
 
 /* نمودار تغییر قیمت*/
 /* کارت مینیمال */
 .custom-card {
-  border: 1px solid #e9eef5;
-  border-radius: 12px;
-  background: #fff;
-  overflow: hidden;
+    border: 1px solid #e9eef5;
+    border-radius: 12px;
+    background: #fff;
+    overflow: hidden;
 }
-.custom-card .card-header{
-  padding: 14px 18px;
-  border-bottom: 1px solid #eef3f9;
-  background:#fafcff;
+
+.custom-card .card-header {
+    padding: 14px 18px;
+    border-bottom: 1px solid #eef3f9;
+    background: #fafcff;
 }
-.custom-card .card-title{
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: #5a6272;
+
+.custom-card .card-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #5a6272;
 }
-.custom-card .card-body{
-  padding: 16px 18px 20px;
+
+.custom-card .card-body {
+    padding: 16px 18px 20px;
 }
 
 /* بوم نمودار */
-#priceLineChart{
-  width:100%;
-  height: 260px;          /* می‌تونی 260–360 تغییر بدی */
-  display:block;
+#priceLineChart {
+    width: 100%;
+    height: 260px; /* می‌تونی 260–360 تغییر بدی */
+    display: block;
 }
 
 /* ظاهر نرم شبیه تصویر */
-:root{
-  --axis-muted: #dfbbab;
-  --grid:#eff3f8;
-  --line: #fa6a35;        /* آبی ملایم */
-  --point: #e4977f;
-  --bg:#ffffff;
+:root {
+    --axis-muted: #dfbbab;
+    --grid: #eff3f8;
+    --line: #fa6a35; /* آبی ملایم */
+    --point: #e4977f;
+    --bg: #ffffff;
 }
 
 
+/*.product-title {*/
+/*  direction: rtl;*/
+/*  font-weight: 400;*/
+/*  font-size: 1.5rem;*/
+/*  line-height: 1.25;*/
+/*  letter-spacing: -.01em;*/
+/*  color: #100e0e;*/
+/*  margin-bottom: .7rem;*/
+/*  margin-top: .7rem;*/
+/*  text-align: right;*/
+/*}*/
 
-.product-title {
-  direction: rtl;
-  font-weight: 600;
-  font-size: 1.5rem;
-  line-height: 1.25;
-  letter-spacing: -.01em;
-  color: #100e0e;
-  margin-bottom: .7rem;
-  margin-top: .7rem;
-  text-align: right;
+
+/* ========= Product card: compact & tidy (listing only) ========= */
+.page-content .products .product.product-7{
+  --card-pad: 10px;
+  --card-radius: 12px;
+  --media-h: 300px;               /* ارتفاع تصویر کارت روی دسکتاپ */
+  border: 1px solid rgba(0,0,0,.06);
+  border-radius: var(--card-radius);
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 6px 20px rgba(0,0,0,.04);
+  transition: transform .15s ease, box-shadow .2s ease;
+}
+.page-content .products .product.product-7:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(0,0,0,.06);
+}
+
+/* 1) خود قاب عکس: وسط‌چین محتوا */
+.page-content .products .product.product-7 figure.product-media{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 2) اگر لینکِ دورِ تصویر هست، آن هم فلکس و وسط‌چین شود */
+.page-content .products .product.product-7 figure.product-media > a{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+/* 3) خودِ تصویر: بدون کشیدگی و دقیقاً وسط قاب */
+.page-content .products .product.product-7 img.product-image{
+  display: block;
+  max-width: var(--media-max-w, 86%);
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  margin: 0 auto;                         /* fallback وسط‌چین افقی */
+  object-fit: contain !important;
+  object-position: center center !important;
+}
+
+
+/* بدنه و تایپوگرافی جمع‌وجور */
+.page-content .products .product.product-7 .product-body{
+  padding: 8px 10px 12px;
+  display:flex;                   /* برای پین‌کردن قیمت به کف کارت */
+  flex-direction:column;
+  flex:1;
+}
+.page-content .products .product.product-7 .product-cat a{ font-size: .95rem; }
+
+.page-content .products .product.product-7 .product-title{
+  margin-bottom: 10px;            /* فاصلهٔ خواسته شده تا قیمت */
+}
+.page-content .products .product.product-7 .product-title a{
+  font-size: 1.25rem;             /* قبلاً 1.6rem بود → خواناتر و جمع‌وجورتر */
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;          /* حداکثر دو خط */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* === Align main prices on one baseline (Technolife-style) === */
+.page-content .products .row{ margin-inline: -8px; }
+.page-content .products .row > [class*="col-"]{ padding-inline: 8px; display:flex; }
+.page-content .products .row > [class*="col-"] > .product{ display:flex; flex-direction:column; width:100%; }
+
+/* پین‌کردن قیمت به کف کارت + رزرو یک ردیف برای قیمتِ قبل */
+.page-content .products .product.product-7 .product-price,
+.page-content .products .product.product-7 .product-price.text-right{
+  margin-top:auto;
+  display:grid;
+  grid-template-rows: auto 1.35rem;   /* ردیف 2 = فضای ثابتِ قیمتِ قبل */
+  align-content:end;
+  gap:2px;
+  padding-top:10px;                    /* فاصله‌ی مطمئن با تایتل */
+
+  /* چپ‌چین فیزیکی، مستقل از RTL/LTR */
+  text-align:left !important;
+  direction:rtl;                       /* ترتیب فارسی حفظ شود */
+  justify-items:left;                  /* مهم: چپِ فیزیکی در گرید */
+}
+
+/* خط قیمتِ اصلی (هم‌تراز و درشت) */
+.page-content .products .product.product-7 .product-price .new-price{
+  grid-row:1;
+  display:inline-flex; align-items:baseline; gap:.35rem;
+  font-weight:800; font-size:2rem; line-height:1.15;
+  justify-self:left;                   /* مهم: چپ فیزیکی */
+}
+.page-content .products .product.product-7 .product-price .new-price .num{
+  font-family:"DanaFaNum","Vazirmatn","IRANSansWeb",system-ui,sans-serif;
+}
+.page-content .products .product.product-7 .product-price small{
+  font-size:.95rem; opacity:.9;
+}
+
+/* خط قیمتِ قبل (اختیاری) — همیشه یک خط ثابت */
+.page-content .products .product.product-7 .product-price .old-price{
+  grid-row:2;
+  display:inline-flex; align-items:baseline;
+  font-size:1.05rem; line-height:1.2;
+  text-decoration:line-through; opacity:.75;
+  margin-right:.4rem; margin-left:.6rem;
+  justify-self:left;                   /* مهم: چپ فیزیکی */
+}
+
+.low-stock{
+  font-weight: 700;
+  color: #e53935;   /* قرمز خوانا */
+  font-size: .95rem;
+}
+
+
+/* بندانگشتی‌های زیر تصویر کوچکتر و تمیز */
+.page-content .products .product.product-7 .product-nav-thumbs img{
+  width:40px; height:40px; object-fit:cover; border-radius:8px;
+}
+
+/* ارتفاع‌های واکنش‌گرا */
+@media (min-width: 1400px){
+  .page-content .products .product.product-7{ --media-h: 300px; }  /* دسکتاپ بزرگ */
+}
+@media (max-width: 991.98px){
+  .page-content .products .product.product-7{ --media-h: 220px; }  /* تبلت/موبایل */
 }

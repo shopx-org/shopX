@@ -2,6 +2,8 @@
 {% load specs %}
 {% load querystring %}
 {% load static %}
+{% load humanize persian_digits %}
+{% load persian_digits %}
 
 {% block content %}
     <main class="main" dir="rtl">
@@ -15,7 +17,7 @@
                             <li class="breadcrumb-item {% if forloop.last %}active{% endif %}"
                                 {% if forloop.last %}aria-current="page"{% endif %}>
                                 {% if forloop.last %}{{ c.name }}{% else %}
-                                    <a href="{% url 'products:category' path=c.slug %}">{{ c.name }}</a>
+                                    <a href="{% url 'products:category' path=c.slug_path %}">{{ c.name }}</a>
                                 {% endif %}
                             </li>
                         {% endfor %}
@@ -134,43 +136,75 @@
                                             <div class="product-body">
                                                 <div class="product-cat text-right">
                                                     {% if p.category %}
-                                                        <a href="{% url 'products:category' path=p.category.slug %}">{{ p.category.name }}</a>
+                                                        <a href="{% url 'products:category' path=p.category.slug_path %}">{{ p.category.name }}</a>
                                                     {% else %}<span class="text-muted">بدون دسته</span>{% endif %}
+
+
+                                                    {# امتیاز فشرده: یک ستاره + عدد #}
+                                                    <div class="rating-compact text-right">
+                                                        <span class="score">
+                                                        {% if p.rating %}{{ p.rating|floatformat:1 }}{% else %}
+                                                            0.0{% endif %}
+                                                    </span>
+                                                        <span class="star" aria-hidden="true">★</span>
+                                                    </div>
                                                 </div>
+
+
+                                                <div class="details-filter-row details-row-size">
+                                                    <label>رنگ : </label>
+
+                                                    <div class="product-nav product-nav-dots">
+                                                        <a href="#" class="active" style="background: #eab656;"><span
+                                                                class="sr-only">نام رنگ</span></a>
+                                                        <a href="#" style="background: #333333;"><span class="sr-only">نام
+                                                    رنگ</span></a>
+                                                        <a href="#" style="background: #3a588b;"><span class="sr-only">نام
+                                                    رنگ</span></a>
+                                                        <a href="#" style="background: #caab97;"><span class="sr-only">نام
+                                                    رنگ</span></a>
+                                                    </div><!-- End .product-nav -->
+                                                </div><!-- End .details-filter-row -->
 
                                                 <h3 class="product-title text-right">
                                                     <a href="{{ p.get_absolute_url|default:'#' }}">{{ p.name }}</a>
                                                 </h3>
 
+
+                                                {% if p.stock and p.stock > 0 and p.stock < 5 %}
+                                                    <p class="low-stock mt-2">تنها
+                                                        {% if p.stock == 1 %}۱{% else %}
+                                                            {{ p.stock|fa_digits }}{% endif %}
+                                                        عدد در انبار باقی مانده
+                                                    </p>
+                                                {% endif %}
+
+
+
                                                 <div class="product-price text-right">
+                                                      <span class="new-price">
+                                                        <span class="num">{{ p.price|fa_price }}</span><small> تومان</small>
+                                                      </span>
                                                     {% if p.compare_at_price %}
-                                                        <span class="new-price">{{ p.price|floatformat:0 }} تومان</span>
-                                                        <span class="old-price">{{ p.compare_at_price|floatformat:0 }}</span>
-                                                    {% else %}
-                                                        {{ p.price|floatformat:0 }} تومان
+                                                        <span class="old-price">
+                                                          <span class="num">{{ p.compare_at_price|fa_price }}</span><small> تومان</small>
+                                                        </span>
                                                     {% endif %}
                                                 </div>
 
-                                                {# امتیاز فشرده: یک ستاره + عدد #}
-                                                <div class="rating-compact text-right">
-                                                    <span class="star" aria-hidden="true">★</span>
-                                                    <span class="score">
-                {% if p.rating %}{{ p.rating|floatformat:1 }}{% else %}0.0{% endif %}
-              </span>
-                                                </div>
 
                                                 {# بندانگشتی‌های زیر تصویر (اختیاری) #}
-                                                {% if p.image_list and p.image_list|length > 1 %}
-                                                    <div class="product-nav product-nav-thumbs">
-                                                        {% for im in p.image_list|slice:":3" %}
-                                                            <a href="{{ p.get_absolute_url|default:'#' }}"
-                                                               class="{% if forloop.first %}active{% endif %}">
-                                                                <img src="{{ im.image.url }}"
-                                                                     alt="{{ im.alt|default:p.name }}">
-                                                            </a>
-                                                        {% endfor %}
-                                                    </div>
-                                                {% endif %}
+                                                {#                                                {% if p.image_list and p.image_list|length > 1 %}#}
+                                                {#                                                    <div class="product-nav product-nav-thumbs">#}
+                                                {#                                                        {% for im in p.image_list|slice:":3" %}#}
+                                                {#                                                            <a href="{{ p.get_absolute_url|default:'#' }}"#}
+                                                {#                                                               class="{% if forloop.first %}active{% endif %}">#}
+                                                {#                                                                <img src="{{ im.image.url }}"#}
+                                                {#                                                                     alt="{{ im.alt|default:p.name }}">#}
+                                                {#                                                            </a>#}
+                                                {#                                                        {% endfor %}#}
+                                                {#                                                    </div>#}
+                                                {#                                                {% endif %}#}
                                             </div>
                                         </div>
                                     </div>
@@ -235,70 +269,70 @@
                         <div class="sidebar sidebar-shop">
 
                             <!-- دسته‌ها -->
-                            <div class="widget widget-categories">
-                                <h3 class="widget-title">
-                                    {% if category %}{{ category.name }}{% else %}دسته‌بندی‌ها{% endif %}
-                                </h3>
-
-                                <div class="widget-body">
-
-                                    {# نوار برگشت به والد (اگر در دستهٔ داخلی هستیم) #}
-                                    {% if sidebar_root and sidebar_root.parent %}
-                                        <div class="mb-2 small">
-                                            ←
-                                            <a href="{% url 'products:category' path=sidebar_root.parent.slug_path|default:sidebar_root.parent.slug %}">
-                                                بازگشت به {{ sidebar_root.parent.name }}
-                                            </a>
-                                        </div>
-                                    {% endif %}
-
-                                    {# حالت اصلی: از sidebar_categories که در ویو ساختیم استفاده کن #}
-                                    {% if sidebar_categories %}
-                                        <ul class="list-unstyled cat-list">
-                                            {% for cat in sidebar_categories %}
-                                                <li class="cat-item {% if category and cat in ancestors %}is-active{% endif %}">
-                                                    <a class="cat-link"
-                                                       href="{% url 'products:category' path=cat.slug_path|default:cat.slug %}">
-                                                        <span class="cat-name">{{ cat.name }}</span>
-                                                        {% if cat.direct_product_count %}
-                                                            <span class="cat-count">{{ cat.direct_product_count }}</span>
-                                                        {% endif %}
-                                                    </a>
-
-                                                    {# فقط برای دستهٔ فعال، یک لایه از بچه‌ها را نشان بده (مرتب و فشرده) #}
-                                                    {% if category and cat.id == category.id %}
-                                                        <ul class="list-unstyled cat-children">
-                                                            {% for ch in cat.children.all %}
-                                                                <li>
-                                                                    <a href="{% url 'products:category' path=ch.slug_path|default:ch.slug %}">
-                                                                        {{ ch.name }}
-                                                                    </a>
-                                                                </li>
-                                                            {% empty %}{% endfor %}
-                                                        </ul>
-                                                    {% endif %}
-                                                </li>
-                                            {% endfor %}
-                                        </ul>
-
-                                        {# حالت پشتیبان: اگر هنوز sidebar_categories نساختی، از related_categories قبلی استفاده کن #}
-                                    {% elif related_categories %}
-                                        <ul class="list-unstyled cat-list">
-                                            {% for cat in related_categories %}
-                                                <li class="cat-item">
-                                                    <a class="cat-link"
-                                                       href="{% url 'products:category' path=cat.slug_path|default:cat.slug %}">
-                                                        <span class="cat-name">{{ cat.name }}</span>
-                                                    </a>
-                                                </li>
-                                            {% endfor %}
-                                        </ul>
-
-                                    {% else %}
-                                        <div class="text-muted px-3 py-2">دسته‌ای یافت نشد.</div>
-                                    {% endif %}
-                                </div>
-                            </div>
+                            {#                            <div class="widget widget-categories">#}
+                            {#                                <h3 class="widget-title">#}
+                            {#                                    {% if category %}{{ category.name }}{% else %}دسته‌بندی‌ها{% endif %}#}
+                            {#                                </h3>#}
+                            {##}
+                            {#                                <div class="widget-body">#}
+                            {##}
+                            {# نوار برگشت به والد (اگر در دستهٔ داخلی هستیم) #}
+                            {#                                    {% if sidebar_root and sidebar_root.parent %}#}
+                            {#                                        <div class="mb-2 small">#}
+                            {#                                            ←#}
+                            {#                                            <a href="{% url 'products:category' path=sidebar_root.parent.slug_path|default:sidebar_root.parent.slug %}">#}
+                            {#                                                بازگشت به {{ sidebar_root.parent.name }}#}
+                            {#                                            </a>#}
+                            {#                                        </div>#}
+                            {#                                    {% endif %}#}
+                            {##}
+                            {# حالت اصلی: از sidebar_categories که در ویو ساختیم استفاده کن #}
+                            {#                                    {% if sidebar_categories %}#}
+                            {#                                        <ul class="list-unstyled cat-list">#}
+                            {#                                            {% for cat in sidebar_categories %}#}
+                            {#                                                <li class="cat-item {% if category and cat in ancestors %}is-active{% endif %}">#}
+                            {#                                                    <a class="cat-link"#}
+                            {#                                                       href="{% url 'products:category' path=cat.slug_path|default:cat.slug %}">#}
+                            {#                                                        <span class="cat-name">{{ cat.name }}</span>#}
+                            {#                                                        {% if cat.direct_product_count %}#}
+                            {#                                                            <span class="cat-count">{{ cat.direct_product_count }}</span>#}
+                            {#                                                        {% endif %}#}
+                            {#                                                    </a>#}
+                            {##}
+                            {# فقط برای دستهٔ فعال، یک لایه از بچه‌ها را نشان بده (مرتب و فشرده) #}
+                            {#                                                    {% if category and cat.id == category.id %}#}
+                            {#                                                        <ul class="list-unstyled cat-children">#}
+                            {#                                                            {% for ch in cat.children.all %}#}
+                            {#                                                                <li>#}
+                            {#                                                                    <a href="{% url 'products:category' path=ch.slug_path|default:ch.slug %}">#}
+                            {#                                                                        {{ ch.name }}#}
+                            {#                                                                    </a>#}
+                            {#                                                                </li>#}
+                            {#                                                            {% empty %}{% endfor %}#}
+                            {#                                                        </ul>#}
+                            {#                                                    {% endif %}#}
+                            {#                                                </li>#}
+                            {#                                            {% endfor %}#}
+                            {#                                        </ul>#}
+                            {##}
+                            {# حالت پشتیبان: اگر هنوز sidebar_categories نساختی، از related_categories قبلی استفاده کن #}
+                            {#                                    {% elif related_categories %}#}
+                            {#                                        <ul class="list-unstyled cat-list">#}
+                            {#                                            {% for cat in related_categories %}#}
+                            {#                                                <li class="cat-item">#}
+                            {#                                                    <a class="cat-link"#}
+                            {#                                                       href="{% url 'products:category' path=cat.slug_path|default:cat.slug %}">#}
+                            {#                                                        <span class="cat-name">{{ cat.name }}</span>#}
+                            {#                                                    </a>#}
+                            {#                                                </li>#}
+                            {#                                            {% endfor %}#}
+                            {#                                        </ul>#}
+                            {##}
+                            {#                                    {% else %}#}
+                            {#                                        <div class="text-muted px-3 py-2">دسته‌ای یافت نشد.</div>#}
+                            {#                                    {% endif %}#}
+                            {#                                </div>#}
+                            {#                            </div>#}
 
 
                             <div class="widget">
