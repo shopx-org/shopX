@@ -192,3 +192,7 @@ if DEBUG:
 # SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 # SECURE_HSTS_PRELOAD = True
 # SECURE_SSL_REDIRECT = True
+
+#  ──────────────────────────────────────
+
+LOGIN_URL = '/accounts/otp-login/'
