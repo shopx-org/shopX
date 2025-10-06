@@ -394,16 +394,18 @@
 # account/views.py
 
 from django.conf import settings
-from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.sessions.models import Session
 from django.core.cache import cache
-from django.shortcuts import render, redirect, reverse
 from django.utils import timezone
 from django.utils.decorators import method_decorator
-from django.views import View
-
 from django_ratelimit.decorators import ratelimit
+from django.views import View
+from django.shortcuts import render, redirect, reverse
+from django.contrib import messages
+
+
+
 
 from .forms import (
     RegisterForm, CheckOtpForm, PasswordOnlyForm,
@@ -791,3 +793,5 @@ class LogoutView(View):
     def get(self, request):
         logout(request)
         return redirect('home:home')
+
+

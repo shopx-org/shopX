@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+    <main class="main">
+        <div class="page-header text-center" style="background-image: url('{% static 'images/page-header-bg.jpg' %}')">
+            <div class="container">
+                <h1 class="page-title">جزئیات حساب کاربری<span>فروشگاه</span></h1>
+            </div>
+        </div>
+
+        <nav aria-label="breadcrumb" class="breadcrumb-nav mb-3">
+            <div class="container">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'home:home' %}">خانه</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'dashboards:dashboard' %}">داشبورد</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">جزئیات حساب کاربری</li>
+                </ol>
+            </div>
+        </nav>
+
+        <div class="page-content">
+            <div class="container">
+                <div class="row">
+                    <!-- سایدبار -->
+                    {% include 'dashboards/sidbar_user_dashboard.html' %}
+
+                    <div class="col-lg-10 col-xl-4-5col mx-auto">
+                        <h2 class="mb-4">جزئیات حساب کاربری</h2>
+
+                        {% if messages %}
+                            <div class="alert alert-dismissible fade show" role="alert">
+                                {% for message in messages %}
+                                    <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %}">
+                                        {{ message }}
+                                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <form method="post" class="needs-validation" novalidate>
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="{{ form.phone.name }}">{{ form.phone.label }} <span
+                                        class="text-danger">*</span></label>
+                                {{ form.phone }}
+                                {% if form.phone.errors %}
+                                    <small class="text-danger">{{ form.phone.errors }}</small>
+                                {% endif %}
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6 form-group">
+                                    <label for="{{ form.first_name.name }}">{{ form.first_name.label }} <span
+                                            class="text-danger">*</span></label>
+                                    {{ form.first_name }}
+                                    {% if form.first_name.errors %}
+                                        <small class="text-danger">{{ form.first_name.errors }}</small>
+                                    {% endif %}
+                                </div>
+                                <div class="col-sm-6 form-group">
+                                    <label for="{{ form.last_name.name }}">{{ form.last_name.label }} <span
+                                            class="text-danger">*</span></label>
+                                    {{ form.last_name }}
+                                    {% if form.last_name.errors %}
+                                        <small class="text-danger">{{ form.last_name.errors }}</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="{{ form.email.name }}">{{ form.email.label }}</label>
+                                {{ form.email }}
+                                {% if form.email.errors %}
+                                    <small class="text-danger">{{ form.email.errors }}</small>
+                                {% endif %}
+                            </div>
+                            <div class="form-group">
+                                <label for="{{ form.display_name.name }}">{{ form.display_name.label }}</label>
+                                {{ form.display_name }}
+                                <small class="form-text text-muted">این نام در قسمت بازدیدها، نظرات و حساب کاربری شما
+                                    نمایش داده
+                                    می‌شود.</small>
+                                {% if form.display_name.errors %}
+                                    <small class="text-danger">{{ form.display_name.errors }}</small>
+                                {% endif %}
+                            </div>
+                            <div class="form-group">
+                                <label for="{{ form.national_id.name }}">{{ form.national_id.label }}</label>
+                                {{ form.national_id }}
+                                {% if form.national_id.errors %}
+                                    <small class="text-danger">{{ form.national_id.errors }}</small>
+                                {% endif %}
+                            </div>
+                            <div class="form-group">
+                                <label for="{{ form.birth_date.name }}">{{ form.birth_date.label }}</label>
+                                {{ form.birth_date }}
+                                {% if form.birth_date.errors %}
+                                    <small class="text-danger">{{ form.birth_date.errors }}</small>
+                                {% endif %}
+                            </div>
+                            <div class="form-group">
+                                <label for="{{ form.gender.name }}">{{ form.gender.label }}</label>
+                                {{ form.gender }}
+                                {% if form.gender.errors %}
+                                    <small class="text-danger">{{ form.gender.errors }}</small>
+                                {% endif %}
+                            </div>
+                            <div class="form-group">
+                                <label for="{{ form.new_password.name }}">{{ form.new_password.label }}</label>
+                                {{ form.new_password }}
+                                {% if form.new_password.errors %}
+                                    <small class="text-danger">{{ form.new_password.errors|join:", " }}</small>
+                                {% endif %}
+                            </div>
+                            <div class="form-group">
+                                <label for="{{ form.confirm_password.name }}">{{ form.confirm_password.label }}</label>
+                                {{ form.confirm_password }}
+                                {% if form.confirm_password.errors %}
+                                    <small class="text-danger">{{ form.confirm_password.errors|join:", " }}</small>
+                                {% endif %}
+                            </div>
+                            <button type="submit" class="btn btn-outline-primary-2">
+                                <span>ذخیره تغییرات</span>
+                                <i class="fas fa-save"></i>
+                            </button>
+                            <a href="{% url 'account:logout' %}" class="btn btn-outline-danger">
+                                <span>خروج از حساب</span>
+                                <i class="fas fa-sign-out-alt"></i>
+                            </a>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    {% block CSS-JS %}
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"/>
+        <link rel="stylesheet" href="{% static 'css/dashboard_user.css' %}"/>
+        <script src="{% static 'js/dashboard_user.js' %}"></script>
+    {% endblock %}
+{% endblock %}

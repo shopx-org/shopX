@@ -157,4 +157,7 @@ if DEBUG:
     OTP_WINDOW_SECONDS = 3600
     OTP_MAX_ATTEMPTS_IN_WINDOW = 100000
 
-# ── Security (برای دیپلوی واقعی فعال کن) ──────────────────────────────────────
+#  ──────────────────────────────────────
+
+LOGIN_URL = '/accounts/otp-login/'
+
