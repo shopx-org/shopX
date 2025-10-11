@@ -42,8 +42,19 @@ INSTALLED_APPS = [
     "mptt",
     "tree_queries",
     "colorfield",
+
+    # apps
     "django_jalali",
+
 ]
+# ── Apps ───────────────────────────────────────────────────────────────────────
+JALALI_DATE_DEFAULTS = {
+    'Strftime': {
+        'date': '%y/%m/%d',
+        'datetime': '%y/%m/%d %H:%M',
+    },
+}
+
 
 # ── Middleware ─────────────────────────────────────────────────────────────────
 MIDDLEWARE = [
@@ -111,7 +122,8 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # ── i18n / tz ──────────────────────────────────────────────────────────────────
-LANGUAGE_CODE = "fa"
+
+LANGUAGE_CODE = "fa"  # 'fa-ir' ممکنه variant رسمی نداشته باشه
 TIME_ZONE = "Asia/Tehran"
 USE_I18N = True
 USE_TZ = True
@@ -179,11 +191,13 @@ OTP_MAX_ATTEMPTS_IN_WINDOW = 3
 # هر متن غیرکامنت در انتهای خطوط باعث SyntaxError می‌شود.
 if DEBUG:
     OTP_TTL_SECONDS = 60
-    OTP_RESEND_GAP_SEC = 1       # فاصله بین ارسال دوباره
-    OTP_MAX_RESENDS = 999        # برای تست؛ در پروداکشن محدود کن
-    OTP_BLOCK_DURATION = 2       # بلاک کوتاه تستی (دقیقه/ثانیه بسته به پیاده‌سازی‌ات)
-    OTP_WINDOW_SECONDS = 3600
-    OTP_MAX_ATTEMPTS_IN_WINDOW = 100000
+OTP_RESEND_GAP_SEC = 1       # فاصله بین ارسال دوباره (برای تست راحت)
+OTP_MAX_RESENDS = 999        # برای تست؛ در پروداکشن محدود کن
+OTP_BLOCK_DURATION = 2       # بلاک کوتاه تستی (دقیقه/ثانیه بسته به پیاده‌سازی‌ات)
+
+OTP_WINDOW_SECONDS = 3600
+OTP_MAX_ATTEMPTS_IN_WINDOW = 100000
+
 
 # ── Security (نمونه‌هایی که در پروداکشن فعال می‌کنی) ─────────────────────────
 # CSRF_COOKIE_SECURE = True

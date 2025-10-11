@@ -1,83 +1,199 @@
+/* === Sidebar Section === */
+.sidebar-shop {
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: .75rem;
+    padding: 1.5rem 1rem;
+    transition: all .3s ease;
+}
+
+.sidebar-shop .widget-dashboard .widget-title {
+    font-weight: 800;
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    color: #222;
+}
+
 .sidebar-shop .widget-dashboard .dashboard-menu {
     list-style: none;
     padding: 0;
     margin: 0;
 }
 
+.sidebar-shop .widget-dashboard .dashboard-menu li {
+    margin-bottom: .6rem;
+}
+
 .sidebar-shop .widget-dashboard .dashboard-menu li a {
-    font-size: 1.8rem;
-    font-weight: 700;
+    font-size: 1.5rem;
+    font-weight: 600;
     color: #000;
     display: flex;
     align-items: center;
+    gap: 10px; /* فاصله آیکون و متن */
     text-decoration: none;
-    padding: .8rem 1rem;
-    transition: all .3s ease;
+    padding: .7rem 1rem;
+    border-radius: 8px;
+    transition: all .25s ease;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 .sidebar-shop .widget-dashboard .dashboard-menu li a i {
-    width: 24px;
+    min-width: 22px;
     text-align: center;
-    margin-left: 1rem;
-    font-size: 2rem;
-    color: #000;
+    font-size: 1.8rem;
+    color: #555;
     transition: all .3s ease;
 }
 
-.sidebar-shop .widget-dashboard .dashboard-menu li a.active,
-.sidebar-shop .widget-dashboard .dashboard-menu li a:hover {
+.sidebar-shop .widget-dashboard .dashboard-menu li a:hover,
+.sidebar-shop .widget-dashboard .dashboard-menu li a.active {
+    color: #FA523C !important;
+    background: #fdf1ef;
+}
+
+.sidebar-shop .widget-dashboard .dashboard-menu li a:hover i,
+.sidebar-shop .widget-dashboard .dashboard-menu li a.active i {
     color: #FA523C !important;
 }
 
-.sidebar-shop .widget-dashboard .dashboard-menu li a.active i,
-.sidebar-shop .widget-dashboard .dashboard-menu li a:hover i {
-    color: #FA523C;
+/* === Align Sidebar & Dashboard Content === */
+.page-content .row {
+    align-items: flex-start !important;
 }
 
-    .form-group {
+.tab-content {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+.dashboard-card {
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 16px;
+    background: linear-gradient(145deg, #ffffff, #f8f9fa);
+    padding: 2.5rem;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+    transition: all .3s ease;
+    backdrop-filter: blur(6px);
+    margin-top: 0 !important;
+}
+
+@media (min-width: 992px) {
+    .dashboard-card {
+        margin-top: -4px !important;
+    }
+}
+
+.dashboard-card:hover {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    transform: translateY(-3px);
+}
+
+/* === Form Modern === */
+.user-form-modern input,
+.user-form-modern select,
+.user-form-modern textarea {
+    width: 100%;
+    border: 1px solid #e4e4e4;
+    border-radius: 10px;
+    padding: 10px 12px;
+    transition: all .25s ease;
+    background-color: #fdfdfd;
+    font-size: 15px;
+    box-shadow: none !important;
+    margin-top: 5px;
+}
+
+.user-form-modern input:focus,
+.user-form-modern select:focus,
+.user-form-modern textarea:focus {
+    border-color: #FA523C;
+    background-color: #fff;
+    box-shadow: 0 0 0 3px rgba(250, 82, 60, 0.1);
+    outline: none;
+}
+
+.user-form-modern label {
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: #222;
+    display: block;
+}
+
+/* === Buttons === */
+.user-form-modern .btn-save {
+    background: linear-gradient(135deg, #FA523C, #ff785d);
+    border: none;
+    color: #fff;
+    border-radius: 10px;
+    padding: 10px 22px;
+    font-weight: 600;
+    transition: all .25s ease;
+    box-shadow: 0 3px 10px rgba(250, 82, 60, 0.2);
+}
+
+.user-form-modern .btn-save:hover {
+    background: linear-gradient(135deg, #ff6b4b, #fa523c);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(250, 82, 60, 0.25);
+}
+
+.user-form-modern .btn-logout {
+    background: #fff;
+    border: 2px solid #FA523C;
+    color: #FA523C;
+    border-radius: 10px;
+    padding: 10px 22px;
+    font-weight: 600;
+    transition: all .25s ease;
+    text-align: center;
+}
+
+.user-form-modern .btn-logout:hover {
+    background-color: #FA523C;
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(250, 82, 60, 0.2);
+}
+
+/* === Alerts === */
+.alert-success {
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+    color: #155724;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+}
+
+.alert .close {
+    float: left;
+    font-size: 1.5rem;
+    line-height: 1;
+}
+
+/* === Responsive Fixes === */
+@media (max-width: 992px) {
+    .sidebar-shop {
         margin-bottom: 1.5rem;
     }
-    .form-control {
-        border-radius: 0.25rem;
-        padding: 0.75rem;
+
+    .dashboard-card {
+        padding: 1.5rem;
     }
-    .btn-outline-primary-2 {
-        border-color: #FA523C;
-        color: #FA523C;
+
+    .user-form-modern .btn-save,
+    .user-form-modern .btn-logout {
+        width: 100%;
+        margin-bottom: 0.8rem;
     }
-    .btn-outline-primary-2:hover {
-        background-color: #FA523C;
-        color: #fff;
+
+    .d-flex.justify-content-between {
+        flex-direction: column;
     }
-    .btn-outline-danger {
-        border-color: #dc3545;
-        color: #dc3545;
-    }
-    .btn-outline-danger:hover {
-        background-color: #dc3545;
-        color: #fff;
-    }
-    .alert-success {
-        background-color: #d4edda;
-        border-color: #c3e6cb;
-        color: #155724;
-    }
-    .alert-danger {
-        background-color: #f8d7da;
-        border-color: #f5c6cb;
-        color: #721c24;
-    }
-    .alert .close {
-        float: left;
-        font-size: 1.5rem;
-        line-height: 1;
-    }
-    .form-control:invalid {
-        border-color: #dc3545;
-    }
-    .form-control:valid {
-        border-color: #28a745;
-    }
+}

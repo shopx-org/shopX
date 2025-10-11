@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth import password_validation
 from django.core.validators import RegexValidator
 from account.models import User, Profile
-
+from jdatetime import date as jdate  # تغییر import به jdatetime
 
 class DashboardAccountForm(forms.ModelForm):
     # فیلدهای User
@@ -70,11 +70,28 @@ class DashboardAccountForm(forms.ModelForm):
             )
         ]
     )
-    birth_date = forms.DateField(
-        label="تاریخ تولد",
+    day = forms.ChoiceField(
+        label="روز",
         required=False,
-        widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'name': 'birth_date'}),
-        error_messages={'invalid': 'لطفاً یک تاریخ معتبر وارد کنید.'}
+        choices=[(str(i).zfill(2), str(i).zfill(2)) for i in range(1, 32)],
+        widget=forms.Select(attrs={'class': 'form-control', 'name': 'day'})
+    )
+    month = forms.ChoiceField(
+        label="ماه",
+        required=False,
+        choices=[
+            ('01', 'فروردین'), ('02', 'اردیبهشت'), ('03', 'خرداد'),
+            ('04', 'تیر'), ('05', 'مرداد'), ('06', 'شهریور'),
+            ('07', 'مهر'), ('08', 'آبان'), ('09', 'آذر'),
+            ('10', 'دی'), ('11', 'بهمن'), ('12', 'اسفند')
+        ],
+        widget=forms.Select(attrs={'class': 'form-control', 'name': 'month'})
+    )
+    year = forms.ChoiceField(
+        label="سال",
+        required=False,
+        choices=[(str(i), str(i)) for i in range(1300, jdate.today().year - 6)],  # 1404 - 7 = 1397 (سال جاری منهای 7)
+        widget=forms.Select(attrs={'class': 'form-control', 'name': 'year'})
     )
     gender = forms.ChoiceField(
         label="جنسیت",
@@ -110,7 +127,9 @@ class DashboardAccountForm(forms.ModelForm):
             profile = self.instance.profile
             self.fields['display_name'].initial = profile.display_name or ''
             self.fields['national_id'].initial = profile.national_id or ''
-            self.fields['birth_date'].initial = profile.birth_date or ''
+            self.fields['day'].initial = str(profile.day).zfill(2) if profile.day else ''
+            self.fields['month'].initial = str(profile.month).zfill(2) if profile.month else ''
+            self.fields['year'].initial = str(profile.year) if profile.year else ''
             self.fields['gender'].initial = profile.gender or ''
             self.fields['phone'].initial = self.instance.phone or ''
 
@@ -157,6 +176,18 @@ class DashboardAccountForm(forms.ModelForm):
         if phone and User.objects.filter(phone=phone).exclude(pk=self.user.pk).exists():
             self.add_error('phone', 'این شماره تلفن قبلاً توسط حساب کاربری دیگری استفاده شده است.')
 
+        # اعتبارسنجی تاریخ تولد
+        day = cleaned_data.get('day')
+        month = cleaned_data.get('month')
+        year = cleaned_data.get('year')
+        if day or month or year:
+            try:
+                day, month, year = int(day), int(month), int(year)
+                if not (1 <= day <= 31 and 1 <= month <= 12 and 1300 <= year <= jdate.today().year - 6):
+                    self.add_error('birth_date', 'لطفاً یک تاریخ معتبر وارد کنید.')
+            except ValueError:
+                self.add_error('birth_date', 'لطفاً مقادیر معتبر برای روز، ماه و سال وارد کنید.')
+
         return cleaned_data
 
     def save(self, commit=True):
@@ -166,7 +197,9 @@ class DashboardAccountForm(forms.ModelForm):
             profile, created = Profile.objects.get_or_create(user=user)
             profile.display_name = self.cleaned_data['display_name'] or None
             profile.national_id = self.cleaned_data['national_id'] or None
-            profile.birth_date = self.cleaned_data['birth_date'] or None
+            profile.day = self.cleaned_data['day'] or None
+            profile.month = self.cleaned_data['month'] or None
+            profile.year = self.cleaned_data['year'] or None
             profile.gender = self.cleaned_data['gender'] or None
             profile.save()
 

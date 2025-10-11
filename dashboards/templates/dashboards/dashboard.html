@@ -1,86 +1,15 @@
-{% extends "base.html" %}
-{% load static %}
-{% block content %}
-    <main class="main">
-
-        <nav aria-label="breadcrumb" class="breadcrumb-nav mb-3">
-            <div class="container">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{% url 'home:home' %}">خانه</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">داشبورد</li>
-                </ol>
-            </div>
-        </nav>
-
-        <div class="page-content">
-            <div class="container">
-                <div class="row">
-                    <!-- سایدبار -->
-                    {% include 'dashboards/sidbar_user_dashboard.html' %}
-
-                    <!-- محتوای داشبورد -->
-                    <div class="col-lg-10 col-xl-4-5col">
-                        <div class="tab-content">
-                            <div class="tab-pane fade show active" id="tab-dashboard" role="tabpanel">
-                                {% if user.is_authenticated %}
-                                    <p>سلام <span
-                                            class="font-weight-normal text-dark">{{ user.get_full_name|default:user.phone }}</span><br>
-                                        شما در اینجا می‌توانید
-                                        <a href="#tab-orders" class="tab-trigger-link">سفارشات</a> خود را ببینید،
-                                        وضعیت ارسال <a href="#tab-address" class="tab-trigger-link">سفارشات</a> را
-                                        مشاهده کنید،
-                                        آدرس خود را تغییر دهید، و همچنین
-                                        <a href="{% url 'dashboards:personal_info' %}">جزئیات حساب</a> یا رمز عبور خود
-                                        را ویرایش کنید.
-                                    </p>
-                                {% else %}
-                                    <p>لطفاً برای دسترسی به داشبورد <a href="{% url 'account:login' %}">وارد شوید</a>.
-                                    </p>
-                                {% endif %}
-                            </div>
-
-{#                            <div class="tab-pane fade" id="tab-orders" role="tabpanel">#}
-{#                                <p>سفارش جدیدی وجود ندارد</p>#}
-{#                            </div>#}
-{##}
-{#                            <div class="tab-pane fade" id="tab-wallet" role="tabpanel">#}
-{#                                <p>موجودی کیف پول شما: ۰ تومان</p>#}
-{#                            </div>#}
-{##}
-{#                            <div class="tab-pane fade" id="tab-favorites" role="tabpanel">#}
-{#                                <p>لیست کالاهای مورد علاقه شما خالی است.</p>#}
-{#                            </div>#}
-{##}
-{#                            <div class="tab-pane fade" id="tab-reviews" role="tabpanel">#}
-{#                                <p>شما هنوز نظری ثبت نکرده‌اید.</p>#}
-{#                            </div>#}
-{##}
-{#                            <div class="tab-pane fade" id="tab-recent" role="tabpanel">#}
-{#                                <p>هنوز کالایی مشاهده نکرده‌اید.</p>#}
-{#                            </div>#}
-{##}
-{#                            <div class="tab-pane fade" id="tab-messages" role="tabpanel">#}
-{#                                <p>پیام جدیدی وجود ندارد.</p>#}
-{#                            </div>#}
-{##}
-{#                            <div class="tab-pane fade" id="tab-giftcards" role="tabpanel">#}
-{#                                <p>کارت هدیه‌ای موجود نیست.</p>#}
-{#                            </div>#}
-{##}
-{#                            <div class="tab-pane fade" id="tab-address" role="tabpanel">#}
-{#                                <p>آدرسی که اینجا ثبت می‌کنید به‌صورت پیش‌فرض برای ارسال محصولات به شما استفاده#}
-{#                                    می‌شود.</p>#}
-{#                            </div>#}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
-{% endblock %}
-
-{% block CSS-JS %}
-    <link rel="stylesheet" href="{% static 'css/http_cdnjs.cloudflare.com_ajax_libs_font-awesome_5.15.4_css_all.css' %}"/>
-    <link rel="stylesheet" href="{% static 'css/dashboard_user.css' %}"/>
-    <script src="{% static 'js/dashboard_user.js' %}"></script>
+{% extends 'dashboards/dashboard_base_user.html' %}
+{% block UserDash_content %}
+    <div class="tab-pane fade show active" id="dashboard" role="tabpanel">
+        <p>سلام <span
+                class="font-weight-normal text-dark">{{ user.get_full_name|default:user.phone }}</span><br>
+            شما در اینجا می‌توانید
+            <a href="#tab-orders" class="tab-trigger-link">سفارشات</a> خود را ببینید،
+            وضعیت ارسال <a href="#tab-address" class="tab-trigger-link">سفارشات</a> را
+            مشاهده کنید،
+            آدرس خود را تغییر دهید، و همچنین
+            <a href="{% url 'dashboards:personal_info' %}">جزئیات حساب</a> یا رمز عبور خود
+            را ویرایش کنید.
+        </p>
+    </div>
 {% endblock %}
