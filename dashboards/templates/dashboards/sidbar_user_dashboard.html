@@ -1,34 +1,40 @@
 {% load static %}
-<aside class="col-lg-2 col-xl-5col order-lg-first">
-    <div class="sidebar sidebar-shop">
-        <div class="widget widget-dashboard">
-            <h3 class="widget-title">حساب کاربری</h3>
-            <div class="widget-body">
-                <ul class="cat-list dashboard-menu">
-                    <li><a href="#tab-dashboard" class="tab-trigger-link active"><i
-                            class="fas fa-tachometer-alt"></i>داشبورد</a></li>
-                    <li><a href="#tab-orders" class="tab-trigger-link"><i
-                            class="fas fa-shopping-bag"></i>سفارشات</a></li>
-                    <li><a href="#tab-wallet" class="tab-trigger-link"><i class="fas fa-wallet"></i>کیف
-                        پول</a></li>
-                    <li><a href="#tab-favorites" class="tab-trigger-link"><i
-                            class="fas fa-heart"></i>کالاهای مورد علاقه</a></li>
-                    <li><a href="#tab-reviews" class="tab-trigger-link"><i
-                            class="fas fa-comments"></i>نظرات</a></li>
-                    <li><a href="#tab-recent" class="tab-trigger-link"><i
-                            class="fas fa-history"></i>آخرین کالاهای دیده‌شده</a></li>
-                    <li><a href="#tab-messages" class="tab-trigger-link"><i
-                            class="fas fa-envelope"></i>پیام‌ها</a></li>
-                    <li><a href="#tab-giftcards" class="tab-trigger-link"><i
-                            class="fas fa-gift"></i>کارت‌های هدیه</a></li>
-                    <li><a href="#tab-address" class="tab-trigger-link"><i
-                            class="fas fa-map-marker-alt"></i>آدرس</a></li>
-                    <li><a href="{% url 'dashboards:personal_info' %}"><i
-                            class="fas fa-user-cog"></i>جزئیات حساب کاربری</a></li>
-                    <li><a href="{% url 'account:logout' %}"><i class="fas fa-sign-out-alt"></i>خروج
-                        از حساب</a></li>
-                </ul>
-            </div>
+<aside class="sidebar sidebar-shop" id="userSidebar">
+    <div class="widget widget-dashboard">
+        <h3 class="widget-title">حساب کاربری</h3>
+        <div class="widget-body">
+            <ul class="cat-list dashboard-menu">
+                <li><a href="{% url 'dashboards:dashboard' %}#dashboard" class="menu-link "><i
+                        class="fas fa-tachometer-alt"></i><span class="menu-text">داشبورد</span></a></li>
+                <li><a href="#tab-orders" class="tab-trigger-link"><i class="fas fa-shopping-bag"></i><span
+                        class="menu-text">سفارشات</span></a></li>
+                <li><a href="#tab-wallet" class="tab-trigger-link"><i class="fas fa-wallet"></i><span
+                        class="menu-text">کیف پول</span></a></li>
+                <li><a href="#tab-favorites" class="tab-trigger-link"><i class="fas fa-heart"></i><span
+                        class="menu-text">کالاهای مورد علاقه</span></a></li>
+                <li><a href="#tab-reviews" class="tab-trigger-link"><i class="fas fa-comments"></i><span
+                        class="menu-text">نظرات</span></a></li>
+                <li><a href="#tab-recent" class="tab-trigger-link"><i class="fas fa-history"></i><span
+                        class="menu-text">بازدیدهای اخیر</span></a></li>
+                <li><a href="#tab-messages" class="tab-trigger-link"><i class="fas fa-envelope"></i><span
+                        class="menu-text">پیام‌ها</span></a></li>
+                <li><a href="#tab-giftcards" class="tab-trigger-link"><i class="fas fa-gift"></i><span
+                        class="menu-text">کارت‌های هدیه</span></a></li>
+                <li><a href="#tab-address" class="tab-trigger-link"><i class="fas fa-map-marker-alt"></i><span
+                        class="menu-text">آدرس</span></a></li>
+                <li><a href="{% url 'dashboards:personal_info' %}#personal-info-card"><i class="fas fa-user-cog"></i><span
+                        class="menu-text">جزئیات حساب کاربری</span></a></li>
+                <li><a href="{% url 'account:logout' %}"><i class="fas fa-sign-out-alt"></i><span class="menu-text">خروج از حساب</span></a>
+                </li>
+            </ul>
         </div>
     </div>
 </aside>
+
+{% block CSS-JS %}
+    <link rel="stylesheet" href="{% static 'css/dashboard_user.css' %}">
+    <link rel="stylesheet"
+          href="{% static 'css/http_cdnjs.cloudflare.com_ajax_libs_font-awesome_5.15.4_css_all.css' %}">
+    <!-- font awesome -->
+    <script src="{% static 'js/dashboard_user.js' %}" defer></script>
+{% endblock %}

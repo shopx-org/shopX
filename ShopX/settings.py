@@ -1,4 +1,3 @@
-
 # ShopX/settings.py
 from pathlib import Path
 import os
@@ -46,9 +45,17 @@ INSTALLED_APPS = [
     "tree_queries",
     "colorfield",
 
+    # apps
+    "django_jalali",
 
 ]
 # ── Apps ───────────────────────────────────────────────────────────────────────
+JALALI_DATE_DEFAULTS = {
+    'Strftime': {
+        'date': '%y/%m/%d',
+        'datetime': '%y/%m/%d %H:%M',
+    },
+}
 
 # ── Middleware ─────────────────────────────────────────────────────────────────
 MIDDLEWARE = [
@@ -117,7 +124,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # ── i18n / tz ──────────────────────────────────────────────────────────────────
-LANGUAGE_CODE = "fa"          # 'fa-ir' ممکنه variant رسمی نداشته باشه
+LANGUAGE_CODE = "fa"  # 'fa-ir' ممکنه variant رسمی نداشته باشه
 TIME_ZONE = "Asia/Tehran"
 USE_I18N = True
 USE_TZ = True
@@ -151,7 +158,7 @@ OTP_MAX_ATTEMPTS_IN_WINDOW = 3
 # dev/testing overrides
 if DEBUG:
     OTP_TTL_SECONDS = 60
-    OTP_RESEND_GAP_SEC = 1       # برای تست راحت
+    OTP_RESEND_GAP_SEC = 1  # برای تست راحت
     OTP_MAX_RESENDS = 999
     OTP_BLOCK_DURATION = 2
     OTP_WINDOW_SECONDS = 3600
@@ -160,4 +167,3 @@ if DEBUG:
 #  ──────────────────────────────────────
 
 LOGIN_URL = '/accounts/otp-login/'
-

@@ -1,29 +1,37 @@
+// کنترل تب‌ها فقط برای لینک‌های داخلی (دارای #)
 document.addEventListener("DOMContentLoaded", function () {
     const links = document.querySelectorAll('.dashboard-menu li a.tab-trigger-link');
     const tabs = document.querySelectorAll('.tab-content .tab-pane');
 
     links.forEach(link => {
         link.addEventListener('click', function (e) {
-            e.preventDefault();
-            // حذف کلاس active از همه لینک‌ها
-            document.querySelectorAll('.dashboard-menu li a').forEach(l => l.classList.remove('active'));
-            this.classList.add('active');
-            // نمایش تب مربوطه و مخفی کردن سایر تب‌ها
-            tabs.forEach(tab => tab.classList.remove('show', 'active'));
             const target = this.getAttribute('href');
-            const pane = document.querySelector(target);
-            if (pane) {
-                pane.classList.add('show', 'active');
+
+            // فقط اگر لینک به تب داخلی (#) اشاره دارد، از رفتار پیش‌فرض جلوگیری کن
+            if (target && target.startsWith('#')) {
+                e.preventDefault();
+
+                // حذف active از همه لینک‌ها
+                document.querySelectorAll('.dashboard-menu li a').forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+
+                // نمایش تب مربوطه و مخفی کردن سایر تب‌ها
+                tabs.forEach(tab => tab.classList.remove('show', 'active'));
+                const pane = document.querySelector(target);
+                if (pane) {
+                    pane.classList.add('show', 'active');
+                }
             }
         });
     });
 });
 
-// اعتبارسنجی فرم در سمت کلاینت
+
+// ✅ اعتبارسنجی فرم سمت کلاینت
 (function () {
     'use strict';
     window.addEventListener('load', function () {
-        var forms = document.getElementsByClassName('needs-validation');
+        const forms = document.getElementsByClassName('needs-validation');
         Array.prototype.filter.call(forms, function (form) {
             form.addEventListener('submit', function (event) {
                 if (form.checkValidity() === false) {
@@ -37,14 +45,9 @@ document.addEventListener("DOMContentLoaded", function () {
         // محدود کردن ورودی شماره تلفن به اعداد و شروع با 09
         const phoneInput = document.querySelector('input[name="phone"]');
         if (phoneInput) {
-            phoneInput.addEventListener('input', function (e) {
-                // فقط اعداد را نگه می‌دارد
+            phoneInput.addEventListener('input', function () {
                 this.value = this.value.replace(/[^0-9]/g, '');
-                // محدود کردن به ۱۱ رقم
-                if (this.value.length > 11) {
-                    this.value = this.value.slice(0, 11);
-                }
-                // اطمینان از شروع با 09
+                if (this.value.length > 11) this.value = this.value.slice(0, 11);
                 if (this.value.length > 0 && this.value[0] !== '0') {
                     this.value = '09' + this.value.slice(1);
                 } else if (this.value.length > 1 && this.value.slice(0, 2) !== '09') {
@@ -53,7 +56,6 @@ document.addEventListener("DOMContentLoaded", function () {
             });
 
             phoneInput.addEventListener('keypress', function (e) {
-                // فقط اجازه ورود اعداد
                 if (e.charCode !== 0 && (e.charCode < 48 || e.charCode > 57)) {
                     e.preventDefault();
                 }
@@ -63,17 +65,12 @@ document.addEventListener("DOMContentLoaded", function () {
         // محدود کردن ورودی کد ملی به اعداد و دقیقاً ۱۰ رقم
         const nationalIdInput = document.querySelector('input[name="national_id"]');
         if (nationalIdInput) {
-            nationalIdInput.addEventListener('input', function (e) {
-                // فقط اعداد را نگه می‌دارد
+            nationalIdInput.addEventListener('input', function () {
                 this.value = this.value.replace(/[^0-9]/g, '');
-                // محدود کردن به ۱۰ رقم
-                if (this.value.length > 10) {
-                    this.value = this.value.slice(0, 10);
-                }
+                if (this.value.length > 10) this.value = this.value.slice(0, 10);
             });
 
             nationalIdInput.addEventListener('keypress', function (e) {
-                // فقط اجازه ورود اعداد
                 if (e.charCode !== 0 && (e.charCode < 48 || e.charCode > 57)) {
                     e.preventDefault();
                 }
@@ -81,3 +78,21 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }, false);
 })();
+
+
+// 🔸 اسکرول خودکار به کارت هدف در موبایل
+document.addEventListener('DOMContentLoaded', function () {
+    if (window.innerWidth <= 992) { // فقط در موبایل و تبلت
+        const hash = window.location.hash; // مثلا #personal-info-card
+        if (hash) {
+            const target = document.querySelector(hash);
+            if (target) {
+                setTimeout(() => {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 500); // کمی تأخیر تا DOM کامل لود شود
+            }
+        }
+    }
+});
+
+
