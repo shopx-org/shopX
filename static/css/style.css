@@ -7616,6 +7616,7 @@ a:focus {
 .product-pager-link:hover,
 .product-pager-link:focus {
     color: #FA523C;
+
 }
 
 .product-cat span {
@@ -15382,6 +15383,8 @@ small.form-text {
     color: #fff;
     background-color: #9de5fb;
     border: 1px solid #0069d9;
+    text-align: right;
+
 }
 
 .alert-success {
@@ -17240,7 +17243,6 @@ button:focus {
 }
 
 .product-details .product-content {
-
     margin-bottom: 1.6rem;
 }
 
@@ -17412,7 +17414,6 @@ button:focus {
     align-items: center;
     flex-flow: row wrap;
     margin-bottom: .5rem;
-
 }
 
 .product-details-action .btn-cart {

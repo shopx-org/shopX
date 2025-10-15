@@ -1,10 +1,10 @@
-/* === Sidebar Section === */
+/* === 🎯 Sidebar Section === */
 .sidebar-shop {
     background: #fff;
     border: 1px solid #eee;
-    border-radius: .75rem;
+    border-radius: 0.75rem;
     padding: 1.5rem 1rem;
-    transition: all .3s ease;
+    transition: all 0.3s ease;
 }
 
 .sidebar-shop .widget-dashboard .widget-title {
@@ -21,20 +21,20 @@
 }
 
 .sidebar-shop .widget-dashboard .dashboard-menu li {
-    margin-bottom: .6rem;
+    margin-bottom: 0.6rem;
 }
 
 .sidebar-shop .widget-dashboard .dashboard-menu li a {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: #000;
     display: flex;
     align-items: center;
     gap: 10px; /* فاصله آیکون و متن */
-    text-decoration: none;
-    padding: .7rem 1rem;
+    padding: 0.7rem 1rem;
     border-radius: 8px;
-    transition: all .25s ease;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #000;
+    text-decoration: none;
+    transition: all 0.25s ease;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -45,7 +45,7 @@
     text-align: center;
     font-size: 1.8rem;
     color: #555;
-    transition: all .3s ease;
+    transition: all 0.3s ease;
 }
 
 .sidebar-shop .widget-dashboard .dashboard-menu li a:hover,
@@ -59,7 +59,7 @@
     color: #FA523C !important;
 }
 
-/* === Align Sidebar & Dashboard Content === */
+/* === 🧭 Align Sidebar & Dashboard Content === */
 .page-content .row {
     align-items: flex-start !important;
 }
@@ -69,15 +69,21 @@
     padding-top: 0 !important;
 }
 
+/* === 🪩 Dashboard Card === */
 .dashboard-card {
+    background: linear-gradient(145deg, #ffffff, #f8f9fa);
     border: 1px solid rgba(0, 0, 0, 0.08);
     border-radius: 16px;
-    background: linear-gradient(145deg, #ffffff, #f8f9fa);
     padding: 2.5rem;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
-    transition: all .3s ease;
     backdrop-filter: blur(6px);
+    transition: all 0.3s ease;
     margin-top: 0 !important;
+}
+
+.dashboard-card:hover {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    transform: translateY(-3px);
 }
 
 @media (min-width: 992px) {
@@ -86,12 +92,7 @@
     }
 }
 
-.dashboard-card:hover {
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-    transform: translateY(-3px);
-}
-
-/* === Form Modern === */
+/* === 🧾 Form (Modern Style) === */
 .user-form-modern input,
 .user-form-modern select,
 .user-form-modern textarea {
@@ -99,11 +100,11 @@
     border: 1px solid #e4e4e4;
     border-radius: 10px;
     padding: 10px 12px;
-    transition: all .25s ease;
-    background-color: #fdfdfd;
-    font-size: 15px;
-    box-shadow: none !important;
     margin-top: 5px;
+    font-size: 15px;
+    background-color: #fdfdfd;
+    transition: all 0.25s ease;
+    box-shadow: none !important;
 }
 
 .user-form-modern input:focus,
@@ -116,21 +117,28 @@
 }
 
 .user-form-modern label {
-    font-weight: 700;
-    margin-bottom: 6px;
-    color: #222;
     display: block;
+    margin-bottom: 6px;
+    font-weight: 700;
+    color: #222;
 }
 
-/* === Buttons === */
+/* === 🔘 Buttons === */
+.user-form-modern .btn-save,
+.user-form-modern .btn-logout {
+    display: inline-block;
+    border-radius: 10px;
+    padding: 10px 22px;
+    font-weight: 600;
+    transition: all 0.25s ease;
+    text-align: center;
+}
+
+/* ذخیره تغییرات */
 .user-form-modern .btn-save {
     background: linear-gradient(135deg, #FA523C, #ff785d);
     border: none;
     color: #fff;
-    border-radius: 10px;
-    padding: 10px 22px;
-    font-weight: 600;
-    transition: all .25s ease;
     box-shadow: 0 3px 10px rgba(250, 82, 60, 0.2);
 }
 
@@ -140,15 +148,12 @@
     box-shadow: 0 6px 15px rgba(250, 82, 60, 0.25);
 }
 
+/* خروج از حساب */
 .user-form-modern .btn-logout {
     background: #fff;
     border: 2px solid #FA523C;
     color: #FA523C;
-    border-radius: 10px;
-    padding: 10px 22px;
-    font-weight: 600;
-    transition: all .25s ease;
-    text-align: center;
+    box-shadow: none;
 }
 
 .user-form-modern .btn-logout:hover {
@@ -158,16 +163,24 @@
     box-shadow: 0 4px 12px rgba(250, 82, 60, 0.2);
 }
 
-/* === Alerts === */
+/* === 💬 Alerts === */
+.alert {
+    text-align: right;
+    border-radius: 8px;
+    font-size: 1.4rem;
+    font-weight: 500;
+    padding: 10px 14px;
+}
+
 .alert-success {
     background-color: #d4edda;
-    border-color: #c3e6cb;
+    border: 1px solid #c3e6cb;
     color: #155724;
 }
 
 .alert-danger {
     background-color: #f8d7da;
-    border-color: #f5c6cb;
+    border: 1px solid #f5c6cb;
     color: #721c24;
 }
 
@@ -177,23 +190,62 @@
     line-height: 1;
 }
 
-/* === Responsive Fixes === */
+/* === 📱 Responsive === */
 @media (max-width: 992px) {
+
+    /* فاصله‌ی سایدبار و کارت */
     .sidebar-shop {
         margin-bottom: 1.5rem;
     }
 
+    /* فرم کارت داشبورد */
     .dashboard-card {
         padding: 1.5rem;
     }
 
+    /* دکمه‌های ذخیره و خروج در موبایل تمام عرض */
     .user-form-modern .btn-save,
     .user-form-modern .btn-logout {
         width: 100%;
-        margin-bottom: 0.8rem;
+        margin: 0.8rem 0;
     }
 
+    /* چینش دکمه‌ها در فرم به صورت ستونی */
     .d-flex.justify-content-between {
         flex-direction: column;
+    }
+
+    /* 🟠 مخصوص بخش تغییر شماره موبایل */
+    .input-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    #new_phone {
+        border-radius: 10px !important; /* گوشه‌های گرد کامل */
+        width: 100%;
+    }
+
+    #send_otp_old {
+        border-radius: 10px !important; /* گوشه‌های گرد کامل */
+        width: 100%;
+        margin-top: 8px; /* فاصله بین input و دکمه */
+    }
+
+    /* نمایش بخش وارد کردن کد OTP هم تمام عرض و با فاصله مناسب */
+    #otp_stage_area .input-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    #otp_code {
+        border-radius: 10px !important;
+        width: 100%;
+    }
+
+    #verify_otp {
+        border-radius: 10px !important;
+        width: 100%;
+        margin-top: 8px;
     }
 }

@@ -54,8 +54,6 @@ JALALI_DATE_DEFAULTS = {
         'datetime': '%y/%m/%d %H:%M',
     },
 }
-
-
 # ── Middleware ─────────────────────────────────────────────────────────────────
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
