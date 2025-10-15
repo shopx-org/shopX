@@ -1,98 +1,194 @@
-// کنترل تب‌ها فقط برای لینک‌های داخلی (دارای #)
 document.addEventListener("DOMContentLoaded", function () {
-    const links = document.querySelectorAll('.dashboard-menu li a.tab-trigger-link');
-    const tabs = document.querySelectorAll('.tab-content .tab-pane');
+    // المنت‌ها
+    const sendBtn = document.getElementById("send_otp_old");
+    const verifyBtn = document.getElementById("verify_otp");
+    const newPhoneInput = document.getElementById("new_phone");
+    const codeInput = document.getElementById("otp_code");
+    const otpStageArea = document.getElementById("otp_stage_area");
+    const personalCard = document.getElementById("personal-info-card"); // برای درج پیام
 
-    links.forEach(link => {
-        link.addEventListener('click', function (e) {
-            const target = this.getAttribute('href');
+    // حالت‌ها
+    let stage = "send_old";
+    let token = null;
+    let isProcessing = false;
 
-            // فقط اگر لینک به تب داخلی (#) اشاره دارد، از رفتار پیش‌فرض جلوگیری کن
-            if (target && target.startsWith('#')) {
-                e.preventDefault();
+    // helper: نمایش پیام در بالای کارت (مثل messages جنگو)
+    function showMessageInView(message, type = "info") {
+        // type: 'info' | 'success' | 'error'
+        if (!personalCard) {
+            alert(message);
+            return;
+        }
+        // حذف پیام قبلی
+        const existing = personalCard.querySelector(".ajax-message-area");
+        if (existing) existing.remove();
 
-                // حذف active از همه لینک‌ها
-                document.querySelectorAll('.dashboard-menu li a').forEach(l => l.classList.remove('active'));
-                this.classList.add('active');
+        const wrapper = document.createElement("div");
+        wrapper.className = "ajax-message-area mb-3";
 
-                // نمایش تب مربوطه و مخفی کردن سایر تب‌ها
-                tabs.forEach(tab => tab.classList.remove('show', 'active'));
-                const pane = document.querySelector(target);
-                if (pane) {
-                    pane.classList.add('show', 'active');
-                }
+        let cls = "alert alert-info";
+        if (type === "success") cls = "alert alert-success";
+        else if (type === "error") cls = "alert alert-danger";
+
+        wrapper.innerHTML = `<div class="${cls}" role="alert">${message}</div>`;
+        // درج در بالای کارت (قبل از اولین child)
+        personalCard.insertBefore(wrapper, personalCard.firstChild);
+    }
+
+    // جلوگیری از double-bind اگر JS چند بار اجرا شود:
+    if (sendBtn && sendBtn.dataset.bound !== "1") {
+        sendBtn.dataset.bound = "1";
+        sendBtn.addEventListener("click", async function (e) {
+            e.preventDefault();
+            if (isProcessing) return;
+            isProcessing = true;
+
+            const newPhone = newPhoneInput.value.trim();
+            if (!/^09\d{9}$/.test(newPhone)) {
+                showMessageInView("شماره جدید معتبر نیست.", "error");
+                isProcessing = false;
+                return;
             }
-        });
-    });
-});
 
+            // disable button to prevent double click
+            sendBtn.disabled = true;
+            sendBtn.classList.add("disabled");
 
-// ✅ اعتبارسنجی فرم سمت کلاینت
-(function () {
-    'use strict';
-    window.addEventListener('load', function () {
-        const forms = document.getElementsByClassName('needs-validation');
-        Array.prototype.filter.call(forms, function (form) {
-            form.addEventListener('submit', function (event) {
-                if (form.checkValidity() === false) {
-                    event.preventDefault();
-                    event.stopPropagation();
+            try {
+                const res = await fetch("/dashboard/change-phone-otp/", {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    },
+                    body: new URLSearchParams({stage, new_phone: newPhone})
+                });
+                const data = await res.json();
+
+                if (data.status === "error") {
+                    showMessageInView(data.message || "خطا در ارسال.", "error");
+                } else if (data.status === "ok" && data.stage === "verify_old") {
+                    token = data.token;
+                    stage = "verify_old";
+                    otpStageArea.style.display = "block";
+                    codeInput.value = "";
+                    showMessageInView(data.message || "کد ارسال شد.", "info");
+                } else {
+                    showMessageInView(data.message || "پاسخ نامعلوم از سرور.", "error");
                 }
-                form.classList.add('was-validated');
-            }, false);
-        });
 
-        // محدود کردن ورودی شماره تلفن به اعداد و شروع با 09
-        const phoneInput = document.querySelector('input[name="phone"]');
-        if (phoneInput) {
-            phoneInput.addEventListener('input', function () {
-                this.value = this.value.replace(/[^0-9]/g, '');
-                if (this.value.length > 11) this.value = this.value.slice(0, 11);
-                if (this.value.length > 0 && this.value[0] !== '0') {
-                    this.value = '09' + this.value.slice(1);
-                } else if (this.value.length > 1 && this.value.slice(0, 2) !== '09') {
-                    this.value = '09' + this.value.slice(2);
-                }
-            });
-
-            phoneInput.addEventListener('keypress', function (e) {
-                if (e.charCode !== 0 && (e.charCode < 48 || e.charCode > 57)) {
-                    e.preventDefault();
-                }
-            });
-        }
-
-        // محدود کردن ورودی کد ملی به اعداد و دقیقاً ۱۰ رقم
-        const nationalIdInput = document.querySelector('input[name="national_id"]');
-        if (nationalIdInput) {
-            nationalIdInput.addEventListener('input', function () {
-                this.value = this.value.replace(/[^0-9]/g, '');
-                if (this.value.length > 10) this.value = this.value.slice(0, 10);
-            });
-
-            nationalIdInput.addEventListener('keypress', function (e) {
-                if (e.charCode !== 0 && (e.charCode < 48 || e.charCode > 57)) {
-                    e.preventDefault();
-                }
-            });
-        }
-    }, false);
-})();
-
-
-// 🔸 اسکرول خودکار به کارت هدف در موبایل
-document.addEventListener('DOMContentLoaded', function () {
-    if (window.innerWidth <= 992) { // فقط در موبایل و تبلت
-        const hash = window.location.hash; // مثلا #personal-info-card
-        if (hash) {
-            const target = document.querySelector(hash);
-            if (target) {
-                setTimeout(() => {
-                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }, 500); // کمی تأخیر تا DOM کامل لود شود
+            } catch (err) {
+                console.error("Send OTP error:", err);
+                showMessageInView("خطا در ارتباط با سرور.", "error");
             }
-        }
+
+            // re-enable after short delay
+            setTimeout(() => {
+                isProcessing = false;
+                sendBtn.disabled = false;
+                sendBtn.classList.remove("disabled");
+            }, 1500);
+        });
+    }
+
+    // bind verifyBtn
+    if (verifyBtn && verifyBtn.dataset.bound !== "1") {
+        verifyBtn.dataset.bound = "1";
+        verifyBtn.addEventListener("click", async function (e) {
+            e.preventDefault();
+            if (isProcessing) return;
+            isProcessing = true;
+
+            const code = codeInput.value.trim();
+            if (!/^\d{4}$/.test(code)) {
+                showMessageInView("کد باید ۴ رقمی باشد.", "error");
+                isProcessing = false;
+                return;
+            }
+
+            // disable verify button briefly
+            verifyBtn.disabled = true;
+            verifyBtn.classList.add("disabled");
+
+            try {
+                const res = await fetch("/dashboard/change-phone-otp/", {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    },
+                    body: new URLSearchParams({
+                        stage,
+                        token,
+                        code,
+                        new_phone: newPhoneInput.value.trim()
+                    })
+                });
+                const data = await res.json();
+
+                if (data.status === "error") {
+                    showMessageInView(data.message || "کد اشتباه یا خطا.", "error");
+                } else if (data.status === "ok" && data.stage === "verify_new") {
+                    token = data.token;
+                    stage = "verify_new";
+                    codeInput.value = "";
+                    showMessageInView(data.message || "کد دوم ارسال شد.", "info");
+                } else if (data.status === "done") {
+                    showMessageInView(data.message || "شماره تغییر کرد.", "success");
+                    // بعد از موفقیت صفحه را رفرش کن تا مقدار phone در template بروزرسانی شود
+                    setTimeout(() => window.location.reload(), 900);
+                } else {
+                    showMessageInView(data.message || "پاسخ نامعلوم از سرور.", "error");
+                }
+            } catch (err) {
+                console.error("Verify OTP error:", err);
+                showMessageInView("خطا در ارتباط با سرور.", "error");
+            }
+
+            setTimeout(() => {
+                isProcessing = false;
+                verifyBtn.disabled = false;
+                verifyBtn.classList.remove("disabled");
+            }, 1200);
+        });
     }
 });
 
+// -----------------------------
+// 🧭 اسکرول نرم و هوشمند بدون # در URL (فعال برای موبایل و دسکتاپ)
+// -----------------------------
+document.addEventListener('DOMContentLoaded', function () {
+    const sidebarLinks = document.querySelectorAll('a[data-scroll]');
+    sidebarLinks.forEach(link => {
+        link.addEventListener('click', function (e) {
+            const targetSelector = this.getAttribute('data-scroll');
+            const target = document.querySelector(targetSelector);
+            const href = this.getAttribute('href');
 
+            if (target) {
+                e.preventDefault();
+                target.scrollIntoView({behavior: 'smooth', block: 'start'});
+
+                // حذف # از URL
+                if (window.history.replaceState) {
+                    window.history.replaceState(null, '', href);
+                }
+            } else {
+                // اگر سکشن هنوز لود نشده بود (در تب یا lazy load)
+                sessionStorage.setItem('scrollTarget', targetSelector);
+            }
+        });
+    });
+
+    // اگر کاربر از صفحه دیگری آمده و scrollTarget در sessionStorage بود
+    const scrollTarget = sessionStorage.getItem('scrollTarget');
+    if (scrollTarget) {
+        const target = document.querySelector(scrollTarget);
+        if (target) {
+            setTimeout(() => {
+                target.scrollIntoView({behavior: 'smooth', block: 'start'});
+                sessionStorage.removeItem('scrollTarget');
+            }, 500);
+        }
+    }
+});
