@@ -1,136 +1,119 @@
-// static/products/js/pav-inline.js
 (function ($) {
-  "use strict";
+  if (typeof $ === "undefined") return;
 
-  if (window.__PAV_INLINE_BOUND__) return;
-  window.__PAV_INLINE_BOUND__ = true;
-
-  var CHOICES_URL = window._pavChoicesURL || "/admin/products/product/attribute-choices/";
-
-  function toStrArr(v){ if (!v) return []; if (Array.isArray(v)) return v.map(String); return [String(v)]; }
-
-  function setKindVisibility($row, kind) {
-    var $tdSingle = $row.find("td.field-value_choice");
-    var $tdMulti  = $row.find("td.field-values_multi");
-
-    if (kind === "choice") {
-      $tdSingle.show();
-      $tdMulti.hide().find("select").val([]);   // خالیِ چندتایی
-    } else if (kind === "multi") {
-      $tdMulti.show();
-      $tdSingle.hide().find("select").val("");  // خالیِ تکی
-    } else {
-      $tdSingle.hide().find("select").val("");
-      $tdMulti.hide().find("select").val([]);
-    }
+  // === کمکی‌ها ===
+  function findRow($el) {
+    // پوشش تم‌های مختلف ادمین و inline‌های Tabular/Stacked
+    return $el.closest("tr.form-row, .dynamic-productattributevalue_set, .inline-related");
   }
 
-  function applyInitialIfEmpty($single, $multi) {
-    if ($single.length && !$single.val()) {
-      var initSingle = $single.attr("data-initial") || "";
-      if (initSingle && $single.find('option[value="'+initSingle+'"]').length) {
-        $single.val(initSingle);
-      }
-    }
-    if ($multi.length) {
-      var cur = toStrArr($multi.val());
-      if (!cur.length) {
-        var initMulti = ($multi.attr("data-initial") || "")
-                        .split(",").filter(Boolean);
-        if (initMulti.length) {
-          $multi.val(initMulti);
-        }
-      }
-    }
-    // یک‌بارمصرف
-    $single.removeAttr("data-initial");
-    $multi.removeAttr("data-initial");
+  function fields($row){
+    return {
+      attr:    $row.find("select[name$='-attribute']"),
+      vtext:   $row.find("input[name$='-value_text']"),
+      vint:    $row.find("input[name$='-value_int']"),
+      vdec:    $row.find("input[name$='-value_decimal']"),
+      vbool:   $row.find("select[name$='-value_bool'],input[name$='-value_bool']"),
+      vchoice: $row.find("select[name$='-value_choice']"),
+      vmulti:  $row.find("select[name$='-values_multi']")
+    };
   }
 
-  // preserve=true یعنی مقدار فعلیِ DOM را پس از پرکردن دوباره، نگه‌دار
-  function fillChoices($row, attrId, preserve) {
-    var $single = $row.find('select[name$="-value_choice"]');
-    var $multi  = $row.find('select[name$="-values_multi"]');
+  function showOnly($row, kind){
+    var F = fields($row);
+    F.attr.prop("disabled", false).closest("td, .form-row").show();
 
-    var prevSingle = $single.length ? String($single.val() || "") : "";
-    var prevMulti  = $multi.length ? toStrArr($multi.val()) : [];
+    [F.vtext,F.vint,F.vdec,F.vbool,F.vchoice,F.vmulti].forEach(function ($el) {
+      $el.prop("disabled", true).closest("td, .form-row").hide();
+    });
 
-    if ($single.length) $single.empty().append($('<option value="">---------</option>'));
-    if ($multi.length)  $multi.empty();
+    function on($el){ $el.prop("disabled", false).closest("td, .form-row").show(); }
 
-    if (!attrId) { setKindVisibility($row, null); return; }
+    if (kind === "text")    on(F.vtext);
+    else if (kind === "int")     on(F.vint);
+    else if (kind === "decimal") on(F.vdec);
+    else if (kind === "bool")    on(F.vbool);
+    else if (kind === "choice")  on(F.vchoice);
+    else if (kind === "multi")   on(F.vmulti);
+  }
 
-    var token = Date.now() + Math.random().toString(36).slice(2);
-    $row.data("pavToken", token);
+  function fill($select, options){
+    if (!$select.length) return;
+    var cur = $select.val();
+    $select.empty().append($('<option/>',{value:"",text:"— انتخاب کنید —"}));
+    (options || []).forEach(function (o) {
+      $select.append($('<option/>',{value:o.id,text:o.label}));
+    });
+    if (cur) $select.val(cur);
+  }
 
-    $.getJSON(CHOICES_URL, { attr: attrId }).done(function (resp) {
-      if ($row.data("pavToken") !== token) return;
+  function resetChoiceFields($row){
+    var F = fields($row);
+    if (F.vchoice.length) F.vchoice.val("");
+    if (F.vmulti.length)  F.vmulti.val([]);
+  }
 
-      var items = (resp && resp.data) || [];
-      var kind  = (resp && resp.kind) || null;
+  function endpointUrl(){
+    if (window.PAV && window.PAV.endpoint) return window.PAV.endpoint;
+    if (typeof window.PAV_ENDPOINT !== "undefined" && window.PAV_ENDPOINT) return window.PAV_ENDPOINT;
+    var here = window.location.pathname.replace(/\/(add|change)\/?$/, "/");
+    return here + "attribute-choices/";
+  }
 
-      items.forEach(function (it) {
-        var v = String(it.id), t = it.label;
-        if ($single.length) $single.append($("<option>").val(v).text(t));
-        if ($multi.length)  $multi.append($("<option>").val(v).text(t));
-      });
+  function loadChoices($row, attrId){
+    if (!attrId){ showOnly($row, null); return; }
 
-      if (preserve) {
-        if ($single.length && prevSingle && $single.find('option[value="'+prevSingle+'"]').length) {
-          $single.val(prevSingle);
-        }
-        if ($multi.length && prevMulti.length) {
-          $multi.val(prevMulti);
-        }
+    resetChoiceFields($row);
+
+    $.get(endpointUrl(), { attr: attrId }).done(function (resp) {
+      var kind = resp && resp.kind ? resp.kind : null;
+      var data = (resp && resp.data) || [];
+
+      var F = fields($row);
+      fill(F.vchoice, data);
+      fill(F.vmulti,  data);
+
+      // اگر تکی بود، چندتایی را مخفی کن و برعکس
+      if (kind === "choice"){
+        F.vmulti.prop("disabled", true).closest("td, .form-row").hide();
+      } else if (kind === "multi"){
+        F.vchoice.prop("disabled", true).closest("td, .form-row").hide();
       }
 
-      // اگر هنوز خالی‌اند، از data-initial بخوان
-      applyInitialIfEmpty($single, $multi);
-
-      setKindVisibility($row, kind);
+      showOnly($row, kind);
+    }).fail(function () {
+      showOnly($row, null);
     });
   }
 
-  function initRow($row) {
-    var $attr = $row.find('select[name$="-attribute"]');
-    if (!$attr.length) return;
-
-    var attrId = $attr.val();
-    var hasSingleChoices = $row.find('td.field-value_choice select option').length > 1;
-    var hasMultiChoices  = $row.find('td.field-values_multi  select option').length > 0;
-
-    if (attrId && (hasSingleChoices || hasMultiChoices)) {
-      // اگر سرور از قبل options را رندر کرده، فقط مطمئن شو مقدارهای initial/انتخاب‌شده از دست نرود
-      applyInitialIfEmpty(
-        $row.find('td.field-value_choice select'),
-        $row.find('td.field-values_multi  select')
-      );
-      // ولی برای دانستن kind، یکبار AJAX می‌زنیم (بدون از دست دادن انتخاب‌ها)
-      fillChoices($row, attrId, true);
-    } else if (attrId) {
-      fillChoices($row, attrId, true);
-    } else {
-      setKindVisibility($row, null);
-    }
-  }
-
-  function wire() {
-    // تغییر attribute توسط کاربر
-    $(document).off("change.pav").on("change.pav",
-      'select[name$="-attribute"]',
-      function () {
-        var $row = $(this).closest("tr.form-row");
-        fillChoices($row, $(this).val(), false); // روی تغییر دستی، preserve لازم نیست
-      });
-
-    // بارگذاری اولیه (صفحه‌ی ویرایش)
-    $('tr.form-row').each(function(){ initRow($(this)); });
-
-    // ردیف‌های جدیدی که با «+» اضافه می‌شوند
-    $(document).off("formset:added.pav").on("formset:added.pav", function (event, $row) {
-      initRow($row);
+  function bindExistingRows(){
+    $("select[name$='-attribute']").each(function(){
+      var $attr = $(this);
+      var $row  = findRow($attr);
+      showOnly($row, null);
+      var initAid = $attr.val();
+      if (initAid) loadChoices($row, initAid);
     });
   }
 
-  $(wire);
-})(django.jQuery);
+  function boot(){
+    // تغییر ویژگی در هر ردیف
+    $(document).off("change.pav", "select[name$='-attribute']")
+      .on("change.pav", "select[name$='-attribute']", function(){
+        var $row = findRow($(this));
+        loadChoices($row, $(this).val());
+      });
+
+    // ردیف تازه
+    $(document).on("formset:added", function (e, $row){
+      var $attr = $row.find("select[name$='-attribute']");
+      showOnly($row, null);
+      var initAid = $attr.val();
+      if (initAid) loadChoices($row, initAid);
+    });
+
+    bindExistingRows();
+  }
+
+  $(document).ready(boot);
+})(window.django && django.jQuery ? django.jQuery : window.jQuery);

@@ -1,5 +1,5 @@
 :root {
-    --accent: #fa523c;
+    --accent: #000000;
     --ok: #2bbf6a;
     --soft: rgba(0, 0, 0, .06);
     --soft2: rgba(0, 0, 0, .1)
@@ -30,6 +30,7 @@
     border: 1px solid var(--soft);
     border-radius: 14px;
     padding: 14px;
+    margin-bottom: 2rem;
     box-shadow: 0 8px 28px rgba(0, 0, 0, .05)
 }
 
@@ -42,14 +43,14 @@
 .tlp-hero .product-title {
     font-size: 1.25rem;
     font-weight: 400;
-    margin-bottom: .4rem
+    margin-bottom: 1rem
 }
 
 .tlp-hero .meta-line {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px
+    margin-bottom: 5px
 }
 
 .tlp-hero .actions .btn-icon {
@@ -898,7 +899,7 @@ body.no-scroll {
     margin: 10px 0 0;
     display: grid;
     gap: 6px;
-    color: #555;
+    color: #a8a1a1;
 }
 
 .dk-meta i {
@@ -1056,7 +1057,7 @@ body.no-scroll {
 }
 
 .switch input:checked + .slider {
-    background: var(--accent);
+    background:  #FA523C;
 }
 
 .switch input:checked + .slider::before {
@@ -1321,15 +1322,19 @@ body.no-scroll {
 
 .dk-cta .dk-add {
     width: 100%;
-    background: var(--accent);
+    background: #FFFFFF;
+    border:1px solid  #FA523C;
     border-radius: 10px;
     font-weight: 800;
+    font-size: 1.6rem;
+    color: #111;
     padding: 12px;
     transition: background .2s ease;
 }
 
 .dk-cta .dk-add:hover {
-    background: #e24c30;
+    background:  linear-gradient( #FA523C , #bd4040);
+    color: #FFFFFF;
 }
 
 .dk-meta {
@@ -2512,133 +2517,312 @@ body.no-scroll {
 
 
 /* ========= Product card: compact & tidy (listing only) ========= */
-.page-content .products .product.product-7{
-  --card-pad: 10px;
-  --card-radius: 12px;
-  --media-h: 300px;               /* ارتفاع تصویر کارت روی دسکتاپ */
-  border: 1px solid rgba(0,0,0,.06);
-  border-radius: var(--card-radius);
-  overflow: hidden;
-  background: #fff;
-  box-shadow: 0 6px 20px rgba(0,0,0,.04);
-  transition: transform .15s ease, box-shadow .2s ease;
+.page-content .products .product.product-7 {
+    --card-pad: 10px;
+    --card-radius: 12px;
+    --media-h: 300px; /* ارتفاع تصویر کارت روی دسکتاپ */
+    border: 1px solid rgba(0, 0, 0, .06);
+    border-radius: var(--card-radius);
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, .04);
+    transition: transform .15s ease, box-shadow .2s ease;
 }
-.page-content .products .product.product-7:hover{
-  transform: translateY(-2px);
-  box-shadow: 0 12px 28px rgba(0,0,0,.06);
+
+.page-content .products .product.product-7:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, .06);
 }
 
 /* 1) خود قاب عکس: وسط‌چین محتوا */
-.page-content .products .product.product-7 figure.product-media{
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.page-content .products .product.product-7 figure.product-media {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* 2) اگر لینکِ دورِ تصویر هست، آن هم فلکس و وسط‌چین شود */
-.page-content .products .product.product-7 figure.product-media > a{
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
+.page-content .products .product.product-7 figure.product-media > a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
 }
 
 /* 3) خودِ تصویر: بدون کشیدگی و دقیقاً وسط قاب */
-.page-content .products .product.product-7 img.product-image{
-  display: block;
-  max-width: var(--media-max-w, 86%);
-  max-height: 100%;
-  width: auto;
-  height: auto;
-  margin: 0 auto;                         /* fallback وسط‌چین افقی */
-  object-fit: contain !important;
-  object-position: center center !important;
+.page-content .products .product.product-7 img.product-image {
+    display: block;
+    max-width: var(--media-max-w, 86%);
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    margin: 0 auto; /* fallback وسط‌چین افقی */
+    object-fit: contain !important;
+    object-position: center center !important;
 }
 
 
 /* بدنه و تایپوگرافی جمع‌وجور */
-.page-content .products .product.product-7 .product-body{
-  padding: 8px 10px 12px;
-  display:flex;                   /* برای پین‌کردن قیمت به کف کارت */
-  flex-direction:column;
-  flex:1;
+.page-content .products .product.product-7 .product-body {
+    padding: 8px 10px 12px;
+    display: flex; /* برای پین‌کردن قیمت به کف کارت */
+    flex-direction: column;
+    flex: 1;
 }
-.page-content .products .product.product-7 .product-cat a{ font-size: .95rem; }
 
-.page-content .products .product.product-7 .product-title{
-  margin-bottom: 10px;            /* فاصلهٔ خواسته شده تا قیمت */
+.page-content .products .product.product-7 .product-cat a {
+    font-size: .95rem;
 }
-.page-content .products .product.product-7 .product-title a{
-  font-size: 1.25rem;             /* قبلاً 1.6rem بود → خواناتر و جمع‌وجورتر */
-  line-height: 1.45;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;          /* حداکثر دو خط */
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+
+.page-content .products .product.product-7 .product-title {
+    margin-bottom: 10px; /* فاصلهٔ خواسته شده تا قیمت */
+}
+
+.page-content .products .product.product-7 .product-title a {
+    font-size: 1.25rem; /* قبلاً 1.6rem بود → خواناتر و جمع‌وجورتر */
+    line-height: 1.45;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* حداکثر دو خط */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 /* === Align main prices on one baseline (Technolife-style) === */
-.page-content .products .row{ margin-inline: -8px; }
-.page-content .products .row > [class*="col-"]{ padding-inline: 8px; display:flex; }
-.page-content .products .row > [class*="col-"] > .product{ display:flex; flex-direction:column; width:100%; }
+.page-content .products .row {
+    margin-inline: -8px;
+}
+
+.page-content .products .row > [class*="col-"] {
+    padding-inline: 8px;
+    display: flex;
+}
+
+.page-content .products .row > [class*="col-"] > .product {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
 
 /* پین‌کردن قیمت به کف کارت + رزرو یک ردیف برای قیمتِ قبل */
 .page-content .products .product.product-7 .product-price,
-.page-content .products .product.product-7 .product-price.text-right{
-  margin-top:auto;
-  display:grid;
-  grid-template-rows: auto 1.35rem;   /* ردیف 2 = فضای ثابتِ قیمتِ قبل */
-  align-content:end;
-  gap:2px;
-  padding-top:10px;                    /* فاصله‌ی مطمئن با تایتل */
+.page-content .products .product.product-7 .product-price.text-right {
+    margin-top: auto;
+    display: grid;
+    grid-template-rows: auto 1.35rem; /* ردیف 2 = فضای ثابتِ قیمتِ قبل */
+    align-content: end;
+    gap: 2px;
+    padding-top: 10px; /* فاصله‌ی مطمئن با تایتل */
 
-  /* چپ‌چین فیزیکی، مستقل از RTL/LTR */
-  text-align:left !important;
-  direction:rtl;                       /* ترتیب فارسی حفظ شود */
-  justify-items:left;                  /* مهم: چپِ فیزیکی در گرید */
+    /* چپ‌چین فیزیکی، مستقل از RTL/LTR */
+    text-align: left !important;
+    direction: rtl; /* ترتیب فارسی حفظ شود */
+    justify-items: left; /* مهم: چپِ فیزیکی در گرید */
 }
 
 /* خط قیمتِ اصلی (هم‌تراز و درشت) */
-.page-content .products .product.product-7 .product-price .new-price{
-  grid-row:1;
-  display:inline-flex; align-items:baseline; gap:.35rem;
-  font-weight:800; font-size:2rem; line-height:1.15;
-  justify-self:left;                   /* مهم: چپ فیزیکی */
+.page-content .products .product.product-7 .product-price .new-price {
+    grid-row: 1;
+    display: inline-flex;
+    align-items: baseline;
+    gap: .35rem;
+    font-weight: 800;
+    font-size: 2rem;
+    line-height: 1.15;
+    justify-self: left; /* مهم: چپ فیزیکی */
 }
-.page-content .products .product.product-7 .product-price .new-price .num{
-  font-family:"DanaFaNum","Vazirmatn","IRANSansWeb",system-ui,sans-serif;
+
+.page-content .products .product.product-7 .product-price .new-price .num {
+    font-family: "DanaFaNum", "Vazirmatn", "IRANSansWeb", system-ui, sans-serif;
 }
-.page-content .products .product.product-7 .product-price small{
-  font-size:.95rem; opacity:.9;
+
+.page-content .products .product.product-7 .product-price small {
+    font-size: .95rem;
+    opacity: .9;
 }
 
 /* خط قیمتِ قبل (اختیاری) — همیشه یک خط ثابت */
-.page-content .products .product.product-7 .product-price .old-price{
-  grid-row:2;
-  display:inline-flex; align-items:baseline;
-  font-size:1.05rem; line-height:1.2;
-  text-decoration:line-through; opacity:.75;
-  margin-right:.4rem; margin-left:.6rem;
-  justify-self:left;                   /* مهم: چپ فیزیکی */
+.page-content .products .product.product-7 .product-price .old-price {
+    grid-row: 2;
+    display: inline-flex;
+    align-items: baseline;
+    font-size: 1.05rem;
+    line-height: 1.2;
+    text-decoration: line-through;
+    opacity: .75;
+    margin-right: .4rem;
+    margin-left: .6rem;
+    justify-self: left; /* مهم: چپ فیزیکی */
 }
 
-.low-stock{
-  font-weight: 700;
-  color: #e53935;   /* قرمز خوانا */
-  font-size: .95rem;
+.low-stock {
+    font-weight: 700;
+    color: #e53935; /* قرمز خوانا */
+    font-size: 1.3rem;
+    margin-bottom: 0.5rem;
 }
 
 
 /* بندانگشتی‌های زیر تصویر کوچکتر و تمیز */
-.page-content .products .product.product-7 .product-nav-thumbs img{
-  width:40px; height:40px; object-fit:cover; border-radius:8px;
+.page-content .products .product.product-7 .product-nav-thumbs img {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 8px;
 }
 
 /* ارتفاع‌های واکنش‌گرا */
-@media (min-width: 1400px){
-  .page-content .products .product.product-7{ --media-h: 300px; }  /* دسکتاپ بزرگ */
+@media (min-width: 1400px) {
+    .page-content .products .product.product-7 {
+        --media-h: 300px;
+    }
+
+    /* دسکتاپ بزرگ */
 }
-@media (max-width: 991.98px){
-  .page-content .products .product.product-7{ --media-h: 220px; }  /* تبلت/موبایل */
+
+@media (max-width: 991.98px) {
+    .page-content .products .product.product-7 {
+        --media-h: 220px;
+    }
+
+    /* تبلت/موبایل */
+}
+
+.dk-specs-wrap {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #ddd8d8
+}
+
+.dk-specs-table {
+    width: 100%;
+    margin: 0;
+    border-collapse: separate;
+    border-spacing: 0
+}
+
+.dk-specs-table th, .dk-specs-table td {
+    padding: 1.75rem 2.5rem;
+    vertical-align: middle
+}
+
+.dk-specs-table th {
+    width: 36%;
+    background: #f8fafc;
+    color: #6b7280;
+    font-weight: 700;
+    font-size: larger;
+
+}
+
+.dk-specs-table tr + tr th, .dk-specs-table tr + tr td {
+    border-top: 1px solid #eef0f2
+}
+
+.dk-specs-table td .unit {
+    color: #9aa1aa;
+    font-size: .9em;
+    margin-inline-start: .25rem
+}
+
+.product-specs-card {
+  background: #fff;
+  border: 1px solid var(--soft, #eee);
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  direction: rtl;
+  text-align: right;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.product-specs-card .title {
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: #111;
+  margin-bottom: 1.75rem;
+}
+
+.specs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.75rem;
+}
+
+.spec-box {
+  background: rgba(0,0,0,0.02);
+  border-radius: 12px;
+
+  padding: 0.8rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  transition: 0.2s ease;
+}
+
+.spec-box:hover {
+  background: #ffffff;
+    border: 0.3px solid  #FA523C;
+
+}
+
+.spec-box .label {
+  font-size: 0.99rem;
+  color: #111;
+}
+
+.spec-box .value {
+  font-weight: 600;
+  color: #222;
+  margin-top: 0.2rem;
+}
+/* نوار لینک‌های ثانویه زیر دکمهٔ خرید */
+.dk-buybox .dk-mini-actions{
+  direction: rtl;
+  text-align: right;
+  margin-top: .5rem;
+  padding-top: .6rem;
+  border-top: 1px dashed var(--soft, #ececec);  /* مطابق رنگ‌های خود کارت */
+  display: flex;
+  flex-direction: column;       /* یکی زیر دیگری مثل اسکرین‌شات */
+  gap: .25rem;
+}
+
+/* خود لینک‌ها: ساده، خوانا و هم‌رنگ با متن‌های فرعی کارت */
+.dk-buybox .dk-mini-actions .btn-product{
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;  /* راست‌چین */
+  gap: .4rem;
+  padding: .35rem .2rem;
+  font-size: 1.9rem;
+  font-weight: 450;
+  color: #111;               /* خاکستری ملایم؛ «رنگ و لعاب» کارت حفظ شود */
+  text-decoration: none;
+  border-radius: 8px;
+  line-height:2;
+  transition: background .15s ease, color .15s ease;
+}
+
+/* هاور خیلی ملایم، بدون تغییر هویت بصری */
+.dk-buybox .dk-mini-actions .btn-product:hover{
+  background: rgba(0,0,0,.03);
+  color: #FA523C;
+}
+
+/* اگر تم شما برای wishlist/compare آیکن :before دارد، کمی فاصله‌گذاری‌اش را تنظیم می‌کنیم */
+.dk-buybox .dk-mini-actions .btn-product::before{
+  margin-left: .35rem; /* در RTL آیکن سمت راست می‌افتد */
+}
+
+/* موبایل: فاصله‌ها برای لمس بهتر */
+@media (max-width: 576px){
+  .dk-buybox .dk-mini-actions{
+    gap: .35rem;
+  }
+  .dk-buybox .dk-mini-actions .btn-product{
+    padding: .45rem .25rem;
+  }
 }

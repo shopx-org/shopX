@@ -150,21 +150,40 @@
                                                     </div>
                                                 </div>
 
-
                                                 <div class="details-filter-row details-row-size">
                                                     <label>رنگ : </label>
-
                                                     <div class="product-nav product-nav-dots">
-                                                        <a href="#" class="active" style="background: #eab656;"><span
-                                                                class="sr-only">نام رنگ</span></a>
-                                                        <a href="#" style="background: #333333;"><span class="sr-only">نام
-                                                    رنگ</span></a>
-                                                        <a href="#" style="background: #3a588b;"><span class="sr-only">نام
-                                                    رنگ</span></a>
-                                                        <a href="#" style="background: #caab97;"><span class="sr-only">نام
-                                                    رنگ</span></a>
-                                                    </div><!-- End .product-nav -->
-                                                </div><!-- End .details-filter-row -->
+                                                        {% if p.colors_list %}
+                                                            {% for c in p.colors_list|slice:":6" %}
+                                                                <a href="{{ p.get_absolute_url }}?color={{ c.slug }}"
+                                                                   class="{% if forloop.first %}active{% endif %}"
+                                                                   style="background: {{ c.hex }};"
+                                                                   title="{{ c.name }}">
+                                                                    <span class="sr-only">{{ c.name }}</span>
+                                                                </a>
+                                                            {% endfor %}
+                                                            {% if p.colors_list|length > 6 %}
+                                                                <span class="more-colors">+{{ p.colors_list|length|add:"-6" }}</span>
+                                                            {% endif %}
+                                                        {% else %}
+                                                            {# فال‌بک: از QuerySet رنگ‌های مدل (فیلد درست: hex_code) #}
+                                                            {% with colors=p.colors.all %}
+                                                                {% if colors %}
+                                                                    {% for c in colors|slice:":6" %}
+                                                                        <a href="{{ p.get_absolute_url }}?color={{ c.slug }}"
+                                                                           class="{% if forloop.first %}active{% endif %}"
+                                                                           style="background: {{ c.hex_code }};"
+                                                                           title="{{ c.name }}">
+                                                                            <span class="sr-only">{{ c.name }}</span>
+                                                                        </a>
+                                                                    {% endfor %}
+                                                                {% else %}
+                                                                    <span class="text-muted">بدون تنوع رنگ</span>
+                                                                {% endif %}
+                                                            {% endwith %}
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
 
                                                 <h3 class="product-title text-right">
                                                     <a href="{{ p.get_absolute_url|default:'#' }}">{{ p.name }}</a>
@@ -191,20 +210,6 @@
                                                         </span>
                                                     {% endif %}
                                                 </div>
-
-
-                                                {# بندانگشتی‌های زیر تصویر (اختیاری) #}
-                                                {#                                                {% if p.image_list and p.image_list|length > 1 %}#}
-                                                {#                                                    <div class="product-nav product-nav-thumbs">#}
-                                                {#                                                        {% for im in p.image_list|slice:":3" %}#}
-                                                {#                                                            <a href="{{ p.get_absolute_url|default:'#' }}"#}
-                                                {#                                                               class="{% if forloop.first %}active{% endif %}">#}
-                                                {#                                                                <img src="{{ im.image.url }}"#}
-                                                {#                                                                     alt="{{ im.alt|default:p.name }}">#}
-                                                {#                                                            </a>#}
-                                                {#                                                        {% endfor %}#}
-                                                {#                                                    </div>#}
-                                                {#                                                {% endif %}#}
                                             </div>
                                         </div>
                                     </div>

@@ -9,7 +9,31 @@ from colorfield.fields import ColorField
 from django import forms
 from mptt.models import MPTTModel, TreeForeignKey
 from mptt.managers import TreeManager
+from django.core.exceptions import ValidationError
+from django.utils.functional import cached_property
+from decimal import Decimal
 
+# ---------- 1) گروه سایز و خود سایز ----------
+class SizeGroup(models.Model):
+    code  = models.SlugField(max_length=50, unique=True)   # مثلا: apparel_alpha
+    name  = models.CharField(max_length=100)               # مثلا: لباس (حروفی)
+    note  = models.CharField(max_length=200, blank=True)
+
+    def __str__(self):
+        return self.name
+
+class Size(models.Model):
+    group = models.ForeignKey(SizeGroup, on_delete=models.CASCADE, related_name="sizes")
+    code  = models.CharField(max_length=30)     # کلید داخلی: S, M, 42, 29x30 …
+    label = models.CharField(max_length=30)     # نمایش به کاربر: S, M, EU 42, 29/30
+    rank  = models.PositiveIntegerField(default=0)  # برای sort صحیح
+
+    class Meta:
+        unique_together = (("group", "code"),)
+        ordering = ["group", "rank", "code"]
+
+    def __str__(self):
+        return f"{self.label} ({self.group.code})"
 
 # =========================
 # Category (MPTT)
@@ -37,6 +61,25 @@ class Category(MPTTModel):
     meta_description = models.CharField(max_length=160, blank=True, verbose_name="توضیحات متا")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ ایجاد")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="تاریخ به‌روزرسانی")
+    spec_slots = models.JSONField(default=list, blank=True, help_text=(
+        "لیست آیتم‌ها به ترتیب نمایش. مثال:"
+        " ["
+        ' {"key":"brand","label":"برند"},'
+        ' {"key":"attr:os","label":"سیستم‌عامل"},'
+        ' {"key":"attr:model_name","label":"مدل"},'
+        ' {"key":"attr:storage","label":"ظرفیت حافظه"},'
+        ' {"key":"attr:display_size","label":"اندازه صفحه‌نمایش"},'
+        ' {"key":"attr:battery_capacity","label":"ظرفیت باتری"}'
+        " ]"
+    ))
+
+    @cached_property
+    def resolved_spec_slots(self):
+        # نزدیک‌ترین spec_slots غیرخالی در زنجیرهٔ اجداد
+        for c in reversed(list(self.get_ancestors(include_self=True))):
+            if c.spec_slots:
+                return c.spec_slots
+        return []
 
     parent = TreeForeignKey(
         "self",
@@ -47,7 +90,14 @@ class Category(MPTTModel):
         db_index=True,
         verbose_name="والد",
     )
-
+    size_group = models.ForeignKey(
+        "products.SizeGroup",
+        null=True, blank=True,
+        on_delete=models.SET_NULL,
+        related_name="categories",
+        verbose_name="گروه سایز",
+        help_text="اگر تنظیم شود، محصولات این دسته به‌طور پیش‌فرض از این گروه سایز استفاده می‌کنند.",
+    )
     objects: CategoryManager = CategoryManager()
 
     class MPTTMeta:
@@ -72,7 +122,17 @@ class Category(MPTTModel):
             models.Index(fields=["parent", "position"]),
             models.Index(fields=["slug", "parent"]),
             models.Index(fields=["is_active"]),
+            models.Index(fields=["size_group"]),
         ]
+
+        # 🔹 نزدیک‌ترین گروه‌سایز معتبر در شاخه درخت (اگر روی خود دسته نبود از والد می‌گیرد)
+    @cached_property
+    def resolved_size_group(self):
+        # نزدیک‌ترین اجداد از خود دسته به سمت بالا
+        for cat in reversed(list(self.get_ancestors(include_self=True))):
+            if cat.size_group_id:
+                return cat.size_group
+        return None
 
     def save(self, *args, **kwargs):
         MAX = self._meta.get_field("slug").max_length
@@ -244,6 +304,18 @@ class Product(models.Model):
             models.Index(fields=["brand_fk"]),
         ]
 
+
+    @property
+    def effective_price(self) -> Decimal:
+        """
+        قیمت مؤثر بدون درنظرگرفتن کوپن‌های سشن (برای ادمین/استفاده آفلاین).
+        توجه: چون به request دسترسی نداریم، کوپن‌ها لحاظ نمی‌شوند.
+        """
+        # import داخل متد برای جلوگیری از circular import
+        from products.services.pricing_adapter import price_single_product
+        res = price_single_product(self, qty=1, coupons=[], channel="web")
+        return res.total
+
     def save(self, *args, **kwargs):
         MAX = self._meta.get_field("slug").max_length
         if not self.slug:
@@ -264,6 +336,10 @@ class Product(models.Model):
     def cover_image(self) -> Optional["ProductImage"]:
         return self.images.filter(is_primary=True).first() or self.images.order_by("position", "id").first()
 
+    def get_size_group(self):
+        # اگر محصول دسته دارد، از زنجیره‌ی اجداد نزدیک‌ترین size_group را برگردان
+        return self.category.resolved_size_group if self.category_id else None
+
     @property
     def colors(self):
         ids = set(self.variants.values_list("color_id", flat=True))
@@ -282,17 +358,16 @@ SKU_VALIDATOR = RegexValidator(
     message="SKU باید 3 تا 32 کاراکتر، فقط حروف بزرگ، اعداد و - _ . باشد.",
 )
 
-
 class ProductVariant(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="variants", verbose_name="محصول")
-    color = models.ForeignKey(Color, on_delete=models.PROTECT, related_name="variants", verbose_name="رنگ")
-    size = models.CharField(max_length=50, blank=True, verbose_name="سایز/مدل")
+    color   = models.ForeignKey(Color, on_delete=models.PROTECT, related_name="variants", verbose_name="رنگ")
+    size    = models.ForeignKey("products.Size", null=True, blank=True, on_delete=models.PROTECT, related_name="variants", verbose_name="سایز")
 
-    sku = models.CharField(max_length=64, unique=True, validators=[SKU_VALIDATOR], verbose_name="SKU")
+    sku     = models.CharField(max_length=64, unique=True, validators=[SKU_VALIDATOR], verbose_name="SKU")
     barcode = models.CharField(max_length=64, blank=True, verbose_name="بارکد")
 
-    price = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True, validators=[MinValueValidator(0)], verbose_name="قیمت واریانت")
-    stock = models.PositiveIntegerField(default=0, verbose_name="موجودی")
+    price   = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True, validators=[MinValueValidator(0)], verbose_name="قیمت واریانت")
+    stock   = models.PositiveIntegerField(default=0, verbose_name="موجودی")
     is_active = models.BooleanField(default=True, verbose_name="فعال")
 
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ ایجاد")
@@ -301,8 +376,31 @@ class ProductVariant(models.Model):
     class Meta:
         verbose_name = "واریانت"
         verbose_name_plural = "واریانت‌ها"
-        constraints = [models.UniqueConstraint(fields=["product", "color", "size"], name="uniq_product_color_size")]
-        indexes = [models.Index(fields=["product", "color"]), models.Index(fields=["is_active"])]
+        constraints = [
+            # وقتی size مشخص است، ترکیب یکتا باشد
+            models.UniqueConstraint(
+                fields=["product", "color", "size"],
+                condition=Q(size__isnull=False),
+                name="uniq_prod_color_size_when_size_not_null",
+            ),
+            # وقتی size خالی است، فقط یک رکورد برای هر (product, color)
+            models.UniqueConstraint(
+                fields=["product", "color"],
+                condition=Q(size__isnull=True),
+                name="uniq_prod_color_when_size_null",
+            ),
+        ]
+        indexes = [
+            models.Index(fields=["product", "color", "size"]),
+            models.Index(fields=["is_active"]),
+        ]
+
+
+    def clean(self):
+        super().clean()
+        sg = self.product.get_size_group() if self.product_id else None
+        if sg and self.size_id and self.size.group_id != sg.id:
+            raise ValidationError({"size": "سایز انتخابی با گروه سایز محصول/دسته سازگار نیست."})
 
     def get_price(self):
         return self.price if self.price is not None else self.product.price
@@ -312,14 +410,16 @@ class ProductVariant(models.Model):
         return self.is_active and self.stock > 0
 
     def __str__(self):
-        return f"{self.product.name} — {self.color.name}" + (f" / {self.size}" if self.size else "")
+        size_label = self.size.label if self.size_id else ""
+        return f"{self.product.name} — {self.color.name}" + (f" / {size_label}" if size_label else "")
 
     def save(self, *args, **kwargs):
         if not self.sku:
+            size_token = (self.size.code if self.size_id else "OS")[:4]
             parts = [
                 (self.product.slug[:8] if self.product_id else "PROD").upper(),
                 (self.color.slug[:3] if self.color_id else "N/A").upper(),
-                (self.size[:4] or "OS").upper(),
+                size_token.upper(),
             ]
             base = "-".join(parts).replace("--", "-")
             sku = base
@@ -500,3 +600,5 @@ class ProductAttributeValue(models.Model):
                 invalid = self.values_multi.exclude(attribute_id=self.attribute_id).exists()
                 if invalid:
                     raise forms.ValidationError("بعضی گزینه‌های چندتایی متعلق به این ویژگی نیستند")
+
+

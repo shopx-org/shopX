@@ -1,4 +1,3 @@
-
 # ShopX/settings.py
 from pathlib import Path
 import os
@@ -9,46 +8,40 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # ── Env ────────────────────────────────────────────────────────────────────────
 # .env باید کنار manage.py باشد
-env = environ.Env(
-    DEBUG=(bool, True),
-)
+env = environ.Env(DEBUG=(bool, True))
 environ.Env.read_env(BASE_DIR / ".env")
 
 # ── Core ───────────────────────────────────────────────────────────────────────
-SECRET_KEY = env(
-    "SECRET_KEY",
-    default="django-insecure-change-me-in-.env",  # توصیه: در .env بگذار
-)
+SECRET_KEY = env("SECRET_KEY", default="django-insecure-change-me-in-.env")
 DEBUG = env.bool("DEBUG", default=True)
-
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["127.0.0.1", "localhost"])
 
+# ── Apps ───────────────────────────────────────────────────────────────────────
 INSTALLED_APPS = [
+    # Django
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    'django.contrib.humanize',
+    "django.contrib.humanize",
 
-    # local apps
+    # Local apps
     "home.apps.HomeConfig",
     "account.apps.AccountConfig",
     "OTP_app.apps.OtpAppConfig",
     "dashboards.apps.DashboardsConfig",
     "products.apps.ProductsConfig",
     "Core.apps.CoreConfig",
+    "promos.apps.PromosConfig",
 
-    # third-party
+    # Third-party
     "widget_tweaks",
     "mptt",
     "tree_queries",
     "colorfield",
-
-
 ]
-# ── Apps ───────────────────────────────────────────────────────────────────────
 
 # ── Middleware ─────────────────────────────────────────────────────────────────
 MIDDLEWARE = [
@@ -90,10 +83,8 @@ DATABASES = {
         "PASSWORD": env("POSTGRES_PASSWORD", default=""),
         "HOST": env("POSTGRES_HOST", default="127.0.0.1"),
         "PORT": env.int("POSTGRES_PORT", default=5433),
-        "CONN_MAX_AGE": 60,  # اتصال پایدار
-        "OPTIONS": {
-            "options": f"-c search_path={env('PG_SCHEMA', default='public')}"
-        }
+        "CONN_MAX_AGE": 60,
+        "OPTIONS": {"options": f"-c search_path={env('PG_SCHEMA', default='public')}"},
     }
 }
 
@@ -117,19 +108,52 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # ── i18n / tz ──────────────────────────────────────────────────────────────────
-LANGUAGE_CODE = "fa"          # 'fa-ir' ممکنه variant رسمی نداشته باشه
+LANGUAGE_CODE = "fa"
 TIME_ZONE = "Asia/Tehran"
 USE_I18N = True
 USE_TZ = True
 
-# ── Cache (برای ریت‌لیمیت/OTP) ────────────────────────────────────────────────
+# ── Cache ──────────────────────────────────────────────────────────────────────
+# DEV: LocMem. برای پروداکشن بهتره Redis ست کنی (پایین env-toggle گذاشتم).
 ENABLE_RATE_LIMIT = False
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-        "LOCATION": "shopx-rate-limit",
+
+REDIS_URL = env("REDIS_URL", default="")
+USE_REDIS = bool(REDIS_URL)
+
+if USE_REDIS:
+    CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": REDIS_URL,          # e.g. redis://127.0.0.1:6379/1
+            "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
+            "KEY_PREFIX": "shopx",
+            "TIMEOUT": 60,
+        },
+        "ratelimit": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": env("REDIS_URL_RATELIMIT", default=REDIS_URL),  # می‌تونه /2 باشه
+            "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
+            "KEY_PREFIX": "shopx_rl",
+            "TIMEOUT": 300,
+        },
     }
-}
+else:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "shopx-default-cache",
+            "TIMEOUT": 60,
+            "OPTIONS": {"MAX_ENTRIES": 10000},
+        },
+        "ratelimit": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "shopx-rate-limit",
+            "TIMEOUT": 300,
+        },
+    }
+
+# اگر از پکیج خاص rate-limit استفاده می‌کنی:
+RATELIMIT_CACHE = "ratelimit"
 
 # ── Static/Media ───────────────────────────────────────────────────────────────
 STATIC_URL = "/static/"
@@ -140,7 +164,7 @@ CKEDITOR_UPLOAD_PATH = "uploads/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# ── OTP / Ghasedak (از .env) ───────────────────────────────────────────────────
+# ── OTP / Ghasedak ─────────────────────────────────────────────────────────────
 GHASEDAK_API_KEY = env("GHASEDAK_API_KEY", default="")
 OTP_TEMPLATE_NAME = env("OTP_TEMPLATE_NAME", default="verifyphone")
 
@@ -148,13 +172,20 @@ OTP_TEMPLATE_NAME = env("OTP_TEMPLATE_NAME", default="verifyphone")
 OTP_WINDOW_SECONDS = 3600
 OTP_MAX_ATTEMPTS_IN_WINDOW = 3
 
-# dev/testing overrides
+# مقادیر مناسب DEV (برای تست سریع). ✱ دقت: کامنت فارسی را با # بنویس؛
+# هر متن غیرکامنت در انتهای خطوط باعث SyntaxError می‌شود.
 if DEBUG:
     OTP_TTL_SECONDS = 60
-    OTP_RESEND_GAP_SEC = 1       # برای تست راحت
-    OTP_MAX_RESENDS = 999
-    OTP_BLOCK_DURATION = 2
+    OTP_RESEND_GAP_SEC = 1       # فاصله بین ارسال دوباره
+    OTP_MAX_RESENDS = 999        # برای تست؛ در پروداکشن محدود کن
+    OTP_BLOCK_DURATION = 2       # بلاک کوتاه تستی (دقیقه/ثانیه بسته به پیاده‌سازی‌ات)
     OTP_WINDOW_SECONDS = 3600
     OTP_MAX_ATTEMPTS_IN_WINDOW = 100000
 
-# ── Security (برای دیپلوی واقعی فعال کن) ──────────────────────────────────────
+# ── Security (نمونه‌هایی که در پروداکشن فعال می‌کنی) ─────────────────────────
+# CSRF_COOKIE_SECURE = True
+# SESSION_COOKIE_SECURE = True
+# SECURE_HSTS_SECONDS = 31536000
+# SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+# SECURE_HSTS_PRELOAD = True
+# SECURE_SSL_REDIRECT = True
