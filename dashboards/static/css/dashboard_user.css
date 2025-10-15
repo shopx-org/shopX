@@ -1,0 +1,251 @@
+/* === 🎯 Sidebar Section === */
+.sidebar-shop {
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 0.75rem;
+    padding: 1.5rem 1rem;
+    transition: all 0.3s ease;
+}
+
+.sidebar-shop .widget-dashboard .widget-title {
+    font-weight: 800;
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    color: #222;
+}
+
+.sidebar-shop .widget-dashboard .dashboard-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-shop .widget-dashboard .dashboard-menu li {
+    margin-bottom: 0.6rem;
+}
+
+.sidebar-shop .widget-dashboard .dashboard-menu li a {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* فاصله آیکون و متن */
+    padding: 0.7rem 1rem;
+    border-radius: 8px;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #000;
+    text-decoration: none;
+    transition: all 0.25s ease;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sidebar-shop .widget-dashboard .dashboard-menu li a i {
+    min-width: 22px;
+    text-align: center;
+    font-size: 1.8rem;
+    color: #555;
+    transition: all 0.3s ease;
+}
+
+.sidebar-shop .widget-dashboard .dashboard-menu li a:hover,
+.sidebar-shop .widget-dashboard .dashboard-menu li a.active {
+    color: #FA523C !important;
+    background: #fdf1ef;
+}
+
+.sidebar-shop .widget-dashboard .dashboard-menu li a:hover i,
+.sidebar-shop .widget-dashboard .dashboard-menu li a.active i {
+    color: #FA523C !important;
+}
+
+/* === 🧭 Align Sidebar & Dashboard Content === */
+.page-content .row {
+    align-items: flex-start !important;
+}
+
+.tab-content {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+/* === 🪩 Dashboard Card === */
+.dashboard-card {
+    background: linear-gradient(145deg, #ffffff, #f8f9fa);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 16px;
+    padding: 2.5rem;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+    backdrop-filter: blur(6px);
+    transition: all 0.3s ease;
+    margin-top: 0 !important;
+}
+
+.dashboard-card:hover {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    transform: translateY(-3px);
+}
+
+@media (min-width: 992px) {
+    .dashboard-card {
+        margin-top: -4px !important;
+    }
+}
+
+/* === 🧾 Form (Modern Style) === */
+.user-form-modern input,
+.user-form-modern select,
+.user-form-modern textarea {
+    width: 100%;
+    border: 1px solid #e4e4e4;
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-top: 5px;
+    font-size: 15px;
+    background-color: #fdfdfd;
+    transition: all 0.25s ease;
+    box-shadow: none !important;
+}
+
+.user-form-modern input:focus,
+.user-form-modern select:focus,
+.user-form-modern textarea:focus {
+    border-color: #FA523C;
+    background-color: #fff;
+    box-shadow: 0 0 0 3px rgba(250, 82, 60, 0.1);
+    outline: none;
+}
+
+.user-form-modern label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 700;
+    color: #222;
+}
+
+/* === 🔘 Buttons === */
+.user-form-modern .btn-save,
+.user-form-modern .btn-logout {
+    display: inline-block;
+    border-radius: 10px;
+    padding: 10px 22px;
+    font-weight: 600;
+    transition: all 0.25s ease;
+    text-align: center;
+}
+
+/* ذخیره تغییرات */
+.user-form-modern .btn-save {
+    background: linear-gradient(135deg, #FA523C, #ff785d);
+    border: none;
+    color: #fff;
+    box-shadow: 0 3px 10px rgba(250, 82, 60, 0.2);
+}
+
+.user-form-modern .btn-save:hover {
+    background: linear-gradient(135deg, #ff6b4b, #fa523c);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(250, 82, 60, 0.25);
+}
+
+/* خروج از حساب */
+.user-form-modern .btn-logout {
+    background: #fff;
+    border: 2px solid #FA523C;
+    color: #FA523C;
+    box-shadow: none;
+}
+
+.user-form-modern .btn-logout:hover {
+    background-color: #FA523C;
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(250, 82, 60, 0.2);
+}
+
+/* === 💬 Alerts === */
+.alert {
+    text-align: right;
+    border-radius: 8px;
+    font-size: 1.4rem;
+    font-weight: 500;
+    padding: 10px 14px;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+}
+
+.alert .close {
+    float: left;
+    font-size: 1.5rem;
+    line-height: 1;
+}
+
+/* === 📱 Responsive === */
+@media (max-width: 992px) {
+
+    /* فاصله‌ی سایدبار و کارت */
+    .sidebar-shop {
+        margin-bottom: 1.5rem;
+    }
+
+    /* فرم کارت داشبورد */
+    .dashboard-card {
+        padding: 1.5rem;
+    }
+
+    /* دکمه‌های ذخیره و خروج در موبایل تمام عرض */
+    .user-form-modern .btn-save,
+    .user-form-modern .btn-logout {
+        width: 100%;
+        margin: 0.8rem 0;
+    }
+
+    /* چینش دکمه‌ها در فرم به صورت ستونی */
+    .d-flex.justify-content-between {
+        flex-direction: column;
+    }
+
+    /* 🟠 مخصوص بخش تغییر شماره موبایل */
+    .input-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    #new_phone {
+        border-radius: 10px !important; /* گوشه‌های گرد کامل */
+        width: 100%;
+    }
+
+    #send_otp_old {
+        border-radius: 10px !important; /* گوشه‌های گرد کامل */
+        width: 100%;
+        margin-top: 8px; /* فاصله بین input و دکمه */
+    }
+
+    /* نمایش بخش وارد کردن کد OTP هم تمام عرض و با فاصله مناسب */
+    #otp_stage_area .input-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    #otp_code {
+        border-radius: 10px !important;
+        width: 100%;
+    }
+
+    #verify_otp {
+        border-radius: 10px !important;
+        width: 100%;
+        margin-top: 8px;
+    }
+}

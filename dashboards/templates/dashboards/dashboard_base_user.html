@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+    {% if user.is_authenticated %}
+        <main class="main">
+            <nav aria-label="breadcrumb" class="breadcrumb-nav mb-3">
+                <div class="container">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'home:home' %}">خانه</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">داشبورد</li>
+                    </ol>
+                </div>
+            </nav>
+
+            <div class="page-content">
+                <div class="container">
+                    <div class="row">
+
+                        <!-- ✅ سایدبار داخل ستون بوت‌استرپ -->
+                        <div class="col-lg-3 col-xl-3 mb-4 mb-lg-0">
+                            {% include 'dashboards/sidbar_user_dashboard.html' %}
+                        </div>
+
+                        <!-- ✅ محتوای داشبورد -->
+                        <div class="col-lg-9 col-xl-9">
+                            <div class="tab-content">
+                                {% block UserDash_content %}{% endblock %}
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </main>
+    {% else %}
+        <p>لطفاً برای دسترسی به داشبورد <a href="{% url 'account:login' %}">وارد شوید</a>.</p>
+    {% endif %}
+{% endblock %}
+
+{% block CSS-JS %}
+    <link rel="stylesheet"
+          href="{% static 'css/http_cdnjs.cloudflare.com_ajax_libs_font-awesome_5.15.4_css_all.css' %}"/>
+    <link rel="stylesheet" href="{% static 'css/dashboard_user.css' %}"/>
+    <script src="{% static 'js/dashboard_user.js' %}"></script>
+{% endblock %}

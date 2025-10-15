@@ -541,7 +541,7 @@ blockquote.text-white cite span {
 }
 
 .page-content {
-  padding-bottom: 2.5rem;
+  padding-bottom: 5rem;
 }
 
 @media screen and (min-width: 992px) {
@@ -7608,10 +7608,7 @@ a:focus {
 .product-pager-link:focus {
   color: #FA523C;
 }
-.product-cat span{
-  font-size: 1.5rem;
-  color: #111;
-}
+
 .product-pager-link:hover span,
 .product-pager-link:focus span {
   box-shadow: 0 1px 0 #FA523C;
@@ -10913,12 +10910,6 @@ a:focus {
   border: none;
   border-radius: 0;
 }
-.card-body p {
-  font-size: 1.25rem;
-  font-weight: 400;
-  line-height: 2.9rem;
-  color: #1a1c1e;
-}
 
 .accordion-icon .card-body {
   padding-left: 5.5rem !important;
@@ -12341,7 +12332,7 @@ a:focus {
 }
 
 .ratings-text {
-  color: #474343;
+  color: #cccccc;
   letter-spacing: -.01em;
   margin-right: .8rem;
 }
@@ -12520,7 +12511,7 @@ a:focus {
 }
 
 .product-body .btn-wishlist {
-  position: relative;
+  position: absolute;
   top: 3.4rem;
   left: 0;
   color: #ccc;
@@ -12568,7 +12559,7 @@ a:focus {
   letter-spacing: 0;
   min-width: 100px;
   padding-right: 1.8rem;
-  padding-left: .5rem;
+  padding-left: .4rem;
   color: #fff;
   background-color: #FA523C;
   transition: all .35s ease;
@@ -13497,9 +13488,9 @@ a:focus {
 }
 
 .product.product-list .product-content {
-  color: #191818;
-  font-weight: 600;
-  font-size: 1.9rem;
+  color: #777;
+  font-weight: 300;
+  font-size: 1.4rem;
   line-height: 1.43;
   padding-top: 1rem;
   margin-bottom: 3.4rem;
@@ -16126,7 +16117,7 @@ button:focus {
 }
 
 .quickView-content .product-cat a {
-  color: #111;
+  color: #666;
 }
 
 .quickView-content .product-left {
@@ -17209,7 +17200,7 @@ button:focus {
   font-weight: 400;
   font-size: 2.4rem;
   letter-spacing: -.025em;
-  margin-bottom: 0.1rem;
+  margin-bottom: 1.2rem;
   margin-top: -.5rem;
   padding-left: 1rem;
 }
@@ -17227,15 +17218,12 @@ button:focus {
 }
 
 .product-details .product-content {
-
   margin-bottom: 1.6rem;
 }
 
 .product-details .product-content p:last-child {
   margin-bottom: 0;
   text-align: right;
-  font-size: 1.5rem;
-  color: #28292b;
 }
 
 .product-details .product-countdown {
@@ -17260,8 +17248,8 @@ button:focus {
 }
 
 .product-details .product-cat {
-  font-weight: 450;
-  font-size: 1.8rem;
+  font-weight: 400;
+  font-size: 1.4rem;
 }
 
 .product-details .product-cat span {
@@ -17269,7 +17257,7 @@ button:focus {
 }
 
 .product-details .product-cat a {
-  color: #111;
+  color: #666;
   box-shadow: none;
   transition: all .35s ease;
 }
@@ -17287,7 +17275,7 @@ button:focus {
 }
 
 .product-details .product-size a {
-  color: #111;
+  color: #666;
   width: 4rem;
   height: 4rem;
   font-weight: 400;
@@ -17397,8 +17385,7 @@ button:focus {
   display: flex;
   align-items: center;
   flex-flow: row wrap;
-  margin-bottom: .5rem;
-
+  margin-bottom: 3rem;
 }
 
 .product-details-action .btn-cart {
@@ -17430,8 +17417,7 @@ button:focus {
 .details-action-wrapper {
   display: flex;
   align-items: center;
-  margin-right: 1rem;
-  margin-top: 2.5rem ;
+  margin-right: 4rem;
 }
 
 .details-action-wrapper .btn-product {
@@ -17471,14 +17457,14 @@ button:focus {
 }
 
 .product-details-footer {
-  color: #111111;
+  color: #777;
   display: flex;
   font-weight: 400;
   align-items: center;
   flex-wrap: wrap;
-  padding-top: 1.2rem;
+  padding-top: 1.7rem;
   border-top: .1rem solid #ebebeb;
-  padding-bottom: 1.2rem;
+  padding-bottom: 1.7rem;
 }
 
 .product-details-footer .social-icons {
@@ -27783,7 +27769,7 @@ table.invoice-table th {
    تنظیم رنگ‌ها و متغیرها
    ============================ */
 :root{
-  --accent: #170f0e; /* رنگ نارنجی هنگام hover — در صورت نیاز تغییر بده */
+  --accent: #FA523C; /* رنگ نارنجی هنگام hover — در صورت نیاز تغییر بده */
   --sidebar-bg: #fefefe; /* پس‌زمینه سایدبار */
   --sidebar-text: #000000; /* رنگ متن سایدبار */
 }
@@ -27819,7 +27805,7 @@ table.invoice-table th {
 }
 
 :root {
-  --accent: #201d1d; /* رنگ نارنجی هاور (اگر لازم شد تغییر بده) */
+  --accent: #c2cad6; /* رنگ نارنجی هاور (اگر لازم شد تغییر بده) */
 }
 
 /* ویجت‌های سایدبار: پس‌زمینه سفید و متن مشکی */

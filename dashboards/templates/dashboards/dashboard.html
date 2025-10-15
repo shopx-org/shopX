@@ -1,0 +1,15 @@
+{% extends 'dashboards/dashboard_base_user.html' %}
+{% block UserDash_content %}
+    <div class="tab-pane fade show active" id="dashboard" role="tabpanel">
+        <p>سلام <span
+                class="font-weight-normal text-dark">{{ user.get_full_name|default:user.phone }}</span><br>
+            شما در اینجا می‌توانید
+            <a href="#tab-orders" class="tab-trigger-link">سفارشات</a> خود را ببینید،
+            وضعیت ارسال <a href="#tab-address" class="tab-trigger-link">سفارشات</a> را
+            مشاهده کنید،
+            آدرس خود را تغییر دهید، و همچنین
+            <a href="{% url 'dashboards:personal_info' %}">جزئیات حساب</a> یا رمز عبور خود
+            را ویرایش کنید.
+        </p>
+    </div>
+{% endblock %}

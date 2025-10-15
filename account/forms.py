@@ -96,6 +96,7 @@ class CheckOtpForm(forms.Form):
         validators=[RegexValidator(r"^\d{4}$")],
     )
 
+
 class PasswordOnlyForm(forms.Form):
     password = forms.CharField(
         label="رمز عبور",
@@ -109,6 +110,7 @@ class ForgotPasswordForm(forms.Form):
         widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "09xxxxxxxxx"}),
         validators=[MinLengthValidator(11), MaxLengthValidator(11), RegexValidator(r"^09\d{9}$")],
     )
+
 
 class SetPasswordForm(forms.Form):
     new_password1 = forms.CharField(
@@ -154,7 +156,7 @@ class SetPasswordForm(forms.Form):
                 # نگاشت کدهای پیش‌فرض جنگو به پیام فارسی
                 fa = []
                 for err in e.error_list:
-                    code   = getattr(err, "code", "")
+                    code = getattr(err, "code", "")
                     params = getattr(err, "params", {}) or {}
                     if code == "password_too_short":
                         # از MinimumLengthValidator می‌آید
