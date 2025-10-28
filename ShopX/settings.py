@@ -35,12 +35,14 @@ INSTALLED_APPS = [
     "products.apps.ProductsConfig",
     "Core.apps.CoreConfig",
     "promos.apps.PromosConfig",
+    "cart.apps.CartConfig",
 
     # Third-party
     "widget_tweaks",
     "mptt",
     "tree_queries",
     "colorfield",
+
 ]
 
 # ── Middleware ─────────────────────────────────────────────────────────────────

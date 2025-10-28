@@ -860,3 +860,20 @@ $(document).ready(function () {
         }
     });
 });
+
+document.addEventListener('click', function (e) {
+  const btn = e.target.closest('.qty-btn');
+  if (!btn) return;
+
+  const box = btn.closest('.qty');
+  const input = box.querySelector('input[type="number"]');
+  const min = parseInt(input.min || '1', 10);
+  const step = parseInt(btn.dataset.step || '0', 10);
+
+  let v = parseInt(input.value || '1', 10);
+  v = isNaN(v) ? min : v + step;
+  if (v < min) v = min;
+
+  input.value = v;
+});
+

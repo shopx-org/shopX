@@ -11,13 +11,16 @@ from decimal import Decimal
 from django.http import JsonResponse
 from .models import (
     Category, Color, Brand, Product, ProductVariant, ProductImage,
-    Attribute, AttributeChoice, CategoryAttribute, ProductAttributeValue, SizeGroup, Size,
+    Attribute, AttributeChoice, CategoryAttribute, ProductAttributeValue, SizeGroup,
+    Size,Service, ServicePrice, CategoryService, ProductService
 )
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from mptt.admin import DraggableMPTTAdmin
 from django.contrib.humanize.templatetags.humanize import intcomma
 from mptt.exceptions import InvalidMove
-from products.services.pricing_adapter import price_single_product  # ← آداپتر که قبلاً ساختیم
+# products/admin.py
+from django.db.models import OuterRef, Subquery, Sum, Count, IntegerField, Q
+from django.db.models.functions import Coalesce
 
 # helpers: pass parent_obj (Product یا Product موقتی) به فرم‌های Inline
 class ParentAwareInlineMixin:
@@ -80,7 +83,6 @@ class AttributeChoiceForm(forms.ModelForm):
             raise forms.ValidationError("فیلد «مقدار (کُد)» باید پر باشد (مثلاً cotton).")
 
         return cleaned
-
 
 # =============== Helpers ===============
 def _selected_category_id(request, obj=None):
@@ -170,17 +172,27 @@ class PAVInlineForm(forms.ModelForm):
 
         self.fields["attribute"].queryset = qs_attr
 
-        # choices برای attribute انتخاب‌شده
-        selected_attr = Attribute.objects.filter(pk=inst_attr_id).first() if inst_attr_id else None
+        selected_attr = None
+
+        # 1. اگر instance از قبل ویژگی دارد (ویرایش)
+        if getattr(self.instance, "attribute_id", None):
+            selected_attr = self.instance.attribute
+
+        # 2. اگر در داده‌های POST هست
         if not selected_attr:
             for key in self.data:
                 if key.endswith("-attribute") and key.startswith(self.prefix):
                     try:
                         aid = int(self.data.get(key) or 0)
-                        if aid: selected_attr = Attribute.objects.filter(pk=aid).first()
+                        if aid:
+                            selected_attr = Attribute.objects.filter(pk=aid).first()
                     except ValueError:
                         pass
                     break
+
+        # ✅ 3. حالت تازه ایجاد‌شده در add mode (instance خالی ولی attribute ست‌شده در initial)
+        if not selected_attr and self.initial.get("attribute"):
+            selected_attr = Attribute.objects.filter(pk=self.initial["attribute"]).first()
 
         qs = AttributeChoice.objects.filter(attribute=selected_attr).order_by("position","id") if selected_attr else AttributeChoice.objects.none()
         self.fields["value_choice"].queryset = qs
@@ -228,7 +240,7 @@ class PAVInlineForm(forms.ModelForm):
 class ProductAttributeValueInline(admin.TabularInline):
     model = ProductAttributeValue
     form = PAVInlineForm
-    extra = 0
+    extra = 1
     fields = ("attribute", "value_text", "value_int", "value_decimal",
               "value_bool", "value_choice", "values_multi")
     ordering = ("attribute", "id")
@@ -237,7 +249,7 @@ class ProductAttributeValueInline(admin.TabularInline):
         return True
 
     def get_min_num(self, request, obj=None, **kwargs):
-        return 1
+        return 0
 
     def _resolve_parent(self, request, obj):
         if obj: return obj
@@ -274,19 +286,11 @@ class ProductAttributeValueInline(admin.TabularInline):
         return max(1, min(remaining or 1, 25))
 
     def get_max_num(self, request, obj=None, **kwargs):
-        parent = self._resolve_parent(request, obj)
-        if parent and parent.category_id:
-            cnt = parent.category.effective_category_attributes().count()
-            return cnt or 25  # اگر صفر، اجازه بده تا 25 ردیف بتوان اضافه کرد
-        return 25
+        return 1000
 
 
-class ProductVariantInline(admin.TabularInline):
-    model = ProductVariant
-    extra = 0
-    fields = ("color", "size", "sku", "price", "stock", "is_active")
-    autocomplete_fields = ("color",)
-    classes = ("collapse",)
+
+# پایین فایل (یا نزدیک تعریف ProductVariantInlineForm)
 
 
 # Images
@@ -506,6 +510,95 @@ class CategoryAttributeAdmin(admin.ModelAdmin):
     autocomplete_fields = ("category", "attribute")
 
 
+@admin.register(SizeGroup)
+class SizeGroupAdmin(admin.ModelAdmin):
+    list_display = ("name", "code", "note", "sizes_count")
+    search_fields = ("name", "code")
+    ordering = ("name",)
+
+    @admin.display(description=_("تعداد سایز"))
+    def sizes_count(self, obj):
+        return obj.sizes.count()
+
+
+@admin.register(Size)
+class SizeAdmin(admin.ModelAdmin):
+    list_display = ("label", "code", "group", "rank")
+    list_editable = ("rank",)
+    list_filter = ("group",)
+    search_fields = ("label", "code", "group__name", "group__code")  # برای autocomplete
+    ordering = ("group", "rank", "id")
+    autocomplete_fields = ("group",)
+
+
+@admin.register(ProductVariant)
+class ProductVariantAdmin(admin.ModelAdmin):
+    list_display = ("product", "color", "size", "sku", "price", "stock", "is_active", "updated_at")
+    list_filter = ("is_active", "color", "size")
+    search_fields = ("product__name", "sku", "barcode")
+    autocomplete_fields = ("product", "color", "size")
+    list_editable = ("price", "stock", "is_active")
+    ordering = ("-updated_at",)
+    list_select_related = ("product", "color", "size")
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+
+        def limit_size_for_product(product: Product):
+            sg = product.get_size_group() if product else None
+            if sg and "size" in form.base_fields:
+                form.base_fields["size"].queryset = Size.objects.filter(group=sg).order_by("rank", "id")
+
+        if obj:  # ویرایش
+            limit_size_for_product(obj.product)
+        else:  # افزودن جدید - اگر ?product=ID در URL باشد
+            pid = request.GET.get("product") or request.POST.get("product")
+            if pid:
+                try:
+                    p = Product.objects.get(pk=pid)
+                    limit_size_for_product(p)
+                except Product.DoesNotExist:
+                    pass
+        return form
+
+# --- Variant Inline (single, clean) ---
+class ProductVariantInlineForm(forms.ModelForm):
+    class Meta:
+        model = ProductVariant
+        fields = (
+            "color", "size", "sku", "price", "stock", "is_active",
+            "sale_active_variant", "sale_percent_variant", "sale_amount_variant",
+        )
+
+    def __init__(self, *args, **kwargs):
+        parent: Product | None = kwargs.pop("parent_obj", None)
+        super().__init__(*args, **kwargs)
+        # پیش‌فرض: همه سایزها، تا خالی نماند
+        self.fields["size"].queryset = Size.objects.all().order_by("group__id", "rank", "id")
+        sg = None
+        if parent and getattr(parent, "category_id", None):
+            sg = parent.get_size_group()
+        elif self.instance and self.instance.pk:
+            sg = self.instance.product.get_size_group()
+        if sg:
+            qs = Size.objects.filter(group=sg).order_by("rank", "id")
+            # اگر سایز ذخیره‌شده خارج از گروه باشد، همان را هم اضافه کن
+            if self.instance and self.instance.size_id and self.instance.size.group_id != sg.id:
+                qs = Size.objects.filter(pk=self.instance.size_id) | qs
+            self.fields["size"].queryset = qs
+
+
+class ProductVariantInline(ParentAwareInlineMixin, admin.TabularInline):
+    model = ProductVariant
+    form = ProductVariantInlineForm
+    extra = 0
+    fields = (
+        "color", "size", "sku", "price", "stock", "is_active",
+        "sale_active_variant", "sale_percent_variant", "sale_amount_variant",
+    )
+    autocomplete_fields = ("color", "size")
+    classes = ("collapse",)
+
 # =============== Product: filters & actions ===============
 
 class HasImagesFilter(admin.SimpleListFilter):
@@ -570,6 +663,7 @@ def make_draft(modeladmin, request, queryset):
     messages.success(request, _("%d مورد پیش‌نویس شد.") % queryset.update(status="draft"))
 
 
+
 @admin.action(description=_("آرشیو (Archived)"))
 def make_archived(modeladmin, request, queryset):
     messages.success(request, _("%d مورد آرشیو شد.") % queryset.update(status="arch", is_active=False))
@@ -621,7 +715,8 @@ def duplicate_products(modeladmin, request, queryset):
         messages.success(request, _("%d محصول کپی شد (Draft).") % created)
 
 
-# =============== Product Admin ===============
+
+# =============== Variant Admin ==============
 
 
 class ProductAdminForm(forms.ModelForm):
@@ -631,6 +726,11 @@ class ProductAdminForm(forms.ModelForm):
 
     def clean(self):
         cleaned = super().clean()
+        sp = cleaned.get("sale_percent")
+        sa = cleaned.get("sale_amount")
+        if sp and sa:
+            # انتخاب کن: اجازه نده هردو همزمان پر باشد، یا در صورت وجود هر دو اولویت بده
+            self.add_error("sale_amount", _("لطفاً یا درصد یا مبلغ را انتخاب کنید (نه هردو)."))
 
         # انتشار ⇒ باید فعال باشد
         if cleaned.get("status") == "pub" and not cleaned.get("is_active", True):
@@ -653,6 +753,7 @@ class ProductAdminForm(forms.ModelForm):
 
         return cleaned
 
+# =============== Product Admin ===============
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
@@ -662,8 +763,8 @@ class ProductAdmin(admin.ModelAdmin):
     inlines = [ProductVariantInline, ProductAttributeValueInline, ProductImageInline]
 
     list_display = (
-        "thumb", "name", "category", "price", "effective_price_admin",
-        "status", "is_active", "variant_count", "stock_total", "created_at", "effective_size_group",
+        "thumb", "name", "category", "price", "status", "is_active",
+        "variant_count_col", "stock_total_col", "created_at",
     )
     list_display_links = ("name", "thumb")
     list_editable = ("price", "status", "is_active")
@@ -685,7 +786,8 @@ class ProductAdmin(admin.ModelAdmin):
 
     fieldsets = (
         (None, {"fields": ("name", "slug", "category", "additional_categories", "brand_fk", "status", "is_active")}),
-        (_("قیمت"), {"fields": ("price", "compare_at_price", "effective_price_admin")}),
+        (_("قیمت"), {"fields": ("price", "compare_at_price", "sale_active", "sale_percent", "sale_amount", "sale_starts_at",
+                                "sale_ends_at", "effective_price_admin")}),
         (_("محتوا"), {"fields": ("short_description", "description")}),
         (_("SEO"), {"fields": ("meta_title", "meta_description"), "classes": ("collapse",)}),
         (_("زمان"), {"fields": ("created_at", "updated_at"), "classes": ("collapse",)}),
@@ -699,15 +801,18 @@ class ProductAdmin(admin.ModelAdmin):
     @admin.display(description=_("قیمت مؤثر (بدون کوپن)"))
     def effective_price_admin(self, obj: Product):
         try:
+            from products.services.pricing_adapter import price_single_product  # ← lazy
             res = price_single_product(obj, qty=1, coupons=[], channel="web")
-            val = res.total
-            return format_html("{} {}", intcomma(int(val)), "تومان")
+            from django.contrib.humanize.templatetags.humanize import intcomma
+            from django.utils.html import format_html
+            return format_html("{} {}", intcomma(int(res.total)), "تومان")
         except Exception:
             return "—"
 
     @admin.action(description=_("چک سریع قیمت مؤثر (بدون کوپن)"))
     def check_effective_price(self, request, queryset):
-        ok, errs = 0, 0
+        ok = errs = 0
+        from products.services.pricing_adapter import price_single_product  # ← lazy
         for p in queryset:
             try:
                 price_single_product(p, 1, coupons=[], channel="web")
@@ -715,20 +820,41 @@ class ProductAdmin(admin.ModelAdmin):
             except Exception:
                 errs += 1
         if ok:
+            from django.contrib import messages
+            from django.utils.translation import gettext_lazy as _
             messages.success(request, _("%d محصول با موفقیت محاسبه شد.") % ok)
         if errs:
             messages.warning(request, _("%d محصول با خطا مواجه شد.") % errs)
 
     def get_queryset(self, request):
-        return (
-            super().get_queryset(request)
-            .select_related("category", "brand_fk")
-            .prefetch_related("images")
-            .annotate(
-                _variant_count=Count("variants", distinct=True),
-                _stock_total=Coalesce(Sum("variants__stock"), 0),
-            )
+        qs = super().get_queryset(request)
+
+        pv = ProductVariant.objects.filter(product_id=OuterRef("pk"))
+
+        # اگر فقط واریانت‌های فعال/قابل فروش حساب شوند:
+        pv_active = pv.filter(is_active=True)
+
+        stock_sq = pv_active.values("product_id") \
+            .annotate(s=Coalesce(Sum("stock"), 0)) \
+            .values("s")
+
+        count_sq = pv_active.values("product_id") \
+            .annotate(c=Count("id")) \
+            .values("c")
+
+        return qs.annotate(
+            _stock_total=Coalesce(Subquery(stock_sq, output_field=IntegerField()), 0),
+            _variant_count=Coalesce(Subquery(count_sq, output_field=IntegerField()), 0),
         )
+
+    @admin.display(ordering="_variant_count", description="تعداد واریانت")
+    def variant_count_col(self, obj):
+        return obj._variant_count
+
+    @admin.display(ordering="_stock_total", description="موجودی کل")
+    def stock_total_col(self, obj):
+        return obj._stock_total
+
 
     def get_changeform_initial_data(self, request):
         initial = super().get_changeform_initial_data(request)
@@ -744,29 +870,34 @@ class ProductAdmin(admin.ModelAdmin):
         try:
             resp.render()
             if object_id:
-                quick_url = reverse("admin:promos_quick_product")
-                marker = "</body>"
-                inject = f"""
+                try:
+                    quick_url = reverse("admin:promos_quick_product")
+                except Exception:
+                    quick_url = None  # اگر URL ثبت نشده بود، دکمه را تزریق نکنیم
+
+                if quick_url:
+                    marker = "</body>"
+                    inject = f"""
     <script>
-      (function(){{
-        var btn = document.createElement('a');
-        btn.textContent = 'ایجاد کمپین تخفیف برای این کالا';
-        btn.className = 'button';
-        btn.style.marginRight = '8px';
-        btn.onclick = function(e){{
-          e.preventDefault();
-          var percent = prompt('درصد تخفیف؟', '10');
-          if(percent===null) return;
-          var days = prompt('تا چند روز؟', '7');
-          if(days===null) return;
-          var url = '{quick_url}?product_id={object_id}&percent=' + encodeURIComponent(percent) + '&days=' + encodeURIComponent(days);
-          window.location.href = url;
-        }};
-        var h1 = document.querySelector('#content h1');
-        if(h1) h1.appendChild(btn);
-      }})();
+    (function(){{
+      var btn = document.createElement('a');
+      btn.textContent = 'ایجاد کمپین تخفیف برای این کالا';
+      btn.className = 'button';
+      btn.style.marginRight = '8px';
+      btn.onclick = function(e){{
+        e.preventDefault();
+        var percent = prompt('درصد تخفیف؟', '10');
+        if(percent===null) return;
+        var days = prompt('تا چند روز؟', '7');
+        if(days===null) return;
+        var url = '{quick_url}?product_id={object_id}&percent=' + encodeURIComponent(percent) + '&days=' + encodeURIComponent(days);
+        window.location.href = url;
+      }};
+      var h1 = document.querySelector('#content h1');
+      if(h1) h1.appendChild(btn);
+    }})();
     </script>"""
-                resp.content = resp.content.replace(marker.encode(), (inject + marker).encode())
+                    resp.content = resp.content.replace(marker.encode(), (inject + marker).encode())
         except Exception:
             pass
         return resp
@@ -775,7 +906,7 @@ class ProductAdmin(admin.ModelAdmin):
         js = (
             "admin/js/jquery.init.js",
             "products/js/pav-boot.js",
-            "products/js/pav-inline.js",
+            "products/js/pav-inline-2.js",
             "products/js/product_dynamic_attrs.js",
         )
 
@@ -829,37 +960,6 @@ class ProductAdmin(admin.ModelAdmin):
 
 
 
-@admin.register(ProductVariant)
-class ProductVariantAdmin(admin.ModelAdmin):
-    list_display = ("product", "color", "size", "sku", "price", "stock", "is_active", "updated_at")
-    list_filter = ("is_active", "color", "size")
-    search_fields = ("product__name", "sku", "barcode")
-    autocomplete_fields = ("product", "color", "size")
-    list_editable = ("price", "stock", "is_active")
-    ordering = ("-updated_at",)
-    list_select_related = ("product", "color", "size")
-
-    def get_form(self, request, obj=None, **kwargs):
-        form = super().get_form(request, obj, **kwargs)
-
-        def limit_size_for_product(product: Product):
-            sg = product.get_size_group() if product else None
-            if sg and "size" in form.base_fields:
-                form.base_fields["size"].queryset = Size.objects.filter(group=sg).order_by("rank", "id")
-
-        if obj:  # ویرایش
-            limit_size_for_product(obj.product)
-        else:  # افزودن جدید - اگر ?product=ID در URL باشد
-            pid = request.GET.get("product") or request.POST.get("product")
-            if pid:
-                try:
-                    p = Product.objects.get(pk=pid)
-                    limit_size_for_product(p)
-                except Product.DoesNotExist:
-                    pass
-        return form
-
-
 @admin.register(ProductImage)
 class ProductImageAdmin(admin.ModelAdmin):
     list_display = ("thumb", "product", "color", "is_primary", "position", "updated_at")
@@ -902,51 +1002,28 @@ class BrandAdmin(admin.ModelAdmin):
                 return "—"
         return "—"
 
+# =============== Service Admin ===============
+class ServicePriceInline(admin.TabularInline):
+    model = ServicePrice
+    extra = 0
+    fields = ("price_type", "amount", "item_price_min", "item_price_max", "is_active")
+    ordering = ("price_type", "item_price_min")
 
-
-# =============== Variant Admin ===============
-class ProductVariantInlineForm(forms.ModelForm):
-    class Meta:
-        model = ProductVariant
-        fields = ("color", "size", "sku", "price", "stock", "is_active")
-
-    def __init__(self, *args, **kwargs):
-        parent: Product | None = kwargs.pop("parent_obj", None)
-        super().__init__(*args, **kwargs)
-
-        # پیش‌فرض: لیست سایز را خالی بگذار تا اشتباه کمتر شود
-        self.fields["size"].queryset = Size.objects.none()
-
-        sg = None
-        if parent and getattr(parent, "category_id", None):
-            sg = parent.get_size_group()
-        elif self.instance and self.instance.pk:
-            sg = self.instance.product.get_size_group()
-
-        if sg:
-            qs = Size.objects.filter(group=sg).order_by("rank", "id")
-            # در ویرایش، اگر size ذخیره‌شده خارج از گروه باشد، همان را اضافه کنیم تا از دست نرود
-            if self.instance and self.instance.size_id and self.instance.size.group_id != sg.id:
-                qs = Size.objects.filter(pk=self.instance.size_id) | qs
-            self.fields["size"].queryset = qs
-
-
-@admin.register(SizeGroup)
-class SizeGroupAdmin(admin.ModelAdmin):
-    list_display = ("name", "code", "note", "sizes_count")
+@admin.register(Service)
+class ServiceAdmin(admin.ModelAdmin):
+    list_display = ("name", "kind", "exclusive_group", "is_active")
+    list_filter = ("kind", "exclusive_group", "is_active")
     search_fields = ("name", "code")
-    ordering = ("name",)
+    inlines = [ServicePriceInline]
 
-    @admin.display(description=_("تعداد سایز"))
-    def sizes_count(self, obj):
-        return obj.sizes.count()
+@admin.register(CategoryService)
+class CategoryServiceAdmin(admin.ModelAdmin):
+    list_display = ("category", "service", "is_default_on")
+    list_filter = ("service__kind", "is_default_on")
+    autocomplete_fields = ("category", "service")
 
-
-@admin.register(Size)
-class SizeAdmin(admin.ModelAdmin):
-    list_display = ("label", "code", "group", "rank")
-    list_editable = ("rank",)
-    list_filter = ("group",)
-    search_fields = ("label", "code", "group__name", "group__code")
-    ordering = ("group", "rank", "id")
-    autocomplete_fields = ("group",)
+@admin.register(ProductService)
+class ProductServiceAdmin(admin.ModelAdmin):
+    list_display = ("product", "service", "is_default_on")
+    list_filter = ("service__kind", "is_default_on")
+    autocomplete_fields = ("product", "service")

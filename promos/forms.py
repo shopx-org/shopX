@@ -24,6 +24,7 @@ class ActionForm(forms.ModelForm):
             raise forms.ValidationError("سقف تخفیف نمی‌تواند منفی باشد.")
         return c
 
+
 class RuleForm(forms.ModelForm):
     products = forms.ModelMultipleChoiceField(Product.objects.all(), required=False)
     categories = forms.ModelMultipleChoiceField(Category.objects.all(), required=False)

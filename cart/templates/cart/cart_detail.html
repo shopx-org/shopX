@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block CSS-JS %}
+    <link rel="stylesheet" href="{% static 'vendor/font-awesome/css/all.min.css' %}">
+{% endblock %}
+{% block title %}{% endblock %}
+
+{% block content %}
+    <style>
+        .action-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 16px;
+            color: #ef4444;
+            text-decoration: none;
+        }
+
+        .action-link:hover {
+            text-decoration: underline;
+        }
+
+        .link-del {
+            color: #ef4444;
+        }
+
+        .action-link i {
+            font-size: 14px;
+        }
+
+        .action-bar {
+
+        }
+    </style>
+
+    <main class="main tlp-product">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="breadcrumb-nav border-0 mb-0">
+            <div class="container d-flex align-items-center">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'home:home' %}">خانه</a></li>
+                    {% if breadcrumbs %}
+                        {% for bc in breadcrumbs %}
+                            <li class="breadcrumb-item"><a href="{{ bc.url }}">{{ bc.name }}</a></li>
+                        {% endfor %}
+                    {% elif product.category %}
+                        <li class="breadcrumb-item"><a
+                                href="{{ product.category.get_absolute_url }}">{{ product.category.name }}</a></li>
+                    {% endif %}
+                    <li class="breadcrumb-item active" aria-current="page">{{ product.name }}</li>
+                </ol>
+            </div>
+        </nav>
+
+
+        <div class="container cart-wrap">
+            <div class="row g-4">
+
+                <!-- ستون لیست سبد -->
+                <div class="col-lg-9">
+                    <div class="cart-list">
+
+
+                        <!-- آیتم ۲ -->
+                        <div class="cart-item">
+                            <div class="cart-media">
+                                <a href="#"><img src="{% static 'images/products/table/product-3.jpg' %}" alt=""></a>
+                            </div>
+
+                            <div class="cart-body">
+                                <div class="cart-title" dir="rtl">
+                                    <a href="#">کیف چرمی اصل مدل دلتورا</a>
+                                </div>
+                                <div class="cart-meta">
+                                    <span class="text-success">موجود در انبار</span>
+                                </div>
+
+                                <div class="cart-actions">
+                                    <div class="qty">
+
+                                        <input type="number" value="1" min="1">
+
+                                    </div>
+
+                                </div>
+
+
+                            </div>
+
+                            <div class="cart-price">
+
+                                <div class="deal-badge">Limited time deal</div>
+                                <div class="now">۷۹٫۹۸ <span>تومان</span></div>
+                                <div class="list">۱۱۱٫۹۹ <span>تومان</span></div>
+
+                            </div>
+                             <div class="action-bar">
+                                    <a href="#" class="action-link"><i class="fas fa-trash"></i></a>
+                                    <a href="#" class="action-link"><i class="fas fa-bookmark"></i></a>
+                                    <a href="#" class="action-link"><i class="fas fa-random"></i></a>
+                                    <a href="#" class="action-link"><i class="fas fa-share-alt"></i></a>
+                                </div>
+
+                        </div>
+
+                    </div><!-- /cart-list -->
+
+                    <!-- جمع جزء پایین لیست -->
+                    <div class="cart-subtotal">
+                        <div>جمع جزء (۲ کالا): <span>۱۱۰٫۹۷ تومان</span></div>
+                    </div>
+
+                </div><!-- /col-lg-9 -->
+
+                <!-- ستون سایدبار -->
+                <aside class="col-lg-3">
+                    <div class="summary summary-cart">
+                        <div class="title">جمع سبد خرید</div>
+                        <div class="line">
+                            <span>جمع جزء (۲ کالا)</span>
+                            <strong>۱۱۰٫۹۷ تومان</strong>
+                        </div>
+                        <div class="form-check my-2" style="direction:rtl">
+                            <input class="form-check-input" type="checkbox" id="giftorder">
+                            <label class="form-check-label" for="giftorder">این سفارش شامل هدیه است</label>
+                        </div>
+                        <a href="#" class="btn btn-primary btn-checkout">ادامه و پرداخت</a>
+                    </div>
+                    <a href="#" class="btn btn-outline-dark-2 btn-block mt-3">ادامه خرید</a>
+                </aside><!-- /col-lg-3 -->
+
+            </div><!-- /row -->
+        </div><!-- /container -->
+    </main>
+
+{% endblock %}

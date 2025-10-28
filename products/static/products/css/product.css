@@ -826,9 +826,9 @@ body.no-scroll {
 }
 
 .dk-badge-ok {
-    background: #f0fff6;
-    color: #1a7f37;
-    border: 1px solid #d2f4e5;
+    background: #e2fded;
+    color: #175603;
+    border: 1px solid #baf189;
     border-radius: 9px;
     padding: 4px 10px;
     margin-right: 6px;
@@ -847,9 +847,9 @@ body.no-scroll {
 }
 
 .dk-price small {
-    font-size: 2rem;
+    font-size: 2.5rem;
     margin-right: 4px;
-    color: #444;
+    color: #171717;
 }
 
 .dk-price .save {
@@ -1297,7 +1297,7 @@ body.no-scroll {
 }
 
 .dk-price small {
-    font-size: 1.2rem;
+    font-size: 3rem;
     margin-right: 4px;
     color: #444;
 }
@@ -2825,4 +2825,121 @@ body.no-scroll {
   .dk-buybox .dk-mini-actions .btn-product{
     padding: .45rem .25rem;
   }
+}
+/* ===== قیمتِ باکس خرید: استایلِ تخفیف ===== */
+
+/* جعبهٔ تخفیف */
+#price-save{
+  margin-top: .35rem;
+}
+
+/* قیمتِ قبل (خط‌خورده) کمی کوچک‌تر و کم‌رنگ‌تر */
+#price-save #compare-num{
+  font-size: 1.15rem;
+  opacity: .75;
+  margin-inline-end: .5rem;
+}
+
+/* خودِ بجِ درصد تخفیف → درشت‌تر و برجسته‌تر */
+#off-badge{
+  font-size: 1.25rem;         /* ← سایزِ بزرگ‌تر */
+  font-weight: 800;
+  line-height: 1.15;
+  padding: .28rem .8rem;
+  border-radius: 9px;
+  background: #fff0ec;
+  color: var(--accent, #FA523C);
+  border: 1px solid #f6562c;
+  vertical-align: middle;     /* هم‌ترازی با اعداد */
+  display: inline-flex;
+  align-items: center;
+  gap: .25rem;
+}
+
+/* متن مبلغ کسرشده: کمی کوچک‌تر و زیرِ بج */
+#off-amount{
+  font-size: 1.59rem;
+  margin-top: .35rem;
+  color: #104d03 !important;
+}
+
+/* ریسپانسیو: روی موبایل کمی جمع‌وجورتر */
+@media (max-width: 576px){
+  #off-badge{ font-size: 1.1rem; padding: .2rem .55rem; }
+  #price-save #compare-num{ font-size: 1.05rem; }
+  #off-amount{ font-size: .92rem; }
+}
+/* ===== قیمت قبل از تخفیف (del) ===== */
+#compare-num{
+  font-size: 3.9rem;               /* ← بزرگ‌تر از قبل */
+  font-weight: 700;                  /* کمی بولدتر */
+  opacity: 5%;                       /* خواناتر از 0.75 */
+  margin-inline-end: .5rem;          /* فاصله از بج/متن کنار */
+  line-height: 1.6;
+  /* خطِ خط‌خوردگی ضخیم‌تر و ملایم‌تر */
+  text-decoration: line-through;
+  text-decoration-thickness: 0.9px;
+  text-decoration-color: #c9cfd6;    /* خاکستری نرم */
+  text-underline-offset: .1em;
+}
+
+/* اگر خواستی اندازه‌اش نسبت به قیمت اصلی کمتر باشد، این را باز کن: */
+/* .dk-price .num #price-num{ font-size: 1.6rem; } */
+
+/* موبایل کمی جمع‌وجورتر */
+@media (max-width: 576px){
+  #compare-num{ font-size: 1.15rem; text-decoration-thickness: 1.75px; }
+}
+
+/* قیمت قبل از تخفیف (del) را بزرگ و خوانا کن */
+.dk-buybox .dk-price .save del#compare-num{
+  font-size: 1.85rem !important;   /* اندازه بزرگ‌تر */
+  font-weight: 700;
+  line-height: 1.2;
+  color: #5b626b;                   /* خاکستری خواناتر */
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+  text-decoration-color: #c9cfd6;
+  text-underline-offset: .2em;
+  margin-inline-end: .5rem;
+}
+
+/* اگر کل باکس save کوچک شده، پایه‌اش را هم نرمال کن */
+.dk-buybox .dk-price .save{
+  font-size: 1rem !important;
+}
+
+/* موبایل کمی جمع‌وجورتر */
+@media (max-width:576px){
+  .dk-buybox .dk-price .save del#compare-num{
+    font-size: 1.15rem !important;
+    text-decoration-thickness: 1.75px;
+  }
+}
+/* ستون قیمت را ستونی کن تا اکشن‌ها پایینش بچسبند */
+.cart-price{
+  min-width:220px;          /* می‌تونی کمتر/بیشترش کنی */
+  text-align:left;          /* چون RTL است، سمت چپ ستون */
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;   /* متن‌ها چپ ستون */
+}
+
+/* خود نوار اکشن‌ها نزدیک لبه پایین ستون قیمت */
+.action-bar{
+  margin-top:auto;          /* بچسب به پایین .cart-price */
+  padding-top:8px;
+  display:flex; gap:16px; flex-wrap:wrap;
+  justify-content:flex-start;
+}
+
+/* اگر قبلاً اکشن‌ها را پایین بدنه می‌چسباندی، دیگر لازم نیست: */
+.cart-body{ display:flex; flex-direction:column; }
+.cart-actions{ margin-top:8px; } /* یا اگر می‌خواهی بالا بماند، همینی خوب است */
+
+/* واکنش‌گرا: در موبایل، اکشن‌ها را دوباره زیر بدنه بیاور که جا کم است */
+@media (max-width: 768px){
+  .cart-item{ flex-wrap:wrap; }
+  .cart-price{ order:3; width:100%; }
+  .action-bar{ width:100%; justify-content:flex-start; }
 }

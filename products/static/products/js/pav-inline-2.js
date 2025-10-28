@@ -2,9 +2,8 @@
 (function ($) {
   if (typeof $ === "undefined") return;
 
-  // ============ Helpers ============
+  // ===== Helpers =====
   function findRow($el) {
-    // پوشش تم‌های مختلف ادمین و inlineهای Tabular/Stacked
     return $el.closest("tr.form-row, .dynamic-productattributevalue_set, .inline-related");
   }
 
@@ -22,16 +21,11 @@
 
   function showOnly($row, kind){
     var F = fields($row);
-    // همیشه خود attribute فعال باشد
     F.attr.prop("disabled", false).closest("td, .form-row").show();
-
-    // همهٔ فیلدهای مقدار را قفل/مخفی کن
     [F.vtext,F.vint,F.vdec,F.vbool,F.vchoice,F.vmulti].forEach(function ($el) {
       $el.prop("disabled", true).closest("td, .form-row").hide();
     });
-
     function on($el){ $el.prop("disabled", false).closest("td, .form-row").show(); }
-
     if (kind === "text")    on(F.vtext);
     else if (kind === "int")     on(F.vint);
     else if (kind === "decimal") on(F.vdec);
@@ -40,24 +34,28 @@
     else if (kind === "multi")   on(F.vmulti);
   }
 
-  // پرکردن select (تکی و چندتایی) + حفظ انتخاب‌های معتبر
+  // پرکردن select و حفظ انتخاب‌های معتبر
   function fill($select, options){
     if (!$select.length) return;
 
     var isMulti = $select.prop("multiple");
-    var cur = $select.val();
-    if (!Array.isArray(cur)) cur = cur ? [String(cur)] : [];
+    // انتخاب فعلی را قبل از empty بخوانیم (ممکنه server-side ست شده)
+    var current = $select.val();
+    if (isMulti) {
+      if (!Array.isArray(current)) current = current ? [String(current)] : [];
+    } else {
+      current = current ? [String(current)] : [];
+    }
 
     $select.empty().append($('<option/>',{value:"",text:"— انتخاب کنید —"}));
-
     (options || []).forEach(function (o) {
       $select.append($('<option/>',{value:String(o.id),text:o.label}));
     });
 
-    // فقط مقادیرِ هنوز موجود را نگه داریم
+    // فقط مواردی که هنوز وجود دارند را نگه داریم
     var exists = {};
     $select.find("option").each(function(){ exists[$(this).val()] = true; });
-    var keep = cur.filter(function(v){ return exists[v]; });
+    var keep = current.filter(function(v){ return exists[v]; });
 
     if (isMulti) {
       $select.val(keep);
@@ -66,40 +64,32 @@
     }
   }
 
+  // اگر عمداً می‌خواهیم پاک شود (وقتی کاربر attribute را عوض کرد)
   function resetChoiceFields($row){
     var F = fields($row);
     if (F.vchoice.length) F.vchoice.val("");
     if (F.vmulti.length)  F.vmulti.val([]);
   }
 
-  // ====== فیکس قطعی آدرس endpoint ======
+  // آدرس endpoint مطمئن
   function endpointUrl(){
-    // اگر قبلاً به‌صراحت ست شده، همان را استفاده کن
     if (window.PAV && window.PAV.endpoint) return window.PAV.endpoint;
     if (typeof window.PAV_ENDPOINT !== "undefined" && window.PAV_ENDPOINT) return window.PAV_ENDPOINT;
 
-    // از URL جاری بساز: /admin/products/product/<id>/change/  یا  /add/
     var p = window.location.pathname;
-
-    // /product/123/change/  →  /product/
-    p = p.replace(/\/\d+\/change\/?$/, "/");
-
-    // /product/add/  →  /product/
-    p = p.replace(/\/add\/?$/, "/");
-
-    // اگر انتهای مسیر /product/123/ مانده باشد  →  /product/
-    p = p.replace(/\/\d+\/$/, "/");
-
+    p = p.replace(/\/\d+\/change\/?$/, "/"); // /product/123/change/ → /product/
+    p = p.replace(/\/add\/?$/, "/");         // /product/add/        → /product/
+    p = p.replace(/\/\d+\/$/, "/");          // /product/123/        → /product/
     return p + "attribute-choices/";
   }
 
-  function loadChoices($row, attrId){
-    if (!attrId){
-      showOnly($row, null);
-      return;
-    }
+  // preserve=true ⇒ انتخاب قبلی را نگه دار (لود اولیه/ادیت)
+  // preserve=false ⇒ انتخاب را خالی کن (وقتی attribute را تغییر دادند)
+  function loadChoices($row, attrId, opts){
+    var preserve = opts && opts.preserve;
+    if (!attrId){ showOnly($row, null); return; }
 
-    resetChoiceFields($row);
+    if (!preserve) resetChoiceFields($row);
 
     $.get(endpointUrl(), { attr: attrId }).done(function (resp) {
       var kind = resp && resp.kind ? resp.kind : null;
@@ -118,7 +108,6 @@
 
       showOnly($row, kind);
     }).fail(function () {
-      // اگر به هر دلیلی endpoint در دسترس نبود، همهٔ فیلدهای مقدار بسته بماند
       showOnly($row, null);
     });
   }
@@ -127,26 +116,26 @@
     $("select[name$='-attribute']").each(function(){
       var $attr = $(this);
       var $row  = findRow($attr);
-      showOnly($row, null);     // ابتدا همه را ببند
+      showOnly($row, null);
       var initAid = $attr.val();
-      if (initAid) loadChoices($row, initAid); // اگر از قبل attr داشت، گزینه‌ها را لود کن
+      if (initAid) loadChoices($row, initAid, {preserve:true}); // ← نگه‌داشتن مقدار قبلی
     });
   }
 
   function boot(){
-    // تغییر ویژگی در هر ردیف
+    // وقتی کاربر attribute را تغییر می‌دهد ⇒ ریست انتخاب‌ها
     $(document).off("change.pav", "select[name$='-attribute']")
       .on("change.pav", "select[name$='-attribute']", function(){
         var $row = findRow($(this));
-        loadChoices($row, $(this).val());
+        loadChoices($row, $(this).val(), {preserve:false}); // ← عمداً خالی کن
       });
 
-    // ردیف تازه اضافه شد
+    // ردیف تازه اضافه شد (initial را اگر داشت نگه می‌داریم)
     $(document).on("formset:added", function (e, $row){
       var $attr = $row.find("select[name$='-attribute']");
       showOnly($row, null);
       var initAid = $attr.val();
-      if (initAid) loadChoices($row, initAid);
+      if (initAid) loadChoices($row, initAid, {preserve:true});
     });
 
     bindExistingRows();

@@ -1,10 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends "admin/change_form.html" %}
 
-</body>
-</html>
+{% block content %}
+  <div id="content-main"
+       data-pav-endpoint="{% url 'admin:products_product_attr_meta' 0 %}"></div>
+  {{ block.super }}
+{% endblock %}
+
+{% block extrahead %}
+  {{ block.super }}
+  {# این سه فایل همان‌هایی هستند که آپلود کردی #}
+  <script src="{% static 'adminjs/pav-endpoint.js' %}"></script>       {# f9a9ca4e-... #}
+  <script src="{% static 'adminjs/pav-inline-2.js' %}"></script>         {# 9d18fa06-... #}
+  <script src="{% static 'adminjs/category-redirect.js' %}"></script>  {# 20aeb227-... #}
+{% endblock %}

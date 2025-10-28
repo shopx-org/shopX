@@ -12,6 +12,7 @@ urlpatterns = [
 
     path("account/", include(("account.urls", "account"), namespace="account")),
     path("promos/", include("promos.urls")),
+    path("cart/", include("cart.urls")),
 
 ]
 

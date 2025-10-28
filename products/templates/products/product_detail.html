@@ -46,540 +46,538 @@
         <div class="page-content" style="margin-bottom:2rem;">
             <div class="container">
                 <section class="tlp-hero ui-compact" dir="rtl">
-                    <div class="row g-3 align-items-start">
+                    {# ——— ردیف اصلی: باکس محصول (گالری+جزئیات) + ستون قیمت/خرید ——— #}
+                    <form id="add-to-cart-form" method="post" action="{% url 'cart:cart_add' product.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="product_id" value="{{ product.id }}">
+                        <input type="hidden" name="variant_id" id="variant_id" value="">
 
-                        <!-- کارت راست: گالری + اطلاعات محصول -->
-                        <div class="col-xl-9 col-lg-8 order-lg-2">
-                            <div class="card-like wm-main">
-                                <div class="row g-3">
+                        <div class="row g-3 align-items-start">
 
-                                    <!-- گالری: ستون راست -->
-                                    <div class="col-lg-6 order-lg-2">
-                                        <section class="tlp-gallery gallery-rtl-right" aria-label="گالری محصول"
-                                                 dir="rtl">
-                                            <!-- استیج -->
-                                            <div class="stage card-like">
-                                                <img id="tlp-main"
-                                                     src="{{ gallery_images.0.url|default:FALLBACK_IMG }}"
-                                                     alt="{{ gallery_images.0.alt|default:product.name }}"
-                                                     loading="eager" decoding="async">
-                                            </div>
+                            <!-- باکس محصول: گالری + جزئیات -->
+                            <div class="col-xl-9 col-lg-8 order-lg-2">
+                                <div class="card-like wm-main">
+                                    <div class="row g-3">
+                                        <!-- گالری (راست) -->
+                                        <div class="col-lg-6 order-lg-2">
+                                            <section class="tlp-gallery gallery-rtl-right" aria-label="گالری محصول"
+                                                     dir="rtl">
+                                                <div class="stage card-like">
+                                                    <img id="tlp-main"
+                                                         src="{{ gallery_images.0.url|default:FALLBACK_IMG }}"
+                                                         alt="{{ gallery_images.0.alt|default:product.name }}"
+                                                         loading="eager" decoding="async">
+                                                </div>
 
-                                            <!-- ردیف تامب‌ها -->
-                                            <div class="thumbs" role="list">
-                                                {% if gallery_images %}
-                                                    {% for img in gallery_images %}
-                                                        <button class="thumb{% if img.is_primary or forloop.first %} is-active{% endif %}"
-                                                                type="button" role="listitem"
-                                                                aria-pressed="{% if img.is_primary or forloop.first %}true{% else %}false{% endif %}"
-                                                                title="{{ product.name }} - {{ forloop.counter }}"
-                                                                data-full="{{ img.url }}">
-                                                            <img src="{{ img.url }}"
-                                                                 alt="{{ img.alt|default:product.name }}"
+                                                <div class="thumbs" role="list">
+                                                    {% if gallery_images %}
+                                                        {% for img in gallery_images %}
+                                                            <button class="thumb{% if img.is_primary or forloop.first %} is-active{% endif %}"
+                                                                    type="button" role="listitem"
+                                                                    aria-pressed="{% if img.is_primary or forloop.first %}true{% else %}false{% endif %}"
+                                                                    title="{{ product.name }} - {{ forloop.counter }}"
+                                                                    data-full="{{ img.url }}">
+                                                                <img src="{{ img.url }}"
+                                                                     alt="{{ img.alt|default:product.name }}"
+                                                                     loading="lazy" decoding="async">
+                                                            </button>
+                                                        {% endfor %}
+                                                    {% else %}
+                                                        <button class="thumb is-active" type="button" role="listitem"
+                                                                aria-pressed="true" title="{{ product.name }}"
+                                                                data-full="{{ FALLBACK_IMG }}">
+                                                            <img src="{{ FALLBACK_THUMB }}" alt="{{ product.name }}"
                                                                  loading="lazy" decoding="async">
                                                         </button>
-                                                    {% endfor %}
-                                                {% else %}
-                                                    <button class="thumb is-active" type="button" role="listitem"
-                                                            aria-pressed="true" title="{{ product.name }}"
-                                                            data-full="{{ FALLBACK_IMG }}">
-                                                        <img src="{{ FALLBACK_THUMB }}" alt="{{ product.name }}"
-                                                             loading="lazy" decoding="async">
-                                                    </button>
-                                                {% endif %}
-                                            </div>
-                                        </section>
-                                    </div>
-
-                                    <!-- اطلاعات/رنگ/سایز/...: ستون چپ -->
-                                    <div class="col-lg-6 order-lg-1">
-                                        <div class="product-details">
-
-                                            <!-- عنوان -->
-                                            <h1 class="product-title border-bottom  pb-1 mb-2 mt-1">{{ product.name }}</h1>
-
-
-                                            <!-- امتیاز (نمونه) -->
-                                            <div class="ratings-container  mt-1">
-                                                <div class="ratings">
-                                                    <div class="ratings-val" style="width: 80%;"></div>
+                                                    {% endif %}
                                                 </div>
-                                                <a class="ratings-text" href="#comments"
-                                                   id="review-link">( {{ product.review_count|default:0 }} نظر )</a>
-                                            </div>
+                                            </section>
+                                        </div>
 
-                                            <!-- توضیح -->
-                                            <div class="product-content pt-2 mb-2">
-                                                {% if product.short_description %}
-                                                    <p>{{ product.short_description }}</p>
-                                                {% elif product.meta_description %}
-                                                    <p>{{ product.meta_description }}</p>
-                                                {% else %}
-                                                    <p>{{ product.description|default_if_none:""|truncatechars:220 }}</p>
+                                        <!-- جزئیات/رنگ/سایز (چپ) -->
+                                        <div class="col-lg-6 order-lg-1">
+                                            <div class="product-details">
+
+                                                <h1 class="product-title border-bottom pb-1 mb-2 mt-1">{{ product.name }}</h1>
+
+                                                <div class="ratings-container mt-1">
+                                                    <div class="ratings">
+                                                        <div class="ratings-val" style="width:80%;"></div>
+                                                    </div>
+                                                    <a class="ratings-text" href="#comments" id="review-link">
+                                                        ( {{ product.review_count|default:0 }} نظر )
+                                                    </a>
+                                                </div>
+
+                                                <div class="product-content pt-2 mb-2">
+                                                    {% if product.short_description %}
+                                                        <p>{{ product.short_description }}</p>
+                                                    {% elif product.meta_description %}
+                                                        <p>{{ product.meta_description }}</p>
+                                                    {% else %}
+                                                        <p>{{ product.description|default_if_none:""|truncatechars:220 }}</p>
+                                                    {% endif %}
+                                                </div>
+
+                                                {% if ui.show_color %}
+                                                    <div class="details-filter-row details-row-size">
+                                                        <label class="form-label mb-2">رنگ :</label>
+                                                        <div class="product-nav product-nav-dots" id="color-swatches">
+                                                            {% if colors %}
+                                                                {% for c in colors %}
+                                                                    <a href="javascript:;"
+                                                                       class="swatch {% if forloop.first %}active{% endif %}"
+                                                                       data-color-id="{{ c.id }}"
+                                                                       style="background: {{ c.hex_code }};"
+                                                                       aria-label="انتخاب رنگ {{ c.name }}"
+                                                                       role="button">
+                                                                        <span class="sr-only">{{ c.name }}</span>
+                                                                    </a>
+
+
+                                                                {% endfor %}
+                                                            {% else %}
+                                                                <span class="text-muted">بدون تنوع رنگ</span>
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
                                                 {% endif %}
-                                            </div>
 
-                                            {# رنگ‌ها: فقط اگر از ویوو اجازه داده شده #}
-                                            {% if ui.show_color %}
-                                                <div class="details-filter-row details-row-size">
-                                                    <label>رنگ : </label>
-                                                    <div class="product-nav product-nav-dots" id="color-swatches">
-                                                        {% if colors %}
-                                                            {% for c in colors %}
-                                                                <a href="javascript:;"
-                                                                   class="{% if forloop.first %}active{% endif %}"
-                                                                   data-color-id="{{ c.id }}"
-                                                                   style="background: {{ c.hex_code }};">
-                                                                    <span class="sr-only">{{ c.name }}</span>
-                                                                </a>
-                                                            {% endfor %}
-                                                        {% else %}
-                                                            <span class="text-muted">بدون تنوع رنگ</span>
+                                                {% if ui.show_size %}
+                                                    <div class="details-filter-row details-row-size">
+                                                        <label for="size" class="form-label">سایز :</label>
+                                                        <div class="select-custom">
+                                                            <select name="size" id="size" class="form-control"
+                                                                    aria-label="انتخاب سایز">
+                                                                <option value="" selected disabled>سایز را انتخاب کنید
+                                                                </option>
+                                                                {% for s in sizes %}
+                                                                    <option value="{{ s.id|default:s }}">{{ s }}</option>
+                                                                {% endfor %}
+                                                            </select>
+                                                        </div>
+                                                        {% if ui.show_size_guide %}
+                                                            <a href="#" class="size-guide"><i class="icon-th-list"></i>راهنمای
+                                                                اندازه</a>
                                                         {% endif %}
                                                     </div>
-                                                </div>
-                                            {% endif %}
+                                                {% endif %}
 
-                                            {# سایز: فقط اگر از ویوو اجازه داده شده #}
-                                            {% if ui.show_size %}
-                                                <div class="details-filter-row details-row-size">
-                                                    <label for="size">سایز : </label>
-                                                    <div class="select-custom">
-                                                        <select name="size" id="size" class="form-control">
-                                                            <option value="#" selected>سایز را انتخاب کنید</option>
-                                                            {% for s in sizes %}
-                                                                <option value="{{ s }}">{{ s }}</option>
-                                                            {% empty %}
-                                                                {# اگر سایزی در دیتابیس نبود، چیزی نشان نمی‌دهیم #}
+                                                {% if spec_summary and spec_summary|length %}
+                                                    <div class="product-specs-card">
+                                                        <h5 class="title">ویژگی‌های کلیدی محصول</h5>
+                                                        <div class="specs-grid">
+                                                            {% for it in spec_summary %}
+                                                                <div class="spec-box">
+                                                                    <span class="label">{{ it.label }}</span>
+                                                                    <span class="value">{{ it.value }}</span>
+                                                                </div>
                                                             {% endfor %}
-                                                        </select>
+                                                        </div>
+                                                        {% if spec_total > spec_summary|length %}
+                                                            <a href="#section-specs" class="see-all">مشاهدهٔ همهٔ
+                                                                ویژگی‌ها</a>
+                                                        {% endif %}
                                                     </div>
-                                                    {% if ui.show_size_guide %}
-                                                        <a href="#" class="size-guide"><i class="icon-th-list"></i>راهنمای
-                                                            اندازه</a>
-                                                    {% endif %}
-                                                </div>
-                                            {% endif %}
+                                                {% endif %}
+{#                                                <details class="dk-acc card-like">#}
+{#                                                    <summary><span>خدمات نصب و راه‌اندازی</span> <label#}
+{#                                                            class="switch"><input#}
+{#                                                            type="checkbox"#}
+{#                                                            id="svc-toggle"><span#}
+{#                                                            class="slider"></span></label></summary>#}
+{#                                                    <div class="dk-acc-body"><label class="opt"> <input type="checkbox"#}
+{#                                                                                                        id="install-chk">#}
+{#                                                        <span#}
+{#                                                                class="ttl">نصب در محل</span> <span#}
+{#                                                                class="price muted">هزینه پس از خرید مشخص می‌شود</span>#}
+{#                                                    </label>#}
+{#                                                        <div class="dk-acc-foot"><a href="#" class="lnk">جزئیات</a>#}
+{#                                                        </div>#}
+{#                                                    </div>#}
+{#                                                </details>#}
 
-                                            {% if spec_summary and spec_summary|length %}
-                                                <div class="product-specs-card">
-                                                    <h5 class="title">ویژگی‌های کلیدی محصول</h5>
+                                                {% if show_insurance %}
+                                                    <details class="dk-acc card-like" open>
+                                                        <summary>
+                                                            <span class="t">بیمه</span>
+                                                            <label class="switch">
+                                                                <input type="checkbox" id="ins-toggle" checked>
+                                                                <span class="slider"></span>
+                                                            </label>
+                                                        </summary>
 
-                                                    <div class="specs-grid">
-                                                        {% for it in spec_summary %}
-                                                            <div class="spec-box">
-                                                                <span class="label">{{ it.label }}</span>
-                                                                <span class="value">{{ it.value }}</span>
+                                                        <div class="dk-acc-body">
+                                                            {% for si in services_insurance %}
+                                                                <label class="opt">
+                                                                    <input
+                                                                            type="radio"   {# یا checkbox #}
+                                                                            name="services[]"
+                                                                            value="{{ si.id }}"
+                                                                            {% if si.is_default_on %}checked{% endif %}
+                                                                    >
+                                                                    <span class="ttl">{{ si.name }}</span>
+
+                                                                    {# اگر پلن درصدی داری، می‌تونی یک badge نشان دهی؛ اینجا فقط قیمت نهایی نشان داده می‌شود #}
+                                                                    {# <span class="off">٪۵</span>  ← اگر لازم شد بعداً از متادیتا اضافه می‌کنیم #}
+
+                                                                    <span class="price">
+          {{ si.unit_price|floatformat:0|intcomma }}
+          <small>تومان</small>
+                                                                        {% if si.per_item %}
+                                                                            <small class="text-muted">(به‌ازای هر واحد)</small>{% endif %}
+        </span>
+                                                                </label>
+                                                            {% endfor %}
+                                                            <div class="dk-acc-foot"><a href="#" class="lnک">جزئیات</a>
                                                             </div>
-                                                        {% endfor %}
+                                                        </div>
+                                                    </details>
+
+                                                {% endif %}
+                                                <div class="product-details-footer">
+                                                    <div class="product-cat text-center">
+                                                        <span>دسته‌بندی : </span>
+                                                        {% if product.category %}
+                                                            <a href="{{ product.category.get_absolute_url }}">{{ product.category.name }}</a>
+                                                        {% else %}
+                                                            <span class="text-muted">نامشخص</span>
+                                                        {% endif %}
                                                     </div>
-
-                                                    {% if spec_total > spec_summary|length %}
-                                                        <a href="#section-specs" class="see-all">مشاهدهٔ همهٔ
-                                                            ویژگی‌ها</a>
-                                                    {% endif %}
-                                                </div>
-                                            {% endif %}
-
-                                            <!-- دسته‌بندی و شبکه‌های اجتماعی -->
-                                            <div class="product-details-footer">
-                                                <div class="product-cat text-center">
-                                                    <span>دسته‌بندی : </span>
-                                                    {% if product.category %}
-                                                        <a href="{{ product.category.get_absolute_url }}">{{ product.category.name }}</a>
-                                                    {% else %}
-                                                        <span class="text-muted">نامشخص</span>
-                                                    {% endif %}
-                                                </div>
-
-                                                <div class="social-icons social-icons-sm">
-                                                    <span class="social-label">اشتراک گذاری : </span>
-                                                    <a href="#" class="social-icon" title="فیسبوک" target="_blank"><i
-                                                            class="icon-facebook-f"></i></a>
-                                                    <a href="#" class="social-icon" title="توییتر" target="_blank"><i
-                                                            class="icon-twitter"></i></a>
-                                                    <a href="#" class="social-icon" title="اینستاگرام"
-                                                       target="_blank"><i class="icon-instagram"></i></a>
-                                                    <a href="#" class="social-icon" title="پینترست" target="_blank"><i
-                                                            class="icon-pinterest"></i></a>
-                                                </div>
-                                            </div>
-
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-                            {#  Price Chart _ Price History     #}
-                            <div class="row g-9 align-items-start">
-                                <div class="col-xl-12 col-lg-8 order-lg-2">
-                                    <div class="card-like wm-main">
-                                        <div class="row g-3">
-                                            <div class="col-lg-12 order-lg-2">
-                                                <div class="card custom-card">
-                                                    <div class="card-header">
-                                                        <div class="card-title">نمودار تغییرات قیمت این محصول</div>
-                                                    </div>
-                                                    <div id="line-chart">
-                                                        <canvas id="priceLineChart" aria-label="نمودار روند قیمت"
-                                                                role="img"></canvas>
+                                                    <div class="social-icons social-icons-sm">
+                                                        <span class="social-label">اشتراک‌گذاری : </span>
+                                                        <a href="#" class="social-icon" title="فیسبوک"
+                                                           target="_blank"><i class="icon-facebook-f"></i></a>
+                                                        <a href="#" class="social-icon" title="توییتر"
+                                                           target="_blank"><i class="icon-twitter"></i></a>
+                                                        <a href="#" class="social-icon" title="اینستاگرام"
+                                                           target="_blank"><i class="icon-instagram"></i></a>
+                                                        <a href="#" class="social-icon" title="پینترست" target="_blank"><i
+                                                                class="icon-pinterest"></i></a>
                                                     </div>
                                                 </div>
+
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
+                            <!-- ستون قیمت/خرید (سایدبار) -->
+                            <aside class="col-xl-3 col-lg-4 order-lg-1">
+                                <div class="dk-buybox card-like sticky-col">
+
+                                    <div class="dk-seller">
+                                        <a href="#" class="lnk">عملکرد این محصول</a>
+                                        <span class="badge dk-badge-ok">عملکرد خوب</span>
+                                    </div>
+
+                                    <div class="dk-price">
+                                        <div class="num">
+                                            <span id="price-num">{{ price_final|floatformat:0|intcomma }}</span>
+                                            <small>تومان</small>
+                                        </div>
+
+                                        <div class="save" id="price-save"
+                                             style="
+                                                     {% if price_base and price_final and price_final < price_base %}{% else %}display:none{% endif %}">
+                                            <del id="compare-num">
+                                                {% if price_base and price_final and price_final < price_base %}
+                                                    {{ price_base|floatformat:0|intcomma }}
+                                                {% endif %}
+                                            </del>
+                                            <span class="badge dk-badge-off" id="off-badge">
+                {% if discount_percent %}{{ discount_percent|floatformat:0 }}٪ تخفیف{% endif %}
+              </span>
+                                            <small class="text-muted d-block" id="off-amount">
+                                                {% if discount_amount %}مبلغ کسرشده:
+                                                    {{ discount_amount|floatformat:0|intcomma }} تومان{% endif %}
+                                            </small>
+                                        </div>
+                                    </div>
+
+                                    <div id="price-api"
+                                         data-url="{% url 'products:variant-price' slug=product.slug %}"></div>
+
+                                    <div class="dk-rows">
+                                        <div class="details-filter-row details-row-size">
+                                            <label for="qty">تعداد :</label>
+                                            <div class="product-details-quantity">
+                                                <input type="number" id="qty" name="quantity" class="form-control"
+                                                       value="1"
+                                                       min="1" max="10" step="1" data-decimals="0" required>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {% if stock_info and stock_info.is_low %}
+                                        <p class="mt-2 low-stock" style="font-weight:700;color:red;">
+                                            تنها {{ stock_info.min_stock|default:stock_info.total_stock }} عدد در انبار
+                                            باقی مانده
+                                        </p>
+                                    {% endif %}
+
+                                    <div class="dk-cta">
+                                        <button class="btn dk-add" id="btn-add" type="submit" disabled>
+                                            <i class="icon-shopping-cart"></i><span>افزودن به سبد خرید</span>
+                                        </button>
+                                    </div>
+
+                                    <div class="dk-mini-actions" role="group" aria-label="لینک‌های ثانویه محصول">
+                                        <a href="#" class="btn-product btn-wishlist" title="لیست علاقه‌مندی"><span>افزودن به لیست علاقه‌مندی</span></a>
+                                        <a href="#" class="btn-product btn-compare" title="مقایسه"><span>افزودن به لیست مقایسه</span></a>
+                                    </div>
+
+                                    <hr>
+
+                                    <div class="dk-row"><label><i class="icon-truck"></i> روش و هزینه ارسال</label>
+                                        <div class="v">{{ product.shipping_text|default:"ارسال سریع • تامین از ۱ روز کاری دیگر" }}</div>
+                                    </div>
+                                    <div class="dk-row"><label><i class="icon-check"></i> اصالت و سلامت کالا</label>
+                                        <div class="v">ضمانت اصالت و سلامت فیزیکی</div>
+                                    </div>
+                                    <div class="dk-row"><label><i class="icon-rotate-left"></i> بازگشت</label>
+                                        <div class="v">۷ روز مهلت بازگشت</div>
+                                    </div>
+                                    <div class="dk-row"><label><i class="icon-superpowers"></i> گارانتی</label>
+                                        <div class="v">{{ product.warranty_text|default:"—" }}</div>
+                                    </div>
+
+
+                                </div>
+                            </aside>
 
                         </div>
+                        {# /row #}
+                        <!-- اکاردئون خدمات -->
 
-                        <!-- کارت چپ: خرید/قیمت/ارسال -->
-                        <aside class="col-xl-3 col-lg-4 order-lg-1">
-                            <div class="dk-buybox card-like sticky-col">
+                    </form>
 
-                                <!-- عملکرد -->
-                                <div class="dk-seller">
-                                    <a href="#" class="lnk">عملکرد این محصول</a>
-                                    <span class="badge dk-badge-ok">عملکرد خوب</span>
-                                </div>
-
-
-                                {% with orig=product.compare_at_price|default_if_none:product.price %}
-                                    {# قیمت نهایی: eff_price اگر از موتور اومده; در غیر اینصورت همون price #}
-                                    {% with current=eff_price %}
-                                        <div class="dk-price">
-                                            <div class="num">
-                                                <span id="price-num">{{ current|floatformat:0|intcomma }}</span>
-                                                <small>تومان</small>
+                    {# ——— ردیف جدا برای نمودار قیمت (بعد از ردیف اصلی) ——— #}
+                    <div class="row g-9 align-items-start mt-3">
+                        <div class="col-12">
+                            <div class="card-like wm-main">
+                                <div class="row g-3">
+                                    <div class="col-12">
+                                        <div class="card custom-card">
+                                            <div class="card-header">
+                                                <div class="card-title">نمودار تغییرات قیمت این محصول</div>
                                             </div>
-
-                                            {# اگر قیمت نهایی از قیمت مرجع کمتر بود، مرجع رو خط‌خورده نمایش بده #}
-                                            {% if current < orig %}
-                                                <div class="save">
-                                                    <del id="compare-num">{{ orig|floatformat:0|intcomma }}</del>
-                                                </div>
-                                            {% endif %}
+                                            <div id="line-chart">
+                                                <canvas id="priceLineChart" aria-label="نمودار روند قیمت"
+                                                        role="img"></canvas>
+                                            </div>
                                         </div>
-                                    {% endwith %}
-                                {% endwith %}
-                                {#                                <!-- قیمت -->#}
-                                {#                                <div class="dk-price">#}
-                                {#                                    <div class="num">#}
-                                {#                                        <span id="price-num">{{ product.price|floatformat:0|intcomma }}</span>#}
-                                {#                                        <small>تومان</small>#}
-                                {#                                    </div>#}
-                                {##}
-                                {#                                    {% if product.compare_at_price %}#}
-                                {#                                        <div class="save">#}
-                                {#                                            <del id="compare-num">{{ product.compare_at_price|floatformat:0|intcomma }}</del>#}
-                                {#                                        </div>#}
-                                {#                                    {% endif %}#}
-                                {##}
-
-                            </div>
-                            <!-- اطلاعات ارسال و ضمانت -->
-
-                            <!-- گزینه‌ها -->
-                            <div class="dk-rows">
-
-                                <div class="details-filter-row details-row-size">
-                                    <label for="qty">تعداد : </label>
-                                    <div class="product-details-quantity">
-                                        <input type="number" id="qty" class="form-control" value="1" min="1"
-                                               max="10" step="1" data-decimals="0" required>
                                     </div>
                                 </div>
                             </div>
-                            {% if stock_info and stock_info.is_low %}
-                                <p class="mt-2 low-stock" style="font-weight:700;color:red;">
-                                    تنها {{ stock_info.min_stock|default:stock_info.total_stock }} عدد در انبار باقی
-                                    مانده
-                                </p>
-                            {% endif %}
-                            <!-- CTA -->
-                            <div class="dk-cta">
-                                <button class="btn dk-add"><i
-                                        class="icon-shopping-cart"></i><span>افزودن به سبد خرید</span>
-                                </button>
-                            </div>
-
-                            <div class="dk-mini-actions" role="group" aria-label="لینک‌های ثانویه محصول">
-                                <a href="#" class="btn-product btn-wishlist" title="لیست علاقه‌مندی">
-                                    <span>افزودن به لیست علاقه‌مندی</span>
-                                </a>
-                                <a href="#" class="btn-product btn-compare" title="مقایسه">
-                                    <span>افزودن به لیست مقایسه</span>
-                                </a>
-                            </div>
-                            <hr>
-                            <div class="dk-row"><label><i class="icon-truck"></i> روش و هزینه ارسال</label>
-                                <div class="v">{{ product.shipping_text|default:"ارسال سریع • تامین از ۱ روز کاری دیگر" }}</div>
-                            </div>
-                            <div class="dk-row"><label><i class="icon-check"></i> اصالت و سلامت کالا</label>
-                                <div class="v">ضمانت اصالت و سلامت فیزیکی</div>
-                            </div>
-                            <div class="dk-row"><label><i class="icon-rotate-left"></i> بازگشت</label>
-                                <div class="v">۷ روز مهلت بازگشت</div>
-                            </div>
-
-                            <div class="dk-row"><label><i class="icon-superpowers"></i> گارانتی</label>
-                                <div class="v">{{ product.warranty_text|default:"—" }}</div>
-                            </div>
-                            <hr>
-
-                            <!-- اکاردئون خدمات -->
-                            <details class="dk-acc card-like">
-                                <summary>
-                                    <span>خدمات نصب و راه‌اندازی</span>
-                                    <label class="switch"><input type="checkbox" id="svc-toggle"><span
-                                            class="slider"></span></label>
-                                </summary>
-                                <div class="dk-acc-body">
-                                    <label class="opt">
-                                        <input type="checkbox" id="install-chk">
-                                        <span class="ttl">نصب در محل</span>
-                                        <span class="price muted">هزینه پس از خرید مشخص می‌شود</span>
-                                    </label>
-                                    <div class="dk-acc-foot"><a href="#" class="lnk">جزئیات</a></div>
-                                </div>
-                            </details>
-
-                            <details class="dk-acc card-like" open>
-                                <summary>
-                                    <span class="t">بیمه</span>
-                                    <label class="switch"><input type="checkbox" id="ins-toggle" checked><span
-                                            class="slider"></span></label>
-                                </summary>
-                                <div class="dk-acc-body">
-                                    <label class="opt">
-                                        <input type="radio" name="ins" checked>
-                                        <span class="ttl">بیمه تجهیزات دیجیتال سامان</span>
-                                        <span class="off">٪۵</span>
-                                        <span class="price">۱,۰۲۳,۰۰۰ <small>تومان</small></span>
-                                    </label>
-                                    <div class="dk-acc-foot"><a href="#" class="lnک">جزئیات</a></div>
-                                </div>
-                            </details>
+                        </div>
                     </div>
+                </section>
 
 
-                    </aside>
+                <hr>
 
-            </div>
-
-
-            </section>
-
-            {#                <!-- نمودار قیمت -->#}
-            {#                <section class="tlp-hero ui-compact mt-0" dir="rtl" style="margin-top: 5rem;">#}
-            {#                   #}
-            {##}
-            {#                    </div>#}
-            {#                </section>#}
-
-            <hr>
-
-            <!-- محصولات مرتبط -->
-            <div class="container">
-                <h2 class="title text-center mb-4">محصولاتی که شاید بپسندید</h2>
-                <div class="owl-carousel owl-simple carousel-equal-height carousel-with-shadow"
-                     data-toggle="owl"
-                     data-owl-options='{"nav":false,"dots":true,"margin":20,"loop":false,"rtl":true,
+                <!-- محصولات مرتبط -->
+                <div class="container">
+                    <h2 class="title text-center mb-4">محصولاتی که شاید بپسندید</h2>
+                    <div class="owl-carousel owl-simple carousel-equal-height carousel-with-shadow"
+                         data-toggle="owl"
+                         data-owl-options='{"nav":false,"dots":true,"margin":20,"loop":false,"rtl":true,
                  "responsive":{"0":{"items":1},"480":{"items":2},"768":{"items":3},"992":{"items":4},"1200":{"items":4,"nav":true,"dots":false}}}'>
-                    {% for r in related_products %}
-                        <div class="product product-7 text-center">
-                            <figure class="product-media">
-                                <a href="{{ r.get_absolute_url }}">
-                                    {% with img=r.images.all|first %}
-                                        {% if img %}
-                                            <img src="{{ img.image.url }}" alt="{{ img.alt|default:r.name }}"
-                                                 class="product-image">
-                                        {% else %}
-                                            <img src="{% static 'images/products/product-4.jpg' %}"
-                                                 alt="{{ r.name }}" class="product-image">
-                                        {% endif %}
-                                    {% endwith %}
-                                </a>
-                            </figure>
-                            <div class="product-body">
-                                <div class="product-cat text-center">
-                                    {% if r.category %}
-                                        <a href="{{ r.category.get_absolute_url }}">{{ r.category.name }}</a>{% else %}
-                                        <span class="text-muted">—</span>{% endif %}
+                        {% for r in related_products %}
+                            <div class="product product-7 text-center">
+                                <figure class="product-media">
+                                    <a href="{{ r.get_absolute_url }}">
+                                        {% with img=r.images.all|first %}
+                                            {% if img %}
+                                                <img src="{{ img.image.url }}" alt="{{ img.alt|default:r.name }}"
+                                                     class="product-image">
+                                            {% else %}
+                                                <img src="{% static 'images/products/product-4.jpg' %}"
+                                                     alt="{{ r.name }}" class="product-image">
+                                            {% endif %}
+                                        {% endwith %}
+                                    </a>
+                                </figure>
+                                <div class="product-body">
+                                    <div class="product-cat text-center">
+                                        {% if r.category %}
+                                            <a href="{{ r.category.get_absolute_url }}">{{ r.category.name }}</a>{% else %}
+                                            <span class="text-muted">—</span>{% endif %}
+                                    </div>
+                                    <h3 class="product-title text-center"><a
+                                            href="{{ r.get_absolute_url }}">{{ r.name }}</a></h3>
+                                    <div class="product-price">{{ r.price|floatformat:0|intcomma }} تومان</div>
                                 </div>
-                                <h3 class="product-title text-center"><a
-                                        href="{{ r.get_absolute_url }}">{{ r.name }}</a></h3>
-                                <div class="product-price">{{ r.price|floatformat:0|intcomma }} تومان</div>
                             </div>
-                        </div>
-                    {% empty %}
-                        <div class="text-center text-muted p-3">محصول مرتبطی پیدا نشد.</div>
-                    {% endfor %}
+                        {% empty %}
+                            <div class="text-center text-muted p-3">محصول مرتبطی پیدا نشد.</div>
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- تب‌ها -->
-        <div class="product-details-tab product-details-extended mt-5">
-            <div class="product-tab-new">
-                <div class="page-content">
-                    <div class="container">
-                        <div class="row">
-                            <div class="col-md-11">
-                                <div class="accordion" id="accordion-1">
-                                    <!-- مشخصات -->
-                                    <div class="card">
-                                        <div class="card-header" id="heading-1">
-                                            <h2 class="card-title">
-                                                <a role="button" data-toggle="collapse" href="#collapse-1"
-                                                   aria-expanded="true" aria-controls="collapse-1">مشخصات</a>
-                                            </h2>
-                                        </div>
-                                        <div id="collapse-1" class="collapse show" aria-labelledby="heading-1"
-                                             data-parent="#accordion-1">
-                                            <div class="card-body">
-                                                {% if product.description %}
-                                                    <p>{{ product.description|linebreaks }}</p>
-                                                {% else %}
-                                                    <span class="text-muted">توضیحی ثبت نشده است.</span>
-                                                {% endif %}
+            <!-- تب‌ها -->
+            <div class="product-details-tab product-details-extended mt-5">
+                <div class="product-tab-new">
+                    <div class="page-content">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-md-11">
+                                    <div class="accordion" id="accordion-1">
+                                        <!-- مشخصات -->
+                                        <div class="card">
+                                            <div class="card-header" id="heading-1">
+                                                <h2 class="card-title">
+                                                    <a role="button" data-toggle="collapse" href="#collapse-1"
+                                                       aria-expanded="true" aria-controls="collapse-1">مشخصات</a>
+                                                </h2>
+                                            </div>
+                                            <div id="collapse-1" class="collapse show" aria-labelledby="heading-1"
+                                                 data-parent="#accordion-1">
+                                                <div class="card-body">
+                                                    {% if product.description %}
+                                                        <p>{{ product.description|linebreaks }}</p>
+                                                    {% else %}
+                                                        <span class="text-muted">توضیحی ثبت نشده است.</span>
+                                                    {% endif %}
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
 
-                                    <!-- مشخصات فنی -->
-                                    <div class="card" id="section-specs">
-                                        <div class="card-header" id="heading-2">
-                                            <h2 class="card-title">
-                                                <a class="collapsed" role="button" data-toggle="collapse"
-                                                   href="#collapse-2" aria-expanded="false"
-                                                   aria-controls="collapse-2">مشخصات فنی</a>
-                                            </h2>
-                                        </div>
+                                        <!-- مشخصات فنی -->
+                                        <div class="card" id="section-specs">
+                                            <div class="card-header" id="heading-2">
+                                                <h2 class="card-title">
+                                                    <a class="collapsed" role="button" data-toggle="collapse"
+                                                       href="#collapse-2" aria-expanded="false"
+                                                       aria-controls="collapse-2">مشخصات فنی</a>
+                                                </h2>
+                                            </div>
 
-                                        <div id="collapse-2" class="collapse" aria-labelledby="heading-2"
-                                             data-parent="#accordion-1">
-                                            <div class="card-body">
-                                                {% if product.attr_values.all %}
-                                                    <div class="dk-specs-wrap" dir="rtl">
-                                                        <table class="dk-specs-table">
-                                                            <tbody>
-                                                            {% for av in product.attr_values.all %}
-                                                                {# choice - گزینه تکی #}
-                                                                {% if av.attribute.kind == "choice" and av.value_choice %}
-                                                                    <tr>
-                                                                        <th>{{ av.attribute.name }}</th>
-                                                                        <td>{{ av.value_choice.label }}</td>
-                                                                    </tr>
+                                            <div id="collapse-2" class="collapse" aria-labelledby="heading-2"
+                                                 data-parent="#accordion-1">
+                                                <div class="card-body">
+                                                    {% if product.attr_values.all %}
+                                                        <div class="dk-specs-wrap" dir="rtl">
+                                                            <table class="dk-specs-table">
+                                                                <tbody>
+                                                                {% for av in product.attr_values.all %}
+                                                                    {# choice - گزینه تکی #}
+                                                                    {% if av.attribute.kind == "choice" and av.value_choice %}
+                                                                        <tr>
+                                                                            <th>{{ av.attribute.name }}</th>
+                                                                            <td>{{ av.value_choice.label }}</td>
+                                                                        </tr>
 
-                                                                    {# multi - چندگزینه‌ای #}
-                                                                {% elif av.attribute.kind == "multi" and av.values_multi.all|length %}
-                                                                    <tr>
-                                                                        <th>{{ av.attribute.name }}</th>
-                                                                        <td>
-                                                                            {% for ch in av.values_multi.all %}
-                                                                                {{ ch.label }}
-                                                                                {% if not forloop.last %}
-                                                                                    ، {% endif %}
-                                                                            {% endfor %}
-                                                                        </td>
-                                                                    </tr>
+                                                                        {# multi - چندگزینه‌ای #}
+                                                                    {% elif av.attribute.kind == "multi" and av.values_multi.all|length %}
+                                                                        <tr>
+                                                                            <th>{{ av.attribute.name }}</th>
+                                                                            <td>
+                                                                                {% for ch in av.values_multi.all %}
+                                                                                    {{ ch.label }}
+                                                                                    {% if not forloop.last %}
+                                                                                        ، {% endif %}
+                                                                                {% endfor %}
+                                                                            </td>
+                                                                        </tr>
 
-                                                                    {# decimal - عدد اعشاری #}
-                                                                {% elif av.attribute.kind == "decimal" and av.value_decimal is not None %}
-                                                                    <tr>
-                                                                        <th>{{ av.attribute.name }}</th>
-                                                                        <td>
-                                                                            {{ av.value_decimal|floatformat:"-2" }}
-                                                                            {% if av.attribute.unit %}
-                                                                                <span class="unit">{{ av.attribute.unit }}</span>{% endif %}
-                                                                        </td>
-                                                                    </tr>
+                                                                        {# decimal - عدد اعشاری #}
+                                                                    {% elif av.attribute.kind == "decimal" and av.value_decimal is not None %}
+                                                                        <tr>
+                                                                            <th>{{ av.attribute.name }}</th>
+                                                                            <td>
+                                                                                {{ av.value_decimal|floatformat:"-2" }}
+                                                                                {% if av.attribute.unit %}
+                                                                                    <span class="unit">{{ av.attribute.unit }}</span>{% endif %}
+                                                                            </td>
+                                                                        </tr>
 
-                                                                    {# int - عدد صحیح #}
-                                                                {% elif av.attribute.kind == "int" and av.value_int is not None %}
-                                                                    <tr>
-                                                                        <th>{{ av.attribute.name }}</th>
-                                                                        <td>
-                                                                            {{ av.value_int|intcomma }}
-                                                                            {% if av.attribute.unit %}
-                                                                                <span class="unit">{{ av.attribute.unit }}</span>{% endif %}
-                                                                        </td>
-                                                                    </tr>
+                                                                        {# int - عدد صحیح #}
+                                                                    {% elif av.attribute.kind == "int" and av.value_int is not None %}
+                                                                        <tr>
+                                                                            <th>{{ av.attribute.name }}</th>
+                                                                            <td>
+                                                                                {{ av.value_int|intcomma }}
+                                                                                {% if av.attribute.unit %}
+                                                                                    <span class="unit">{{ av.attribute.unit }}</span>{% endif %}
+                                                                            </td>
+                                                                        </tr>
 
-                                                                    {# bool - بلی/خیر #}
-                                                                {% elif av.attribute.kind == "bool" and av.value_bool is not None %}
-                                                                    <tr>
-                                                                        <th>{{ av.attribute.name }}</th>
-                                                                        <td>{{ av.value_bool|yesno:"بله,خیر" }}</td>
-                                                                    </tr>
+                                                                        {# bool - بلی/خیر #}
+                                                                    {% elif av.attribute.kind == "bool" and av.value_bool is not None %}
+                                                                        <tr>
+                                                                            <th>{{ av.attribute.name }}</th>
+                                                                            <td>{{ av.value_bool|yesno:"بله,خیر" }}</td>
+                                                                        </tr>
 
-                                                                    {# text - متن #}
-                                                                {% elif av.attribute.kind == "text" and av.value_text %}
-                                                                    <tr>
-                                                                        <th>{{ av.attribute.name }}</th>
-                                                                        <td>{{ av.value_text }}</td>
-                                                                    </tr>
-                                                                {% endif %}
-                                                            {% endfor %}
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
-                                                {% else %}
-                                                    <span class="text-muted">ویژگی‌ای ثبت نشده است.</span>
-                                                {% endif %}
+                                                                        {# text - متن #}
+                                                                    {% elif av.attribute.kind == "text" and av.value_text %}
+                                                                        <tr>
+                                                                            <th>{{ av.attribute.name }}</th>
+                                                                            <td>{{ av.value_text }}</td>
+                                                                        </tr>
+                                                                    {% endif %}
+                                                                {% endfor %}
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    {% else %}
+                                                        <span class="text-muted">ویژگی‌ای ثبت نشده است.</span>
+                                                    {% endif %}
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <!-- نظرات -->
-                                    <div class="card">
-                                        <div class="card-header" id="heading-3">
-                                            <h2 class="card-title">
-                                                <a class="collapsed" role="button" data-toggle="collapse"
-                                                   href="#collapse-3" aria-expanded="false"
-                                                   aria-controls="collapse-3">نظرات</a>
-                                            </h2>
-                                        </div>
-                                        <div id="collapse-3" class="collapse" aria-labelledby="heading-3"
-                                             data-parent="#accordion-1">
-                                            <div class="text-right mt-4 border-t" id="comments">
-                                                <div class="reviews">
-                                                    <div class="container mt-3">
-                                                        <span class="text-muted">سیستم نظرات به‌زودی متصل می‌شود.</span>
+                                        <!-- نظرات -->
+                                        <div class="card">
+                                            <div class="card-header" id="heading-3">
+                                                <h2 class="card-title">
+                                                    <a class="collapsed" role="button" data-toggle="collapse"
+                                                       href="#collapse-3" aria-expanded="false"
+                                                       aria-controls="collapse-3">نظرات</a>
+                                                </h2>
+                                            </div>
+                                            <div id="collapse-3" class="collapse" aria-labelledby="heading-3"
+                                                 data-parent="#accordion-1">
+                                                <div class="text-right mt-4 border-t" id="comments">
+                                                    <div class="reviews">
+                                                        <div class="container mt-3">
+                                                            <span class="text-muted">سیستم نظرات به‌زودی متصل می‌شود.</span>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
 
-                                </div><!-- /accordion -->
-                            </div>
-                        </div><!-- /row -->
+                                    </div><!-- /accordion -->
+                                </div>
+                            </div><!-- /row -->
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Sticky Bar -->
-        <div class="tlp-sticky">
-            <div class="container d-flex align-items-center justify-content-between">
-                <div class="sum">
-                    {% with img=gallery_images.0 %}
-                        {% if img %}
-                            <img src="{{ img.url }}" alt="{{ img.alt|default:product.name }}">
-                        {% else %}
-                            <img src="{{ FALLBACK_THUMB }}" alt="{{ product.name }}">
-                        {% endif %}
-                    {% endwith %}
-                    <div class="txt">
-                        <div class="t1">{{ product.name }}</div>
-                        <div class="t2">{{ product.price|floatformat:0|intcomma }} تومان</div>
+            <!-- Sticky Bar -->
+            <div class="tlp-sticky">
+                <div class="container d-flex align-items-center justify-content-between">
+                    <div class="sum">
+                        {% with img=gallery_images.0 %}
+                            {% if img %}
+                                <img src="{{ img.url }}" alt="{{ img.alt|default:product.name }}">
+                            {% else %}
+                                <img src="{{ FALLBACK_THUMB }}" alt="{{ product.name }}">
+                            {% endif %}
+                        {% endwith %}
+                        <div class="txt">
+                            <div class="t1">{{ product.name }}</div>
+                            <div class="t2">{{ product.price|floatformat:0|intcomma }} تومان</div>
+                        </div>
                     </div>
+                    <button class="btn bb-add"><i class="icon-shopping-cart"></i><span>افزودن به سبد</span></button>
                 </div>
-                <button class="btn bb-add"><i class="icon-shopping-cart"></i><span>افزودن به سبد</span></button>
             </div>
-        </div>
         </div>
 
     </main>

@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import  ProductListView, CategoryProductListView, ProductDetailView
+from .views import ProductListView, CategoryProductListView, ProductDetailView, VariantPriceView
 from products import  views
 
 
@@ -9,6 +9,7 @@ urlpatterns = [
     # دسته با مسیر درختی (electronics/mobile/ ...)
     path("c/<path:path>/", CategoryProductListView.as_view(), name='category'),
     path("p/<slug:slug>/", ProductDetailView.as_view(), name='product_detail'),
+    path("p/<slug:slug>/variant-price/", VariantPriceView.as_view(), name="variant-price"),
 
     # path('product/', views.product_detail_view, name='product_details'),
 ]

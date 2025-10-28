@@ -13,6 +13,90 @@ from django.core.exceptions import ValidationError
 from django.utils.functional import cached_property
 from decimal import Decimal
 
+# ---------- 1) گروه سرویس ها بیمه / نصب /گارانتی  ----------
+
+class Service(models.Model):
+    """
+    یک «خدمت افزوده» مثل: نصب در محل، راه‌اندازی نرم‌افزار، بیمه/گارانتی افزوده.
+    """
+    KIND_CHOICES = (
+        ("install", "نصب و راه‌اندازی"),
+        ("warranty", "گارانتی/بیمه افزوده"),
+        ("custom", "سفارشی"),
+    )
+    code = models.SlugField(max_length=80, unique=True, verbose_name="کد")
+    name = models.CharField(max_length=160, verbose_name="عنوان")
+    kind = models.CharField(max_length=20, choices=KIND_CHOICES, default="install", verbose_name="نوع")
+    description = models.TextField(blank=True, verbose_name="توضیحات")
+    is_active = models.BooleanField(default=True, verbose_name="فعال")
+
+    # گروه انحصاری (اختیاری): مثلا فقط یکی از «پلن‌های بیمه» قابل انتخاب باشد
+    exclusive_group = models.CharField(max_length=60, blank=True, verbose_name="گروه انحصاری")
+
+    # محدودیت‌ها
+    per_item = models.BooleanField(default=True, verbose_name="به ازای هر آیتم؟ (qty مبنا)")
+    max_qty = models.PositiveIntegerField(null=True, blank=True, verbose_name="حداکثر تعداد قابل انتخاب")
+
+    def __str__(self):
+        return self.name
+
+
+class ServicePrice(models.Model):
+    """
+    قیمت‌دهی منعطف برای یک سرویس:
+    - fixed: مبلغ ثابت
+    - percent_of_item: درصدی از قیمت آیتم
+    - per_unit_fixed: مبلغ ثابت * تعداد
+    - tiered_by_item_price: پلکانی بر اساس قیمت آیتم
+    """
+    PRICE_TYPES = (
+        ("fixed", "مبلغ ثابت"),
+        ("percent_of_item", "درصدی از قیمت آیتم"),
+        ("per_unit_fixed", "مبلغ ثابت به ازای هر واحد"),
+        ("tiered_by_item_price", "پلکانی بر اساس قیمت آیتم"),
+    )
+    service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name="prices", verbose_name="سرویس")
+    price_type = models.CharField(max_length=40, choices=PRICE_TYPES, default="fixed", verbose_name="نوع قیمت")
+    amount = models.DecimalField(max_digits=12, decimal_places=2, default=0, validators=[MinValueValidator(0)],
+                                 verbose_name="مبلغ/درصد")
+    # برای پلکانی (اختیاری)
+    item_price_min = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    item_price_max = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = "قیمت سرویس"
+        verbose_name_plural = "قیمت‌های سرویس"
+        indexes = [models.Index(fields=["service", "is_active"])]
+
+    def __str__(self):
+        return f"{self.service} – {self.get_price_type_display()} : {self.amount}"
+
+
+class CategoryService(models.Model):
+    """
+    وصل‌کردن یک سرویس به دسته‌ها (برای ارث‌بری به محصولات آن کتگوری).
+    """
+    category = models.ForeignKey("products.Category", on_delete=models.CASCADE, related_name="category_services")
+    service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name="category_links")
+    is_default_on = models.BooleanField(default=False, verbose_name="پیشنهاد پیش‌فرض روشن؟")
+
+    class Meta:
+        unique_together = (("category", "service"),)
+
+
+class ProductService(models.Model):
+    """
+    وصل‌کردن مستقیم سرویس به یک محصول (برای override/افزودن خاص).
+    """
+    product = models.ForeignKey("products.Product", on_delete=models.CASCADE, related_name="product_services")
+    service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name="product_links")
+    is_default_on = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = (("product", "service"),)
+
 # ---------- 1) گروه سایز و خود سایز ----------
 class SizeGroup(models.Model):
     code  = models.SlugField(max_length=50, unique=True)   # مثلا: apparel_alpha
@@ -292,6 +376,20 @@ class Product(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ ایجاد")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="تاریخ به‌روزرسانی")
+    # === product-level sale fields (اختیاری: admin-only) ===
+    sale_active = models.BooleanField(default=False, verbose_name="تخفیف محصول فعال")
+    sale_percent = models.DecimalField(
+        max_digits=5, decimal_places=2, null=True, blank=True,
+        verbose_name="درصد تخفیف (مثلاً 10 برای 10%)",
+        help_text="اگر پر شد، درصدی از قیمت پایه کم می‌شود."
+    )
+    sale_amount = models.DecimalField(
+        max_digits=12, decimal_places=2, null=True, blank=True,
+        verbose_name="مبلغ ثابت تخفیف (تومان)",
+        help_text="اگر پر شد، مبلغ ثابت از قیمت پایه کم می‌شود."
+    )
+    sale_starts_at = models.DateTimeField(null=True, blank=True, verbose_name="شروع تخفیف")
+    sale_ends_at = models.DateTimeField(null=True, blank=True, verbose_name="پایان تخفیف")
 
     class Meta:
         verbose_name = "محصول"
@@ -304,6 +402,26 @@ class Product(models.Model):
             models.Index(fields=["brand_fk"]),
         ]
 
+    def effective_services(self):
+        """
+        سرویس‌های موثر این محصول = سرویس‌های سطح محصول + سرویس‌های کتگوری‌های اجدادی.
+        """
+        cats = self.category.get_ancestors(include_self=True)
+        cat_services = (CategoryService.objects
+                        .filter(category__in=cats).select_related("service"))
+        prd_services = (ProductService.objects
+                        .filter(product=self).select_related("service"))
+
+        # ادغامِ یکتا با اولویت ProductService
+        seen = set()
+        result = []
+        for link in list(prd_services) + list(cat_services):
+            s = link.service
+            if not s.is_active or s.id in seen:
+                continue
+            seen.add(s.id)
+            result.append({"service": s, "is_default_on": getattr(link, "is_default_on", False)})
+        return result
 
     @property
     def effective_price(self) -> Decimal:
@@ -337,8 +455,14 @@ class Product(models.Model):
         return self.images.filter(is_primary=True).first() or self.images.order_by("position", "id").first()
 
     def get_size_group(self):
-        # اگر محصول دسته دارد، از زنجیره‌ی اجداد نزدیک‌ترین size_group را برگردان
-        return self.category.resolved_size_group if self.category_id else None
+        cat = getattr(self, "category", None)
+        if not cat:
+            return None
+        # اگر کتگوری متد بالا را دارد:
+        if hasattr(cat, "get_size_group"):
+            return cat.get_size_group()
+        # یا مستقیم از خود کتگوری
+        return getattr(cat, "size_group", None)
 
     @property
     def colors(self):
@@ -370,6 +494,20 @@ class ProductVariant(models.Model):
     stock   = models.PositiveIntegerField(default=0, verbose_name="موجودی")
     is_active = models.BooleanField(default=True, verbose_name="فعال")
 
+    # === sale fields (variant-level) ===
+    sale_active_variant = models.BooleanField(default=False, verbose_name="تخفیف روی این واریانت فعال")
+    sale_percent_variant = models.DecimalField(
+        max_digits=5, decimal_places=2, null=True, blank=True,
+        verbose_name="درصد تخفیف واریانت",
+        help_text="مثلاً 10 برای 10% (اختیاری)"
+    )
+    sale_amount_variant = models.DecimalField(
+        max_digits=12, decimal_places=2, null=True, blank=True,
+        verbose_name="مبلغ ثابت تخفیف واریانت",
+        help_text="مثلاً 10000 (تومان) (اختیاری)"
+    )
+
+
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ ایجاد")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="تاریخ به‌روزرسانی")
 
@@ -394,7 +532,7 @@ class ProductVariant(models.Model):
             models.Index(fields=["product", "color", "size"]),
             models.Index(fields=["is_active"]),
         ]
-
+    unique_together = (("product", "sku"),)
 
     def clean(self):
         super().clean()
