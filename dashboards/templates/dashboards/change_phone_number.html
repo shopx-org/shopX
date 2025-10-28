@@ -1,0 +1,149 @@
+{% extends 'dashboards/dashboard_base_user.html' %}
+{% block UserDash_content %}
+<div class="tab-pane fade show active" id="tab-dashboard" role="tabpanel">
+    <div id="change-phone-card" class="col-lg-10 col-xl-8 mx-auto dashboard-card animate__animated animate__fadeIn">
+        <div class="mb-4 text-right rtl border-bottom pb-2">
+            <h4 class="fw-bold text-dark">📱 تغییر شماره همراه</h4>
+        </div>
+
+        <div id="alert-area" class="mb-3"></div>
+
+        <form id="change-phone-form" class="user-form-modern text-right" novalidate>
+            {% csrf_token %}
+
+            <!-- 🟠 مرحله ۱: دریافت شماره جدید -->
+            <div id="step-new-phone" class="step active">
+                <label class="form-label">{{ form.new_phone.label }}</label>
+                {{ form.new_phone }}
+                <div class="d-flex justify-content-end mt-3">
+                    <button type="button" id="send_otp_old" class="btn-save">ارسال کد به شماره فعلی</button>
+                </div>
+            </div>
+
+            <!-- 🟠 مرحله ۲: تایید شماره فعلی -->
+            <div id="step-verify-old" class="step" style="display:none;">
+                <label class="form-label">کد تأیید شماره فعلی</label>
+                <input type="text" id="otp_old" class="form-control" maxlength="6" placeholder="کد ۶ رقمی را وارد کنید">
+                <div class="d-flex justify-content-end mt-3">
+                    <button type="button" id="verify_old" class="btn-save">تأیید و ارسال کد دوم</button>
+                </div>
+            </div>
+
+            <!-- 🟠 مرحله ۳: تایید شماره جدید -->
+            <div id="step-verify-new" class="step" style="display:none;">
+                <label class="form-label">کد تأیید شماره جدید</label>
+                <input type="text" id="otp_new" class="form-control" maxlength="6" placeholder="کد ۶ رقمی را وارد کنید">
+                <div class="d-flex justify-content-end mt-3">
+                    <button type="button" id="verify_new" class="btn-save">تغییر شماره</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    /* ✨ انیمیشن fade-in برای مراحل */
+    .step {
+        animation: fadeIn 0.4s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    #change-phone-card {
+        transition: all 0.3s ease;
+    }
+
+    /* فاصله بین مراحل */
+    .step {
+        margin-top: 1.2rem;
+    }
+
+    /* نمایش alert زیبا */
+    #alert-area .alert {
+        margin-bottom: 1rem;
+        border-radius: 10px;
+        font-size: 1.4rem;
+        text-align: right;
+    }
+
+    /* وسط‌چین فرم برای حالت موبایل */
+    @media (max-width: 768px) {
+        .user-form-modern {
+            text-align: center !important;
+        }
+    }
+</style>
+
+<script>
+    const csrfToken = "{{ csrf_token }}";
+
+    function showAlert(message, type = "success") {
+        const html = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="close" data-dismiss="alert">
+                    <span>&times;</span>
+                </button>
+            </div>`;
+        document.getElementById('alert-area').innerHTML = html;
+    }
+
+    async function postData(data) {
+        const response = await fetch("{% url 'dashboards:change_phone_otp' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "X-CSRFToken": csrfToken
+            },
+            body: new URLSearchParams(data)
+        });
+        return response.json();
+    }
+
+    // مرحله ۱
+    document.getElementById('send_otp_old').onclick = async () => {
+        const newPhone = document.querySelector('[name="new_phone"]').value.trim();
+        if (!newPhone) return showAlert("لطفاً شماره جدید را وارد کنید.", "danger");
+
+        const res = await postData({ stage: "send_old", new_phone: newPhone });
+        showAlert(res.message, res.status === "ok" ? "success" : "danger");
+
+        if (res.status === "ok") {
+            document.getElementById('step-new-phone').style.display = 'none';
+            document.getElementById('step-verify-old').style.display = 'block';
+        }
+    };
+
+    // مرحله ۲
+    document.getElementById('verify_old').onclick = async () => {
+        const code = document.getElementById('otp_old').value.trim();
+        const newPhone = document.querySelector('[name="new_phone"]').value.trim();
+        if (!code) return showAlert("کد تأیید را وارد کنید.", "danger");
+
+        const res = await postData({ stage: "verify_old", code, new_phone: newPhone });
+        showAlert(res.message, res.status === "ok" ? "success" : "danger");
+
+        if (res.status === "ok") {
+            document.getElementById('step-verify-old').style.display = 'none';
+            document.getElementById('step-verify-new').style.display = 'block';
+        }
+    };
+
+    // مرحله ۳
+    document.getElementById('verify_new').onclick = async () => {
+        const code = document.getElementById('otp_new').value.trim();
+        const newPhone = document.querySelector('[name="new_phone"]').value.trim();
+        if (!code) return showAlert("کد تأیید شماره جدید را وارد کنید.", "danger");
+
+        const res = await postData({ stage: "verify_new", code, new_phone: newPhone });
+        showAlert(res.message, res.status === "done" ? "success" : "danger");
+
+        if (res.status === "done") {
+            setTimeout(() => window.location.reload(), 2000);
+        }
+    };
+</script>
+{% endblock %}

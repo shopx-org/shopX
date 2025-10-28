@@ -86,19 +86,8 @@
 
 
                     <div class="col-md-6 mt-3">
-                        <label class="form-label">تغییر شماره موبایل</label>
-                        <div class="input-group d-flex">
-                            <input type="tel" id="new_phone" class="form-control" placeholder="{{ phone }}">
-                            <button type="button" id="send_otp_old" class="btn-save ms-2">تأیید تغییر</button>
-                        </div>
-                    </div>
-
-                    <div id="otp_stage_area" class="col-md-6 mt-3" style="display:none;">
-                        <label class="form-label">کد تأیید</label>
-                        <div class="input-group d-flex">
-                            <input type="text" id="otp_code" class="form-control" maxlength="6" placeholder="کد ۴ رقمی">
-                            <button type="button" id="verify_otp" class="btn-save ms-2">تأیید</button>
-                        </div>
+                        <label class="form-label">شماره موبایل</label>
+                        {{ phone }}
                     </div>
 
                 </div>

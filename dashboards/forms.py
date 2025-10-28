@@ -5,38 +5,22 @@ from account.models import User, Profile
 from jdatetime import date as jdate  # تغییر import به jdatetime
 
 class DashboardAccountForm(forms.ModelForm):
-    # فیلدهای User
-    phone = forms.CharField(
-        label="شماره تلفن همراه",
-        required=True,
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'شماره تلفن همراه (۱۱ رقم با ۰۹ شروع شود)',
-            'name': 'phone',
-            'type': 'tel',
-            'maxlength': '11',
-            'pattern': '[0][9][0-9]{9}',
-            'onkeypress': 'return (event.charCode !=8 && event.charCode ==0 || (event.charCode >= 48 && event.charCode <= 57))'
-        }),
-        validators=[
-            RegexValidator(
-                regex=r'^09[0-9]{9}$',
-                message='شماره تلفن باید دقیقاً ۱۱ رقم باشد، با ۰۹ شروع شود و فقط شامل اعداد باشد.'
-            )
-        ],
-        error_messages={'required': 'لطفاً شماره تلفن همراه را وارد کنید.'}
-    )
+   
     first_name = forms.CharField(
         label="نام",
         required=True,
+        min_length=3,
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'نام خود را وارد کنید', 'name': 'first_name'}),
-        error_messages={'required': 'لطفاً نام خود را وارد کنید.'}
+        error_messages={'required': 'لطفاً نام خود را وارد کنید.',
+            'min_length': 'نام باید حداقل ۳ کاراکتر باشد.'}
     )
     last_name = forms.CharField(
         label="نام خانوادگی",
         required=True,
+        min_length=3,
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'نام خانوادگی خود را وارد کنید', 'name': 'last_name'}),
-        error_messages={'required': 'لطفاً نام خانوادگی خود را وارد کنید.'}
+        error_messages={'required': 'لطفاً نام خانوادگی خود را وارد کنید.',
+            'min_length': 'نام خانوادگی باید حداقل ۳ کاراکتر باشد.'}
     )
     email = forms.EmailField(
         label="ایمیل",
@@ -118,7 +102,7 @@ class DashboardAccountForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ['phone', 'first_name', 'last_name', 'email']
+        fields = ['first_name', 'last_name', 'email']
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
@@ -131,13 +115,13 @@ class DashboardAccountForm(forms.ModelForm):
             self.fields['month'].initial = str(profile.month).zfill(2) if profile.month else ''
             self.fields['year'].initial = str(profile.year) if profile.year else ''
             self.fields['gender'].initial = profile.gender or ''
-            self.fields['phone'].initial = self.instance.phone or ''
+            # self.fields['phone'].initial = self.instance.phone or ''
 
     def clean(self):
         cleaned_data = super().clean()
         new_pw = cleaned_data.get('new_password')
         confirm_pw = cleaned_data.get('confirm_password')
-
+# 
         # اعتبارسنجی رمز عبور
         if new_pw or confirm_pw:
             if new_pw != confirm_pw:
@@ -172,9 +156,9 @@ class DashboardAccountForm(forms.ModelForm):
             self.add_error('national_id', 'این کد ملی قبلاً توسط حساب کاربری دیگری استفاده شده است.')
 
         # بررسی یکتایی شماره تلفن
-        phone = cleaned_data.get('phone')
-        if phone and User.objects.filter(phone=phone).exclude(pk=self.user.pk).exists():
-            self.add_error('phone', 'این شماره تلفن قبلاً توسط حساب کاربری دیگری استفاده شده است.')
+        # phone = cleaned_data.get('phone')
+        # if phone and User.objects.filter(phone=phone).exclude(pk=self.user.pk).exists():
+        #     self.add_error('phone', 'این شماره تلفن قبلاً توسط حساب کاربری دیگری استفاده شده است.')
 
         # اعتبارسنجی تاریخ تولد
         day = cleaned_data.get('day')
@@ -209,3 +193,47 @@ class DashboardAccountForm(forms.ModelForm):
                 user.save()
 
         return user
+
+
+# در انتهای forms.py اضافه کن:
+class ChangePhoneNumberForm(forms.Form):
+    new_phone = forms.CharField(
+        label="شماره جدید",
+        required=True,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'شماره تلفن جدید (با ۰۹ شروع شود)',
+            'maxlength': '11',
+            'pattern': '[0][9][0-9]{9}',
+            'type': 'tel',
+            'inputmode': 'numeric',
+        }),
+        validators=[
+            RegexValidator(
+                regex=r'^09\d{9}$',
+                message='شماره تلفن باید با ۰۹ شروع شود و دقیقاً ۱۱ رقم عددی باشد.'
+            )
+        ],
+        error_messages={'required': 'لطفاً شماره تلفن جدید را وارد کنید.'}
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+
+    def clean_new_phone(self):
+        phone = self.cleaned_data.get('new_phone', '').strip()
+
+        # بررسی عدد بودن
+        if not phone.isdigit():
+            raise forms.ValidationError('شماره تلفن فقط باید شامل اعداد باشد.')
+
+        # بررسی طول دقیق و شروع با 09
+        if not phone.startswith('09') or len(phone) != 11:
+            raise forms.ValidationError('شماره تلفن باید با ۰۹ شروع شود و دقیقاً ۱۱ رقم باشد.')
+
+        # بررسی تکراری نبودن
+        if User.objects.filter(phone=phone).exclude(pk=self.user.pk).exists():
+            raise forms.ValidationError('این شماره تلفن قبلاً توسط کاربر دیگری استفاده شده است.')
+
+        return phone

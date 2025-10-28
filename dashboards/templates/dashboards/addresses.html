@@ -1,0 +1,323 @@
+{% extends 'dashboards/dashboard_base_user.html' %}
+{% block UserDash_content %}
+    <div class="tab-pane fade show active" id="add-addresses" role="tabpanel">
+
+        <div id="addresses-card" class="col-lg-10 col-xl-8 mx-auto dashboard-card">
+            
+
+            {% if messages %}
+                <div class="alert alert-dismissible fade show" role="alert" dir="rtl">
+                    {% for message in messages %}
+                        <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %}">
+                            {{ message }}
+                            <button type="button" class="close" data-dismiss="alert"
+                                    aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="fw-bold mb-0">آدرس‌ها</h5>
+      <button id="btnAddAddress" type="button" class="btn btn-link text-danger fw-boldm mt-1">
+        <i class="fa fa-plus ms-1"></i> افزودن آدرس جدید
+      </button>
+    </div>
+       
+
+    <!-- لیست آدرس‌ها -->
+    <div id="address-list" class="">
+    {% for addr in addresses %}
+        <div class="card mb-2 mt-2 address-card"
+            data-id="{{ addr.id }}"
+            data-title="{{ addr.title }}"
+            data-province="{{ addr.province }}"
+            data-city="{{ addr.city }}"
+            data-address="{{ addr.address }}"
+            data-number="{{ addr.number }}"
+            data-unit="{{ addr.unit }}"
+            data-postal_code="{{ addr.postal_code }}"
+            data-latitude="{{ addr.latitude|default:'' }}"
+            data-longitude="{{ addr.longitude|default:'' }}"
+            data-is_default="{{ addr.is_default }}">
+            
+        <div class="card-body d-flex justify-content-between align-items-center mt-2">
+            <div class="text-right mb-2">
+            <strong>
+                {% if addr.title %}{{ addr.title }} ({% endif %}
+                {{ addr.province }} - {{ addr.city }}
+                {% if addr.title %}){% endif %}
+            </strong><br>
+            {{ addr.address }}
+            {% if addr.number %}- پلاک: {{ addr.number }}{% endif %}
+            {% if addr.unit %}- واحد: {{ addr.unit }}{% endif %}<br>
+            کد پستی: {{ addr.postal_code }}
+            {% if addr.is_default %}
+                <span class="badge bg-success">پیش‌فرض</span>
+            {% endif %}
+            </div>
+
+            <!-- 🔹 دکمه‌های عملیات -->
+            <div class="d-flex gap-2">
+            <button class="btn-edit mx-2"><i class="fa fa-edit"></i> ویرایش</button> <button class="btn-delete"><i class="fa fa-trash"></i></button>
+            </div>
+        </div>
+        </div>
+    {% empty %}
+        <p>هیچ آدرسی ثبت نشده است.</p>
+    {% endfor %}
+    </div>
+    {% if addresses %}
+    <div class="mb-2"></div>
+    {% endif %}
+
+
+            <form method="post" class="user-form-modern" novalidate id="addressForm">
+
+                {% csrf_token %}
+                <input type="hidden" name="action" value="add">
+                <input type="hidden" name="address_id" id="address_id">
+
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <label class="form-label">{{ form.title.label }}</label>
+                        {{ form.title }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">{{ form.province.label }}</label>
+                        {{ form.province }}
+                    </div>
+
+                    <div class="col-md-6">
+                      <label class="form-label">{{ form.city.label }}</label>
+                      {{ form.city }} 
+                    </div>
+
+                    <div class="col-md-12">
+                        <label class="form-label">{{ form.address.label }}</label>
+                        {{ form.address }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">{{ form.number.label }}</label>
+                        {{ form.number }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">{{ form.unit.label }}</label>
+                        {{ form.unit }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">{{ form.postal_code.label }}</label>
+                        {{ form.postal_code }}
+                    </div>
+                    <!-- فیلدهای hidden برای latitude/longitude -->
+                    {{ form.latitude }}
+                    {{ form.longitude }}
+                    <!-- انتخاب آدرس به عنوان پیش‌فرض -->
+                    <div class="col-md-12 mt-3">
+                      <div class="form-check d-flex align-items-center gap-2">
+                        {{ form.is_default }}
+                        <label class="form-check-label fw-bold text-dark mt-1" for="{{ form.is_default.id_for_label }}">
+                          استفاده از این آدرس به عنوان پیش‌فرض
+                        </label>
+                      </div>
+                    </div>
+
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-4">
+                    <button type="submit" class="btn-save px-4">
+                        <i class="fas fa-save ms-2"></i> ذخیره تغییرات
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', async function () {
+  const provinceSelect = document.getElementById('id_province');
+  const citySelect = document.getElementById('id_city');
+  const form = document.getElementById('addressForm');
+  const addressIdInput = document.getElementById('address_id');
+  const actionInput = form.querySelector('input[name="action"]');
+  const saveBtn = form.querySelector('.btn-save');
+
+  // ======== 1️⃣ خواندن شهرها از فایل JSON ======== //
+  let citiesByProvince = {};
+  try {
+    const response = await fetch('/static/data/iran_cities.json');
+    if (response.ok) {
+      citiesByProvince = await response.json();
+    } else {
+      console.error('خطا در بارگذاری فایل iran_cities.json');
+    }
+  } catch (err) {
+    console.error('عدم دسترسی به فایل iran_cities.json', err);
+  }
+
+  if (!provinceSelect || !citySelect) return;
+
+  function populateCitySelect(province, selectedCity = '') {
+    citySelect.innerHTML = '';
+    const defaultOption = document.createElement('option');
+    defaultOption.value = '';
+    defaultOption.textContent = 'لطفاً شهر را انتخاب کنید';
+    citySelect.appendChild(defaultOption);
+
+    if (province && citiesByProvince[province]) {
+      const sortedCities = [...citiesByProvince[province]].sort((a, b) =>
+        a.localeCompare(b, 'fa')
+      );
+      sortedCities.forEach(city => {
+        const opt = document.createElement('option');
+        opt.value = city;
+        opt.textContent = city;
+        if (city === selectedCity) opt.selected = true;
+        citySelect.appendChild(opt);
+      });
+    }
+  }
+
+  provinceSelect.addEventListener('change', function () {
+    populateCitySelect(this.value.trim());
+  });
+
+  // مقدار اولیه فرم (برای حالت ویرایش از سمت سرور)
+  const initialProvince = "{{ form.province.value|default_if_none:''|escapejs }}";
+  const initialCity = "{{ form.city.value|default_if_none:''|escapejs }}";
+  if (initialProvince) {
+    populateCitySelect(initialProvince, initialCity);
+  }
+
+  // ======== 2️⃣ حذف آدرس ======== //
+  const deleteButtons = document.querySelectorAll('.btn-delete');
+  deleteButtons.forEach(btn => {
+    btn.addEventListener('click', function () {
+      const card = this.closest('.address-card');
+      const addrId = card.dataset.id;
+
+      if (confirm('آیا از حذف این آدرس اطمینان دارید؟')) {
+        actionInput.value = 'delete';
+        addressIdInput.value = addrId;
+        form.submit(); // ارسال فرم به view
+      }
+    });
+  });
+
+// ======== 3️⃣ ویرایش آدرس ======== //
+const editButtons = document.querySelectorAll('.btn-edit');
+editButtons.forEach(btn => {
+  btn.addEventListener('click', function () {
+    const card = this.closest('.address-card');
+
+    addressIdInput.value = card.dataset.id;
+    actionInput.value = 'update';
+    document.getElementById('id_title').value = card.dataset.title || '';
+    document.getElementById('id_province').value = card.dataset.province || '';
+    populateCitySelect(card.dataset.province || '', card.dataset.city || '');
+    document.getElementById('id_address').value = card.dataset.address || '';
+    document.getElementById('id_number').value = card.dataset.number || '';
+    document.getElementById('id_unit').value = card.dataset.unit || '';
+    document.getElementById('id_postal_code').value = card.dataset.postal_code || '';
+    document.getElementById('latitude').value = card.dataset.latitude || '';
+    document.getElementById('longitude').value = card.dataset.longitude || '';
+    document.getElementById('id_is_default').checked = (card.dataset.is_default === 'True');
+
+    saveBtn.innerHTML = '<i class="fas fa-save ms-2"></i> ذخیره تغییرات آدرس';
+    saveBtn.classList.add('btn-warning');
+
+    // نمایش فرم
+    const form = document.getElementById('addressForm');
+    form.classList.add('active');
+
+    // اسکرول نرم به بالای فرم
+    setTimeout(() => {
+      const y = form.getBoundingClientRect().top + window.pageYOffset - 100;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+      document.getElementById('id_title').focus();
+    }, 200);
+  });
+});
+
+
+  // ======== 4️⃣ بازگردانی فرم به حالت افزودن ======== //
+  form.addEventListener('submit', function () {
+    actionInput.value = 'add';
+    saveBtn.innerHTML = '<i class="fas fa-save ms-2"></i> ذخیره آدرس جدید';
+    saveBtn.classList.remove('btn-warning');
+  });
+
+  // ======== 5️⃣ نمایش فرم افزودن آدرس جدید ======== //
+  const btnAdd = document.getElementById('btnAddAddress');
+  if (btnAdd) {
+    btnAdd.addEventListener('click', function () {
+      const form = document.getElementById('addressForm');
+      form.reset(); // پاک کردن مقادیر قبلی
+      addressIdInput.value = '';
+      actionInput.value = 'add';
+      saveBtn.innerHTML = '<i class="fas fa-save ms-2"></i> ذخیره آدرس جدید';
+      saveBtn.classList.remove('btn-warning');
+
+      // نمایش فرم
+      form.classList.add('active');
+
+      // اسکرول نرم به بالای فرم
+      setTimeout(() => {
+        const y = form.getBoundingClientRect().top + window.pageYOffset - 100;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+        document.getElementById('id_title').focus();
+      }, 200);
+    });
+  }
+});
+
+  // ======== 6️⃣ انتخاب آدرس به عنوان پیش‌فرض ======== //
+  const addressCards = document.querySelectorAll('.address-card');
+  addressCards.forEach(card => {
+    card.addEventListener('click', async function (e) {
+      // جلوگیری از تداخل با دکمه‌های ویرایش و حذف
+      if (e.target.closest('.btn-edit') || e.target.closest('.btn-delete')) return;
+
+      const selectedId = this.dataset.id;
+
+      // حذف حالت انتخاب از همه‌ی کارت‌ها
+      addressCards.forEach(c => c.classList.remove('selected'));
+      this.classList.add('selected');
+
+      // نمایش فوری تغییر در رابط کاربری
+      const badge = this.querySelector('.badge');
+      document.querySelectorAll('.badge.bg-success').forEach(b => b.remove());
+      const newBadge = document.createElement('span');
+      newBadge.className = 'badge bg-success';
+      newBadge.innerText = 'پیش‌فرض';
+      badge?.remove();
+      this.querySelector('.text-right').appendChild(newBadge);
+
+      // درخواست به سرور برای ذخیره پیش‌فرض جدید
+      try {
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        const response = await fetch('{% url "shipping:set_default_address" %}', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+          },
+          body: JSON.stringify({ address_id: selectedId })
+        });
+
+        if (!response.ok) {
+          alert('خطا در تغییر آدرس پیش‌فرض');
+        }
+      } catch (err) {
+        console.error('خطا در ارتباط با سرور', err);
+      }
+    });
+  });
+
+</script>
+
+{% endblock %}

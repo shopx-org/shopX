@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     "account.apps.AccountConfig",
     "OTP_app.apps.OtpAppConfig",
     "dashboards.apps.DashboardsConfig",
+    "shipping.apps.ShippingConfig",
     "products.apps.ProductsConfig",
     "Core.apps.CoreConfig",
     "promos.apps.PromosConfig",
