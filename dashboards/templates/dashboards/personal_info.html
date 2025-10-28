@@ -9,7 +9,6 @@
                 <p>ویرایش اطلاعات حساب کاربری</p>
             </div>
 
-
             {% if messages %}
                 <div class="alert alert-dismissible fade show" role="alert" dir="rtl">
                     {% for message in messages %}
@@ -42,10 +41,6 @@
                         <label class="form-label">{{ form.email.label }}</label>
                         {{ form.email }}
                     </div>
-                    {#                    <div class="col-md-6">#}
-                    {#                        <label class="form-label">{{ form.phone.label }}</label>#}
-                    {#                        #}
-                    {#                    </div>#}
 
                     <div class="col-md-6">
                         <label class="form-label">{{ form.new_password.label }}</label>
@@ -56,11 +51,6 @@
                         {{ form.confirm_password }}
                     </div>
 
-
-{#                    <div class="col-md-12">#}
-{#                        <label class="form-label">{{ form.display_name.label }}</label>#}
-{#                        {{ form.display_name }}#}
-{#                    </div>#}
                     <div class="col-md-6">
                         <label class="form-label">{{ form.national_id.label }}</label>
                         {{ form.national_id }}

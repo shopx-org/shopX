@@ -343,3 +343,41 @@
 }
 
 /* End Address Default Design */
+
+
+/* Change Phone Number style */
+  /* ✨ انیمیشن fade-in برای مراحل */
+    .step {
+        animation: fadeIn 0.4s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    #change-phone-card {
+        transition: all 0.3s ease;
+    }
+
+    /* فاصله بین مراحل */
+    .step {
+        margin-top: 1.2rem;
+    }
+
+    /* نمایش alert زیبا */
+    #alert-area .alert {
+        margin-bottom: 1rem;
+        border-radius: 10px;
+        font-size: 1.4rem;
+        text-align: right;
+    }
+
+    /* وسط‌چین فرم برای حالت موبایل */
+    @media (max-width: 768px) {
+        .user-form-modern {
+            text-align: center !important;
+        }
+    }
+
+/* End Change Phone Number style */
