@@ -14,6 +14,7 @@ urlpatterns = [
     path("cart/", include("cart.urls")),
     path("dashboard/", include(("dashboards.urls", "dashboards"), namespace="dashboards")),
     path("shipping/", include(("shipping.urls", "shipping"))),
+    path('core/', include('Core.urls', namespace='core')),
 
 ]
 

@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load social_share %}
 {% load humanize %}
 {% load promos_tags %}
 {% block CSS-JS %}
@@ -245,15 +246,11 @@
                                                         {% endif %}
                                                     </div>
                                                     <div class="social-icons social-icons-sm">
-                                                        <span class="social-label">اشتراک‌گذاری : </span>
-                                                        <a href="#" class="social-icon" title="فیسبوک"
-                                                           target="_blank"><i class="icon-facebook-f"></i></a>
-                                                        <a href="#" class="social-icon" title="توییتر"
-                                                           target="_blank"><i class="icon-twitter"></i></a>
-                                                        <a href="#" class="social-icon" title="اینستاگرام"
-                                                           target="_blank"><i class="icon-instagram"></i></a>
-                                                        <a href="#" class="social-icon" title="پینترست" target="_blank"><i
-                                                                class="icon-pinterest"></i></a>
+                                                    {% post_to_facebook product '<i class="icon-facebook-f"></i>' 'social-icon' %}  <!-- لینک جزئیات رو share می‌کنه -->
+                                                    {% post_to_twitter "این محصول عالی رو چک کن: {{ product.name }} - {{ request.build_absolute_uri }}{{ product.get_absolute_url }}" product '<i class="icon-twitter"></i>' 'social-icon' %}  <!-- متن با نام و لینک -->
+                                                    {% post_to_whatsapp product '<i class="icon-whatsapp"></i>' 'social-icon' %}  <!-- مشابه برای واتس‌اپ -->
+                                                    {% copy_to_clipboard product '<i class="icon-google"></i>' 'social-icon' %}
+                                                    
                                                     </div>
                                                 </div>
 
@@ -534,23 +531,19 @@
                                         <div class="card">
                                             <div class="card-header" id="heading-3">
                                                 <h2 class="card-title">
-                                                    <a class="collapsed" role="button" data-toggle="collapse"
-                                                       href="#collapse-3" aria-expanded="false"
-                                                       aria-controls="collapse-3">نظرات</a>
+                                                <a class="collapsed" role="button" data-toggle="collapse"
+                                                    href="#collapse-3" aria-expanded="false"
+                                                    aria-controls="collapse-3">نظرات</a>
                                                 </h2>
                                             </div>
+
                                             <div id="collapse-3" class="collapse" aria-labelledby="heading-3"
-                                                 data-parent="#accordion-1">
-                                                <div class="text-right mt-4 border-t" id="comments">
-                                                    <div class="reviews">
-                                                        <div class="container mt-3">
-                                                            <span class="text-muted">سیستم نظرات به‌زودی متصل می‌شود.</span>
-                                                        </div>
-                                                    </div>
+                                                data-parent="#accordion-1">
+                                                <div class="card-body">
+                                                {% include "core/comments_section.html" with comments=comments form=comment_form %}
                                                 </div>
                                             </div>
                                         </div>
-
                                     </div><!-- /accordion -->
                                 </div>
                             </div><!-- /row -->

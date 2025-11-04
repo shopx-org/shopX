@@ -2,7 +2,6 @@
 from decimal import Decimal
 from typing import Optional, Iterable, Any, Dict, List
 from dataclasses import dataclass
-
 from django.db.models import Q, Count, Sum, Min, Max, Prefetch
 from django.db.models.functions import Coalesce
 from django.http import Http404, HttpResponse, JsonResponse
@@ -13,12 +12,19 @@ from django.views import View
 from django.views.generic import ListView, DetailView
 from django.templatetags.static import static
 from products.services.service_pricing import compute_service_unit_price
+from django.contrib import messages
+from django.shortcuts import redirect
 
 from .models import (
     Product, ProductVariant, ProductImage, Color, Brand,
     Category, ProductAttributeValue,Service, CategoryService, ProductService
 )
 from .services.pricing_adapter import price_single_product
+
+from django.contrib.contenttypes.models import ContentType
+from Core.models import Comment
+from Core.forms import CommentForm
+
 
 # ---------------- Utils (single source of truth) ----------------
 def _normalize_unit_price(obj):
@@ -628,5 +634,21 @@ class ProductDetailView(DetailView):
             
         ctx["variant_prices_json"] = _json(variant_prices)  # ← JSON معتبر
 
-        return ctx
+        # نظرات
+        content_type = ContentType.objects.get_for_model(p)
+        comments = Comment.objects.filter(
+            content_type=content_type,
+            object_id=p.id,
+            is_active=True,
+            parent__isnull=True
+        ).select_related("user").prefetch_related("replies__user")
 
+        ctx["comments"] = comments
+        ctx["comment_form"] = CommentForm()
+
+        return ctx
+    
+    
+
+
+    
