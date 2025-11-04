@@ -163,7 +163,7 @@ class PricingEngine:
 
                 if scope == "line":
                     eligible = [l for l in lines if not getattr(l, "_exclude_from_discounts", False)]
-                    base = subtotal
+                    base = sum((l.line_subtotal for l in eligible), D0)
                     if base <= 0:
                         continue
                     if kind == "percent_off" and val is not None:

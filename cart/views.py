@@ -1,19 +1,361 @@
-from django.shortcuts import render,redirect,get_object_or_404
-from django.views import View
+# cart/views.py
+from __future__ import annotations
 
-from products.models import Product
+from decimal import Decimal
+from types import SimpleNamespace
+from typing import Any, Dict, Iterable, List, Tuple
 
+from django.contrib import messages
+from django.http import HttpRequest, JsonResponse, HttpResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_POST
 
-class CartDetailView(View):
-    def get(self, request):
-         return render(request, "cart/cart_detail.html", {})
+from .cart import Cart
+from products.models import Product, ProductVariant, ProductImage
+from promos.services.pricing import PricingEngine
+from products.services.pricing_adapter import (
+    build_pricing_line_public,
+    build_service_line_public,
+    build_ephemeral_campaigns_for_lines,
+)
 
+# =========================
+# Helpers (pure)
+# =========================
 
-class CartAddView(View):
-    def post(self, request,pk):
-        product = get_object_or_404(Product,id=pk)
-        size ,color , quantity , service_insurance= (request.POST.get('size'),request.POST.get('color'),
-                                                     request.POST.get('quantity'),request.POST.get('service_insurance'))
-        print(size,color,quantity,service_insurance)
-        return redirect("cart:cart_detail")
+def _to_number(x: Decimal | int | float | None) -> float:
+    if x is None:
+        return 0.0
+    if isinstance(x, Decimal):
+        return float(x)
+    return float(x)
 
+def _summary_payload(result) -> Dict[str, float]:
+    """
+    result: خروجی PricingEngine.evaluate
+    """
+    return {
+        "subtotal": _to_number(getattr(result, "subtotal", 0)),
+        "total_discount": _to_number(getattr(result, "total_discount", 0)),
+        "total": _to_number(getattr(result, "total", 0)),
+    }
+
+def _row_payload(result, gid: str | None) -> Dict[str, float] | None:
+    """
+    جمع‌های ردیفی را از روی خطوطِ برچسب‌خورده با gid حساب می‌کند.
+    """
+    if not gid:
+        return None
+
+    sub = Decimal("0")
+    disc = Decimal("0")
+
+    for ln in getattr(result, "lines", []) or []:
+        if getattr(ln, "_cart_gid", None) == gid:
+            sub += getattr(ln, "line_subtotal", Decimal("0"))
+            disc += getattr(ln, "line_discount", Decimal("0"))
+
+    return {
+        "subtotal": _to_number(sub),
+        "discount": _to_number(disc),
+        "total": _to_number(sub - disc),
+    }
+
+def _first_image_url(product: Product) -> str | None:
+    img: ProductImage | None = (
+        product.images.filter(is_primary=True).first()
+        or product.images.order_by("position", "id").first()
+    )
+    return img.image.url if img else None
+
+def _build_lines_with_gids(cart: Cart) -> Tuple[List[Any], List[Tuple[str, SimpleNamespace]]]:
+    """
+    خطوط قیمت‌گذاری را با gid برای هر آیتم می‌سازد تا بتوانیم
+    مجموع‌های ردیفی را از نتیجه‌ی PricingEngine استخراج کنیم.
+
+    خروجی:
+      - lines: لیست خطوط برای PricingEngine
+      - groups: [(gid, item_ns)] که item_ns همان آیتم سبد با فیلدهای product, variant, qty, services, unit_price است.
+    """
+    items: Iterable[SimpleNamespace] = list(cart.items())
+    lines: List[Any] = []
+    groups: List[Tuple[str, SimpleNamespace]] = []
+
+    for idx, it in enumerate(items):
+        gid = f"g{idx}"
+
+        # خط پایه (خود محصول یا واریانت)
+        base = build_pricing_line_public(it.variant or it.product, it.qty)
+        if getattr(it, "unit_price", None) is not None:
+            base.unit_price = Decimal(str(it.unit_price))  # snapshot واحد
+        setattr(base, "_cart_gid", gid)
+        lines.append(base)
+
+        # خطوط سرویس‌های افزوده (مثلاً نصب/گارانتی افزوده و ...)
+        for svc in (getattr(it, "services", []) or []):
+            svc_line = build_service_line_public(
+                service=svc,
+                base_line=base,
+                item_unit_price=base.unit_price,
+                qty=it.qty,
+            )
+            setattr(svc_line, "_cart_gid", gid)
+            lines.append(svc_line)
+
+        groups.append((gid, it))
+
+    return lines, groups
+
+def _pricing_ctx_for(request: HttpRequest) -> Dict[str, Any]:
+    """
+    کانتکست استاندارد برای PricingEngine: کانال، کوپن‌ها
+    """
+    cart = Cart(request)
+    coupons = [cart.get_coupon()] if cart.get_coupon() else []
+    return {"channel": "web", "coupons": coupons}
+
+def _ajax(request: HttpRequest) -> bool:
+    return request.headers.get("X-Requested-With") == "XMLHttpRequest"
+
+# =========================
+# JSON responders (internal)
+# =========================
+
+def _json_cart_summary(request: HttpRequest) -> JsonResponse:
+    cart = Cart(request)
+    lines, _ = _build_lines_with_gids(cart)
+    ctx = _pricing_ctx_for(request)
+    eps = build_ephemeral_campaigns_for_lines(lines, channel=ctx.get("channel", "web"))
+    if eps:
+        ctx["ephemeral_campaigns"] = eps
+    res = PricingEngine().evaluate(lines, ctx)
+    return JsonResponse({"ok": True, "summary": _summary_payload(res)})
+
+def _json_cart_for_row(request: HttpRequest, product_id: int, variant_id: int | None) -> JsonResponse:
+    cart = Cart(request)
+    lines, groups = _build_lines_with_gids(cart)
+    ctx = _pricing_ctx_for(request)
+    eps = build_ephemeral_campaigns_for_lines(lines, channel=ctx.get("channel", "web"))
+    if eps:
+        ctx["ephemeral_campaigns"] = eps
+    res = PricingEngine().evaluate(lines, ctx)
+
+    # پیدا کردن gid ردیف مورد نظر
+    target_gid: str | None = None
+    for gid, it in groups:
+        it_vid = (it.variant.id if getattr(it, "variant", None) else None)
+        if it.product.id == product_id and it_vid == variant_id:
+            target_gid = gid
+            break
+
+    payload = {
+        "ok": True,
+        "row": _row_payload(res, target_gid),
+        "summary": _summary_payload(res),
+    }
+    return JsonResponse(payload)
+
+# =========================
+# Views
+# =========================
+
+def cart_detail(request: HttpRequest) -> HttpResponse:
+    """
+    صفحه‌ی سبد خرید + محاسبه‌ی ردیفی/کلی برای رندر اولیه
+    """
+    cart = Cart(request)
+    lines, groups = _build_lines_with_gids(cart)
+
+    # ساخت کانتکست همراه با کمپین‌های موقتی (برای تخفیف‌های واریانت و محصول)
+    ctx = _pricing_ctx_for(request)
+    eps = build_ephemeral_campaigns_for_lines(lines, channel=ctx.get("channel", "web"))
+    if eps:
+        ctx["ephemeral_campaigns"] = eps
+
+    # محاسبه‌ی قیمت‌گذاری نهایی
+    result = PricingEngine().evaluate(lines, ctx)
+
+    # جمع‌بندی مقدار هر آیتم (محصول + سرویس‌ها) بر اساس gid
+    by_gid: dict[str, dict[str, Decimal]] = {}
+    for ln in getattr(result, "lines", []) or []:
+        gid = getattr(ln, "_cart_gid", None)
+        if not gid:
+            continue
+        g = by_gid.setdefault(gid, {"subtotal": Decimal("0"), "line_discount": Decimal("0")})
+        g["subtotal"] += getattr(ln, "line_subtotal", Decimal("0"))
+        g["line_discount"] += getattr(ln, "line_discount", Decimal("0"))
+
+    # ساخت دیتا برای تمپلیت
+    cart_rows: List[Dict[str, Any]] = []
+    for gid, it in groups:
+        agg = by_gid.get(gid, {"subtotal": Decimal("0"), "line_discount": Decimal("0")})
+        line_subtotal: Decimal = agg["subtotal"]
+        line_discount: Decimal = agg["line_discount"]
+        line_total: Decimal = (line_subtotal - line_discount).quantize(Decimal("0.01"))
+
+        product: Product = it.product
+        variant: ProductVariant | None = getattr(it, "variant", None)
+
+        cart_rows.append({
+            "product_id": product.id,
+            "variant_id": (variant.id if variant else None),
+            "title": product.name if not variant else f"{product.name}",
+            "qty": getattr(it, "qty", 1),
+            "img": _first_image_url(product),
+            "in_stock": (variant.in_stock if variant else True),
+            "unit_price": getattr(it, "unit_price", None),
+            "subtotal": line_subtotal,
+            "discount": line_discount,
+            "total": line_total,
+            "services": [
+                {"id": getattr(s, "id", None), "name": getattr(s, "name", str(s))}
+                for s in (getattr(it, "services", []) or [])
+            ],
+            "remove_url": "cart:cart_remove" if variant else "cart:cart_remove_no_variant",
+            "update_url": "cart:cart_update_qty" if variant else "cart:cart_update_qty_no_variant",
+        })
+
+    context = {
+        "cart_rows": cart_rows,
+        "cart_subtotal": getattr(result, "subtotal", Decimal("0")),
+        "cart_total_discount": getattr(result, "total_discount", Decimal("0")),
+        "cart_total": getattr(result, "total", Decimal("0")),
+        "cart_coupon": Cart(request).get_coupon() or "",
+    }
+    return render(request, "cart/cart_detail.html", context)
+@require_POST
+def cart_add(request: HttpRequest, product_id: int) -> HttpResponse:
+    """
+    افزودن آیتم به سبد؛ variant_id اختیاری از POST خوانده می‌شود.
+    """
+    product = get_object_or_404(Product, pk=product_id, is_active=True, status="pub")
+    variant_id_raw = request.POST.get("variant_id")
+    qty_raw = request.POST.get("quantity") or "1"
+    services = request.POST.getlist("services[]") or request.POST.getlist("services") or []
+
+    try:
+        qty = int(qty_raw)
+    except ValueError:
+        qty = 1
+    qty = max(1, min(qty, 999))
+
+    # واریانت (اختیاری)
+    variant: ProductVariant | None = None
+    if variant_id_raw not in (None, "", "null", "None"):
+        variant = get_object_or_404(ProductVariant, pk=int(variant_id_raw), product=product, is_active=True)
+
+    cart = Cart(request)
+    # فرض API کارت: add(product_id=..., variant_id=..., qty=..., services=[...])
+    cart.add(product_id=product.id, variant_id=(variant.id if variant else None), qty=qty, services=services)
+
+    messages.success(request, "به سبد خرید اضافه شد.")
+    return redirect("cart:cart_detail")
+
+@require_POST
+def cart_update_qty(request: HttpRequest, product_id: int, variant_id: int) -> HttpResponse:
+    """
+    آپدیت تعداد برای آیتمی که واریانت دارد (مسیر: .../update-qty/<pid>/<vid>/)
+    """
+    return _update_qty_impl(request, product_id, variant_id)
+
+@require_POST
+def cart_update_qty_no_variant(request: HttpRequest, product_id: int) -> HttpResponse:
+    """
+    آپدیت تعداد برای آیتمی که واریانت ندارد (مسیر: .../update-qty/<pid>/)
+    """
+    return _update_qty_impl(request, product_id, None)
+
+def _get_row_services_safe(cart: Cart, product_id: int, variant_id: int | None) -> List[Any]:
+    """
+    سعی می‌کند سرویس‌های ردیف موجود را پیدا کند تا در آپدیت تعداد از دست نروند.
+    ابتدا اگر کارت متدی مثل get(...) داشته باشد از آن استفاده می‌کند؛
+    در غیر این صورت به صورت محدود از cart._data (fallback) می‌خواند.
+    """
+    # روش ایمن اگر کارت پشتیبانی کند
+    if hasattr(cart, "get"):
+        row = cart.get(product_id=product_id, variant_id=variant_id)
+        if row and isinstance(row, dict):
+            return list(row.get("services", []))
+
+    # Fallback (به‌خاطر سازگاری با پیاده‌سازی فعلی)
+    try:
+        key = f"{product_id}:{variant_id or 'none'}"
+        base = getattr(cart, "_data", {}) or {}
+        row = base.get(key) or {}
+        return list(row.get("services", []))
+    except Exception:
+        return []
+
+def _update_qty_impl(request: HttpRequest, product_id: int, variant_id: int | None) -> HttpResponse:
+    qty_raw = request.POST.get("quantity") or "1"
+    try:
+        qty = int(qty_raw)
+    except ValueError:
+        qty = 1
+    qty = max(1, min(qty, 999))
+
+    cart = Cart(request)
+    services = _get_row_services_safe(cart, product_id, variant_id)
+
+    # remove + add (replace)
+    cart.remove(product_id=product_id, variant_id=variant_id)
+    cart.add(product_id=product_id, variant_id=variant_id, qty=qty, services=services)
+
+    if _ajax(request):
+        return _json_cart_for_row(request, product_id, variant_id)
+
+    messages.success(request, "تعداد به‌روزرسانی شد.")
+    return redirect("cart:cart_detail")
+
+@require_POST
+def cart_remove(request: HttpRequest, product_id: int, variant_id: int) -> HttpResponse:
+    """
+    حذف آیتم دارای واریانت
+    """
+    cart = Cart(request)
+    cart.remove(product_id=product_id, variant_id=variant_id)
+
+    if _ajax(request):
+        return _json_cart_summary(request)
+
+    messages.info(request, "از سبد حذف شد.")
+    return redirect("cart:cart_detail")
+
+@require_POST
+def cart_remove_no_variant(request: HttpRequest, product_id: int) -> HttpResponse:
+    """
+    حذف آیتم بدون واریانت
+    """
+    cart = Cart(request)
+    cart.remove(product_id=product_id, variant_id=None)
+
+    if _ajax(request):
+        return _json_cart_summary(request)
+
+    messages.info(request, "از سبد حذف شد.")
+    return redirect("cart:cart_detail")
+
+@require_POST
+def cart_clear(request: HttpRequest) -> HttpResponse:
+    cart = Cart(request)
+    # اگر کارت متد clear دارد از آن استفاده کن؛ در غیر این صورت fallback
+    if hasattr(cart, "clear"):
+        cart.clear()
+    else:
+        cart._data = {}
+        cart._save()
+
+    messages.info(request, "سبد خرید خالی شد.")
+    return redirect("cart:cart_detail")
+
+@require_POST
+def cart_set_coupon(request: HttpRequest) -> HttpResponse:
+    code = (request.POST.get("coupon") or "").strip()
+    cart = Cart(request)
+    cart.set_coupon(code if code else None)
+
+    if _ajax(request):
+        return _json_cart_summary(request)
+
+    messages.success(request, "کوپن ثبت شد." if code else "کوپن حذف شد.")
+    return redirect("cart:cart_detail")

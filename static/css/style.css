@@ -29082,7 +29082,7 @@ html {
     .deal-badge{display:inline-block;font-size:12px;background:#fee2e2;color:#b91c1c;padding:3px 7px;border-radius:999px;margin-bottom:6px}
     .cart-subtotal{display:flex;justify-content:flex-end;padding:16px 0;font-weight:700}
     .summary-cart{position:sticky;top:16px;border:1px solid #eee;border-radius:12px;padding:16px;background:#fff}
-    .summary-cart .title{font-size:16px;font-weight:800;margin-bottom:10px}
+    .summary-cart .title{font-size:18px;font-weight:800;margin-bottom:10px}
     .summary-cart .line{display:flex;justify-content:space-between;margin:8px 0}
     .btn-checkout{width:100%;background:#ff5b3c;border-color:#ff5b3c}
     .qty{
@@ -29162,14 +29162,371 @@ html {
   display:flex; gap:16px; flex-wrap:wrap;
   justify-content:flex-end;
 }
+/* ---------- Layout ---------- */
+.cart-wrap{padding-top:1rem;padding-bottom:2rem }
+.cart-list{display:flex;flex-direction:column;gap:1rem}
+.cart-item{
+  display:grid;grid-template-columns:1fr auto;gap:1rem;align-items:center;
+  background:#fff;border-bottom:1px solid #fff0ec;padding:16px 18px
+}
+.cart-media{order:2}
+.cart-media img{width:84px;height:84px;object-fit:cover;border-radius:12px;border:1px solid #eee}
+.cart-body{order:1;display:flex;flex-direction:column;gap:.35rem}
+.cart-title a{font-weight:800;color:#222;text-decoration:none; text-align: right; direction: rtl}
+.cart-meta{font-size:.9rem;color:#6b7280; text-align: right}
+.cart-meta .text-success{color:#17a34a!important}
+.cart-side{display:flex;flex-direction:column;align-items:flex-start;gap:.5rem}
 
-/* اگر قبلاً اکشن‌ها را پایین بدنه می‌چسباندی، دیگر لازم نیست: */
-.cart-body{ display:flex; flex-direction:column; }
-.cart-actions{ margin-top:5px; } /* یا اگر می‌خواهی بالا بماند، همینی خوب است */
+/* ---------- Price ---------- */
+.deal-badge{
+  display:inline-block;background:#ffe9e9;color:#e84343;border:1px solid #ffd1d1;
+  border-radius:999px;padding:.15rem .5rem;font-size:.78rem;font-weight:700
+}
+.price-now{font-size:1.6rem;font-weight:900;line-height:1}
+.price-now .unit{font-size:.85rem;margin-inline-start:.25rem}
+.price-list{color:#9ca3af}
+.price-list del{font-size:1.05rem;color:#9ca3af;text-decoration-thickness:2px}
+.price-list .save{color:#e24343;font-weight:700;margin-inline-start:.35rem}
 
-/* واکنش‌گرا: در موبایل، اکشن‌ها را دوباره زیر بدنه بیاور که جا کم است */
-@media (max-width: 768px){
-  .cart-item{ flex-wrap:wrap; }
-  .cart-price{ order:3; width:100%; }
-  .action-bar{ width:100%; justify-content:flex-start; }
+/* ---------- Qty pill ---------- */
+.qty-form{display:flex;align-items:center;gap:.5rem}
+.qty-pill{
+  display:inline-flex;align-items:center;gap:.5rem;border:1px solid #e5e7eb;border-radius:999px;
+  padding:.25rem .5rem;background:#fff
+}
+.qty-pill button{width:28px;height:28px;border:0;background:#fff;border-radius:999px;cursor:pointer}
+.qty-pill button:hover{background:#f3f4f6}
+.qty-input{width:42px;border:0;text-align:center;font-weight:700}
+
+/* ---------- Actions ---------- */
+.action-bar{display:flex;gap:.65rem}
+.action-link{color:#ef4444;background:transparent;border:0;cursor:pointer}
+.action-link i{font-size:2rem}
+
+/* ---------- Summary ---------- */
+.summary-cart{position:sticky;top:88px;border:1px solid #eee;border-radius:14px;padding:16px;background:#fff}
+.summary-cart .title{font-weight:900;border-bottom:1px dashed #eee;padding-bottom:.5rem;margin-bottom:.5rem}
+.summary-cart .line{display:flex;justify-content:space-between;margin:.4rem 0;color:#374151}
+.btn-checkout{width:100%;font-weight:800}
+@media (max-width: 992px){
+  .cart-item{grid-template-columns:1fr;align-items:flex-start}
+  .cart-media{order:1}
+}
+
+/* ====== Cart row layout (RTL) ====== */
+.cart-item{
+  display:grid;
+  /* ستون چپ: قیمت/اکشن | وسط: تیتر/متا/تعداد | راست: تصویر */
+  grid-template-columns: 220px 1fr 110px;
+  grid-template-areas: "side body media";
+  align-items:stretch;
+  gap: 1rem;
+  background:#fff;border:1px solid #eee;border-radius:14px;padding:16px 18px
+}
+.cart-side { grid-area: side; display:flex; flex-direction:column; align-items:flex-start; text-align:left }
+.cart-body { grid-area: body; display:flex; flex-direction:column; gap:.5rem; text-align:right }
+.cart-media{ grid-area: media; display:flex; align-items:center; justify-content:center }
+
+/* عنوان و وضعیت (راست) */
+.cart-title a{font-weight:800;color:#1f2937;text-decoration:none}
+.cart-meta{font-size:.9rem;color:#6b7280}
+.cart-meta .text-success{color:#17a34a!important}
+
+/* قیمت (چپ) + بج */
+.deal-badge{
+  display:inline-block;background:#ffe9e9;color:#e84343;border:1px solid #ffd1d1;
+  border-radius:999px;padding:.15rem .55rem;font-size:.78rem;font-weight:700;margin-bottom:.25rem
+}
+.price-now{font-size:3.3rem;font-weight:500;line-height:1.5}
+.price-now .unit{font-size:2.2rem;margin-inline-start:.25rem}
+.price-list{color:#9ca3af}
+.price-list del{font-size:1.05rem;text-decoration-thickness:2px}
+
+/* اکشن‌ها بیاد پایین ستون قیمت */
+.cart-side .action-bar{margin-top:auto;display:flex;gap:.65rem;justify-content:flex-start}
+.action-link{color:#ef4444;background:transparent;border:0;cursor:pointer}
+
+/* تصویر کوچک (راست) */
+.cart-media img{width:84px;height:84px;object-fit:cover;border-radius:12px;border:1px solid #eee}
+
+/* کنترل تعداد زیر عنوان و کمی متمایل به راست */
+.qty-form{display:flex;align-items:center;gap:.5rem;align-self:flex-start}
+.qty-pill{
+  display:inline-flex;align-items:center;gap:.5rem;border:1px solid #e5e7eb;border-radius:999px;
+  padding:.25rem .5rem;background:#fff
+}
+.qty-pill button{width:28px;height:28px;border:0;background:#fff;border-radius:999px;cursor:pointer}
+.qty-pill button:hover{background:#f3f4f6}
+.qty-input{width:42px;border:0;text-align:center;font-weight:700}
+
+/* ریسپانسیو: در موبایل زیر هم (تیتر، قیمت، تصویر) */
+@media (max-width: 992px){
+  .cart-item{
+    grid-template-columns:1fr;
+    grid-template-areas:
+      "body"
+      "side"
+      "media";
+  }
+  .cart-side{align-items:stretch}
+  .cart-side .action-bar{justify-content:flex-end}
+}
+
+/* سطر کارت: چپ=قیمت/اکشن | وسط=بدنه (تیتر/وضعیت/تعداد) | راست=تصویر */
+.cart-wrap .cart-item{
+  display:grid;
+  grid-template-columns: 230px minmax(0,1fr) 110px;
+  grid-template-areas: "side body media";
+  gap: 16px;
+  align-items: stretch;
+  background:#fff; border:1px solid #eee; border-radius:14px; padding:16px 18px;
+}
+
+/* نگاشت نواحی */
+.cart-wrap .cart-side  { grid-area: side;  display:flex; flex-direction:column; align-items:flex-start; text-align:left; }
+.cart-wrap .cart-body  { grid-area: body;  display:flex; flex-direction:column; gap:.5rem; text-align:right; }
+.cart-wrap .cart-media { grid-area: media; display:flex; align-items:center; justify-content:center; }
+
+/* تصویر کوچک سمت راست */
+.cart-wrap .cart-media img{
+  width:84px; height:84px; object-fit:cover; border-radius:12px; border:1px solid #eee;
+}
+
+/* قیمت و بج در ستون چپ */
+.cart-wrap .deal-badge{
+  display:inline-block; margin-bottom:.25rem;
+  background:#ffe9e9; color:#e84343; border:1px solid #ffd1d1;
+  border-radius:999px; padding:.15rem .55rem; font-size:.78rem; font-weight:700;
+}
+.cart-wrap .price-now{ font-size:2.8rem; font-weight:900; line-height:1; }
+.cart-wrap .price-now .unit{ font-size:.85rem; margin-inline-start:.3rem; }
+.cart-wrap .price-list{ color:#9ca3af; }
+.cart-wrap .price-list del{ font-size:1.05rem; text-decoration-thickness:2px; }
+
+/* اکشن‌ها بروند پایین ستون قیمت */
+.cart-wrap .cart-side .action-bar{
+  margin-top:auto;               /* می‌فرستد به پایین ستون */
+  display:flex; gap:.65rem; justify-content:flex-start;
+}
+.cart-wrap .action-link{ color:#ef4444; background:transparent; border:0; cursor:pointer; }
+
+/* بدنه: عنوان راست، وضعیت سبز، کنترل تعداد زیر عنوان */
+.cart-wrap .cart-title a{ font-weight:800; color:#1f2937; text-decoration:none; }
+.cart-wrap .cart-meta{ font-size:1.7rem; color: #3b3d40; }
+.cart-wrap .cart-meta .text-success{ color:#17a34a !important; }
+
+/* کنترل تعداد (به‌صورت کپسولی) */
+.cart-wrap .qty-form{ display:flex; align-items:center; gap:.5rem; align-self:flex-start; }
+.cart-wrap .qty-pill{
+  display:inline-flex; align-items:center; gap:.5rem;
+  border:1px solid #e5e7eb; border-radius:999px; padding:.25rem .5rem; background:#fff;
+}
+.cart-wrap .qty-pill button{ width:38px; height:28px; border:0; background:#fff; border-radius:999px; cursor:pointer; }
+.cart-wrap .qty-pill button:hover{ background:#f3f4f6; }
+.cart-wrap .qty-input{ width:42px; border:0; text-align:center; font-weight:700; }
+
+/* ریسپانسیو: در موبایل ترتیب شود: بدنه → قیمت/اکشن → تصویر */
+@media (max-width: 992px){
+  .cart-wrap .cart-item{
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "body"
+      "side"
+      "media";
+  }
+  .cart-wrap .cart-side{ align-items:stretch; }
+  .cart-wrap .cart-side .action-bar{ justify-content:flex-end; }
+}
+
+/* swap: media (عکس) ←→ side (قیمت/اکشن‌ها) */
+.cart-wrap .cart-item{
+  grid-template-columns: 125px minmax(0,1fr) 230px; /* تصویر باریک، وسط، ستون قیمت پهن */
+  grid-template-areas: "media body side";
+}
+
+/* وقتی ستون قیمت رفته سمت راست، چیدمان و ترازبندی مناسب راست */
+.cart-wrap .cart-side{
+  text-align:right;           /* قیمت بچسبد به لبه راست */
+  align-items:flex-end;       /* اکشن‌ها هم راست‌چین */
+}
+.cart-wrap .cart-side .action-bar{
+  justify-content:flex-end;   /* آیکن‌ها راست ستون */
+}
+
+/* تصویر حالا ستون چپ است (همچنان ظاهرش ثابت می‌ماند) */
+.cart-wrap .cart-media{
+  justify-content:center;
+}
+.cart-wrap .cart-media img{
+  width:84px;height:84px;object-fit:cover;border-radius:12px;border:1px solid #eee;
+}
+
+/* ریسپانسیو: همان قبلی بماند (بدنه → قیمت/اکشن → تصویر) */
+@media (max-width: 992px){
+  .cart-wrap .cart-item{
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "body"
+      "side"
+      "media";
+  }
+  .cart-wrap .cart-side{ align-items:stretch; text-align:left; }
+  .cart-wrap .cart-side .action-bar{ justify-content:flex-end; }
+}
+
+/* مخفی‌کردن اسپینرهای عدد در همه‌ی مرورگرها */
+.cart-wrap .qty-input {
+  -moz-appearance: textfield;  /* Firefox */
+  appearance: textfield;       /* استاندارد */
+  direction: ltr;              /* از چسبیدن علامت منفی/فلش‌ها جلوگیری می‌کند */
+}
+
+/* Chrome / Edge / Safari (WebKit/Blink) */
+.cart-wrap .qty-input::-webkit-outer-spin-button,
+.cart-wrap .qty-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* قدیمی‌های Edge/IE */
+.cart-wrap .qty-input::-ms-clear,
+.cart-wrap .qty-input::-ms-reveal {
+  display: none;
+}
+
+/* کمی بهینه‌سازی ظاهری فیلد وسط کپسول */
+.cart-wrap .qty-pill .qty-input{
+  width: 48px;                 /* کمی جا برای ۳ رقم */
+  border: 0;
+  text-align: center;
+  font-weight: 700;
+  background: transparent;
+  padding: 0;
+}
+
+/* ==== Kill all native number spinners (scoped to cart) ==== */
+.cart-wrap .qty-pill .qty-input[type="number"] {
+  -moz-appearance: textfield !important;   /* Firefox */
+  appearance: textfield !important;        /* Standard */
+  direction: ltr;                           /* از علائم عجیب در RTL جلوگیری می‌کند */
+}
+
+/* Chrome / Edge / Safari */
+.cart-wrap .qty-pill .qty-input[type="number"]::-webkit-outer-spin-button,
+.cart-wrap .qty-pill .qty-input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  margin: 0 !important;
+}
+
+/* IE/legacy Edge cleanups */
+.cart-wrap .qty-pill .qty-input[type="number"]::-ms-clear,
+.cart-wrap .qty-pill .qty-input[type="number"]::-ms-reveal {
+  display: none !important;
+}
+
+/* اطمینان از تمیزی داخل کپسول */
+.cart-wrap .qty-pill .qty-input {
+  background: transparent !important;
+  border: 0 !important;
+  width: 52px;           /* کمی جا برای ۳ رقم */
+  text-align: center !important;
+  font-weight: 700 !important;
+  padding: 0 !important;
+  line-height: 1 !important;
+}
+
+/* کنترل تعداد – مستقل از Bootstrap */
+.dk-qty{display:flex;align-items:center;gap:.5rem}
+.qty-input{
+  width:96px;height:40px;text-align:center;direction:ltr;
+  border:1px solid #e5e7eb;border-radius:8px;background:#fff;font-size:16px;
+}
+/* دکمه‌های +/− سبک */
+.qty-btn{
+  width:40px;height:40px;border:1px solid #e5e7eb;border-radius:8px;
+  background:#fff;font-size:18px;font-weight:600;line-height:1;padding:0;cursor:pointer;
+}
+.qty-btn:active{transform:translateY(1px)}
+/* حذف اسپینر عدد در مرورگرها */
+.qty-input::-webkit-outer-spin-button,
+.qty-input::-webkit-inner-spin-button{ -webkit-appearance:none;margin:0 }
+.qty-input{ -moz-appearance:textfield }
+
+/* آیکون‌های نوار اکشن خیلی بزرگ نشوند */
+.action-bar .action-link i{font-size:16px;line-height:1}
+/* کامپوننت تعداد */
+.qty{display:inline-flex;align-items:center;gap:.5rem}
+.qty__input{
+  width:96px;height:40px;text-align:center;direction:ltr;
+  border:1px solid #e5e7eb;border-radius:8px;background:#fff;font-size:16px;
+}
+.qty__btn{
+  width:40px;height:40px;border:1px solid #e5e7eb;border-radius:8px;
+  background:#fff;font-size:18px;font-weight:600;line-height:1;padding:0;cursor:pointer;
+}
+.qty__btn:active{transform:translateY(1px)}
+
+/* اگر جایی هنوز type=number بماند، استپرها را مخفی کند */
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0 }
+input[type=number]{ -moz-appearance:textfield }
+/* فرم تعداد را اینلاین و جمع‌وجور کن */
+.qty-inline{display:flex;align-items:center;gap:.75rem;margin:0;padding:0}
+.qty-label{margin:0;white-space:nowrap}
+
+/* خود کامپوننت تعداد */
+.qty{display:inline-flex;align-items:center;gap:.5rem}
+.qty__input{
+  width:88px;height:36px;text-align:center;direction:ltr;
+  border:1px solid #e5e7eb;border-radius:8px;background:#fff;font-size:15px;
+}
+.qty__btn{
+  width:36px;height:36px;border:1px solid #e5e7eb;border-radius:8px;
+  background:#fff;font-size:18px;font-weight:600;line-height:1;padding:0;cursor:pointer;
+}
+.qty__btn:active{transform:translateY(1px)}
+
+/* کمی فشرده‌سازی کارت تا ستون جمع‌کل بالا بیاید */
+.cart-item{padding:16px 20px}
+.cart-body{display:flex;flex-direction:column;gap:8px}
+.cart-meta{margin:0}
+.action-bar{margin-top:6px}
+
+/* نوار ویژگی‌ها */
+.item-flags{display:flex;gap:12px;flex-wrap:wrap;margin:6px 0 0;padding:0;list-style:none}
+.item-flags li{display:inline-flex;align-items:center;gap:8px;font-size:1.7rem;color:#5b667a}
+.item-flags i{font-size:14px}
+.item-flags li.ok i{color:#22c55e}   /* سبز برای موجودی */
+.item-flags li.no  i{color:#ef4444}  /* قرمز برای ناموجود */
+
+/* باکس بیمه (تمام‌عرضِ کارت) */
+.service-card{
+  grid-column: 1 / -1;    /* کل عرض کارت */
+  display:flex;justify-content:space-between;align-items:center;
+  padding:12px 14px;border:1px solid #e6f0ff;background: #28a745;
+  border-radius:12px;margin-top:10px
+}
+.service-card__head{display:flex;align-items:center;gap:10px;font-size: 1.6rem;font-weight:600;color:#254f9e}
+.service-card__head i{font-size:18px}
+.service-card__head .dot{
+  width:8px;height:8px;border-radius:50%;display:inline-block
+}
+.service-card__head .dot.ok{background:#22c55e}
+.service-card__meta{display:flex;align-items:center;gap:10px}
+.service-card__meta .price{font-weight:700;color:#0f172a}
+.service-card__meta .hint{color:#64748b;font-size:.9rem}
+
+/* ساختار کارت سه‌ستونه که قبلاً دادی */
+.cart-item{
+  display:grid;grid-template-columns:120px 1fr 220px;
+  gap:16px;align-items:center;padding:16px 20px;border-bottom:1px solid #eee;;background:#fff;margin-bottom:16px
+}
+.cart-media img{width:100%;height:auto;border-radius:8px;object-fit:cover}
+.cart-body{display:flex;flex-direction:column;gap:8px}
+.cart-side{text-align:left}
+@media (max-width:991.98px){
+  .cart-item{grid-template-columns:90px 1fr}
+  .cart-side{grid-column:1 / -1;display:flex;justify-content:space-between;gap:12px}
+  .service-card{grid-column:1 / -1}
 }

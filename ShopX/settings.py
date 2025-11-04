@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     "mptt",
     "tree_queries",
     "colorfield",
-
+    "django_jalali",
 ]
 
 # ── Middleware ─────────────────────────────────────────────────────────────────

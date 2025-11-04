@@ -5,7 +5,25 @@ from django.utils import timezone
 from products.models import Service
 from promos.services import pricing
 from products.services.service_pricing import compute_service_unit_price  # ← این ایمپورت لازم است
+from decimal import Decimal, InvalidOperation
 
+_PERSIAN_DIGITS = str.maketrans("۰۱۲۳۴۵۶۷۸۹٬, ", "0123456789,, ")  # کاما/فاصله هم نرمال
+
+def _to_money(val, *, fallback="0"):
+    """
+    ورودی‌های None/''/'None'/اعداد فارسی/با کاما را امن به Decimal تبدیل می‌کند.
+    اگر نتوانست، به fallback می‌افتد.
+    """
+    if val is None:
+        val = fallback
+    s = str(val).strip()
+    if s in ("", "None", "nan", "NaN", "NULL"):
+        s = str(fallback)
+    s = s.translate(_PERSIAN_DIGITS).replace(",", "")
+    try:
+        return Decimal(s)
+    except (InvalidOperation, ValueError, TypeError):
+        return Decimal(str(fallback))
 
 def _is_variant(item) -> bool:
     return hasattr(item, "product_id") and getattr(item, "product_id") is not None
@@ -16,7 +34,9 @@ def _build_pricing_line(item, qty: int = 1):
     if _is_variant(item):
         variant = item
         product = variant.product
-        unit_price = Decimal(str(getattr(variant, "price", product.price)))
+        raw_unit = variant.price if getattr(variant, "price", None) not in ("", None) else getattr(product, "price",
+                                                                                                   None)
+        unit_price = _to_money(raw_unit, fallback=getattr(product, "price", 0) or 0)
 
         # کتگوری‌های اضافه/برند از محصول
         try:
@@ -56,7 +76,7 @@ def _build_pricing_line(item, qty: int = 1):
 
     # --- Product ---
     product = item
-    unit_price = Decimal(str(getattr(product, "price")))
+    unit_price = _to_money(getattr(product, "price", None), fallback=0)
     try:
         extra_cids = list(product.additional_categories.values_list("id", flat=True))
     except Exception:
@@ -218,3 +238,30 @@ def _build_service_line(*, service: Service, base_line, item_unit_price: Decimal
         extra_category_ids=getattr(base_line, "extra_category_ids", []),
         _exclude_from_discounts=True,  # سرویس‌ها از تخفیف خطی سهم نگیرند
     )
+
+
+# --- public wrappers so callers don't touch "protected" names ---
+def build_pricing_line_public(item, qty: int = 1):
+    return _build_pricing_line(item, qty)
+
+def build_service_line_public(*, service, base_line, item_unit_price, qty: int):
+    return _build_service_line(service=service, base_line=base_line,
+                               item_unit_price=item_unit_price, qty=qty)
+
+def build_ephemeral_campaigns_for_lines(lines, channel="web"):
+    """
+    برای هر خط، اگر فیلدهای _variant_sale_* یا _product_sale_* فعال باشند،
+    یک کمپین موقتی معادل می‌سازیم تا PricingEngine همان‌طور که در صفحه‌ی
+    دیتیل عمل می‌کند، اینجا هم تخفیف را اعمال کند.
+    """
+    camps = []
+    for ln in lines:
+        epi = _ephemeral_from_variant_line(ln) or _ephemeral_from_product_line(ln)
+        if epi:
+            # اطمینان از کانال
+            try:
+                setattr(epi, "channel", channel)
+            except Exception:
+                pass
+            camps.append(epi)
+    return camps
