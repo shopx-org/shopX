@@ -4,12 +4,13 @@
     </div>
     <div class="card-body">
 
-        {% if comments %}
+        {% if comments %}        
             {% for comment in comments %}
                 <div class="border-bottom mb-3 pb-2">
                     <strong>{{ comment.user.get_full_name|default:comment.user.phone }}</strong>
                     <small class="text-muted">{{ comment.created_at|date:"Y/m/d" }}</small>
-                    <p class="mt-2">{{ comment.text }}</p>
+                    <p class="mt-2">{{ comment.text|escape }}</p>
+
 
                     {% if user.is_authenticated %}
                         <a href="#" class="reply-btn" data-parent="{{ comment.id }}">پاسخ</a>
@@ -17,11 +18,13 @@
 
                     {# ریپلای‌های مستقیم #}
                     {% for reply in comment.replies.all %}
+                        {% if reply.is_approved %}
                         <div class="ms-4 mt-2 p-2 border-start">
                             <strong>{{ reply.user.get_full_name|default:reply.user.phone }}</strong>
                             <small class="text-muted">{{ reply.created_at|date:"Y/m/d" }}</small>
                             <p class="mt-1">{{ reply.text }}</p>
                         </div>
+                        {% endif %}
                     {% endfor %}
                 </div>
             {% endfor %}
@@ -31,13 +34,21 @@
 
         {% if user.is_authenticated %}
             <form method="post"
-                  id="comment-form"
-                  action="{% url 'core:add_comment' 'products' 'product' object.id %}">
+                id="comment-form"
+                action="{% url 'core:add_comment' 'product' 'product' object.id %}">
                 {% csrf_token %}
                 {{ form.text }}
                 {{ form.parent_id }}
+
+                {% if form.text.errors %}
+                    <div class="text-danger mt-1">{{ form.text.errors.0 }}</div>
+                {% endif %}
+
                 <button type="submit" class="btn btn-primary mt-2">ارسال نظر</button>
             </form>
+
+
+
         {% else %}
             <p class="text-muted mt-3">
                 برای ثبت نظر لطفاً <a href="{% url 'account:otp_login' %}">وارد شوید</a>.

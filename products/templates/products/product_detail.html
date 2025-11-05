@@ -540,6 +540,12 @@
                                             <div id="collapse-3" class="collapse" aria-labelledby="heading-3"
                                                 data-parent="#accordion-1">
                                                 <div class="card-body">
+                                                {% if messages %}
+                                                    {% for message in messages %}
+                                                        <div class="alert alert-{{ message.tags }} mt-3">{{ message }}</div>
+                                                    {% endfor %}
+                                                {% endif %}
+
                                                 {% include "core/comments_section.html" with comments=comments form=comment_form %}
                                                 </div>
                                             </div>

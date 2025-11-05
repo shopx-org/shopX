@@ -27,6 +27,10 @@ class Comment(models.Model):
         verbose_name="پاسخ به"
     )
 
+    ip_address = models.GenericIPAddressField(null=True, blank=True, verbose_name="IP")
+    is_approved = models.BooleanField(default=False, verbose_name="تایید شده؟")
+
+
     text = models.TextField(verbose_name="متن نظر")
     created_at = jmodels.jDateTimeField(auto_now_add=True, verbose_name="تاریخ ایجاد")
     updated_at = jmodels.jDateTimeField(auto_now=True, verbose_name="آخرین بروزرسانی")

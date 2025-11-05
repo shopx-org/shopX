@@ -450,6 +450,7 @@ class Product(models.Model):
     def get_absolute_url(self):
         return reverse("products:product_detail", kwargs={"slug": self.slug})
 
+
     @property
     def cover_image(self) -> Optional["ProductImage"]:
         return self.images.filter(is_primary=True).first() or self.images.order_by("position", "id").first()
