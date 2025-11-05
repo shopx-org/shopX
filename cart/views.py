@@ -22,6 +22,13 @@ from products.services.pricing_adapter import (
 # =========================
 # Helpers (pure)
 # =========================
+def _pct(sub: Decimal, disc: Decimal) -> int:
+    try:
+        if sub and sub > 0 and disc and disc > 0:
+            return int(round((disc / sub) * 100))
+    except Exception:
+        pass
+    return 0
 
 def _to_number(x: Decimal | int | float | None) -> float:
     if x is None:
@@ -41,9 +48,6 @@ def _summary_payload(result) -> Dict[str, float]:
     }
 
 def _row_payload(result, gid: str | None) -> Dict[str, float] | None:
-    """
-    جمع‌های ردیفی را از روی خطوطِ برچسب‌خورده با gid حساب می‌کند.
-    """
     if not gid:
         return None
 
@@ -59,6 +63,7 @@ def _row_payload(result, gid: str | None) -> Dict[str, float] | None:
         "subtotal": _to_number(sub),
         "discount": _to_number(disc),
         "total": _to_number(sub - disc),
+        "discount_percent": _pct(sub, disc),  # ← جدید
     }
 
 def _first_image_url(product: Product) -> str | None:
@@ -207,6 +212,7 @@ def cart_detail(request: HttpRequest) -> HttpResponse:
             "subtotal": line_subtotal,
             "discount": line_discount,
             "total": line_total,
+            "discount_percent": _pct(line_subtotal, line_discount),
             "services": [
                 {"id": getattr(s, "id", None), "name": getattr(s, "name", str(s))}
                 for s in (getattr(it, "services", []) or [])

@@ -15,6 +15,7 @@
                         <div class="title">جمع سبد خرید</div>
                         <div class="line"><span>جمع جزء</span> <strong
                                 id="s-sub">{{ cart_subtotal|floatformat:0|intcomma }} تومان</strong></div>
+
                         <div class="line"><span>تخفیف</span> <strong
                                 id="s-disc">{{ cart_total_discount|floatformat:0|intcomma }} تومان</strong></div>
                         <hr>
@@ -62,11 +63,9 @@
                                         </li>
 
 
-
-
                                     </ul>
                                     <ul>
-                                          <li>
+                                        <li>
                                             <i class="fas fa-shield-alt"></i>
                                             ضمانت اصالت کالا
                                         </li>
@@ -76,6 +75,7 @@
                                     {# تعداد: همان فرم فعلی تو #}
                                     <form class="js-qty-form qty-inline" method="post"
                                           action="
+
 
                                                   {% if row.variant_id %}{% url 'cart:cart_update_qty' row.product_id row.variant_id %}{% else %}{% url 'cart:cart_update_qty_no_variant' row.product_id %}{% endif %}">
                                         {% csrf_token %}
@@ -96,8 +96,8 @@
 
                                 <!-- چپ: قیمت و اکشن‌ها -->
                                 <div class="cart-side">
-                                    {% if row.discount and row.discount|floatformat:0 != '0' %}
-                                        <span class="deal-badge">Limited time deal</span>
+                                    {% if row.discount_percent %}
+                                        <span class="deal-badge">{{ row.discount_percent }}٪</span>
                                     {% endif %}
 
                                     <div class="price-now">
@@ -107,14 +107,17 @@
 
                                     {% if row.discount and row.discount|floatformat:0 != '0' %}
                                         <div class="price-list">
-                                            <del class="js-row-subtotal">{{ row.subtotal|floatformat:0|intcomma }}</del>
-                                            <span class="save">− {{ row.discount|floatformat:0|intcomma }}</span>
+
+                                            <del class="js-row-subtotal">{{ row.subtotal|floatformat:0|intcomma }}  </del>
+                                            <span style="mso-bidi-font-size: 18px; color: #1b1e21">   : قیمت قبل  </span>
+                                            {#                                            <span class="save">− {{ row.discount|floatformat:0|intcomma }}</span>#}
                                         </div>
                                     {% endif %}
 
                                     <div class="action-bar mt-1">
                                         <form class="js-remove-form" method="post"
                                               action="
+
 
 
 
