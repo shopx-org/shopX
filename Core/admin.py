@@ -4,8 +4,8 @@ from .models import Comment
 
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
-    list_display = ('user', 'content_object', 'short_text', 'created_at', 'is_active')
-    list_filter = ('is_active', 'created_at')
+    list_display = ('user', 'content_object', 'short_text', 'created_at', 'is_approved')
+    list_filter = ('is_approved', 'created_at')
     search_fields = ('user__phone', 'user__first_name', 'user__last_name', 'text')
     readonly_fields = ('created_at', 'updated_at')
 

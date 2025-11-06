@@ -634,14 +634,16 @@ class ProductDetailView(DetailView):
             
         ctx["variant_prices_json"] = _json(variant_prices)  # ← JSON معتبر
 
-        # نظرات
+
         content_type = ContentType.objects.get_for_model(p)
+
         comments = Comment.objects.filter(
-            content_type=content_type,
-            object_id=p.id,
-            is_active=True,
-            parent__isnull=True
-        ).select_related("user").prefetch_related("replies__user")
+        content_type=content_type,
+        object_id=p.id,
+        is_approved=True,   # 🔥 این مهمه
+        parent__isnull=True
+    ).select_related("user").prefetch_related("replies__user")
+
 
         ctx["comments"] = comments
         ctx["comment_form"] = CommentForm()

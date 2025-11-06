@@ -34,7 +34,7 @@ class Comment(models.Model):
     text = models.TextField(verbose_name="متن نظر")
     created_at = jmodels.jDateTimeField(auto_now_add=True, verbose_name="تاریخ ایجاد")
     updated_at = jmodels.jDateTimeField(auto_now=True, verbose_name="آخرین بروزرسانی")
-    is_active = models.BooleanField(default=True, verbose_name="فعال است؟")
+    # is_active = models.BooleanField(default=True, verbose_name="فعال است؟")
 
     class Meta:
         ordering = ['-created_at']

@@ -36,7 +36,8 @@ INSTALLED_APPS = [
     "products.apps.ProductsConfig",
     "Core.apps.CoreConfig",
     "promos.apps.PromosConfig",
-    "cart.apps.CartConfig",
+    "shipping.apps.ShippingConfig",
+
 
     # Third-party
     "widget_tweaks",
