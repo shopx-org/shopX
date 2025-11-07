@@ -1,0 +1,144 @@
+{% extends 'dashboards/dashboard_base_user.html' %}
+{% load static %}
+{% block UserDash_content %}
+
+<div class="tab-pane fade show active" id="user-comments" role="tabpanel">
+    <div class="col-lg-10 col-xl-8 mx-auto dashboard-card">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold">نظرات من</h5>
+        </div>
+
+        {% if comments %}
+            {% for c in comments %}
+            <div class="card mb-3 shadow-sm comment-card">
+                <div class="card-body">
+
+                    <div class="comment-wrapper d-flex justify-content-between align-items-start mt-2">
+
+                        <div class="comment-text me-1">
+
+                            <!-- ✅ در موبایل همین بخش میاد بالا -->
+                            <div class="comment-status mobile-status mb-2 d-none">
+                                {% if c.is_approved %}
+                                    <span class="status-pill status-approved">✅ تایید شده</span>
+                                {% else %}
+                                    <span class="status-pill status-pending">⏳ در انتظار تایید</span>
+                                {% endif %}
+                            </div>
+
+                            <strong class="text-dark">برای:</strong>
+                            {% if c.content_object %}
+                                <a href="{{ c.content_object.get_absolute_url }}" class="text-primary fw-bold" target="_blank">
+                                    {{ c.content_object }}
+                                </a>
+                            {% else %}
+                                {{ c.content_type }} 
+                            {% endif %}
+                            <br>
+
+                            <strong>متن:</strong>
+                            <div class="mt-1">{{ c.text|linebreaksbr }}</div>
+
+                            <!-- ✅ در دسکتاپ همچنان پایین متن -->
+                            <div class="comment-status desktop-status mt-2">
+                                {% if c.is_approved %}
+                                    <span class="status-pill status-approved">✅ تایید شده</span>
+                                {% else %}
+                                    <span class="status-pill status-pending">⏳ در انتظار تایید</span>
+                                {% endif %}
+                            </div>
+
+                            {% if c.parent %}
+                                <p class="text-muted small mt-1 mb-0">
+                                    ↳ پاسخ به نظر 
+                                </p>
+                            {% endif %}
+                        </div>
+
+                        <div class="comment-actions text-end">
+                            <small class="text-muted">{{ c.created_at|date:"Y/m/d H:i" }}</small>
+                            <br>
+                            <form method="post" class="delete-comment-form" action="{% url 'dashboards:delete_comment' c.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-delete fa fa-trash mt-2"></button>
+                            </form>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-muted">هنوز نظری ثبت نکرده‌اید.</p>
+        {% endif %}
+
+    </div>
+</div>
+
+{% endblock %}
+
+{% block CSS-JS %}
+<style>
+    .status-pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 3px 9px;
+        border-radius: 50px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    .status-approved {
+        background: #e6f9ec;
+        color: #0f8a3b;
+    }
+    .status-pending {
+        background: #f1f1f1;
+        color: #6c6c6c;
+    }
+
+    .comment-card {
+        border: 1px solid #eee;
+        border-radius: 12px;
+    }
+
+    .comment-text {
+        text-align: right;
+        direction: rtl;
+        line-height: 1.9;
+        width: 100%;
+    }
+
+    .btn-delete {
+        border: none;
+        background: none;
+        color: #dc3545;
+        cursor: pointer;
+        font-size: 18px;
+        transition: 0.2s;
+    }
+    .btn-delete:hover { transform: scale(1.2); }
+
+    /* ✅ دسکتاپ: نشان پایین متن */
+    .desktop-status { display: block; }
+    .mobile-status { display: none; }
+
+    /* ✅ موبایل */
+    @media (max-width: 768px) {
+        .comment-wrapper { flex-direction: column; }
+
+        /* وضعیت بیاد بالا */
+        .desktop-status { display: none; }
+        .mobile-status { display: block !important; }
+
+        /* دکمه حذف پایین کارت */
+        .comment-actions {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            margin-top: 12px;
+        }
+    }
+</style>
+{% endblock %}

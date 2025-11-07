@@ -1,15 +1,19 @@
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.views import View
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.http import JsonResponse
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from datetime import timedelta, datetime
-
 from .forms import DashboardAccountForm, ChangePhoneNumberForm
 from OTP_app import services as otp_services
+from Core.models import Comment
+from django.http import JsonResponse
+from django.contrib.auth.mixins import LoginRequiredMixin
+
+
 
 User = get_user_model()
 
@@ -179,4 +183,27 @@ class ChangePhoneOtpView(View):
             return JsonResponse({'status': 'error', 'message': f'خطای داخلی سرور: {str(e)}'})
         
 
-        
+@method_decorator(login_required, name='dispatch')
+class UserCommentsView(View):
+    template_name = 'dashboards/user_comments.html'
+
+    def get(self, request):
+        comments = Comment.objects.filter(
+            user=request.user
+        ).select_related('content_type', 'parent').order_by('-created_at')
+
+        return render(request, self.template_name, {
+            'comments': comments,
+        })
+
+
+
+class DeleteCommentAjaxView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        try:
+            comment = Comment.objects.get(pk=pk, user=request.user)
+            comment.delete()
+            return JsonResponse({'status': 'ok'})
+        except Comment.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'کامنت پیدا نشد'}, status=404)
+    
