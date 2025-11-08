@@ -1,3 +1,4 @@
+# /home/atusa92/PycharmProjects/ShopX/cart/management/commands/inspect_cart.py
 from __future__ import annotations
 import json
 from decimal import Decimal

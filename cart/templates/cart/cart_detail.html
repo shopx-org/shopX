@@ -1,3 +1,5 @@
+{#/home/atusa92/PycharmProjects/ShopX/cart/templates/cart/cart_detail.html#}
+{# /cart/templates/cart/cart_detail.html #}
 {% extends 'base.html' %}
 {% load static humanize %}
 {% block CSS-JS %}
@@ -9,18 +11,29 @@
         <div class="container cart-wrap mt-3">
             <div class="row g-4">
 
-                {# ستون سایدبار (چپ در RTL) #}
                 <aside class="col-lg-3 order-lg-1">
-                    <div class="summary summary-cart" id="summary">
+                    <div class="summary summary-cart" id="summary"
+                         data-sub="{{ cart_subtotal }}"
+                         data-disc="{{ cart_total_discount }}"
+                         data-total="{{ cart_total }}">
                         <div class="title">جمع سبد خرید</div>
-                        <div class="line"><span>جمع جزء</span> <strong
-                                id="s-sub">{{ cart_subtotal|floatformat:0|intcomma }} تومان</strong></div>
 
-                        <div class="line"><span>تخفیف</span> <strong
-                                id="s-disc">{{ cart_total_discount|floatformat:0|intcomma }} تومان</strong></div>
+                        <div class="line">
+                            <span>جمع جزء</span>
+                            <strong id="s-sub">{{ cart_subtotal|floatformat:0|intcomma }} تومان</strong>
+                        </div>
+
+                        <div class="line">
+                            <span>تخفیف</span>
+                            <strong id="s-disc">{{ cart_total_discount|floatformat:0|intcomma }} تومان</strong>
+                        </div>
+
                         <hr>
-                        <div class="line"><span>مبلغ پرداختی</span> <strong
-                                id="s-total">{{ cart_total|floatformat:0|intcomma }} تومان</strong></div>
+
+                        <div class="line">
+                            <span>مبلغ پرداختی</span>
+                            <strong id="s-total">{{ cart_total|floatformat:0|intcomma }} تومان</strong>
+                        </div>
 
                         <form id="coupon-form" class="mt-3" method="post" action="{% url 'cart:cart_set_coupon' %}">
                             {% csrf_token %}
@@ -40,7 +53,7 @@
                     </div>
                 </aside>
 
-                {# ستون لیست سبد (راست در RTL) #}
+                {# لیست سبد #}
                 <div class="col-lg-9 order-lg-2">
                     <div class="cart-list" id="cart-list">
                         {% for row in cart_rows %}
@@ -61,21 +74,14 @@
                                             <i class="fas fa-warehouse"></i>
                                             {% if row.in_stock %}موجود در انبار{% else %}ناموجود{% endif %}
                                         </li>
-
-
                                     </ul>
                                     <ul>
-                                        <li>
-                                            <i class="fas fa-shield-alt"></i>
-                                            ضمانت اصالت کالا
-                                        </li>
-
+                                        <li><i class="fas fa-shield-alt"></i> ضمانت اصالت کالا</li>
                                     </ul>
 
-                                    {# تعداد: همان فرم فعلی تو #}
+                                    {# تعداد #}
                                     <form class="js-qty-form qty-inline" method="post"
                                           action="
-
 
                                                   {% if row.variant_id %}{% url 'cart:cart_update_qty' row.product_id row.variant_id %}{% else %}{% url 'cart:cart_update_qty_no_variant' row.product_id %}{% endif %}">
                                         {% csrf_token %}
@@ -98,6 +104,8 @@
                                 <div class="cart-side">
                                     {% if row.discount_percent %}
                                         <span class="deal-badge">{{ row.discount_percent }}٪</span>
+                                    {% else %}
+                                        <span class="deal-badge" style="display:none;"></span>
                                     {% endif %}
 
                                     <div class="price-now">
@@ -105,22 +113,14 @@
                                         <span class="unit">تومان</span>
                                     </div>
 
-                                    {% if row.discount and row.discount|floatformat:0 != '0' %}
-                                        <div class="price-list">
-
-                                            <del class="js-row-subtotal">{{ row.subtotal|floatformat:0|intcomma }}  </del>
-                                            <span style="mso-bidi-font-size: 18px; color: #1b1e21">   : قیمت قبل  </span>
-                                            {#                                            <span class="save">− {{ row.discount|floatformat:0|intcomma }}</span>#}
-                                        </div>
-                                    {% endif %}
+                                    <div class="price-list" {% if not row.discount %}style="display:none;"{% endif %}>
+                                        <del class="js-row-subtotal">{{ row.subtotal|floatformat:0|intcomma }}</del>
+                                        <span style="mso-bidi-font-size: 18px; color:#1b1e21"> : قیمت قبل </span>
+                                    </div>
 
                                     <div class="action-bar mt-1">
                                         <form class="js-remove-form" method="post"
                                               action="
-
-
-
-
 
                                                       {% if row.variant_id %}{% url 'cart:cart_remove' row.product_id row.variant_id %}{% else %}{% url 'cart:cart_remove_no_variant' row.product_id %}{% endif %}">
                                             {% csrf_token %}
@@ -151,9 +151,10 @@
             </div>
         </div>
     </main>
+
     <script>
         // ---------- helpers ----------
-        const fmt = n => Number(n).toLocaleString('fa-IR');
+        const fmt = n => Number(n ?? 0).toLocaleString('fa-IR');
         const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
         const cartList = document.getElementById('cart-list');
         const clamp = (v, min, max) => Math.min(Math.max(v, min), (max ?? 999));
@@ -177,15 +178,41 @@
             if (ss) ss.textContent = fmt(sum.subtotal);
         }
 
-        function updateRow(el, row) { // row = {total, subtotal}
+        // ← این نسخه بج درصد را هم آپدیت می‌کند و price-list را نمایش/مخفی می‌کند
+        function updateRow(el, row) { // row = {total, subtotal, discount, discount_percent}
             if (!row) return;
             el.querySelector('.js-row-total').textContent = fmt(row.total);
+
             const sub = el.querySelector('.js-row-subtotal');
+            const priceList = el.querySelector('.price-list');
             if (sub) sub.textContent = fmt(row.subtotal);
+            if (priceList) priceList.style.display = (row.discount && Number(row.discount) > 0) ? '' : 'none';
+
+            const badge = el.querySelector('.deal-badge');
+            if (badge) {
+                const p = Number(row.discount_percent || 0);
+                if (p > 0) {
+                    badge.textContent = p + '٪';
+                    badge.style.display = '';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
         }
 
         // ---------- qty update ----------
 
+        // normalize sidebar values on first paint (prevents stale numbers)
+        (function bootSummary() {
+            const box = document.getElementById('summary');
+            if (!box) return;
+            const init = {
+                subtotal: Number(box.dataset.sub || 0),
+                total_discount: Number(box.dataset.disc || 0),
+                total: Number(box.dataset.total || 0),
+            };
+            updateSummary(init);
+        })();
         cartList?.addEventListener('click', (e) => {
             const decBtn = e.target.closest('[data-qty-dec]');
             const incBtn = e.target.closest('[data-qty-inc]');
@@ -238,9 +265,11 @@
             } else {
                 location.reload();
             }
+           console.log('init summary', init); // باید با اعداد بک‌اند یکی باشد
+           updateSummary(init);
         });
 
-        // حذف آیتم (delegation)
+        // حذف آیتم
         cartList?.addEventListener('submit', async (e) => {
             const form = e.target.closest('form.js-remove-form');
             if (!form) return;
@@ -263,8 +292,275 @@
             if (data?.ok) updateSummary(data.summary); else location.reload();
         });
     </script>
-
 {% endblock %}
+
+{#{% extends 'base.html' %}#}
+{#{% load static humanize %}#}
+{#{% block CSS-JS %}#}
+{#    <link rel="stylesheet" href="{% static 'vendor/font-awesome/css/all.min.css' %}">#}
+{#{% endblock %}#}
+{##}
+{#{% block content %}#}
+{#    <main class="main">#}
+{#        <div class="container cart-wrap mt-3">#}
+{#            <div class="row g-4">#}
+{##}
+{# ستون سایدبار (چپ در RTL) #}
+{#                <aside class="col-lg-3 order-lg-1">#}
+{#                    <div class="summary summary-cart" id="summary">#}
+{#                        <div class="title">جمع سبد خرید</div>#}
+{#                        <div class="line"><span>جمع جزء</span> <strong#}
+{#                                id="s-sub">{{ cart_subtotal|floatformat:0|intcomma }} تومان</strong></div>#}
+{##}
+{#                        <div class="line"><span>تخفیف</span> <strong#}
+{#                                id="s-disc">{{ cart_total_discount|floatformat:0|intcomma }} تومان</strong></div>#}
+{#                        <hr>#}
+{#                        <div class="line"><span>مبلغ پرداختی</span> <strong#}
+{#                                id="s-total">{{ cart_total|floatformat:0|intcomma }} تومان</strong></div>#}
+{##}
+{#                        <form id="coupon-form" class="mt-3" method="post" action="{% url 'cart:cart_set_coupon' %}">#}
+{#                            {% csrf_token %}#}
+{#                            <div class="input-group">#}
+{#                                <input name="coupon" type="text" class="form-control" placeholder="کد تخفیف"#}
+{#                                       value="{{ cart_coupon }}">#}
+{#                                <button class="btn btn-outline-secondary" type="submit">اعمال</button>#}
+{#                            </div>#}
+{#                        </form>#}
+{##}
+{#                        <a href="#" class="btn btn-primary btn-checkout mt-3">ادامه و پرداخت</a>#}
+{##}
+{#                        <form class="mt-2" method="post" action="{% url 'cart:cart_clear' %}">#}
+{#                            {% csrf_token %}#}
+{#                            <button class="btn btn-outline-dark-2 btn-block" type="submit">خالی کردن سبد</button>#}
+{#                        </form>#}
+{#                    </div>#}
+{#                </aside>#}
+{##}
+{# ستون لیست سبد (راست در RTL) #}
+{#                <div class="col-lg-9 order-lg-2">#}
+{#                    <div class="cart-list" id="cart-list">#}
+{#                        {% for row in cart_rows %}#}
+{#                            <div class="cart-item" data-pid="{{ row.product_id }}"#}
+{#                                 data-vid="{{ row.variant_id|default_if_none:'' }}">#}
+{##}
+{#                                <!-- راست: تصویر -->#}
+{#                                <div class="cart-media">#}
+{#                                    <img src="{{ row.img|default:'https://dummyimage.com/480x480/eee/aaa' }}"#}
+{#                                         alt="{{ row.title }}">#}
+{#                                </div>#}
+{##}
+{#                                <!-- وسط: عنوان، وضعیت، تعداد -->#}
+{#                                <div class="cart-body">#}
+{#                                    <div class="cart-title"><a href="#">{{ row.title }}</a></div>#}
+{#                                    <ul class="item-flags">#}
+{#                                        <li class="{% if row.in_stock %}ok{% else %}no{% endif %}">#}
+{#                                            <i class="fas fa-warehouse"></i>#}
+{#                                            {% if row.in_stock %}موجود در انبار{% else %}ناموجود{% endif %}#}
+{#                                        </li>#}
+{##}
+{##}
+{#                                    </ul>#}
+{#                                    <ul>#}
+{#                                        <li>#}
+{#                                            <i class="fas fa-shield-alt"></i>#}
+{#                                            ضمانت اصالت کالا#}
+{#                                        </li>#}
+{##}
+{#                                    </ul>#}
+{##}
+{# تعداد: همان فرم فعلی تو #}
+{#                                    <form class="js-qty-form qty-inline" method="post"#}
+{#                                          action="#}
+{##}
+{##}
+{#                                                  {% if row.variant_id %}{% url 'cart:cart_update_qty' row.product_id row.variant_id %}{% else %}{% url 'cart:cart_update_qty_no_variant' row.product_id %}{% endif %}">#}
+{#                                        {% csrf_token %}#}
+{#                                        <label class="qty-label" for="qty-{{ forloop.counter }}">تعداد:</label>#}
+{#                                        <div class="qty" data-qty>#}
+{#                                            <button type="button" class="qty__btn" data-qty-dec aria-label="کم‌کردن">−#}
+{#                                            </button>#}
+{#                                            <input id="qty-{{ forloop.counter }}" name="quantity" class="qty__input"#}
+{#                                                   type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off"#}
+{#                                                   value="{{ row.qty|default:1 }}" data-qty-input#}
+{#                                                   data-min="{{ row.min_qty|default:1 }}"#}
+{#                                                   data-max="{{ row.max_qty|default:10 }}" required>#}
+{#                                            <button type="button" class="qty__btn" data-qty-inc aria-label="افزودن">+#}
+{#                                            </button>#}
+{#                                        </div>#}
+{#                                    </form>#}
+{#                                </div>#}
+{##}
+{#                                <!-- چپ: قیمت و اکشن‌ها -->#}
+{#                                <div class="cart-side">#}
+{#                                    {% if row.discount_percent %}#}
+{#                                        <span class="deal-badge">{{ row.discount_percent }}٪</span>#}
+{#                                    {% endif %}#}
+{##}
+{#                                    <div class="price-now">#}
+{#                                        <span class="js-row-total">{{ row.total|floatformat:0|intcomma }}</span>#}
+{#                                        <span class="unit">تومان</span>#}
+{#                                    </div>#}
+{##}
+{#                                    {% if row.discount and row.discount|floatformat:0 != '0' %}#}
+{#                                        <div class="price-list">#}
+{##}
+{#                                            <del class="js-row-subtotal">{{ row.subtotal|floatformat:0|intcomma }}  </del>#}
+{#                                            <span style="mso-bidi-font-size: 18px; color: #1b1e21">   : قیمت قبل  </span>#}
+{#                                            <span class="save">− {{ row.discount|floatformat:0|intcomma }}</span>#}
+{#                                        </div>#}
+{#                                    {% endif %}#}
+{##}
+{#                                    <div class="action-bar mt-1">#}
+{#                                        <form class="js-remove-form" method="post"#}
+{#                                              action="#}
+{##}
+{##}
+{##}
+{##}
+{##}
+{#                                                      {% if row.variant_id %}{% url 'cart:cart_remove' row.product_id row.variant_id %}{% else %}{% url 'cart:cart_remove_no_variant' row.product_id %}{% endif %}">#}
+{#                                            {% csrf_token %}#}
+{#                                            <button class="action-link" title="حذف" type="submit"><i#}
+{#                                                    class="fas fa-trash"></i></button>#}
+{#                                        </form>#}
+{#                                        <button class="action-link" title="ذخیره برای بعد" type="button"><i#}
+{#                                                class="fas fa-bookmark"></i></button>#}
+{#                                        <button class="action-link" title="مقایسه" type="button"><i#}
+{#                                                class="fas fa-random"></i></button>#}
+{#                                        <button class="action-link" title="اشتراک‌گذاری" type="button"><i#}
+{#                                                class="fas fa-share-alt"></i></button>#}
+{#                                    </div>#}
+{#                                </div>#}
+{##}
+{#                            </div>#}
+{#                        {% endfor %}#}
+{#                    </div>#}
+{##}
+{#                    {% if cart_rows %}#}
+{#                        <div class="cart-subtotal">#}
+{#                            جمع جزء: <span id="sum-subtotal"#}
+{#                                           class="ms-1">{{ cart_subtotal|floatformat:0|intcomma }}</span> تومان#}
+{#                        </div>#}
+{#                    {% endif %}#}
+{#                </div>#}
+{##}
+{#            </div>#}
+{#        </div>#}
+{#    </main>#}
+{#    <script>#}
+{#        // ---------- helpers ----------#}
+{#        const fmt = n => Number(n).toLocaleString('fa-IR');#}
+{#        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;#}
+{#        const cartList = document.getElementById('cart-list');#}
+{#        const clamp = (v, min, max) => Math.min(Math.max(v, min), (max ?? 999));#}
+{##}
+{#        async function postJSON(url, form) {#}
+{#            const body = new FormData(form);#}
+{#            const res = await fetch(url, {#}
+{#                method: 'POST',#}
+{#                headers: {'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': csrftoken},#}
+{#                body,#}
+{#            });#}
+{#            return await res.json();#}
+{#        }#}
+{##}
+{#        function updateSummary(sum) { // sum = {subtotal, total_discount, total}#}
+{#            if (!sum) return;#}
+{#            document.getElementById('s-sub').textContent = fmt(sum.subtotal) + ' تومان';#}
+{#            document.getElementById('s-disc').textContent = fmt(sum.total_discount) + ' تومان';#}
+{#            document.getElementById('s-total').textContent = fmt(sum.total) + ' تومان';#}
+{#            const ss = document.getElementById('sum-subtotal');#}
+{#            if (ss) ss.textContent = fmt(sum.subtotal);#}
+{#        }#}
+{##}
+{#        function updateRow(el, row) { // row = {total, subtotal}#}
+{#            if (!row) return;#}
+{#            el.querySelector('.js-row-total').textContent = fmt(row.total);#}
+{#            const sub = el.querySelector('.js-row-subtotal');#}
+{#            if (sub) sub.textContent = fmt(row.subtotal);#}
+{#        }#}
+{##}
+{#        // ---------- qty update ----------#}
+{##}
+{#        cartList?.addEventListener('click', (e) => {#}
+{#            const decBtn = e.target.closest('[data-qty-dec]');#}
+{#            const incBtn = e.target.closest('[data-qty-inc]');#}
+{#            if (!decBtn && !incBtn) return;#}
+{##}
+{#            const wrap = e.target.closest('[data-qty]');#}
+{#            const input = wrap?.querySelector('[data-qty-input]');#}
+{#            if (!input) return;#}
+{##}
+{#            const form = e.target.closest('form.js-qty-form');#}
+{#            const min = +(input.dataset.min || 1);#}
+{#            const max = +(input.dataset.max || 999);#}
+{#            let v = +(input.value || min);#}
+{##}
+{#            if (incBtn) v = clamp(v + 1, min, max);#}
+{#            if (decBtn) v = clamp(v - 1, min, max);#}
+{##}
+{#            input.value = v;#}
+{#            form?.requestSubmit();#}
+{#        });#}
+{##}
+{#        // تایپ دستی با دیباونس#}
+{#        let qtyTO = null;#}
+{#        cartList?.addEventListener('input', (e) => {#}
+{#            const input = e.target.closest('[data-qty-input]');#}
+{#            if (!input) return;#}
+{#            clearTimeout(qtyTO);#}
+{#            qtyTO = setTimeout(() => {#}
+{#                const min = +(input.dataset.min || 1);#}
+{#                const max = +(input.dataset.max || 999);#}
+{#                const digits = (input.value || '').replace(/[^\d]/g, '');#}
+{#                let v = digits === '' ? min : parseInt(digits, 10);#}
+{#                v = clamp(v, min, max);#}
+{#                input.value = v;#}
+{#                input.closest('form')?.requestSubmit();#}
+{#            }, 400);#}
+{#        });#}
+{##}
+{#        // submit ایجکس qty#}
+{#        cartList?.addEventListener('submit', async (e) => {#}
+{#            const form = e.target.closest('form.js-qty-form');#}
+{#            if (!form) return;#}
+{#            e.preventDefault();#}
+{#            const wrapper = form.closest('.cart-item');#}
+{#            const url = form.getAttribute('action');#}
+{#            const data = await postJSON(url, form);#}
+{#            if (data?.ok) {#}
+{#                updateRow(wrapper, data.row);#}
+{#                updateSummary(data.summary);#}
+{#            } else {#}
+{#                location.reload();#}
+{#            }#}
+{#        });#}
+{##}
+{#        // حذف آیتم (delegation)#}
+{#        cartList?.addEventListener('submit', async (e) => {#}
+{#            const form = e.target.closest('form.js-remove-form');#}
+{#            if (!form) return;#}
+{#            e.preventDefault();#}
+{#            const wrapper = form.closest('.cart-item');#}
+{#            const data = await postJSON(form.getAttribute('action'), form);#}
+{#            if (data?.ok) {#}
+{#                wrapper.remove();#}
+{#                updateSummary(data.summary);#}
+{#                if (!document.querySelectorAll('.cart-item').length) location.reload();#}
+{#            } else {#}
+{#                location.reload();#}
+{#            }#}
+{#        });#}
+{##}
+{#        // کوپن#}
+{#        document.getElementById('coupon-form')?.addEventListener('submit', async (e) => {#}
+{#            e.preventDefault();#}
+{#            const data = await postJSON(e.target.getAttribute('action'), e.target);#}
+{#            if (data?.ok) updateSummary(data.summary); else location.reload();#}
+{#        });#}
+{#    </script>#}
+{##}
+{#{% endblock %}#}
 
 
 {##}

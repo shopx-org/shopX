@@ -85,6 +85,89 @@ class PricingEngine:
         now = timezone.now()
         camps = self.provider.get(ctx.get("channel", "web"), now)
 
+        def _rules_match_line(campaign, line, all_lines):
+            def _iter_rules(c):
+                rules = getattr(c, "rules", None)
+                if rules is None: return []
+                if hasattr(rules, "all") and callable(rules.all):
+                    return rules.all()
+                return rules
+
+            for r in _iter_rules(campaign):
+                kind = getattr(r, "kind", None)
+                p = getattr(r, "payload", {}) or {}
+
+                if kind == "variant_in":
+                    ids = set(p.get("variant_ids", []))
+                    if getattr(line, "variant_id", None) not in ids:
+                        return False
+
+                elif kind == "product_in":
+                    ids = set(p.get("product_ids", []))
+                    if line.product_id not in ids:
+                        return False
+
+                elif kind == "category_in":
+                    ids = set(p.get("category_ids", []))
+                    ec = getattr(line, "extra_category_ids", []) or []
+                    if line.category_id not in ids and not any(cid in ids for cid in ec):
+                        return False
+
+                elif kind == "brand_in":
+                    ids = set(p.get("brand_ids", []))
+                    if getattr(line, "brand_id", None) not in ids:
+                        return False
+
+                elif kind == "qty_at_least":
+                    if line.quantity < int(p.get("qty", 1)):
+                        return False
+
+                elif kind == "cart_min_total":
+                    continue
+            return True
+
+        def _rules_match_line(campaign, line, all_lines):
+            def _iter_rules(c):
+                rules = getattr(c, "rules", None)
+                if rules is None: return []
+                if hasattr(rules, "all") and callable(rules.all):
+                    return rules.all()
+                return rules
+
+            for r in _iter_rules(campaign):
+                kind = getattr(r, "kind", None)
+                p = getattr(r, "payload", {}) or {}
+
+                if kind == "variant_in":
+                    ids = set(p.get("variant_ids", []))
+                    if getattr(line, "variant_id", None) not in ids:
+                        return False
+
+                elif kind == "product_in":
+                    ids = set(p.get("product_ids", []))
+                    if line.product_id not in ids:
+                        return False
+
+                elif kind == "category_in":
+                    ids = set(p.get("category_ids", []))
+                    ec = getattr(line, "extra_category_ids", []) or []
+                    if line.category_id not in ids and not any(cid in ids for cid in ec):
+                        return False
+
+                elif kind == "brand_in":
+                    ids = set(p.get("brand_ids", []))
+                    if getattr(line, "brand_id", None) not in ids:
+                        return False
+
+                elif kind == "qty_at_least":
+                    if line.quantity < int(p.get("qty", 1)):
+                        return False
+
+                elif kind == "cart_min_total":
+                    continue
+
+            return True
+
         # 1) کمپین‌های موقتی (مثلاً برای SALE مستقیمِ محصول/واریانت)
         ephemeral = ctx.get("ephemeral_campaigns") or []
         if ephemeral:
@@ -109,33 +192,46 @@ class PricingEngine:
             for r in _iter_rules(c):
                 p = getattr(r, "payload", {}) or {}
                 kind = getattr(r, "kind", None)
-                if kind == "product_in":
+
+                if kind == "variant_in":
+                    ids = set(p.get("variant_ids", []))
+                    if not any(getattr(l, "variant_id", None) in ids for l in ls):
+                        return False
+
+                elif kind == "product_in":
                     ids = set(p.get("product_ids", []))
                     if not any(l.product_id in ids for l in ls):
                         return False
+
                 elif kind == "category_in":
                     ids = set(p.get("category_ids", []))
+
                     def in_any(line):
                         if line.category_id in ids:
                             return True
                         ec = getattr(line, "extra_category_ids", None)
                         return any(cid in ids for cid in (ec or []))
+
                     if not any(in_any(l) for l in ls):
                         return False
+
                 elif kind == "cart_min_total":
                     thr = Decimal(str(p.get("threshold", "0")))
                     sub = sum((l.line_subtotal for l in ls), D0)
                     if sub < thr:
                         return False
+
                 elif kind == "qty_at_least":
                     q = int(p.get("qty", 1))
                     if not any(l.quantity >= q for l in ls):
                         return False
+
                 elif kind == "brand_in":
                     ids = set(p.get("brand_ids", []))
                     if not any(getattr(l, "brand_id", None) in ids for l in ls):
                         return False
-            return True  # ← بیرون حلقه
+
+            return True
 
         # 2) کوپن‌ها را در صدر بگذار
         codes = ctx.get("coupons") or []
@@ -162,17 +258,26 @@ class PricingEngine:
                 tag = f"{getattr(c,'name','camp')}:{kind}:{scope}"
 
                 if scope == "line":
-                    eligible = [l for l in lines if not getattr(l, "_exclude_from_discounts", False)]
+                    eligible = [
+                        l for l in lines
+                        if not getattr(l, "_exclude_from_discounts", False)
+                           and _rules_match_line(c, l, lines)
+                    ]
+
                     base = sum((l.line_subtotal for l in eligible), D0)
                     if base <= 0:
                         continue
+
                     if kind == "percent_off" and val is not None:
                         amt = base * (Decimal(val) / D100)
                     elif kind == "amount_off" and val is not None:
                         amt = Decimal(val)
                     else:
                         amt = D0
-                    if cap is not None: amt = min(amt, Decimal(cap))
+
+                    if cap is not None:
+                        amt = min(amt, Decimal(cap))
+
                     self._spread(eligible, amt)
                     explain["applied"].append({"tag": tag, "amount": str(amt)})
 

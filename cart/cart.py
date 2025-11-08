@@ -1,4 +1,4 @@
-# cart/session_cart.py
+# cart/cart.py
 from __future__ import annotations
 from typing import Any, Dict, Generator, Iterable, Optional, List
 from decimal import Decimal
