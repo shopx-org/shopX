@@ -1,7 +1,7 @@
 # cart/views.py
 # cart/views.py
 from __future__ import annotations
-
+from django.urls import reverse
 from decimal import Decimal, ROUND_HALF_UP
 from types import SimpleNamespace
 from typing import Any, Dict, Iterable, List, Tuple
@@ -21,6 +21,50 @@ from products.services.pricing_adapter import (
 )
 
 # ========= Helpers (pure) =========
+
+def _summary_payload(result) -> Dict[str, float]:
+    """
+    result: خروجی PricingEngine.evaluate
+    خروجی این تابع، با منطق نمایش ردیف‌ها هم‌راستا می‌شود:
+    - subtotal: مجموع آیتم‌های «قابل‌تخفیف» (بدون سرویس‌ها)
+    - services_total: مجموع هزینهٔ سرویس‌ها (لاین‌های exclude)
+    - total_discount: جمع تخفیف خطی + تخفیف سبد
+    - total: مبلغ پرداختی نهایی = (subtotal - total_discount) + services_total
+    """
+    from decimal import Decimal
+
+    lines = getattr(result, "lines", []) or []
+
+    sub_exclusive = Decimal("0")  # فقط خطوط قابل‌تخفیف
+    svc_total     = Decimal("0")  # خطوط سرویس (exclude)
+    line_disc     = Decimal("0")
+
+    for ln in lines:
+        if getattr(ln, "_exclude_from_discounts", False):
+            svc_total += getattr(ln, "line_subtotal", Decimal("0"))
+        else:
+            sub_exclusive += getattr(ln, "line_subtotal", Decimal("0"))
+        line_disc += getattr(ln, "line_discount", Decimal("0"))
+
+    cart_disc = getattr(result, "cart_discount", Decimal("0"))
+
+    total_discount = (line_disc + cart_disc)
+    payable = (sub_exclusive - total_discount) + svc_total
+
+    def _f(x):  # به float برای JSON
+        try:
+            return float(x)
+        except Exception:
+            return 0.0
+
+    return {
+        "subtotal": _f(sub_exclusive),
+        "services_total": _f(svc_total),
+        "total_discount": _f(total_discount),
+        "total": _f(payable),
+    }
+
+
 # --- helpers for variant meta shown in cart ---
 def _color_payload(variant: ProductVariant | None):
     try:
@@ -178,24 +222,128 @@ def _json_cart_for_row(request: HttpRequest, product_id: int, variant_id: int | 
 # ========= Views =========
 
 def cart_detail(request: HttpRequest) -> HttpResponse:
+    """
+    صفحه‌ی سبد خرید با محاسبه‌ی کامل:
+    - اعمال کمپین‌ها/کوپن‌ها با PricingEngine
+    - جمع ردیفی (محصول + سرویس‌ها) با استفاده از gid
+    - لیست سرویس‌های انتخاب‌شده و سرویس‌های قابل‌افزودن به هر ردیف (به‌همراه toggle_url)
+    - محاسبه‌ی مجموع هزینه‌ی سرویس‌ها برای سایدبار
+    """
     cart = Cart(request)
     lines, groups = _build_lines_with_gids(cart)
 
+    # کانتکست موتور قیمت‌گذاری + کمپین‌های موقت
     ctx = _pricing_ctx_for(request)
     eps = build_ephemeral_campaigns_for_lines(lines, channel=ctx.get("channel", "web"))
     if eps:
         ctx["ephemeral_campaigns"] = eps
 
+    # خروجی موتور قیمت‌گذاری
     result = PricingEngine().evaluate(lines, ctx)
+    sub_exclusive = Decimal("0")
+    services_total = Decimal("0")
+    line_disc = Decimal("0")
+
+    for ln in getattr(result, "lines", []) or []:
+        if getattr(ln, "_exclude_from_discounts", False):
+            services_total += getattr(ln, "line_subtotal", Decimal("0"))
+        else:
+            sub_exclusive += getattr(ln, "line_subtotal", Decimal("0"))
+        line_disc += getattr(ln, "line_discount", Decimal("0"))
+
+    cart_disc = getattr(result, "cart_discount", Decimal("0"))
+    total_discount = (line_disc + cart_disc)
+    payable = (sub_exclusive - total_discount) + services_total
+
+    # کمکی‌های داخلی برای رنگ/سایز (self-contained)
+    def _color_payload_of(variant: ProductVariant | None):
+        if not variant or not getattr(variant, "color_id", None):
+            return None
+        c = variant.color
+        return {
+            "id": c.id,
+            "name": getattr(c, "name", ""),
+            "hex": getattr(c, "hex_code", None),
+        }
+
+    def _size_payload_of(variant: ProductVariant | None):
+        if not variant or not getattr(variant, "size_id", None):
+            return None
+        s = variant.size
+        return {
+            "id": s.id,
+            "label": getattr(s, "label", ""),
+            "code": getattr(s, "code", ""),
+        }
+
+    def _toggle_url_for(product: Product, variant: ProductVariant | None, service_id: int) -> str:
+        if variant:
+            return reverse("cart:cart_toggle_service", args=[product.id, variant.id, service_id])
+        return reverse("cart:cart_toggle_service_no_variant", args=[product.id, service_id])
 
     cart_rows: List[Dict[str, Any]] = []
+
     for gid, it in groups:
+        # جمع‌های ردیفی از نتیجه‌ی موتور
         row_sum = _row_payload(result, gid) or {
-            "subtotal": 0.0, "discount": 0.0, "total": 0.0, "discount_percent": 0
+            "subtotal": 0.0,
+            "discount": 0.0,
+            "total": 0.0,
+            "discount_percent": 0,
         }
 
         product: Product = it.product
         variant: ProductVariant | None = getattr(it, "variant", None)
+
+        # سرویس‌های انتخاب‌شدهٔ همین ردیف در سبد
+        selected_services = list(getattr(it, "services", []) or [])
+        selected_ids = {getattr(svc, "id", None) for svc in selected_services}
+
+        # سرویس‌های «قابل‌اعمال» سطح محصول/دسته (برای نمایش سوییچ)
+        services_available: List[Dict[str, Any]] = []
+        try:
+            links = product.effective_services() or []   # [{'service': Service, 'is_default_on': bool}, ...]
+        except Exception:
+            links = []
+
+        seen = set()  # برای جلوگیری از تکرار
+        for link in links:
+            svc = link.get("service")
+            if not svc or getattr(svc, "id", None) is None:
+                continue
+            if svc.id in seen:
+                continue
+            seen.add(svc.id)
+            services_available.append({
+                "id": svc.id,
+                "name": getattr(svc, "name", str(svc)),
+                "checked": (svc.id in selected_ids) or bool(link.get("is_default_on", False)),
+                "toggle_url": _toggle_url_for(product, variant, svc.id),
+            })
+
+        # اگر سرویسی در ردیف انتخاب شده ولی در effective_services نبود، اضافه‌اش کنیم
+        for svc in selected_services:
+            sid = getattr(svc, "id", None)
+            if sid is None or sid in seen:
+                continue
+            seen.add(sid)
+            services_available.append({
+                "id": sid,
+                "name": getattr(svc, "name", str(svc)),
+                "checked": True,
+                "toggle_url": _toggle_url_for(product, variant, sid),
+            })
+
+        # همچنین لیست فشرده از سرویس‌های انتخاب‌شده (برای نمایش زیر هر ردیف)
+        services_selected_payload = [
+            {
+                "id": getattr(svc, "id", None),
+                "name": getattr(svc, "name", str(svc)),
+                "toggle_url": _toggle_url_for(product, variant, getattr(svc, "id", None)),
+            }
+            for svc in selected_services
+            if getattr(svc, "id", None) is not None
+        ]
 
         cart_rows.append({
             "product_id": product.id,
@@ -205,32 +353,37 @@ def cart_detail(request: HttpRequest) -> HttpResponse:
             "img": _first_image_url(product),
             "in_stock": (variant.in_stock if variant else True),
             "unit_price": getattr(it, "unit_price", None),
-            # variant size n color
-            "color": _color_payload(variant),
-            "size": _size_payload(variant),
-            # values computed by PricingEngine + row helper
+
+            # رنگ/سایز برای نمایش
+            "color": _color_payload_of(variant),
+            "size": _size_payload_of(variant),
+
+            # جمع‌های محاسبه‌شده برای ردیف
             "subtotal": row_sum["subtotal"],
             "discount": row_sum["discount"],
             "total": row_sum["total"],
             "discount_percent": row_sum["discount_percent"],
 
-            "services": [
-                {"id": getattr(s, "id", None), "name": getattr(s, "name", str(s))}
-                for s in (getattr(it, "services", []) or [])
-            ],
+            # سرویس‌ها
+            "services": services_selected_payload,      # فقط انتخاب‌شده‌ها
+            "services_available": services_available,    # برای سوییچ/تغییر وضعیت
+
+            # URLهای اکشن
             "remove_url": "cart:cart_remove" if variant else "cart:cart_remove_no_variant",
             "update_url": "cart:cart_update_qty" if variant else "cart:cart_update_qty_no_variant",
         })
 
     context = {
         "cart_rows": cart_rows,
-        "cart_subtotal": getattr(result, "subtotal", Decimal("0")),
-        "cart_total_discount": getattr(result, "total_discount", Decimal("0")),
-        "cart_total": getattr(result, "total", Decimal("0")),
+        "cart_subtotal": sub_exclusive,          # «جمع جزء» (بدون سرویس‌ها)
+        "cart_total_discount": total_discount,   # تخفیف کل (خطی + سبد)
+        "cart_total": payable,                   # مبلغ پرداختی نهایی = محصولات - تخفیف + سرویس‌ها
+        "cart_services_total": services_total,   # برای خط «هزینه سرویس‌ها» در سایدبار
         "cart_coupon": Cart(request).get_coupon() or "",
         "result": result,
     }
     return render(request, "cart/cart_detail.html", context)
+
 
 @require_POST
 def cart_add(request: HttpRequest, product_id: int) -> HttpResponse:
@@ -340,3 +493,16 @@ def cart_set_coupon(request: HttpRequest) -> HttpResponse:
 
     messages.success(request, "کوپن ثبت شد." if code else "کوپن حذف شد.")
     return redirect("cart:cart_detail")
+
+
+@require_POST
+def cart_toggle_service(request: HttpRequest, product_id: int, variant_id: int, service_id: int) -> HttpResponse:
+    cart = Cart(request)
+    cart.toggle_service(product_id=product_id, variant_id=variant_id, service_id=service_id)
+    return _json_cart_for_row(request, product_id, variant_id)
+
+@require_POST
+def cart_toggle_service_no_variant(request: HttpRequest, product_id: int, service_id: int) -> HttpResponse:
+    cart = Cart(request)
+    cart.toggle_service(product_id=product_id, variant_id=None, service_id=service_id)
+    return _json_cart_for_row(request, product_id, None)

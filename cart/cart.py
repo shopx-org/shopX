@@ -23,6 +23,37 @@ class Cart:
         raw = self.session.get(self.KEY_DATA, {})
         self._data: CartStore = dict(raw) if isinstance(raw, dict) else {}
 
+
+        # ---------- helpers for per-row access ----------
+
+    def get(self, *, product_id: int, variant_id: Optional[int]):
+        key = self._key(product_id=product_id, variant_id=variant_id)
+        return dict(self._data.get(key) or {})
+
+    def set_services(self, *, product_id: int, variant_id: Optional[int], service_ids: Iterable[int]):
+        key = self._key(product_id=product_id, variant_id=variant_id)
+        row = self._data.get(key)
+        if not row:
+            return
+        row["services"] = list({int(s) for s in service_ids})
+        self._data[key] = row
+        self._save()
+
+    def toggle_service(self, *, product_id: int, variant_id: Optional[int], service_id: int):
+        key = self._key(product_id=product_id, variant_id=variant_id)
+        row = self._data.get(key)
+        if not row:
+            return
+        cur = set(int(s) for s in row.get("services", []))
+        s = int(service_id)
+        if s in cur:
+            cur.remove(s)
+        else:
+            cur.add(s)
+        row["services"] = list(cur)
+        self._data[key] = row
+        self._save()
+
     # ---------- session ----------
     def _save(self) -> None:
         self.session[self.KEY_DATA] = self._data

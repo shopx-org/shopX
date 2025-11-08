@@ -12,15 +12,26 @@
             <div class="row g-4">
 
                 <aside class="col-lg-3 order-lg-1">
-                    <div class="summary summary-cart" id="summary"
-                         data-sub="{{ cart_subtotal }}"
-                         data-disc="{{ cart_total_discount }}"
-                         data-total="{{ cart_total }}">
+                    <div
+                            id="summary"
+                            class="summary summary-cart"
+                            data-sub="{{ cart_subtotal|default:0 }}"
+                            data-disc="{{ cart_total_discount|default:0 }}"
+                            data-total="{{ cart_total|default:0 }}"
+                            data-svc="{{ cart_services_total|default:0 }}"
+                    >
                         <div class="title">جمع سبد خرید</div>
 
                         <div class="line">
                             <span>جمع جزء</span>
                             <strong id="s-sub">{{ cart_subtotal|floatformat:0|intcomma }} تومان</strong>
+                        </div>
+
+                        {# خطِ هزینهٔ سرویس‌ها (بیمه/گارانتی/نصب) — پیش‌فرض مخفی، با JS بر اساس data-svc نمایش داده می‌شود #}
+                        <div class="line" id="s-svcline"
+                             style="{% if cart_services_total|default:0|floatformat:0 == '0' %}display:none{% endif %}">
+                            <span>هزینهٔ سرویس‌ها</span>
+                            <strong id="s-svc">{{ cart_services_total|default:0|floatformat:0|intcomma }} تومان</strong>
                         </div>
 
                         <div class="line">
@@ -110,9 +121,6 @@
                                     <form class="js-qty-form qty-inline" method="post"
                                           action="
 
-
-
-
                                                   {% if row.variant_id %}{% url 'cart:cart_update_qty' row.product_id row.variant_id %}{% else %}{% url 'cart:cart_update_qty_no_variant' row.product_id %}{% endif %}">
                                         {% csrf_token %}
                                         <label class="qty-label" for="qty-{{ forloop.counter }}">تعداد:</label>
@@ -128,6 +136,23 @@
                                             </button>
                                         </div>
                                     </form>
+                                   {% if row.services_available %}
+                                        <div class="cart-services">
+                                            <div class="svc-title">سرویس‌های افزوده:</div>
+                                            <div class="svc-list">
+                                                {% for s in row.services_available %}
+                                                    <label class="svc-item">
+                                                        <input type="checkbox"
+                                                               class="js-svc"
+                                                               data-toggle-url="{{ s.toggle_url }}"
+                                                               {% if s.checked %}checked{% endif %}>
+                                                        <span class="svc-check"></span>
+                                                        <span class="svc-name">{{ s.name }}</span>
+                                                    </label>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    {% endif %}
                                 </div>
 
                                 <!-- چپ: قیمت و اکشن‌ها -->
@@ -150,7 +175,11 @@
 
                                     <div class="action-bar mt-1">
                                         <form class="js-remove-form" method="post"
-                                              action="{% if row.variant_id %}{% url 'cart:cart_remove' row.product_id row.variant_id %}{% else %}{% url 'cart:cart_remove_no_variant' row.product_id %}{% endif %}">
+                                              action="
+
+
+
+                                                      {% if row.variant_id %}{% url 'cart:cart_remove' row.product_id row.variant_id %}{% else %}{% url 'cart:cart_remove_no_variant' row.product_id %}{% endif %}">
                                             {% csrf_token %}
                                             <button class="action-link" title="حذف" type="submit"><i
                                                     class="fas fa-trash"></i></button>
@@ -181,42 +210,60 @@
     </main>
 
     <script>
-        // ---------- helpers ----------
+        // -------- helpers --------
         const fmt = n => Number(n ?? 0).toLocaleString('fa-IR');
-        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
         const cartList = document.getElementById('cart-list');
         const clamp = (v, min, max) => Math.min(Math.max(v, min), (max ?? 999));
 
-        async function postJSON(url, form) {
-            const body = new FormData(form);
+        async function postJSON(url, formOrBody) {
+            const body = formOrBody instanceof HTMLFormElement ? new FormData(formOrBody) : (formOrBody || null);
             const res = await fetch(url, {
                 method: 'POST',
                 headers: {'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': csrftoken},
                 body,
             });
-            return await res.json();
+            return res.json();
         }
 
-        function updateSummary(sum) { // sum = {subtotal, total_discount, total}
+        // خلاصه سایدبار (subtotal / discount / total) + خط سرویس‌ها (اختیاری)
+        function updateSummary(sum) {
             if (!sum) return;
-            document.getElementById('s-sub').textContent = fmt(sum.subtotal) + ' تومان';
-            document.getElementById('s-disc').textContent = fmt(sum.total_discount) + ' تومان';
-            document.getElementById('s-total').textContent = fmt(sum.total) + ' تومان';
+            const subEl = document.getElementById('s-sub');
+            const discEl = document.getElementById('s-disc');
+            const totEl = document.getElementById('s-total');
+            if (subEl) subEl.textContent = fmt(sum.subtotal) + ' تومان';
+            if (discEl) discEl.textContent = fmt(sum.total_discount) + ' تومان';
+            if (totEl) totEl.textContent = fmt(sum.total) + ' تومان';
+
+            // اگر سطر «هزینه سرویس‌ها» را در سایدبار داری (id="s-svcline" و مقدار با id="s-svc")
+            const svcLine = document.getElementById('s-svcline');
+            const svcVal = document.getElementById('s-svc');
+            if (svcLine && svcVal) {
+                const v = Number(sum.services_total || 0);
+                svcVal.textContent = fmt(v) + ' تومان';
+                svcLine.style.display = v > 0 ? '' : 'none';
+            }
+
+            // جمع جزء پایین لیست
             const ss = document.getElementById('sum-subtotal');
             if (ss) ss.textContent = fmt(sum.subtotal);
         }
 
-        // ← این نسخه بج درصد را هم آپدیت می‌کند و price-list را نمایش/مخفی می‌کند
-        function updateRow(el, row) { // row = {total, subtotal, discount, discount_percent}
-            if (!row) return;
-            el.querySelector('.js-row-total').textContent = fmt(row.total);
+        // به‌روزرسانی ردیف (total/subtotal/badge/price-list)
+        // row = { total, subtotal, discount, discount_percent }
+        function updateRow(wrapper, row) {
+            if (!wrapper || !row) return;
+            const totalEl = wrapper.querySelector('.js-row-total');
+            if (totalEl) totalEl.textContent = fmt(row.total);
 
-            const sub = el.querySelector('.js-row-subtotal');
-            const priceList = el.querySelector('.price-list');
-            if (sub) sub.textContent = fmt(row.subtotal);
-            if (priceList) priceList.style.display = (row.discount && Number(row.discount) > 0) ? '' : 'none';
+            const subEl = wrapper.querySelector('.js-row-subtotal');
+            if (subEl) subEl.textContent = fmt(row.subtotal);
 
-            const badge = el.querySelector('.deal-badge');
+            const priceList = wrapper.querySelector('.price-list');
+            if (priceList) priceList.style.display = (Number(row.discount || 0) > 0) ? '' : 'none';
+
+            const badge = wrapper.querySelector('.deal-badge');
             if (badge) {
                 const p = Number(row.discount_percent || 0);
                 if (p > 0) {
@@ -228,19 +275,7 @@
             }
         }
 
-        // ---------- qty update ----------
-
-        // normalize sidebar values on first paint (prevents stale numbers)
-        (function bootSummary() {
-            const box = document.getElementById('summary');
-            if (!box) return;
-            const init = {
-                subtotal: Number(box.dataset.sub || 0),
-                total_discount: Number(box.dataset.disc || 0),
-                total: Number(box.dataset.total || 0),
-            };
-            updateSummary(init);
-        })();
+        // -------- qty update (buttons + typing) --------
         cartList?.addEventListener('click', (e) => {
             const decBtn = e.target.closest('[data-qty-dec]');
             const incBtn = e.target.closest('[data-qty-inc]');
@@ -248,9 +283,9 @@
 
             const wrap = e.target.closest('[data-qty]');
             const input = wrap?.querySelector('[data-qty-input]');
-            if (!input) return;
-
             const form = e.target.closest('form.js-qty-form');
+            if (!input || !form) return;
+
             const min = +(input.dataset.min || 1);
             const max = +(input.dataset.max || 999);
             let v = +(input.value || min);
@@ -259,10 +294,9 @@
             if (decBtn) v = clamp(v - 1, min, max);
 
             input.value = v;
-            form?.requestSubmit();
+            form.requestSubmit();
         });
 
-        // تایپ دستی با دیباونس
         let qtyTO = null;
         cartList?.addEventListener('input', (e) => {
             const input = e.target.closest('[data-qty-input]');
@@ -273,8 +307,7 @@
                 const max = +(input.dataset.max || 999);
                 const digits = (input.value || '').replace(/[^\d]/g, '');
                 let v = digits === '' ? min : parseInt(digits, 10);
-                v = clamp(v, min, max);
-                input.value = v;
+                input.value = clamp(v, min, max);
                 input.closest('form')?.requestSubmit();
             }, 400);
         });
@@ -284,26 +317,26 @@
             const form = e.target.closest('form.js-qty-form');
             if (!form) return;
             e.preventDefault();
+
             const wrapper = form.closest('.cart-item');
             const url = form.getAttribute('action');
-            const data = await postJSON(url, form);
+            const data = await postJSON(url, form).catch(() => ({}));
             if (data?.ok) {
                 updateRow(wrapper, data.row);
                 updateSummary(data.summary);
             } else {
                 location.reload();
             }
-            console.log('init summary', init); // باید با اعداد بک‌اند یکی باشد
-            updateSummary(init);
         });
 
-        // حذف آیتم
+        // -------- remove item --------
         cartList?.addEventListener('submit', async (e) => {
             const form = e.target.closest('form.js-remove-form');
             if (!form) return;
             e.preventDefault();
+
             const wrapper = form.closest('.cart-item');
-            const data = await postJSON(form.getAttribute('action'), form);
+            const data = await postJSON(form.getAttribute('action'), form).catch(() => ({}));
             if (data?.ok) {
                 wrapper.remove();
                 updateSummary(data.summary);
@@ -313,12 +346,40 @@
             }
         });
 
-        // کوپن
+        // -------- coupon --------
         document.getElementById('coupon-form')?.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const data = await postJSON(e.target.getAttribute('action'), e.target);
-            if (data?.ok) updateSummary(data.summary); else location.reload();
+            const form = e.target;
+            const data = await postJSON(form.getAttribute('action'), form).catch(() => ({}));
+            if (data?.ok) updateSummary(data.summary);
+            else location.reload();
         });
+
+        // -------- toggle services (checkboxes) --------
+        // هر چک‌باکس سرویس باید کلاس .js-svc و اتریبیوت data-toggle-url داشته باشد
+        cartList?.addEventListener('change', async (e) => {
+            const cb = e.target.closest('.js-svc');
+            if (!cb) return;
+            const url = cb.dataset.toggleUrl;
+            if (!url) return;
+
+            const wrapper = cb.closest('.cart-item');
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: {'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': csrftoken},
+            }).then(r => r.json()).catch(() => ({}));
+
+            if (res?.ok) {
+                updateRow(wrapper, res.row);
+                updateSummary(res.summary);
+            } else {
+                location.reload();
+            }
+        });
+
+        // (اختیاری) اگر خواستی از data-* روی #summary برای normalize اولیه استفاده کنی،
+        // می‌تونی اینجا آن را بخوانی و یکبار updateSummary را صدا بزنی.
+        // فعلاً چون اعدادِ سرور درست رندر می‌شوند، نیاز نیست.
     </script>
 {% endblock %}
 

@@ -29335,7 +29335,7 @@ html {
       "media";
   }
   .cart-wrap .cart-side{ align-items:stretch; }
-  .cart-wrap .cart-side .action-bar{ justify-content:flex-end; }
+  .cart-wrap .cart-side .action-bar{ justify-content:end; }
 }
 
 /* swap: media (عکس) ←→ side (قیمت/اکشن‌ها) */
@@ -29569,3 +29569,13 @@ input[type=number]{ -moz-appearance:textfield }
     .variant-meta .vm-label{ font-size:.95rem; }
     .variant-meta .vm-name, .variant-meta .vm-size{ font-size:.98rem; }
   }
+.cart-services{ margin-top: .5rem; background-color: #F3F2EC ;border-radius: 9px; border:1px solid #ff6a45; margin-bottom: 1rem;}
+.cart-services .svc-title{ font-size: 1.9rem; color:#6b7280; margin: 0.5rem 0.9rem; }
+.svc-list{ display:flex; flex-wrap:wrap; gap:.5rem .75rem; }
+.svc-item{ position:relative; display:inline-flex; align-items:center; gap:.4rem; cursor:pointer; user-select:none;  margin: 0.5rem 0.9rem;}
+.svc-item input{ display:none; }
+.svc-check{
+  width:18px;height:18px;border:1px solid #d1d5db;border-radius:4px; background:#fff; display:inline-block;
+}
+.svc-item input:checked + .svc-check{ background:#ff6a45; border-color:#ff6a45; }
+.svc-name{ font-size:1.3rem; color:#374151; }

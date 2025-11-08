@@ -20,5 +20,9 @@ urlpatterns = [
     # coupon & clear
     path("set-coupon/", views.cart_set_coupon, name="cart_set_coupon"),
     path("clear/", views.cart_clear, name="cart_clear"),
+    path("toggle-service/<int:product_id>/<int:variant_id>/<int:service_id>/", views.cart_toggle_service,
+         name="cart_toggle_service"),
+    path("toggle-service/<int:product_id>/<int:service_id>/", views.cart_toggle_service_no_variant,
+         name="cart_toggle_service_no_variant"),
 ]
 
