@@ -29530,3 +29530,42 @@ input[type=number]{ -moz-appearance:textfield }
   .cart-side{grid-column:1 / -1;display:flex;justify-content:space-between;gap:12px}
   .service-card{grid-column:1 / -1}
 }
+  /* متای واریانت (رنگ/سایز) */
+  .variant-meta{
+    margin-top:.4rem;
+    display:flex; align-items:center; gap:.6rem; flex-wrap:wrap;
+  }
+  .variant-meta .vm-label{
+    font-size:1.6rem; color: #535864; /* طوسی ملایم */
+  }
+  .variant-meta .vm-name,
+  .variant-meta .vm-size{
+    font-size:1.02rem; color:#111827; font-weight:500; /* کمی پررنگ‌تر و بزرگ‌تر */
+  }
+
+  /* جداکننده عمودی بین رنگ/سایز */
+  .variant-meta .vm-divider{
+    width:1px; height:16px; background:#e5e7eb; margin:0 .35rem;
+  }
+
+  /* سواچ‌ها (دایره‌ی رنگ) — و نسخه‌ی تصویری */
+  .variant-meta .vm-swatch,
+  .variant-meta .vm-swatch-img{
+    width:20px; height:20px; border-radius:9999px; display:inline-block;
+    /* مرز دو لایه برای تمایز روی هر بک‌گراند: اول سفید، بعد خط نازک طوسی */
+    box-shadow:
+      0 0 0 2px #ffffff,         /* حلقه‌ی سفید داخلی */
+      0 0 0 3px rgba(17,24,39,.08); /* خط بیرونی خیلی ملایم (تقریباً #111827 با شفافیت) */
+    border:1px solid #d1d5db;        /* مرز خود عنصر (fallback) */
+    vertical-align:middle;
+  }
+  .variant-meta .vm-swatch-img{
+    object-fit:cover; border:none; /* مرز را box-shadow می‌دهد */
+  }
+
+  /* وقتی صفحه خیلی فشرده شد، متن‌ها یک خط نمیشن */
+  @media (max-width: 576px){
+    .variant-meta{ gap:.5rem; }
+    .variant-meta .vm-label{ font-size:.95rem; }
+    .variant-meta .vm-name, .variant-meta .vm-size{ font-size:.98rem; }
+  }

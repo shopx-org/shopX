@@ -21,6 +21,29 @@ from products.services.pricing_adapter import (
 )
 
 # ========= Helpers (pure) =========
+# --- helpers for variant meta shown in cart ---
+def _color_payload(variant: ProductVariant | None):
+    try:
+        c = getattr(variant, "color", None)
+        if not c:
+            return None
+        return {
+            "name": getattr(c, "name", "") or "",
+            "hex":  str(getattr(c, "hex_code", "") or ""),
+            "slug": getattr(c, "slug", "") or "",
+            "swatch": (c.swatch_image.url if getattr(c, "swatch_image", None) else None),
+        }
+    except Exception:
+        return None
+
+def _size_payload(variant: ProductVariant | None):
+    try:
+        s = getattr(variant, "size", None)
+        if not s:
+            return None
+        return {"label": getattr(s, "label", "") or "", "code": getattr(s, "code", "") or ""}
+    except Exception:
+        return None
 
 def _pct(sub: Decimal, disc: Decimal) -> int:
     try:
@@ -182,7 +205,9 @@ def cart_detail(request: HttpRequest) -> HttpResponse:
             "img": _first_image_url(product),
             "in_stock": (variant.in_stock if variant else True),
             "unit_price": getattr(it, "unit_price", None),
-
+            # variant size n color
+            "color": _color_payload(variant),
+            "size": _size_payload(variant),
             # values computed by PricingEngine + row helper
             "subtotal": row_sum["subtotal"],
             "discount": row_sum["discount"],

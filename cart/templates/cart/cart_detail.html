@@ -66,15 +66,42 @@
                                          alt="{{ row.title }}">
                                 </div>
 
+
                                 <!-- وسط: عنوان، وضعیت، تعداد -->
                                 <div class="cart-body">
                                     <div class="cart-title"><a href="#">{{ row.title }}</a></div>
+
+
+                                    {% if row.color or row.size %}
+                                        <div class="variant-meta">
+                                            {% if row.color %}
+                                                <span class="vm-label">رنگ:</span>
+                                                {% if row.color.swatch %}
+                                                    <img class="vm-swatch-img" src="{{ row.color.swatch }}"
+                                                         alt="{{ row.color.name }}">
+                                                {% else %}
+                                                    <span class="vm-swatch"
+                                                          style="background: {{ row.color.hex|default:'#ccc' }};"></span>
+                                                {% endif %}
+                                                <span class="vm-name">{{ row.color.name }}</span>
+                                            {% endif %}
+
+                                            {% if row.size %}
+                                                <span class="vm-divider" aria-hidden="true"></span>
+                                                <span class="vm-label">سایز:</span>
+                                                <span class="vm-size">{{ row.size.label }}</span>
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
+
                                     <ul class="item-flags">
                                         <li class="{% if row.in_stock %}ok{% else %}no{% endif %}">
                                             <i class="fas fa-warehouse"></i>
                                             {% if row.in_stock %}موجود در انبار{% else %}ناموجود{% endif %}
                                         </li>
                                     </ul>
+
+
                                     <ul>
                                         <li><i class="fas fa-shield-alt"></i> ضمانت اصالت کالا</li>
                                     </ul>
@@ -82,6 +109,9 @@
                                     {# تعداد #}
                                     <form class="js-qty-form qty-inline" method="post"
                                           action="
+
+
+
 
                                                   {% if row.variant_id %}{% url 'cart:cart_update_qty' row.product_id row.variant_id %}{% else %}{% url 'cart:cart_update_qty_no_variant' row.product_id %}{% endif %}">
                                         {% csrf_token %}
@@ -120,9 +150,7 @@
 
                                     <div class="action-bar mt-1">
                                         <form class="js-remove-form" method="post"
-                                              action="
-
-                                                      {% if row.variant_id %}{% url 'cart:cart_remove' row.product_id row.variant_id %}{% else %}{% url 'cart:cart_remove_no_variant' row.product_id %}{% endif %}">
+                                              action="{% if row.variant_id %}{% url 'cart:cart_remove' row.product_id row.variant_id %}{% else %}{% url 'cart:cart_remove_no_variant' row.product_id %}{% endif %}">
                                             {% csrf_token %}
                                             <button class="action-link" title="حذف" type="submit"><i
                                                     class="fas fa-trash"></i></button>
@@ -139,7 +167,7 @@
                             </div>
                         {% endfor %}
                     </div>
-
+                    <hr>
                     {% if cart_rows %}
                         <div class="cart-subtotal">
                             جمع جزء: <span id="sum-subtotal"
@@ -265,8 +293,8 @@
             } else {
                 location.reload();
             }
-           console.log('init summary', init); // باید با اعداد بک‌اند یکی باشد
-           updateSummary(init);
+            console.log('init summary', init); // باید با اعداد بک‌اند یکی باشد
+            updateSummary(init);
         });
 
         // حذف آیتم
