@@ -1,3 +1,4 @@
+# /home/atusa92/PycharmProjects/ShopX/promos/models.py
 from django.db import models
 from django.utils import timezone
 from django.conf import settings
