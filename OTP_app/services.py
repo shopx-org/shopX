@@ -1,3 +1,4 @@
+# /home/atusa92/PycharmProjects/ShopX/OTP_app/services.py
 from .models import OtpSession, OtpBlock
 # otp/services.py
 from django.utils import timezone
