@@ -151,4 +151,20 @@ class Cart:
         ctx = {"channel": "web", "coupons": [self.get_coupon()] if self.get_coupon() else []}
         return PricingEngine().evaluate(lines, ctx)
 
+    def items_count(self, distinct: bool = False) -> int:
+        """
+        اگر distinct=True باشد تعداد ردیف‌های سبد (اقلام متمایز) را برمی‌گرداند،
+        وگرنه جمع qty همه‌ی اقلام (پیشنهادی برای بج هدر) را.
+        """
+        data = getattr(self, "_data", {}) or {}
+        if distinct:
+            return len(data)
+        total = 0
+        for row in data.values():
+            try:
+                total += int(row.get("qty", 1))
+            except Exception:
+                total += 1
+        return total
+
 

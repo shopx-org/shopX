@@ -255,66 +255,110 @@
   onSelectionChange();
 
 })();
-
 (function () {
-    const faNum = n => Number(n).toLocaleString('fa-IR');
+  // فقط بعد از آماده‌شدن DOM اجرا شود
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot, { once: true });
+  } else {
+    boot();
+  }
 
-    // لیبل ماه‌ها (RTL)
-    const labels = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر'];
+  function cssVar(name, fallback) {
+    const v = getComputedStyle(document.documentElement).getPropertyValue(name);
+    return (v && v.trim()) || fallback;
+  }
 
-    // داده‌ی نمونه (می‌تونی بعداً از بک‌اند تزریق کنی)
-    const dataPoints = [12, 42, 36, 50, 49, 61, 68, 92, 150];
+  function faNum(n) {
+    return Number(n ?? 0).toLocaleString("fa-IR");
+  }
 
-    const ctx = document.getElementById('priceLineChart').getContext('2d');
+  function boot() {
+    // 1) وجود عنصر و خود Chart.js را چک کن
+    const el = document.getElementById("priceLineChart");
+    if (!el || typeof window.Chart === "undefined") return;
 
-    // ایجاد چارت
-    new Chart(ctx, {
-        type: 'line',
+    // 2) گرفتن context به‌صورت امن
+    const ctx = el.getContext && el.getContext("2d");
+    if (!ctx) return;
+
+    // 3) امکان تزریق داده از data-* روی canvas
+    //   <canvas id="priceLineChart" data-labels='["فروردین",...]' data-points='[12,42,...]'></canvas>
+    let labels =
+      tryJSON(el.dataset.labels) ??
+      ["فروردین","اردیبهشت","خرداد","تیر","مرداد","شهریور","مهر","آبان","آذر"];
+
+    let dataPoints =
+      tryJSON(el.dataset.points) ?? [12, 42, 36, 50, 49, 61, 68, 92, 150];
+
+    // هم‌طول‌کردنِ labels و data
+    const len = Math.min(labels.length, dataPoints.length);
+    labels = labels.slice(0, len);
+    dataPoints = dataPoints.slice(0, len);
+
+    // 4) رنگ‌ها از CSS Variables با fallback
+    const lineColor = cssVar("--line", "#6c8cff");
+    const gridColor = cssVar("--grid", "#eff3f8");
+    const ticksColor = cssVar("--axis-muted", "#9aa6b2");
+
+    // 5) ساخت چارت
+    try {
+      new Chart(ctx, {
+        type: "line",
         data: {
-            labels,
-            datasets: [{
-                label: 'روند قیمت ماهانه',
-                data: dataPoints,
-                borderColor: getComputedStyle(document.documentElement).getPropertyValue('--line').trim() || '#6c8cff',
-                backgroundColor: 'rgba(108,140,255,0.12)',
-                borderWidth: 3,
-                tension: 0.35,          // خط نرم
-                pointRadius: 0,         // بدون نقاط
-                fill: true
-            }]
+          labels,
+          datasets: [{
+            label: "روند قیمت ماهانه",
+            data: dataPoints,
+            borderColor: lineColor,
+            backgroundColor: "rgba(108,140,255,0.12)",
+            borderWidth: 3,
+            tension: 0.35,
+            pointRadius: 0,
+            fill: true
+          }]
         },
         options: {
-            locale: 'fa-IR',
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {display: false},
-                tooltip: {
-                    enabled: true,
-                    callbacks: {
-                        title: items => items[0].label,
-                        label: item => ' ' + faNum(item.raw) + ' واحد'
-                    }
-                }
-            },
-            interaction: {mode: 'nearest', intersect: false},
-            scales: {
-                x: {
-                    grid: {display: false},
-                    ticks: {
-                        callback: v => labels[v],
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--axis-muted').trim() || '#9aa6b2'
-                    }
-                },
-                y: {
-                    beginAtZero: true,
-                    grid: {color: getComputedStyle(document.documentElement).getPropertyValue('--grid').trim() || '#eff3f8'},
-                    ticks: {
-                        stepSize: 25,
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--axis-muted').trim() || '#9aa6b2',
-                        callback: (value) => faNum(value)
-                    }
-                }
+          locale: "fa-IR",
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              enabled: true,
+              callbacks: {
+                title: items => (items[0]?.label ?? ""),
+                label: item => " " + faNum(item.raw) + " واحد",
+              }
             }
+          },
+          interaction: { mode: "nearest", intersect: false },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: {
+                color: ticksColor,
+                callback: (v) => labels[v] // برای RTL هم جواب می‌دهد
+              }
+            },
+            y: {
+              beginAtZero: true,
+              grid: { color: gridColor },
+              ticks: {
+                color: ticksColor,
+                stepSize: 25,
+                callback: (value) => faNum(value)
+              }
+            }
+          }
         }
-    });
-    })();
+      });
+    } catch (_) {
+      // اگر هر مشکلی بود، در پروداکشن سکوت کن
+      // console.error("Chart init failed:", _);
+    }
+  }
+
+  function tryJSON(s) {
+    if (!s) return null;
+    try { return JSON.parse(s); } catch { return null; }
+  }
+})();

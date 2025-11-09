@@ -8,6 +8,7 @@
 
 {% block content %}
     <main class="main">
+
         <div class="container cart-wrap mt-3">
             <div class="row g-4">
 
@@ -31,7 +32,8 @@
                         <div class="line" id="s-svcline"
                              style="{% if cart_services_total|default:0|floatformat:0 == '0' %}display:none{% endif %}">
                             <span>هزینهٔ سرویس‌ها</span>
-                            <strong id="s-svc">{{ cart_services_total|default:0|floatformat:0|intcomma }} تومان</strong>
+                            <strong id="s-svc">{{ cart_services_total|default:0|floatformat:0|intcomma }}
+                                تومان</strong>
                         </div>
 
                         <div class="line">
@@ -64,8 +66,14 @@
                     </div>
                 </aside>
 
+
                 {# لیست سبد #}
                 <div class="col-lg-9 order-lg-2">
+                    <div class="line">
+                        <span>تعداد آیتم</span>
+                        <strong id="s-count">{{ cart_items_count }}</strong>
+                    </div>
+
                     <div class="cart-list" id="cart-list">
                         {% for row in cart_rows %}
                             <div class="cart-item" data-pid="{{ row.product_id }}"
@@ -120,23 +128,25 @@
                                     {# تعداد #}
                                     <form class="js-qty-form qty-inline" method="post"
                                           action="
-
                                                   {% if row.variant_id %}{% url 'cart:cart_update_qty' row.product_id row.variant_id %}{% else %}{% url 'cart:cart_update_qty_no_variant' row.product_id %}{% endif %}">
                                         {% csrf_token %}
                                         <label class="qty-label" for="qty-{{ forloop.counter }}">تعداد:</label>
                                         <div class="qty" data-qty>
-                                            <button type="button" class="qty__btn" data-qty-dec aria-label="کم‌کردن">−
+                                            <button type="button" class="qty__btn" data-qty-dec
+                                                    aria-label="کم‌کردن">−
                                             </button>
                                             <input id="qty-{{ forloop.counter }}" name="quantity" class="qty__input"
-                                                   type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off"
+                                                   type="text" inputmode="numeric" pattern="[0-9]*"
+                                                   autocomplete="off"
                                                    value="{{ row.qty|default:1 }}" data-qty-input
                                                    data-min="{{ row.min_qty|default:1 }}"
                                                    data-max="{{ row.max_qty|default:10 }}" required>
-                                            <button type="button" class="qty__btn" data-qty-inc aria-label="افزودن">+
+                                            <button type="button" class="qty__btn" data-qty-inc aria-label="افزودن">
+                                                +
                                             </button>
                                         </div>
                                     </form>
-                                   {% if row.services_available %}
+                                    {% if row.services_available %}
                                         <div class="cart-services">
                                             <div class="svc-title">سرویس‌های افزوده:</div>
                                             <div class="svc-list">
@@ -168,7 +178,8 @@
                                         <span class="unit">تومان</span>
                                     </div>
 
-                                    <div class="price-list" {% if not row.discount %}style="display:none;"{% endif %}>
+                                    <div class="price-list"
+                                         {% if not row.discount %}style="display:none;"{% endif %}>
                                         <del class="js-row-subtotal">{{ row.subtotal|floatformat:0|intcomma }}</del>
                                         <span style="mso-bidi-font-size: 18px; color:#1b1e21"> : قیمت قبل </span>
                                     </div>
@@ -176,9 +187,6 @@
                                     <div class="action-bar mt-1">
                                         <form class="js-remove-form" method="post"
                                               action="
-
-
-
                                                       {% if row.variant_id %}{% url 'cart:cart_remove' row.product_id row.variant_id %}{% else %}{% url 'cart:cart_remove_no_variant' row.product_id %}{% endif %}">
                                             {% csrf_token %}
                                             <button class="action-link" title="حذف" type="submit"><i
@@ -207,180 +215,356 @@
 
             </div>
         </div>
+        </div>
     </main>
 
-    <script>
-        // -------- helpers --------
-        const fmt = n => Number(n ?? 0).toLocaleString('fa-IR');
-        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
-        const cartList = document.getElementById('cart-list');
-        const clamp = (v, min, max) => Math.min(Math.max(v, min), (max ?? 999));
+<script>
+/* ---------- helpers ---------- */
+const fmt = n => Number(n ?? 0).toLocaleString('fa-IR');
+const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+const cartList  = document.getElementById('cart-list');
+const clamp     = (v, min, max) => Math.min(Math.max(v, min), (max ?? 999));
 
-        async function postJSON(url, formOrBody) {
-            const body = formOrBody instanceof HTMLFormElement ? new FormData(formOrBody) : (formOrBody || null);
-            const res = await fetch(url, {
-                method: 'POST',
-                headers: {'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': csrftoken},
-                body,
-            });
-            return res.json();
-        }
+async function postJSON(url, formOrBody) {
+  const body = formOrBody instanceof HTMLFormElement ? new FormData(formOrBody) : (formOrBody || null);
+  const res  = await fetch(url, {
+    method: 'POST',
+    headers: {'X-Requested-With':'XMLHttpRequest','X-CSRFToken': csrftoken},
+    body
+  });
+  // اگر سرور JSON نداد (مثلاً ریدایرکت)، این catch برمی‌گرداند {}
+  try { return await res.json(); } catch { return {}; }
+}
 
-        // خلاصه سایدبار (subtotal / discount / total) + خط سرویس‌ها (اختیاری)
-        function updateSummary(sum) {
-            if (!sum) return;
-            const subEl = document.getElementById('s-sub');
-            const discEl = document.getElementById('s-disc');
-            const totEl = document.getElementById('s-total');
-            if (subEl) subEl.textContent = fmt(sum.subtotal) + ' تومان';
-            if (discEl) discEl.textContent = fmt(sum.total_discount) + ' تومان';
-            if (totEl) totEl.textContent = fmt(sum.total) + ' تومان';
+function updateCartBadge(n){
+  const el = document.getElementById('cart-badge');
+  if (el && typeof n !== 'undefined') el.textContent = String(n);
+}
 
-            // اگر سطر «هزینه سرویس‌ها» را در سایدبار داری (id="s-svcline" و مقدار با id="s-svc")
-            const svcLine = document.getElementById('s-svcline');
-            const svcVal = document.getElementById('s-svc');
-            if (svcLine && svcVal) {
-                const v = Number(sum.services_total || 0);
-                svcVal.textContent = fmt(v) + ' تومان';
-                svcLine.style.display = v > 0 ? '' : 'none';
-            }
+/* ---------- Summary (یک نسخه) ---------- */
+function updateSummary(sum){
+  if(!sum) return;
+  document.getElementById('s-sub')  ?.replaceChildren(document.createTextNode(fmt(sum.subtotal)       + ' تومان'));
+  document.getElementById('s-disc') ?.replaceChildren(document.createTextNode(fmt(sum.total_discount)  + ' تومان'));
+  document.getElementById('s-total')?.replaceChildren(document.createTextNode(fmt(sum.total)          + ' تومان'));
 
-            // جمع جزء پایین لیست
-            const ss = document.getElementById('sum-subtotal');
-            if (ss) ss.textContent = fmt(sum.subtotal);
-        }
+  // خط هزینه سرویس‌ها (اختیاری)
+  const svcLine = document.getElementById('s-svcline');
+  const svcVal  = document.getElementById('s-svc');
+  if (svcLine && svcVal){
+    const v = Number(sum.services_total || 0);
+    svcVal.textContent = fmt(v) + ' تومان';
+    svcLine.style.display = v > 0 ? '' : 'none';
+  }
 
-        // به‌روزرسانی ردیف (total/subtotal/badge/price-list)
-        // row = { total, subtotal, discount, discount_percent }
-        function updateRow(wrapper, row) {
-            if (!wrapper || !row) return;
-            const totalEl = wrapper.querySelector('.js-row-total');
-            if (totalEl) totalEl.textContent = fmt(row.total);
+  // جمع جزء پایین لیست
+  const ss = document.getElementById('sum-subtotal');
+  if (ss) ss.textContent = fmt(sum.subtotal);
 
-            const subEl = wrapper.querySelector('.js-row-subtotal');
-            if (subEl) subEl.textContent = fmt(row.subtotal);
+  // بج هدر
+  if ('items_count' in sum) updateCartBadge(sum.items_count);
+}
 
-            const priceList = wrapper.querySelector('.price-list');
-            if (priceList) priceList.style.display = (Number(row.discount || 0) > 0) ? '' : 'none';
+/* ---------- Row updater ---------- */
+function updateRow(wrapper, row){
+  if(!wrapper || !row) return;
+  wrapper.querySelector('.js-row-total')   ?.replaceChildren(document.createTextNode(fmt(row.total)));
+  wrapper.querySelector('.js-row-subtotal')?.replaceChildren(document.createTextNode(fmt(row.subtotal)));
+  const priceList = wrapper.querySelector('.price-list');
+  if (priceList) priceList.style.display = (Number(row.discount || 0) > 0) ? '' : 'none';
 
-            const badge = wrapper.querySelector('.deal-badge');
-            if (badge) {
-                const p = Number(row.discount_percent || 0);
-                if (p > 0) {
-                    badge.textContent = p + '٪';
-                    badge.style.display = '';
-                } else {
-                    badge.style.display = 'none';
-                }
-            }
-        }
+  const badge = wrapper.querySelector('.deal-badge');
+  if (badge){
+    const p = Number(row.discount_percent || 0);
+    if (p > 0){ badge.textContent = p + '٪'; badge.style.display = ''; }
+    else      { badge.style.display = 'none'; }
+  }
+}
 
-        // -------- qty update (buttons + typing) --------
-        cartList?.addEventListener('click', (e) => {
-            const decBtn = e.target.closest('[data-qty-dec]');
-            const incBtn = e.target.closest('[data-qty-inc]');
-            if (!decBtn && !incBtn) return;
+/* ---------- qty: + / - ---------- */
+cartList?.addEventListener('click', (e)=>{
+  const decBtn = e.target.closest('[data-qty-dec]');
+  const incBtn = e.target.closest('[data-qty-inc]');
+  if (!decBtn && !incBtn) return;
 
-            const wrap = e.target.closest('[data-qty]');
-            const input = wrap?.querySelector('[data-qty-input]');
-            const form = e.target.closest('form.js-qty-form');
-            if (!input || !form) return;
+  const wrap  = e.target.closest('[data-qty]');
+  const input = wrap?.querySelector('[data-qty-input]');
+  const form  = e.target.closest('form.js-qty-form');
+  if (!input || !form) return;
 
-            const min = +(input.dataset.min || 1);
-            const max = +(input.dataset.max || 999);
-            let v = +(input.value || min);
+  const min = +(input.dataset.min || 1);
+  const max = +(input.dataset.max || 999);
+  let v = +(input.value || min);
 
-            if (incBtn) v = clamp(v + 1, min, max);
-            if (decBtn) v = clamp(v - 1, min, max);
+  if (incBtn) v = clamp(v + 1, min, max);
+  if (decBtn) v = clamp(v - 1, min, max);
 
-            input.value = v;
-            form.requestSubmit();
-        });
+  input.value = v;
+  form.requestSubmit();
+});
 
-        let qtyTO = null;
-        cartList?.addEventListener('input', (e) => {
-            const input = e.target.closest('[data-qty-input]');
-            if (!input) return;
-            clearTimeout(qtyTO);
-            qtyTO = setTimeout(() => {
-                const min = +(input.dataset.min || 1);
-                const max = +(input.dataset.max || 999);
-                const digits = (input.value || '').replace(/[^\d]/g, '');
-                let v = digits === '' ? min : parseInt(digits, 10);
-                input.value = clamp(v, min, max);
-                input.closest('form')?.requestSubmit();
-            }, 400);
-        });
+/* ---------- qty: typing (debounced) ---------- */
+let qtyTO = null;
+cartList?.addEventListener('input', (e)=>{
+  const input = e.target.closest('[data-qty-input]');
+  if (!input) return;
+  clearTimeout(qtyTO);
+  qtyTO = setTimeout(()=>{
+    const min = +(input.dataset.min || 1);
+    const max = +(input.dataset.max || 999);
+    const digits = (input.value || '').replace(/[^\d]/g,'');
+    let v = digits === '' ? min : parseInt(digits,10);
+    input.value = clamp(v, min, max);
+    input.closest('form')?.requestSubmit();
+  }, 400);
+});
 
-        // submit ایجکس qty
-        cartList?.addEventListener('submit', async (e) => {
-            const form = e.target.closest('form.js-qty-form');
-            if (!form) return;
-            e.preventDefault();
+/* ---------- qty: AJAX submit ---------- */
+cartList?.addEventListener('submit', async (e)=>{
+  const form = e.target.closest('form.js-qty-form');
+  if (!form) return;
+  e.preventDefault();
 
-            const wrapper = form.closest('.cart-item');
-            const url = form.getAttribute('action');
-            const data = await postJSON(url, form).catch(() => ({}));
-            if (data?.ok) {
-                updateRow(wrapper, data.row);
-                updateSummary(data.summary);
-            } else {
-                location.reload();
-            }
-        });
+  const wrapper = form.closest('.cart-item');
+  const data    = await postJSON(form.getAttribute('action'), form);
+  if (data?.ok){
+    updateRow(wrapper, data.row);
+    updateSummary(data.summary);
+  } else {
+    location.reload();
+  }
+});
 
-        // -------- remove item --------
-        cartList?.addEventListener('submit', async (e) => {
-            const form = e.target.closest('form.js-remove-form');
-            if (!form) return;
-            e.preventDefault();
+/* ---------- remove: robust (click روی دکمهٔ حذف) ---------- */
+cartList?.addEventListener('click', async (e)=>{
+  const btn  = e.target.closest('form.js-remove-form button[type="submit"]');
+  if (!btn) return;
+  e.preventDefault();
 
-            const wrapper = form.closest('.cart-item');
-            const data = await postJSON(form.getAttribute('action'), form).catch(() => ({}));
-            if (data?.ok) {
-                wrapper.remove();
-                updateSummary(data.summary);
-                if (!document.querySelectorAll('.cart-item').length) location.reload();
-            } else {
-                location.reload();
-            }
-        });
+  const form    = btn.closest('form.js-remove-form');
+  const wrapper = btn.closest('.cart-item');
+  const data    = await postJSON(form.getAttribute('action'), form);
+  if (data?.ok){
+    wrapper.remove();
+    updateSummary(data.summary);
+    if (!document.querySelectorAll('.cart-item').length) location.reload();
+  } else {
+    location.reload();
+  }
+});
 
-        // -------- coupon --------
-        document.getElementById('coupon-form')?.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const form = e.target;
-            const data = await postJSON(form.getAttribute('action'), form).catch(() => ({}));
-            if (data?.ok) updateSummary(data.summary);
-            else location.reload();
-        });
+/* ---------- coupon ---------- */
+document.getElementById('coupon-form')?.addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const form = e.target;
+  const data = await postJSON(form.getAttribute('action'), form);
+  if (data?.ok) updateSummary(data.summary);
+  else          location.reload();
+});
 
-        // -------- toggle services (checkboxes) --------
-        // هر چک‌باکس سرویس باید کلاس .js-svc و اتریبیوت data-toggle-url داشته باشد
-        cartList?.addEventListener('change', async (e) => {
-            const cb = e.target.closest('.js-svc');
-            if (!cb) return;
-            const url = cb.dataset.toggleUrl;
-            if (!url) return;
+/* ---------- نخستین نرمال‌سازی اختیاری ---------- */
+(function bootBadge(){
+  const box = document.getElementById('summary');
+  if (box && box.dataset.items) updateCartBadge(Number(box.dataset.items || 0));
+})();
+</script>
 
-            const wrapper = cb.closest('.cart-item');
-            const res = await fetch(url, {
-                method: 'POST',
-                headers: {'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': csrftoken},
-            }).then(r => r.json()).catch(() => ({}));
-
-            if (res?.ok) {
-                updateRow(wrapper, res.row);
-                updateSummary(res.summary);
-            } else {
-                location.reload();
-            }
-        });
-
-        // (اختیاری) اگر خواستی از data-* روی #summary برای normalize اولیه استفاده کنی،
-        // می‌تونی اینجا آن را بخوانی و یکبار updateSummary را صدا بزنی.
-        // فعلاً چون اعدادِ سرور درست رندر می‌شوند، نیاز نیست.
-    </script>
+    {#    <script>#}
+    {#        // -------- helpers --------#}
+    {#        const fmt = n => Number(n ?? 0).toLocaleString('fa-IR');#}
+    {#        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';#}
+    {#        const cartList = document.getElementById('cart-list');#}
+    {#        const clamp = (v, min, max) => Math.min(Math.max(v, min), (max ?? 999));#}
+    {##}
+    {#        async function postJSON(url, formOrBody) {#}
+    {#            const body = formOrBody instanceof HTMLFormElement ? new FormData(formOrBody) : (formOrBody || null);#}
+    {#            const res = await fetch(url, {#}
+    {#                method: 'POST',#}
+    {#                headers: {'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': csrftoken},#}
+    {#                body,#}
+    {#            });#}
+    {#            return res.json();#}
+    {#        }#}
+    {##}
+    {#        // خلاصه سایدبار (subtotal / discount / total) + خط سرویس‌ها (اختیاری)#}
+    {#        function updateSummary(sum) {#}
+    {#            if (!sum) return;#}
+    {#            const subEl = document.getElementById('s-sub');#}
+    {#            const discEl = document.getElementById('s-disc');#}
+    {#            const totEl = document.getElementById('s-total');#}
+    {#            if (subEl) subEl.textContent = fmt(sum.subtotal) + ' تومان';#}
+    {#            if (discEl) discEl.textContent = fmt(sum.total_discount) + ' تومان';#}
+    {#            if (totEl) totEl.textContent = fmt(sum.total) + ' تومان';#}
+    {##}
+    {#            // اگر سطر «هزینه سرویس‌ها» را در سایدبار داری (id="s-svcline" و مقدار با id="s-svc")#}
+    {#            const svcLine = document.getElementById('s-svcline');#}
+    {#            const svcVal = document.getElementById('s-svc');#}
+    {#            if (svcLine && svcVal) {#}
+    {#                const v = Number(sum.services_total || 0);#}
+    {#                svcVal.textContent = fmt(v) + ' تومان';#}
+    {#                svcLine.style.display = v > 0 ? '' : 'none';#}
+    {#            }#}
+    {##}
+    {#            // جمع جزء پایین لیست#}
+    {#            const ss = document.getElementById('sum-subtotal');#}
+    {#            if (ss) ss.textContent = fmt(sum.subtotal);#}
+    {#        }#}
+    {##}
+    {#        // به‌روزرسانی ردیف (total/subtotal/badge/price-list)#}
+    {#        // row = { total, subtotal, discount, discount_percent }#}
+    {#        function updateRow(wrapper, row) {#}
+    {#            if (!wrapper || !row) return;#}
+    {#            const totalEl = wrapper.querySelector('.js-row-total');#}
+    {#            if (totalEl) totalEl.textContent = fmt(row.total);#}
+    {##}
+    {#            const subEl = wrapper.querySelector('.js-row-subtotal');#}
+    {#            if (subEl) subEl.textContent = fmt(row.subtotal);#}
+    {##}
+    {#            const priceList = wrapper.querySelector('.price-list');#}
+    {#            if (priceList) priceList.style.display = (Number(row.discount || 0) > 0) ? '' : 'none';#}
+    {##}
+    {#            const badge = wrapper.querySelector('.deal-badge');#}
+    {#            if (badge) {#}
+    {#                const p = Number(row.discount_percent || 0);#}
+    {#                if (p > 0) {#}
+    {#                    badge.textContent = p + '٪';#}
+    {#                    badge.style.display = '';#}
+    {#                } else {#}
+    {#                    badge.style.display = 'none';#}
+    {#                }#}
+    {#            }#}
+    {#        }#}
+    {##}
+    {#        // -------- qty update (buttons + typing) --------#}
+    {#        cartList?.addEventListener('click', (e) => {#}
+    {#            const decBtn = e.target.closest('[data-qty-dec]');#}
+    {#            const incBtn = e.target.closest('[data-qty-inc]');#}
+    {#            if (!decBtn && !incBtn) return;#}
+    {##}
+    {#            const wrap = e.target.closest('[data-qty]');#}
+    {#            const input = wrap?.querySelector('[data-qty-input]');#}
+    {#            const form = e.target.closest('form.js-qty-form');#}
+    {#            if (!input || !form) return;#}
+    {##}
+    {#            const min = +(input.dataset.min || 1);#}
+    {#            const max = +(input.dataset.max || 999);#}
+    {#            let v = +(input.value || min);#}
+    {##}
+    {#            if (incBtn) v = clamp(v + 1, min, max);#}
+    {#            if (decBtn) v = clamp(v - 1, min, max);#}
+    {##}
+    {#            input.value = v;#}
+    {#            form.requestSubmit();#}
+    {#        });#}
+    {##}
+    {#        let qtyTO = null;#}
+    {#        cartList?.addEventListener('input', (e) => {#}
+    {#            const input = e.target.closest('[data-qty-input]');#}
+    {#            if (!input) return;#}
+    {#            clearTimeout(qtyTO);#}
+    {#            qtyTO = setTimeout(() => {#}
+    {#                const min = +(input.dataset.min || 1);#}
+    {#                const max = +(input.dataset.max || 999);#}
+    {#                const digits = (input.value || '').replace(/[^\d]/g, '');#}
+    {#                let v = digits === '' ? min : parseInt(digits, 10);#}
+    {#                input.value = clamp(v, min, max);#}
+    {#                input.closest('form')?.requestSubmit();#}
+    {#            }, 400);#}
+    {#        });#}
+    {##}
+    {#        // submit ایجکس qty#}
+    {#        cartList?.addEventListener('submit', async (e) => {#}
+    {#            const form = e.target.closest('form.js-qty-form');#}
+    {#            if (!form) return;#}
+    {#            e.preventDefault();#}
+    {##}
+    {#            const wrapper = form.closest('.cart-item');#}
+    {#            const url = form.getAttribute('action');#}
+    {#            const data = await postJSON(url, form).catch(() => ({}));#}
+    {#            if (data?.ok) {#}
+    {#                updateRow(wrapper, data.row);#}
+    {#                updateSummary(data.summary);#}
+    {#            } else {#}
+    {#                location.reload();#}
+    {#            }#}
+    {#        });#}
+    {##}
+    {#        // -------- remove item --------#}
+    {#        cartList?.addEventListener('submit', async (e) => {#}
+    {#            const form = e.target.closest('form.js-remove-form');#}
+    {#            if (!form) return;#}
+    {#            e.preventDefault();#}
+    {##}
+    {#            const wrapper = form.closest('.cart-item');#}
+    {#            const data = await postJSON(form.getAttribute('action'), form).catch(() => ({}));#}
+    {#            if (data?.ok) {#}
+    {#                wrapper.remove();#}
+    {#                updateSummary(data.summary);#}
+    {#                if (!document.querySelectorAll('.cart-item').length) location.reload();#}
+    {#            } else {#}
+    {#                location.reload();#}
+    {#            }#}
+    {#        });#}
+    {##}
+    {#        // -------- coupon --------#}
+    {#        document.getElementById('coupon-form')?.addEventListener('submit', async (e) => {#}
+    {#            e.preventDefault();#}
+    {#            const form = e.target;#}
+    {#            const data = await postJSON(form.getAttribute('action'), form).catch(() => ({}));#}
+    {#            if (data?.ok) updateSummary(data.summary);#}
+    {#            else location.reload();#}
+    {#        });#}
+    {##}
+    {#        // -------- toggle services (checkboxes) --------#}
+    {#        // هر چک‌باکس سرویس باید کلاس .js-svc و اتریبیوت data-toggle-url داشته باشد#}
+    {#        cartList?.addEventListener('change', async (e) => {#}
+    {#            const cb = e.target.closest('.js-svc');#}
+    {#            if (!cb) return;#}
+    {#            const url = cb.dataset.toggleUrl;#}
+    {#            if (!url) return;#}
+    {##}
+    {#            const wrapper = cb.closest('.cart-item');#}
+    {#            const res = await fetch(url, {#}
+    {#                method: 'POST',#}
+    {#                headers: {'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': csrftoken},#}
+    {#            }).then(r => r.json()).catch(() => ({}));#}
+    {##}
+    {#            if (res?.ok) {#}
+    {#                updateRow(wrapper, res.row);#}
+    {#                updateSummary(res.summary);#}
+    {#            } else {#}
+    {#                location.reload();#}
+    {#            }#}
+    {#        });#}
+    {##}
+    {#        function updateCartBadge(n) {#}
+    {#            const el = document.getElementById('cart-badge');#}
+    {#            if (el && typeof n !== 'undefined') el.textContent = String(n);#}
+    {#        }#}
+    {##}
+    {#        function updateSummary(sum) {#}
+    {#            if (!sum) return;#}
+    {#            document.getElementById('s-sub').textContent = fmt(sum.subtotal) + ' تومان';#}
+    {#            document.getElementById('s-disc').textContent = fmt(sum.total_discount) + ' تومان';#}
+    {#            document.getElementById('s-total').textContent = fmt(sum.total) + ' تومان';#}
+    {##}
+    {#            const ss = document.getElementById('sum-subtotal');#}
+    {#            if (ss) ss.textContent = fmt(sum.subtotal);#}
+    {##}
+    {#            // ← بج هدر#}
+    {#            if ('items_count' in sum) updateCartBadge(sum.items_count);#}
+    {#        }#}
+    {##}
+    {#        // مقدار اولیه (اختیاری اگر data-* گذاشتی):#}
+    {#        (function bootBadge() {#}
+    {#            const box = document.getElementById('summary');#}
+    {#            if (box && box.dataset.items) updateCartBadge(Number(box.dataset.items || 0));#}
+    {#        })();#}
+    {##}
+    {#        // (اختیاری) اگر خواستی از data-* روی #summary برای normalize اولیه استفاده کنی،#}
+    {#        // می‌تونی اینجا آن را بخوانی و یکبار updateSummary را صدا بزنی.#}
+    {#        // فعلاً چون اعدادِ سرور درست رندر می‌شوند، نیاز نیست.#}
+    {#    </script>#}
 {% endblock %}
 
 {#{% extends 'base.html' %}#}
