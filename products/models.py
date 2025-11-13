@@ -12,6 +12,9 @@ from mptt.managers import TreeManager
 from django.core.exceptions import ValidationError
 from django.utils.functional import cached_property
 from decimal import Decimal
+from django.contrib.contenttypes.models import ContentType
+from Core.models import Rating
+
 
 # ---------- 1) گروه سرویس ها بیمه / نصب /گارانتی  ----------
 
@@ -473,6 +476,18 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+    
+
+    @property
+    def average_rating(self):
+        ctype = ContentType.objects.get_for_model(self)
+        avg = Rating.objects.filter(content_type=ctype, object_id=self.id).aggregate(models.Avg("score"))["score__avg"]
+        return round(avg or 0, 1)
+
+    @property
+    def rating_count(self):
+        ctype = ContentType.objects.get_for_model(self)
+        return Rating.objects.filter(content_type=ctype, object_id=self.id).count()
 
 
 # =========================

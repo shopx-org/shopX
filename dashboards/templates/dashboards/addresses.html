@@ -2,9 +2,12 @@
 {% load static %}
 {% block UserDash_content %}
     {% include 'dashboards/dash_partials/address-parts.html' %}
-{% endblock %}
-
 {% block CSS-JS %}
+ 
+    <script>
+        // آدرس view برای JS
+        const setDefaultAddressURL = "{% url 'shipping:set_default_address' %}";
+    </script>
     <script src="{% static 'js/user_dashboard_addresses.js' %}" defer></script>
 
     <script>
