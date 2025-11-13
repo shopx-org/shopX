@@ -36,6 +36,8 @@ INSTALLED_APPS = [
     "products.apps.ProductsConfig",
     "Core.apps.CoreConfig",
     "promos.apps.PromosConfig",
+    "cart.apps.CartConfig",
+    "checkout.apps.CheckoutConfig",
 
 
     # Third-party
@@ -47,6 +49,7 @@ INSTALLED_APPS = [
     # apps
     "django_jalali",
     "django_social_share",
+
 
 ]
 # ── Apps ───────────────────────────────────────────────────────────────────────
@@ -209,4 +212,4 @@ OTP_MAX_ATTEMPTS_IN_WINDOW = 100000
 
 #  ──────────────────────────────────────
 
-LOGIN_URL = '/accounts/otp-login/'
+LOGIN_URL = '/account/otp-login/'

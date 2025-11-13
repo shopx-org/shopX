@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block content %}
+<div class="container mt-4">
+  <h3 class="mb-3">مرحله ۲: مرور و پرداخت</h3>
+
+  <div class="row g-4">
+    <div class="col-lg-8">
+
+      <div class="card mb-3">
+        <div class="card-header">آدرس ارسال</div>
+        <div class="card-body">
+          {% if address %}
+            <div class="fw-bold">{{ address.title }}</div>
+            <div class="text-muted">{{ address.province }}، {{ address.city }}، {{ address.address }}</div>
+            <div class="text-muted small">کدپستی: {{ address.postal_code }}</div>
+          {% else %}
+            <div class="fw-bold">آدرس مهمان</div>
+            <pre class="mb-0 small">{{ guest_address|default:"-" }}</pre>
+          {% endif %}
+          <a class="btn btn-link p-0 mt-2" href="{% url 'checkout:address' %}">ویرایش آدرس</a>
+        </div>
+      </div>
+
+      <form method="post" action="{% url 'checkout:place' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary">ثبت سفارش</button>
+      </form>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="summary summary-cart">
+        <div class="title">جمع سبد خرید</div>
+        <div class="line"><span>جمع جزء</span> <strong>{{ cart_summary.subtotal|floatformat:0|intcomma }} تومان</strong></div>
+        <div class="line"><span>هزینهٔ سرویس‌ها</span> <strong>{{ cart_summary.services_total|floatformat:0|intcomma }} تومان</strong></div>
+        <div class="line"><span>تخفیف</span> <strong>{{ cart_summary.total_discount|floatformat:0|intcomma }} تومان</strong></div>
+        <hr>
+        <div class="line"><span>مبلغ پرداختی</span> <strong>{{ cart_summary.total|floatformat:0|intcomma }} تومان</strong></div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

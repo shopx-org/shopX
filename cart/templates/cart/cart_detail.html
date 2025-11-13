@@ -57,7 +57,7 @@
                             </div>
                         </form>
 
-                        <a href="#" class="btn btn-primary btn-checkout mt-3">ادامه و پرداخت</a>
+                        <a href="{% url 'checkout:address' %}" class="btn btn-primary btn-checkout mt-3">ادامه و پرداخت</a>
 
                         <form class="mt-2" method="post" action="{% url 'cart:cart_clear' %}">
                             {% csrf_token %}

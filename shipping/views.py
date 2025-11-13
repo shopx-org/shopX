@@ -10,6 +10,9 @@ from .forms import AddressForm
 from .models import Address
 from django.views.decorators.csrf import csrf_exempt
 import json
+from django.http import JsonResponse, HttpRequest
+from django.views.decorators.http import require_POST
+
 
 @method_decorator(login_required, name='dispatch')
 class AddressesView(View):
@@ -51,7 +54,11 @@ class AddressesView(View):
                     messages.error(request, f"{form.fields[field].label}: {error}")
             addresses = request.user.addresses.all()
             return render(request, self.template_name, {'addresses': addresses, 'form': form})
-        
+
+
+
+
+
 
 # ===========================================================
 # 🔹 تابع API برای انتخاب آدرس پیش‌فرض
@@ -74,3 +81,31 @@ def set_default_address(request):
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
     return JsonResponse({"error": "درخواست نامعتبر"}, status=400)
+
+
+@require_POST
+@login_required
+def set_default_address(request: HttpRequest) -> JsonResponse:
+    try:
+        payload = json.loads(request.body.decode("utf-8"))
+    except Exception:
+        payload = {}
+    addr_id = int(payload.get("address_id") or 0)
+    if not addr_id:
+        return JsonResponse({"ok": False, "error": "bad-id"}, status=400)
+
+    try:
+        addr = Address.objects.get(pk=addr_id, user=request.user)
+    except Address.DoesNotExist:
+        return JsonResponse({"ok": False, "error": "not-found"}, status=404)
+
+    # همه‌ی پیش‌فرض‌های قبلی را خاموش و این یکی را روشن کن
+    Address.objects.filter(user=request.user, is_default=True).exclude(pk=addr.pk).update(is_default=False)
+    if not addr.is_default:
+        addr.is_default = True
+        addr.save(update_fields=["is_default"])
+
+    # اگر در جریان checkout هستیم، همین آدرس را برای ادامه انتخاب کن
+    request.session["checkout.address_id"] = addr.id
+
+    return JsonResponse({"ok": True, "address_id": addr.id})
