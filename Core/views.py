@@ -8,9 +8,56 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.utils.html import strip_tags
 from django.http import JsonResponse
-
-from .models import Comment
+from .models import *
 from .forms import CommentForm
+
+@login_required
+@require_POST
+def like_dislike_toggle(request):
+    """
+    Endpoint عمومی برای لایک/دیس‌لایک هر مدل (Comment, Product, ...)
+    """
+    content_type_id = request.POST.get("content_type_id")
+    object_id = request.POST.get("object_id")
+    value = int(request.POST.get("value"))  # 1 یا -1
+
+    if value not in (1, -1):
+        return JsonResponse({"status": "error", "message": "مقدار نامعتبر است."}, status=400)
+
+    content_type = get_object_or_404(ContentType, id=content_type_id)
+    obj = content_type.get_object_for_this_type(id=object_id)
+
+    vote, created = LikeDislike.objects.get_or_create(
+        user=request.user,
+        content_type=content_type,
+        object_id=object_id,
+        defaults={"value": value}
+    )
+
+    if not created:
+        if vote.value == value:
+            # اگر دوباره همان رأی را زد → حذف شود (لغو لایک)
+            vote.delete()
+            message = "رأی شما حذف شد."
+            action = "removed"
+        else:
+            # تغییر رأی از لایک به دیس‌لایک یا برعکس
+            vote.value = value
+            vote.save(update_fields=["value"])
+            message = "رأی شما به‌روزرسانی شد."
+            action = "updated"
+    else:
+        message = "رأی شما ثبت شد."
+        action = "created"
+
+    return JsonResponse({
+        "status": "success",
+        "message": message,
+        "action": action,
+        "likes": LikeDislike.objects.filter(content_type=content_type, object_id=object_id, value=1).count(),
+        "dislikes": LikeDislike.objects.filter(content_type=content_type, object_id=object_id, value=-1).count(),
+    })
+
 
 
 def get_client_ip(request):

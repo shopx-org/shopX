@@ -1,0 +1,10 @@
+/* رنگ آیکون پر شده لایک/دیس‌لایک */
+.vote-filled {
+    color: #FA523C;
+}
+
+.vote-icon {
+    cursor: pointer;
+    font-size: 1.2rem; /* fs-5 */
+    margin-right: 4px; /* فاصله بین آیکون و عدد */
+}

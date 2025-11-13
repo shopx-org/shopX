@@ -4,6 +4,39 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.conf import settings
 from django_jalali.db import models as jmodels
+from django.contrib.contenttypes.models import ContentType
+
+
+class LikeDislike(models.Model):
+    LIKE = 1
+    DISLIKE = -1
+    VALUE_CHOICES = (
+        (LIKE, "Like"),
+        (DISLIKE, "Dislike"),
+    )
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="votes",
+        verbose_name="کاربر"
+    )
+    value = models.SmallIntegerField(choices=VALUE_CHOICES)
+
+    # 🔹 Generic relation برای وصل‌شدن به هر مدل (مثل Comment، Product، Post و ...)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey("content_type", "object_id")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("user", "content_type", "object_id")  # هر کاربر فقط یک رأی برای هر شیء
+        verbose_name = "رأی"
+        verbose_name_plural = "رأی‌ها"
+
+    def __str__(self):
+        return f"{self.user} -> {self.content_object} ({self.get_value_display()})"
 
 
 class Comment(models.Model):
@@ -50,3 +83,30 @@ class Comment(models.Model):
     @property
     def is_reply(self):
         return self.parent is not None
+
+    @property
+    def likes_count(self):
+        content_type = ContentType.objects.get_for_model(self)
+        return LikeDislike.objects.filter(
+            content_type=content_type, object_id=self.id, value=LikeDislike.LIKE
+        ).count()
+
+    @property
+    def dislikes_count(self):
+        content_type = ContentType.objects.get_for_model(self)
+        return LikeDislike.objects.filter(
+            content_type=content_type, object_id=self.id, value=LikeDislike.DISLIKE
+        ).count()
+
+    def user_vote(self, user):
+        """برای تشخیص اینکه کاربر فعلی لایک کرده یا دیس‌لایک"""
+        if not user.is_authenticated:
+            return None
+        content_type = ContentType.objects.get_for_model(self)
+        try:
+            vote = LikeDislike.objects.get(
+                user=user, content_type=content_type, object_id=self.id
+            )
+            return vote.value
+        except LikeDislike.DoesNotExist:
+            return None

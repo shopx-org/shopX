@@ -82,3 +82,57 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
 });
+
+// --- Like / Dislike ---
+document.querySelectorAll(".like-btn, .dislike-btn").forEach(btn => {
+    btn.addEventListener("click", function (e) {
+        e.preventDefault();
+
+        const content_type_id = this.dataset.type;
+        const object_id = this.dataset.id;
+        const value = this.dataset.value;
+
+        fetch("/core/vote/", {
+            method: "POST",
+            headers: {
+                "X-Requested-With": "XMLHttpRequest",
+                "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
+            },
+            body: new URLSearchParams({
+                content_type_id,
+                object_id,
+                value
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === "success") {
+                const parent = this.closest(".d-flex");
+                const likeBtn = parent.querySelector(".like-btn i");
+                const dislikeBtn = parent.querySelector(".dislike-btn i");
+                const likeCount = parent.querySelector(".like-count");
+                const dislikeCount = parent.querySelector(".dislike-count");
+
+                // --- بروزرسانی شمارنده‌ها
+                likeCount.textContent = data.likes;
+                dislikeCount.textContent = data.dislikes;
+
+                // --- ریست کلاس‌ها روی آیکون‌ها
+                likeBtn.className = "bi vote-icon bi-hand-thumbs-up";
+                dislikeBtn.className = "bi vote-icon bi-hand-thumbs-down";
+
+                // --- اگر کاربر لایک یا دیس‌لایک کرده
+                if (data.action === "created" || data.action === "updated") {
+                    if (value === "1") {
+                        likeBtn.className = "bi vote-icon vote-filled bi-hand-thumbs-up-fill";
+                    } else if (value === "-1") {
+                        dislikeBtn.className = "bi vote-icon vote-filled bi-hand-thumbs-down-fill";
+                    }
+                }
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(() => alert("خطا در ثبت رأی"));
+    });
+});
