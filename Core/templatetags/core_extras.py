@@ -24,3 +24,6 @@ def content_type_id(obj):
         return ContentType.objects.get_for_model(obj).id
     except Exception:
         return None
+    
+
+

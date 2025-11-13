@@ -9,6 +9,9 @@ from django.utils.translation import gettext_lazy as _
 from django.urls import path, reverse
 from decimal import Decimal
 from django.http import JsonResponse
+from django.contrib.contenttypes.models import ContentType
+from django.db.models import Avg, Count
+from Core.models import Rating
 from .models import (
     Category, Color, Brand, Product, ProductVariant, ProductImage,
     Attribute, AttributeChoice, CategoryAttribute, ProductAttributeValue, SizeGroup,
@@ -763,7 +766,7 @@ class ProductAdmin(admin.ModelAdmin):
     inlines = [ProductVariantInline, ProductAttributeValueInline, ProductImageInline]
 
     list_display = (
-        "thumb", "name", "category", "price", "status", "is_active",
+        "thumb", "name", "category", "price", "status", "is_active", "average_rating_display", "rating_count_display",
         "variant_count_col", "stock_total_col", "created_at",
     )
     list_display_links = ("name", "thumb")
@@ -773,7 +776,7 @@ class ProductAdmin(admin.ModelAdmin):
     search_fields = ("name", "slug", "brand_fk__name", "variants__sku")
     autocomplete_fields = ("category", "brand_fk")
 
-    readonly_fields = ("created_at", "updated_at", "effective_price_admin")
+    readonly_fields = ("created_at", "updated_at", "effective_price_admin", "average_rating_display", "rating_count_display")
     actions = (
         # اکشن‌های خودت + اکشن جدید
         # make_published, make_draft, make_archived, ensure_primary_image, duplicate_products,
@@ -788,10 +791,31 @@ class ProductAdmin(admin.ModelAdmin):
         (None, {"fields": ("name", "slug", "category", "additional_categories", "brand_fk", "status", "is_active")}),
         (_("قیمت"), {"fields": ("price", "compare_at_price", "sale_active", "sale_percent", "sale_amount", "sale_starts_at",
                                 "sale_ends_at", "effective_price_admin")}),
+        (_("امتیاز کاربران"), {"fields": ("average_rating_display", "rating_count_display")}),
         (_("محتوا"), {"fields": ("short_description", "description")}),
         (_("SEO"), {"fields": ("meta_title", "meta_description"), "classes": ("collapse",)}),
         (_("زمان"), {"fields": ("created_at", "updated_at"), "classes": ("collapse",)}),
     )
+
+
+     # ✅ نمایش میانگین امتیاز
+    @admin.display(description="میانگین امتیاز کاربران")
+    def average_rating_display(self, obj):
+        avg = obj.average_rating
+        if avg == 0:
+            return "بدون امتیاز"
+        avg_str = f"{avg:.1f}"  # قالب‌بندی عدد
+        return format_html('<span style="color:#f5c518;">⭐</span> {}', avg_str)
+
+    # ✅ نمایش تعداد رأی‌ها
+    @admin.display(description="تعداد رأی‌ها")
+    def rating_count_display(self, obj):
+        count = obj.rating_count
+        if count == 0:
+            return "-"
+        return format_html('<span style="color:#555;">{} رأی</span>', count)
+    
+
 
     @admin.display(description=_("گروه سایز"))
     def effective_size_group(self, obj: Product):
@@ -979,6 +1003,7 @@ class ProductImageAdmin(admin.ModelAdmin):
             except Exception:
                 return "—"
         return "—"
+    
 
 
 

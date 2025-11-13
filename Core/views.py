@@ -10,6 +10,12 @@ from django.utils.html import strip_tags
 from django.http import JsonResponse
 from .models import *
 from .forms import CommentForm
+from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Avg, Count
+from .models import Rating
+
+
+
 
 @login_required
 @require_POST
@@ -196,3 +202,70 @@ def add_comment(request, app_label, model_name, object_id):
         messages.error(request, error, extra_tags="comment")
 
     return redirect(obj.get_absolute_url())
+
+
+
+
+@login_required
+@require_POST
+def add_rating(request):
+    """ثبت امتیاز ستاره‌ای برای هر مدل و جلوگیری از تغییر دوباره"""
+    object_id = request.POST.get("object_id")
+    content_type_id = request.POST.get("content_type_id")
+    score = request.POST.get("score")
+
+    try:
+        score = int(score)
+        if not (1 <= score <= 5):
+            raise ValueError
+    except:
+        return JsonResponse({"status": "error", "message": "امتیاز نامعتبر است."})
+
+    content_type = get_object_or_404(ContentType, id=content_type_id)
+    obj = content_type.get_object_for_this_type(id=object_id)
+
+    rating, created = Rating.objects.get_or_create(
+        user=request.user,
+        content_type=content_type,
+        object_id=object_id,
+        defaults={"score": score}
+    )
+
+    if not created:
+        # کاربر قبلاً رأی داده؛ اجازه تغییر نداریم
+        return JsonResponse({"status": "error", "message": "شما قبلاً رأی داده‌اید."})
+
+    # محاسبه میانگین و تعداد
+    agg = Rating.objects.filter(
+        content_type=content_type, object_id=object_id
+    ).aggregate(average=Avg('score'), count=Count('id'))
+
+    return JsonResponse({
+        "status": "success",
+        "average": round(agg["average"] or 0, 1),
+        "count": agg["count"],
+        "user_score": score
+    })
+
+
+
+def get_user_rating(request):
+    """دریافت امتیاز فعلی کاربر برای هر شیء"""
+    object_id = request.GET.get('object_id')
+    content_type_id = request.GET.get('content_type_id')
+    user_score = 0
+
+    if request.user.is_authenticated:
+        try:
+            content_type = ContentType.objects.get(id=content_type_id)
+            rating = Rating.objects.filter(
+                content_type=content_type,
+                object_id=object_id,
+                user=request.user
+            ).first()
+            if rating:
+                user_score = rating.score
+        except:
+            pass
+
+    return JsonResponse({'user_score': user_score})

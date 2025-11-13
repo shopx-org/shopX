@@ -3,6 +3,7 @@
 {% load social_share %}
 {% load humanize %}
 {% load promos_tags %}
+{% load core_extras %}
 {% block CSS-JS %}
     {# JSON برای JS #}
     <script id="variant-matrix" type="application/json">{{ variant_matrix_json|default:'{}'|safe }}</script>
@@ -18,6 +19,124 @@
 
     {# اسکریپت صفحه #}
     <script src="{% static 'products/js/product.js' %}" defer></script>
+
+    <style>
+    .stars {
+        display: inline-flex;
+        gap: 4px;
+        cursor: pointer;
+    }
+    .stars i {
+        font-size: 1.5rem;
+        color: #ccc;
+        transition: color 0.2s ease, transform 0.2s ease;
+    }
+    .stars i.bi-star-fill {
+        color: #f5c518; /* طلایی */
+    }
+    .stars i.hovered {
+        color: #f8d24a !important;
+    }
+    .stars i:hover {
+        transform: scale(1.2);
+        color: #f8d24a;
+    }
+    .rating-average {
+        margin-left: 6px;
+        font-weight: 600;
+        color: #333;
+    }
+    .rating-count {
+        margin-left: 4px;
+        color: #777;
+        font-size: 1.2rem;
+    }
+    </style>
+
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const starsContainers = document.querySelectorAll('.stars');
+
+        starsContainers.forEach(container => {
+            const stars = container.querySelectorAll('i');
+            const objectId = container.dataset.objectId;
+            const contentTypeId = container.dataset.contentTypeId;
+
+            let userHasRated = false;  // آیا کاربر قبلاً رأی داده؟
+
+            // ⭐ Hover پیش‌نمایش فقط وقتی کاربر رأی نداده
+            stars.forEach((star, index) => {
+                star.addEventListener('mouseenter', function () {
+                    if (userHasRated) return;
+                    stars.forEach((s, i) => s.classList.toggle('hovered', i <= index));
+                });
+                star.addEventListener('mouseleave', function () {
+                    if (userHasRated) return;
+                    stars.forEach(s => s.classList.remove('hovered'));
+                });
+            });
+
+            // 🌟 ثبت امتیاز با کلیک
+            stars.forEach(star => {
+                star.addEventListener('click', function () {
+                    if (userHasRated) return; // جلوگیری از رأی دوباره
+
+                    const score = parseInt(this.dataset.score);
+
+                    fetch("{% url 'core:add_rating' %}", {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': '{{ csrf_token }}',
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: `object_id=${objectId}&content_type_id=${contentTypeId}&score=${score}`
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            userHasRated = true; // علامت‌گذاری برای جلوگیری از کلیک دوباره
+                            
+                            // پر کردن ستاره‌ها با امتیاز کاربر
+                            stars.forEach(s => s.classList.remove('bi-star-fill', 'hovered'));
+                            for (let i = 0; i < data.user_score; i++) {
+                                stars[i].classList.add('bi-star-fill');
+                            }
+
+                            // به‌روزرسانی عدد میانگین و تعداد رأی
+                            container.parentElement.querySelector('.rating-average').textContent = data.average;
+                            container.parentElement.querySelector('.rating-count').textContent = `(${data.count} رأی)`;
+
+                            // غیرفعال کردن کلیک‌ها
+                            stars.forEach(s => s.style.pointerEvents = 'none');
+                        } else {
+                            alert(data.message || 'خطایی رخ داد.');
+                        }
+                    });
+                });
+            });
+
+            // 🔹 گرفتن امتیاز کاربر بعد از رفرش و غیرقابل تغییر کردن ستاره‌ها
+            fetch("{% url 'core:get_user_rating' %}?object_id=" + objectId + "&content_type_id=" + contentTypeId)
+                .then(res => res.json())
+                .then(data => {
+                    stars.forEach(s => s.classList.remove('bi-star-fill', 'hovered'));
+                    if (data.user_score) {
+                        userHasRated = true;
+                        for (let i = 0; i < data.user_score; i++) {
+                            stars[i].classList.add('bi-star-fill');
+                        }
+                        stars.forEach(s => s.style.pointerEvents = 'none'); // غیرقابل تغییر
+                    }
+                });
+        });
+    });
+    </script>
+
+
+
+
 {% endblock %}
 
 {% block content %}
@@ -101,14 +220,29 @@
 
                                                 <h1 class="product-title border-bottom pb-1 mb-2 mt-1">{{ product.name }}</h1>
 
-                                                <div class="ratings-container mt-1">
+                                                {% comment %} <div class="ratings-container mt-1">
                                                     <div class="ratings">
                                                         <div class="ratings-val" style="width:80%;"></div>
                                                     </div>
                                                     <a class="ratings-text" href="#comments" id="review-link">
                                                         ( {{ product.review_count|default:0 }} نظر )
                                                     </a>
+                                                </div> {% endcomment %}
+
+
+                                                <div class="product-rating mt-2">
+                                                    <div class="stars" 
+                                                        data-object-id="{{ product.id }}" 
+                                                        data-content-type-id="{{ product|content_type_id }}">
+                                                        {% for i in "12345" %}
+                                                            <i class="bi bi-star" data-score="{{ forloop.counter }}"></i>
+                                                        {% endfor %}
+                                                    </div>
+                                                    <span class="rating-average">{{ product.average_rating|default:"0" }}</span>
+                                                    <span class="rating-count">({{ product.rating_count|default:"0" }} رأی)</span>
                                                 </div>
+
+
 
                                                 <div class="product-content pt-2 mb-2">
                                                     {% if product.short_description %}

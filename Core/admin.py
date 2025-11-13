@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Comment
+from .models import Comment, LikeDislike
+from django.contrib.contenttypes.models import ContentType
 
 
 class ReplyFilter(admin.SimpleListFilter):
@@ -27,10 +28,12 @@ class CommentAdmin(admin.ModelAdmin):
         'user_display',
         'content_object_link',
         'short_text',
+        'likes_count_display',
+        'dislikes_count_display',
         'created_at',
         'is_approved',
         'is_reply',
-        'reply_count'
+        'reply_count',
     )
 
     list_filter = (
@@ -50,7 +53,9 @@ class CommentAdmin(admin.ModelAdmin):
     readonly_fields = (
         'created_at',
         'updated_at',
-        'content_object_link'
+        'content_object_link',
+        'likes_count_display',
+        'dislikes_count_display',
     )
 
     actions = [
@@ -61,15 +66,28 @@ class CommentAdmin(admin.ModelAdmin):
 
     def user_display(self, obj):
         return obj.user.get_full_name() or obj.user.phone
+    user_display.short_description = "کاربر"
 
     def reply_count(self, obj):
         return obj.replies.filter(is_approved=True).count()
+    reply_count.short_description = "تعداد پاسخ‌ها"
 
     def content_object_link(self, obj):
         model = obj.content_type.model
         app = obj.content_type.app_label
         url = f"/admin/{app}/{model}/{obj.object_id}/change/"
         return format_html('<a href="{}">{} #{} </a>', url, model, obj.object_id)
+    content_object_link.short_description = "محتوا"
+
+    # ✅ تعداد لایک‌ها
+    def likes_count_display(self, obj):
+        return obj.likes_count
+    likes_count_display.short_description = "👍 لایک‌ها"
+
+    # ✅ تعداد دیسلایک‌ها
+    def dislikes_count_display(self, obj):
+        return obj.dislikes_count
+    dislikes_count_display.short_description = "👎 دیسلایک‌ها"
 
     @admin.action(description="✔ تایید انتخاب‌شده‌ها")
     def approve_selected_comments(self, request, queryset):
@@ -87,4 +105,3 @@ class CommentAdmin(admin.ModelAdmin):
         count = to_delete.count()
         to_delete.delete()
         self.message_user(request, f"{count} کامنت تایید نشده حذف شد 🗑")
-
