@@ -4,19 +4,35 @@ from decimal import Decimal
 from promos.services.pricing import PricingEngine, PricingLine
 from products.services.pricing_adapter import price_single_product  # ← استفاده از آداپتر
 register = template.Library()
+from promos.models import PromoBanner
+from django.utils import timezone
 
-def _pick_attr(obj, *names, default=None):
-    for n in names:
-        if hasattr(obj, n):
-            val = getattr(obj, n)
-            # پشتیبانی از FK: اگر خود شیء است و id دارد
-            if n.endswith("_id") and val is None:
-                # اگر فیلد *_id موجود نبود، شاید رابطه‌ی اشیاء باشد
-                rel_name = n[:-3]
-                if hasattr(obj, rel_name) and getattr(obj, rel_name) is not None:
-                    return getattr(getattr(obj, rel_name), "id", default)
-            return val
-    return default
+
+# promos/templatetags/promos_tags.py
+from django import template
+from django.utils import timezone
+from promos.models import PromoBanner
+
+register = template.Library()
+
+@register.simple_tag
+def promo_banners(position="hero", channel="web", limit=7):
+    """
+    بنرهای فعال برای یک position خاص را برمی‌گرداند.
+    فقط بنرهایی که:
+      - is_active=True
+      - در بازه زمانی خودشان هستند
+      - اگر کمپین دارند، خود کمپین هم is_running باشد
+    """
+    now = timezone.now()
+    qs = PromoBanner.objects.filter(
+        position=position,
+        channel=channel,
+        is_active=True,
+    ).select_related("campaign")
+
+    banners = [b for b in qs if b.is_running(now)]
+    return banners[:limit]
 
 @register.simple_tag(takes_context=True)
 def effective_price(context, product, qty=1, channel="web"):

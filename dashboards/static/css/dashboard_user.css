@@ -189,27 +189,29 @@
 .alert-success {
     background-color: #d4edda;
     border: 1px solid #c3e6cb;
-    color: #000;
-    margin: 1rem;   
+    color: #000 !important;
+    margin: 1rem !important;
 }
 
 .alert-success p{
-    color: #000;
-    margin: 1rem;
+    color: #000 ;
+    margin: 1rem ;
     margin-right: 2rem;
+    font-size: 1.6rem;
 }
 
 .alert-danger {
     background-color: #f8d7da;
     border: 1px solid #f5c6cb;
-    color: #000;
-    margin: 1rem;
+    color: #000 ;
+    margin: 1rem ;
 }
 
 .alert-danger p{
-    color: #000;
-    margin: 1rem;
+    color: #000 ;
+    margin: 1rem ;
     margin-right: 2rem;
+    font-size: 1.6rem;
 }
 
 .alert .close {
@@ -395,3 +397,35 @@
     }
 
 /* End Change Phone Number style */
+
+/* change address card style */
+
+/* متن آدرس کش‌سان باشد */
+.address-text {
+    flex: 1 1 auto;
+    min-width: 0;
+    word-break: break-word; /* اگه خیلی طولانی شد بشکنه */
+}
+
+/* باکس دکمه‌ها ثابت بماند و کش نیاید */
+.address-actions {
+    flex: 0 0 auto;
+    white-space: nowrap;      /* دکمه‌ها در یک خط بمانند */
+}
+
+/* دکمه‌ها اندازه ثابت داشته باشند */
+.btn-edit,
+.btn-delete {
+    border: 2px solid #FA523C;
+    border-radius: 10px;
+    padding: 8px 18px;
+    font-weight: 600;
+    transition: all .25s ease;
+    box-shadow: 0 3px 8px rgba(250, 82, 60, 0.15);
+
+    min-width: 120px;         /* 👈 عرض ثابت برای همه کارت‌ها */
+    text-align: center;
+    flex-shrink: 0;           /* اجازه نده کوچیک‌تر بشن */
+}
+
+/* end of change address card style */

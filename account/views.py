@@ -403,7 +403,8 @@ from django_ratelimit.decorators import ratelimit
 from django.views import View
 from django.shortcuts import render, redirect, reverse
 from django.contrib import messages
-
+from django.utils.http import url_has_allowed_host_and_scheme
+from django.conf import settings
 
 
 
@@ -688,48 +689,88 @@ class OtpLoginView(View):
     template_name = 'account/otp_login.html'
 
     def get(self, request):
-        return render(request, self.template_name, {'form': RegisterForm()})
+        form = RegisterForm()
+
+        # اگر از بیرون next آمده، در سشن ذخیره‌اش کن که در post هم داشته باشیم
+        next_url = request.GET.get("next")
+        if next_url:
+            # چک امنیتی: فقط اگر داخل همین سایت است
+            if url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
+                request.session["otp_next"] = next_url
+
+        return render(request, self.template_name, {"form": form})
 
     def post(self, request):
         form = RegisterForm(request.POST)
         if not form.is_valid():
-            return render(request, self.template_name, {'form': form})
-        phone = form.cleaned_data['phone']
+            return render(request, self.template_name, {"form": form})
+
+        phone = form.cleaned_data["phone"]
+
         try:
             token = otp_service.create_session(phone)
-            request.session["otp_phone"] = phone  # برای صفحه‌ی login با رمز
+            request.session["otp_phone"] = phone  # برای صفحه‌ی چک OTP
         except OtpBlocked:
             messages.error(request, "به دلیل تعدد تلاش‌ها تا یک ساعت امکان ارسال کد ندارید.")
-            return redirect('account:otp_login')
+            return redirect("account:otp_login")
         except OtpTooSoon:
             messages.error(request, "لطفاً ۶۰ ثانیه بعد دوباره تلاش کنید.")
-            return redirect('account:otp_login')
+            return redirect("account:otp_login")
         except OtpError:
             messages.error(request, "خطا در ارسال کد. دوباره تلاش کنید.")
-            return redirect('account:otp_login')
+            return redirect("account:otp_login")
 
-        return redirect(reverse('account:check_otp') + f"?token={token}")
+        # اینجا next را (اگر هست) از سشن بخوان و به check_otp پاس بده
+        next_url = request.session.get("otp_next")
 
+        base = reverse("account:check_otp")
+        redirect_url = f"{base}?token={token}"
+
+        if next_url:
+            # پارامتر next را هم اضافه کن (check_otp از آن استفاده می‌کند)
+            from urllib.parse import urlencode
+
+            query_dict = {"token": token, "next": next_url}
+            redirect_url = f"{base}?{urlencode(query_dict)}"
+
+        return redirect(redirect_url)
 
 class CheckOtpView(View):
     template_name = 'account/otp_check.html'
 
     def get(self, request):
         token = request.GET.get('token')
+        next_url = request.GET.get('next')  # برای پاس دادن به فرم / template
+
         phone = None
         if token:
             sess = OtpSession.objects.filter(token=token, is_used=False).first()
             phone = getattr(sess, 'phone', None)
+
         return render(request, self.template_name, {
             'form': CheckOtpForm(),
             'token': token,
             'phone': phone,
             'seconds_left': otp_service.seconds_left(token) if token else 0,
             'resend_left': otp_service.resends_left(token) if token else 0,
+            'next': next_url,  # اگر خواستی در فرم hidden بذاری
         })
+
+    def _build_redirect_self(self, token: str, next_url: str | None) -> str:
+        """
+        کمک‌کننده: URL برگشت به همین ویو را با token و next بسازد.
+        """
+        base = reverse('account:check_otp')
+        if next_url:
+            from urllib.parse import urlencode
+            query = urlencode({"token": token, "next": next_url})
+            return f"{base}?{query}"
+        return f"{base}?token={token}"
 
     def post(self, request):
         token = request.GET.get('token')
+        next_url = request.GET.get('next')
+
         if not token:
             messages.error(request, "درخواست نامعتبر است.")
             return redirect('account:otp_login')
@@ -749,29 +790,125 @@ class CheckOtpView(View):
                 messages.error(request, "لطفاً کمی صبر کنید و دوباره تلاش کنید.")
             except OtpError:
                 messages.error(request, "ارسال مجدد با خطا مواجه شد.")
-            return redirect(reverse('account:check_otp') + f"?token={token}")
+
+            return redirect(self._build_redirect_self(token, next_url))
 
         # اعتبارسنجی
         form = CheckOtpForm(request.POST)
         if not form.is_valid():
             messages.error(request, "اطلاعات نامعتبر است.")
-            return redirect(reverse('account:check_otp') + f"?token={token}")
+            return redirect(self._build_redirect_self(token, next_url))
 
         try:
             phone = otp_service.verify(token, form.cleaned_data['code'])
         except OtpExpired:
             messages.error(request, "کد منقضی شده است. ارسال مجدد را بزنید.")
-            return redirect(reverse('account:check_otp') + f"?token={token}")
+            return redirect(self._build_redirect_self(token, next_url))
         except OtpInvalid:
             messages.error(request, "کد وارد شده صحیح نیست.")
-            return redirect(reverse('account:check_otp') + f"?token={token}")
+            return redirect(self._build_redirect_self(token, next_url))
         except OtpError:
             messages.error(request, "بررسی کد با خطا مواجه شد.")
-            return redirect(reverse('account:check_otp') + f"?token={token}")
+            return redirect(self._build_redirect_self(token, next_url))
 
         user, _ = User.objects.get_or_create(phone=phone)
         login(request, user)
+
+        # ✅ اینجا تصمیم‌گیری برای redirect بعد از لاگین
+        if next_url and url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
+            return redirect(next_url)
+
         return redirect('home:home')
+
+# مدل ویوو لاگین otp  بدون توجه به نکست در یو ار ال
+# class OtpLoginView(View):
+#     template_name = 'account/otp_login.html'
+#
+#     def get(self, request):
+#         return render(request, self.template_name, {'form': RegisterForm()})
+#
+#     def post(self, request):
+#         form = RegisterForm(request.POST)
+#         if not form.is_valid():
+#             return render(request, self.template_name, {'form': form})
+#         phone = form.cleaned_data['phone']
+#         try:
+#             token = otp_service.create_session(phone)
+#             request.session["otp_phone"] = phone  # برای صفحه‌ی login با رمز
+#         except OtpBlocked:
+#             messages.error(request, "به دلیل تعدد تلاش‌ها تا یک ساعت امکان ارسال کد ندارید.")
+#             return redirect('account:otp_login')
+#         except OtpTooSoon:
+#             messages.error(request, "لطفاً ۶۰ ثانیه بعد دوباره تلاش کنید.")
+#             return redirect('account:otp_login')
+#         except OtpError:
+#             messages.error(request, "خطا در ارسال کد. دوباره تلاش کنید.")
+#             return redirect('account:otp_login')
+#
+#         return redirect(reverse('account:check_otp') + f"?token={token}")
+
+# اینم برای چک  بدون نکست
+# class CheckOtpView(View):
+#     template_name = 'account/otp_check.html'
+#
+#     def get(self, request):
+#         token = request.GET.get('token')
+#         phone = None
+#         if token:
+#             sess = OtpSession.objects.filter(token=token, is_used=False).first()
+#             phone = getattr(sess, 'phone', None)
+#         return render(request, self.template_name, {
+#             'form': CheckOtpForm(),
+#             'token': token,
+#             'phone': phone,
+#             'seconds_left': otp_service.seconds_left(token) if token else 0,
+#             'resend_left': otp_service.resends_left(token) if token else 0,
+#         })
+#
+#     def post(self, request):
+#         token = request.GET.get('token')
+#         if not token:
+#             messages.error(request, "درخواست نامعتبر است.")
+#             return redirect('account:otp_login')
+#
+#         # ارسال مجدد
+#         if request.POST.get('resend') == '1':
+#             try:
+#                 otp_service.resend(token)
+#                 messages.success(request, "کد جدید ارسال شد.")
+#             except OtpBlocked:
+#                 messages.error(request, "تا یک ساعت امکان ارسال کد ندارید.")
+#                 return redirect('account:otp_login')
+#             except OtpMaxReached:
+#                 messages.error(request, "حداکثر ۳ بار ارسال مجدد انجام شد. تا یک ساعت مسدود شدید.")
+#                 return redirect('account:otp_login')
+#             except OtpTooSoon:
+#                 messages.error(request, "لطفاً کمی صبر کنید و دوباره تلاش کنید.")
+#             except OtpError:
+#                 messages.error(request, "ارسال مجدد با خطا مواجه شد.")
+#             return redirect(reverse('account:check_otp') + f"?token={token}")
+#
+#         # اعتبارسنجی
+#         form = CheckOtpForm(request.POST)
+#         if not form.is_valid():
+#             messages.error(request, "اطلاعات نامعتبر است.")
+#             return redirect(reverse('account:check_otp') + f"?token={token}")
+#
+#         try:
+#             phone = otp_service.verify(token, form.cleaned_data['code'])
+#         except OtpExpired:
+#             messages.error(request, "کد منقضی شده است. ارسال مجدد را بزنید.")
+#             return redirect(reverse('account:check_otp') + f"?token={token}")
+#         except OtpInvalid:
+#             messages.error(request, "کد وارد شده صحیح نیست.")
+#             return redirect(reverse('account:check_otp') + f"?token={token}")
+#         except OtpError:
+#             messages.error(request, "بررسی کد با خطا مواجه شد.")
+#             return redirect(reverse('account:check_otp') + f"?token={token}")
+#
+#         user, _ = User.objects.get_or_create(phone=phone)
+#         login(request, user)
+#         return redirect('home:home')
 
 
 # اگر لیمیت غیرفعال است، دکوریتورِ no-op بساز

@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     "Core.apps.CoreConfig",
     "promos.apps.PromosConfig",
     "cart.apps.CartConfig",
-    # "checkout.apps.CheckoutConfig",
+    "checkout.apps.CheckoutConfig",
 
 
     # Third-party

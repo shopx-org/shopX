@@ -16,7 +16,7 @@ urlpatterns = [
     path("shipping/", include(("shipping.urls", "shipping"))),
     path('core/', include('Core.urls', namespace='core')),
 
-    # path("checkout/",include(("checkout.urls", "checkout"), namespace="checkout")),
+    path("checkout/",include(("checkout.urls", "checkout"), namespace="checkout")),
 ]
 
 if settings.DEBUG:

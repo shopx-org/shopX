@@ -27,7 +27,7 @@ class AddressesView(View):
         action = request.POST.get('action')
         address_id = request.POST.get('address_id')
 
-    # حذف آدرس
+        # حذف آدرس
         if action == 'delete':
             try:
                 address = Address.objects.get(id=address_id, user=request.user)
@@ -56,56 +56,34 @@ class AddressesView(View):
             return render(request, self.template_name, {'addresses': addresses, 'form': form})
 
 
-
-
-
-
 # ===========================================================
 # 🔹 تابع API برای انتخاب آدرس پیش‌فرض
 # ===========================================================
-@login_required
-def set_default_address(request):
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body)
-            addr_id = data.get("address_id")
-            if not addr_id:
-                return JsonResponse({"error": "شناسه آدرس نامعتبر است"}, status=400)
-
-            # ریست آدرس‌های پیش‌فرض کاربر
-            Address.objects.filter(user=request.user, is_default=True).update(is_default=False)
-            # تنظیم آدرس جدید به‌عنوان پیش‌فرض
-            Address.objects.filter(id=addr_id, user=request.user).update(is_default=True)
-
-            return JsonResponse({"success": True})
-        except Exception as e:
-            return JsonResponse({"error": str(e)}, status=400)
-    return JsonResponse({"error": "درخواست نامعتبر"}, status=400)
-
-
 @require_POST
 @login_required
 def set_default_address(request: HttpRequest) -> JsonResponse:
     try:
-        payload = json.loads(request.body.decode("utf-8"))
+        payload = json.loads(request.body.decode("utf-8") or "{}")
     except Exception:
         payload = {}
+
     addr_id = int(payload.get("address_id") or 0)
     if not addr_id:
-        return JsonResponse({"ok": False, "error": "bad-id"}, status=400)
+        return JsonResponse({"success": False, "error": "bad-id"}, status=400)
 
     try:
         addr = Address.objects.get(pk=addr_id, user=request.user)
     except Address.DoesNotExist:
-        return JsonResponse({"ok": False, "error": "not-found"}, status=404)
+        return JsonResponse({"success": False, "error": "not-found"}, status=404)
 
-    # همه‌ی پیش‌فرض‌های قبلی را خاموش و این یکی را روشن کن
-    Address.objects.filter(user=request.user, is_default=True).exclude(pk=addr.pk).update(is_default=False)
+    Address.objects.filter(user=request.user, is_default=True)\
+                   .exclude(pk=addr.pk)\
+                   .update(is_default=False)
+
     if not addr.is_default:
         addr.is_default = True
         addr.save(update_fields=["is_default"])
 
-    # اگر در جریان checkout هستیم، همین آدرس را برای ادامه انتخاب کن
     request.session["checkout.address_id"] = addr.id
 
-    return JsonResponse({"ok": True, "address_id": addr.id})
+    return JsonResponse({"success": True, "address_id": addr.id})

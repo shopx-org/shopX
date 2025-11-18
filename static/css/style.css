@@ -760,6 +760,19 @@ blockquote.text-white cite span {
     background-color: #213555;
 }
 
+.header-checkout{
+    width: 90%;
+    background-color: #a8a1a1;
+    align-content: center;
+    display: flex;
+    border-radius: 10px;
+    align-items: center;
+    margin: auto;
+    align-self: center;
+
+
+}
+
 .header .container,
 .header .container-fluid {
     position: relative;
@@ -29205,10 +29218,21 @@ html {
 .action-link i{font-size:2rem}
 
 /* ---------- Summary ---------- */
-.summary-cart{position:sticky;top:88px;border:1px solid #eee;border-radius:14px;padding:16px;background:#fff}
+.summary-cart{position:sticky;top:88px;border:1px solid #eee;border-radius:14px;padding:16px;background:#fff;margin-top: 2.5rem;}
 .summary-cart .title{font-weight:900;border-bottom:1px dashed #eee;padding-bottom:.5rem;margin-bottom:.5rem}
 .summary-cart .line{display:flex;justify-content:space-between;margin:.4rem 0;color:#374151}
-.btn-checkout{width:100%;font-weight:800}
+.btn-checkout{
+    width:100%;
+    font-weight:800;
+  padding: 10px 22px; /* کوچیک‌تر */
+    border: 0.5px solid  #f36a57;
+    border-radius: 10px;     /* گوشه گرد */
+    font-size: 1.4rem;}
+
+btn-checkout:hover{
+      background-color: #f36a57 ;
+      color: #fff;
+}
 @media (max-width: 992px){
   .cart-item{grid-template-columns:1fr;align-items:flex-start}
   .cart-media{order:1}
@@ -29588,3 +29612,281 @@ input[type=number]{ -moz-appearance:textfield }
   background:#ff4d4f; color:#fff; text-align:center;
 }
 .nav-cart{ position:relative; display:inline-block; }
+
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: .75rem;
+}
+
+ .checkout-box {
+        border-radius: 10px;
+        background: #ffffff;
+        border: 1px solid #edf2f7;
+        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+        padding: 1.5rem 1.75rem;
+    }
+    .checkout-box-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.25rem;
+    }
+    .checkout-box-title {
+        font-weight: 800;
+        font-size: 1.8rem;
+        text-align: right;
+    }
+    .checkout-box-subtitle {
+        font-size: 1.4rem;
+        color: #94a3b8;
+    }
+
+    .info-group-title {
+        font-weight: 700;
+        font-size: 1.4rem;
+        margin-bottom: .33rem;
+        text-align: right;
+    }
+    .info-group-content {
+        font-size: 1.2rem;
+        color: #111827;
+        line-height: 1.7;
+        text-align: right;
+        border-bottom: 1px solid #babdc2;
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 1.6rem;
+    }
+    .info-label {
+        color: #2e2e2e;
+        margin-left: .75rem;
+        white-space: nowrap;
+    }
+    .info-value {
+        font-weight: 600;
+        color: #111827;
+        text-align: left;
+    }
+
+    .checkout-items-table thead th {
+        font-size: 1.5rem;
+        color: #5f6164;
+        border-bottom-width: 1px;
+    }
+    .checkout-items-table tbody td {
+        font-size: 1.5rem;
+        vertical-align: middle;
+    }
+
+    .checkout-summary {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+    }
+    .checkout-summary-header {
+        padding: .5rem 1rem;
+        border-bottom: 1px solid #e5e7eb;
+        background-color: #f8f3f2;
+        color: #040404;
+         border-top-radius: 8px;
+    }
+    .checkout-summary-title {
+        font-weight: 800;
+        font-size: 1.33rem;
+    }
+    .checkout-summary-body {
+        padding: 1rem 1.1rem 1.2rem;
+        margin-bottom: 1.4rem;
+        font-size: 1.43rem;
+    }
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: .5rem;
+    }
+    .summary-row-total strong {
+        font-size: 1.8rem;
+    }
+
+    .payment-link{
+    width: 100%;
+    background: #FFFFFF;
+    border:1px solid  #FA523C;
+    border-radius: 10px;
+    font-weight: 800;
+    font-size: 1.6rem;
+    color: #111;
+    padding: 12px;
+    transition: background .2s ease;
+}
+
+.payment-link:hover {
+    background: linear-gradient(#FA523C, #f36a57);
+    color: #FFFFFF;
+
+    @media (max-width: 767.98px) {
+        .checkout-box {
+            padding: 1.1rem 1.2rem;
+        }
+
+        .checkout-box-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+
+    /* خود badge که قبلاً تعریف کردیم، فقط جهت یادآوری */
+
+    .shipping-badge {
+        display: inline-block;
+        background: #ffffff;
+        border: 0.5px solid #ef4444;
+        color: #111;
+        font-weight: 700;
+        font-size: 1.1rem;
+        padding: 6px 14px;
+        border-radius: 12px;
+        letter-spacing: 0.3px;
+        white-space: nowrap;
+    }
+
+    /* 👉 نسخه موبایل فرندلی */
+    @media (max-width: 576px) {
+        .info-row {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: .35rem;
+        }
+
+        .info-label {
+            font-size: 1.4rem;
+        }
+
+        .info-value {
+            width: 100%;
+        }
+
+        .shipping-badge {
+            display: block;
+            width: 100%;
+            text-align: center;
+            font-size: 0.85rem; /* یه ذره جمع‌وجورتر تو موبایل */
+            padding: 8px 0; /* ارتفاع خوب برای لمس */
+            margin-top: 0.15rem;
+        }
+    }
+}
+
+.checkout-box .btn-back {
+    padding: 10px 22px; /* کوچیک‌تر */
+    border: 0.5px solid  #f36a57;
+    border-radius: 10px;     /* گوشه گرد */
+    font-size: 1.4rem;
+
+}
+
+
+.checkout-box .btn-back:hover{
+    background-color: #f36a57 ;
+    color: #fff;
+}
+
+
+.empty-cart{
+     padding: 10px 22px; /* کوچیک‌تر */
+    border: 0.5px solid  #f36a57;
+    border-radius: 10px;     /* گوشه گرد */
+    font-size: 1.4rem;
+
+}
+
+.empty-cart:hover{
+      background-color: #f36a57 ;
+    color: #fff;
+
+}
+
+.checkout-box-header a{
+    padding: 8px 20px; /* کوچیک‌تر */
+    border: 0.5px solid  #f36a57;
+    border-radius: 10px;     /* گوشه گرد */
+    font-size: 1.5rem;
+}
+
+
+.checkout-box-header a:hover{
+    background-color: #f36a57 ;
+    padding: 10px 22px;
+    color: #fff;
+}
+
+
+.checkout-box a{
+     padding: 8px 20px; /* کوچیک‌تر */
+    border: 0.5px solid  #f36a57;
+    border-radius: 10px;     /* گوشه گرد */
+    font-size: 1.5rem;
+}
+
+.checkout-box a:hover{
+    background-color: #f36a57 ;
+    padding: 10px 22px;
+    color: #fff;
+}
+/* جدول آیتم‌های سبد در صفحه‌ی مرور سفارش */
+.checkout-items-table table {
+    table-layout: fixed;              /* عرض ستون‌ها ثابت و تمیز */
+}
+
+/* تقسیم عرض ستون‌ها */
+.checkout-items-table .col-product  { width: 40%; }
+.checkout-items-table .col-qty      { width: 8%; }
+.checkout-items-table .col-price    { width: 15%; }
+.checkout-items-table .col-service  { width: 17%; }
+.checkout-items-table .col-discount { width: 10%; }
+.checkout-items-table .col-total    { width: 10%; }
+
+/* ستون کالا: چند خطی، بدون به‌هم ریختن جدول */
+.checkout-items-table .product-cell {
+    white-space: normal;
+    word-break: break-word;
+}
+
+.checkout-items-table .product-title {
+    font-weight: 600;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 0.25rem;
+}
+
+.checkout-items-table .product-variant {
+    font-size: 0.8rem;
+    color: #6b7280;         /* خاکستری ملایم */
+}
+
+/* ستون‌های عددی: جمع‌وجور و یک خطی */
+.checkout-items-table .nowrap {
+    white-space: nowrap;
+}
+
+/* کمی فاصله بین ردیف‌ها برای خوانایی بیشتر */
+.checkout-items-table tbody tr > td {
+    padding-top: .75rem;
+    padding-bottom: .75rem;
+    vertical-align: middle;
+}
+
+@media (max-width: 768px) {
+    .checkout-items-table .col-product  { width: 50%; }
+    .checkout-items-table .col-service,
+    .checkout-items-table .col-discount {
+        display: none;   /* اگر خواستی، می‌تونی حذف کنی که خیلی شلوغ نشه */
+    }
+}

@@ -22,6 +22,8 @@ class Rule(models.Model):
         ("category_in", "عضویت در دسته"),
         ("cart_min_total", "حداقل مبلغ سبد"),
         ("qty_at_least", "حداقل تعداد یک سطر"),
+        ("variant_in", "واریانت مشخص"),
+        ("brand_in", "برند مشخص"),
     ]
     campaign = models.ForeignKey(Campaign, related_name="rules", on_delete=models.CASCADE)
     kind = models.CharField(max_length=32, choices=KINDS)
@@ -73,3 +75,71 @@ class CouponRedemption(models.Model):
                 name="uniq_coupon_guest_active"
             ),
         ]
+
+# promos/models.py
+
+class PromoBanner(models.Model):
+    POSITIONS = [
+        ("hero", "بنر بزرگ بالای صفحه"),
+        ("strip", "نوار وسط صفحه"),
+        ("sidebar", "بنر سایدبار"),
+    ]
+
+    title = models.CharField(max_length=200, verbose_name="عنوان بنر")
+    subtitle = models.CharField(max_length=300, blank=True, verbose_name="زیرعنوان / توضیح کوتاه")
+    campaign = models.ForeignKey(
+        Campaign,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="banners",
+        verbose_name="کمپین مرتبط",
+    )
+    position = models.CharField(max_length=20, choices=POSITIONS, default="hero", verbose_name="محل نمایش")
+    image = models.ImageField(upload_to="promos/banners/", verbose_name="تصویر دسکتاپ")
+    image_mobile = models.ImageField(
+        upload_to="promos/banners/",
+        null=True,
+        blank=True,
+        verbose_name="تصویر موبایل",
+    )
+    link_url = models.URLField(max_length=500, blank=True, verbose_name="لینک مقصد (لندینگ جشنواره)")
+    button_text = models.CharField(max_length=50, blank=True, verbose_name="متن دکمه")
+
+    # کنترل زمان و فعال بودن
+    is_active = models.BooleanField(default=True, verbose_name="فعال؟")
+    starts_at = models.DateTimeField(null=True, blank=True, verbose_name="شروع نمایش بنر")
+    ends_at = models.DateTimeField(null=True, blank=True, verbose_name="پایان نمایش بنر")
+
+    channel = models.CharField(max_length=24, default="web", verbose_name="کانال")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "بنر تبلیغاتی"
+        verbose_name_plural = "بنرهای تبلیغاتی"
+
+    def __str__(self):
+        return self.title
+
+    def is_running(self, now=None):
+        """
+        هم خود بنر، هم کمپین (اگر وصل باشد) باید در بازه زمانی و فعال باشد.
+        """
+        from django.utils import timezone
+        now = now or timezone.now()
+
+        # چک خود بنر
+        if not self.is_active:
+            return False
+        if self.starts_at and self.starts_at > now:
+            return False
+        if self.ends_at and self.ends_at < now:
+            return False
+
+        # اگر کمپین وصل است، وضعیت خودش هم باید OK باشد
+        if self.campaign:
+            return self.campaign.is_running(now)
+
+        return True

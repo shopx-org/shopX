@@ -1,59 +1,65 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load static promos_tags %}
 
 {% block content %}
     <main class="main">
+        {% promo_banners 'hero' 'web' 7 as hero_banners %}
+
         <div class="intro-slider-container">
-            <div class="owl-carousel owl-simple owl-light owl-nav-inside" data-toggle="owl"
+            <div class="owl-carousel owl-simple owl-light owl-nav-inside"
+                 data-toggle="owl"
                  data-owl-options='{"nav": false, "rtl": true}'>
-                <div class="intro-slide"
-                     style="background-image: url({% static 'images/demos/demo-2/slider/slide-1.jpg' %});">
-                    <div class="container intro-content">
-                        <h3 class="intro-subtitle">مبل تخت خواب شو</h3><!-- End .h3 intro-subtitle -->
-                        <h1 class="intro-title">بهترین انتخاب <br>مطابق سلیقه شما</h1><!-- End .intro-title -->
 
-                        <a href="#" class="btn btn-primary">
-                            <span>خرید</span>
-                            <i class="icon-long-arrow-left"></i>
-                        </a>
-                    </div><!-- End .container intro-content -->
-                </div><!-- End .intro-slide -->
 
-                <div class="intro-slide"
-                     style="background-image: url({% static 'images/demos/demo-2/slider/slide-2.jpg' %});">
-                    <div class="container intro-content">
-                        <h3 class="intro-subtitle">پیشنهاد جدید</h3><!-- End .h3 intro-subtitle -->
-                        <h1 class="intro-title">میز <br>قهوه خوری <br><span
-                                class="text-primary">49,000<sup>تومان</sup></span></h1><!-- End .intro-title -->
+                {% for b in hero_banners %}
+                    <div class="intro-slide"
+                         style="background-image: url({{ b.image.url }});">
+                        <div class="container intro-content">
 
-                        <a href="#" class="btn btn-primary">
-                            <span>خرید</span>
-                            <i class="icon-long-arrow-left"></i>
-                        </a>
-                    </div><!-- End .container intro-content -->
-                </div><!-- End .intro-slide -->
+                            {% if b.subtitle %}
+                                <h3 class="intro-subtitle">{{ b.subtitle }}</h3>
+                            {% endif %}
 
-                <div class="intro-slide"
-                     style="background-image: url({% static 'images/demos/demo-3/slider/slide-2-480w.jpg' %}">
-                    <div class="container intro-content">
-                        <h3 class="intro-subtitle">اتاق نشیمن</h3><!-- End .h3 intro-subtitle -->
-                        <h1 class="intro-title">
-                            طراحی اتاق نشیمن <br>مطابق سلیقه شما<br>
-                            <span class="text-primary">
-                                    <sup class="text-white font-weight-light">از</sup>99,000<sup>تومان</sup>
-                                </span>
-                        </h1><!-- End .intro-title -->
+                            <h1 class="intro-title">
+                                {{ b.title|linebreaksbr }}
+                            </h1>
 
-                        <a href="#" class="btn btn-primary">
-                            <span>خرید</span>
-                            <i class="icon-long-arrow-left"></i>
-                        </a>
-                    </div><!-- End .container intro-content -->
-                </div><!-- End .intro-slide -->
-            </div><!-- End .owl-carousel owl-simple -->
+                            {% with camp=b.campaign %}
+                                {% if camp %}
+                                    {% with act=camp.actions.all.0 %}
+                                        {% if act and act.kind == 'percent_off' %}
+                                            <div class="intro-subtitle text-primary mt-2">
+                                                تا {{ act.value|floatformat:0 }}٪ تخفیف
+                                            </div>
+                                        {% endif %}
+                                    {% endwith %}
+                                {% endif %}
+                            {% endwith %}
 
-            <span class="slider-loader text-white"></span><!-- End .slider-loader -->
-        </div><!-- End .intro-slider-container -->
+                            <a href="{{ b.link_url|default:'#' }}" class="btn btn-primary">
+                                <span>{{ b.button_text|default:'خرید' }}</span>
+                                <i class="icon-long-arrow-left"></i>
+                            </a>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="intro-slide"
+                         style="background-image: url({% static 'images/demos/demo-2/slider/slide-1.jpg' %});">
+                        <div class="container intro-content">
+                            <h3 class="intro-subtitle">به ShopX خوش آمدید</h3>
+                            <h1 class="intro-title">جشنواره‌ها را از بخش مدیریت تعریف کنید</h1>
+                            <a href="#" class="btn btn-primary">
+                                <span>مشاهده محصولات</span>
+                                <i class="icon-long-arrow-left"></i>
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+
+            </div>
+            <span class="slider-loader text-white"></span>
+        </div>
 
         <div class="brands-border owl-carousel owl-simple" data-toggle="owl" data-owl-options='{
                     "nav": false,
@@ -172,7 +178,7 @@
                             <div class="banner-content banner-content-top">
                                 <h4 class="banner-subtitle">برای فروش</h4><!-- End .banner-subtitle -->
                                 <h3 class="banner-title">تخفف لامپ</h3><!-- End .banner-title -->
-                               <!-- End .banner-text -->
+                                <!-- End .banner-text -->
                                 <a href="#" class="btn btn-outline-gray banner-link">خرید<i
                                         class="icon-long-arrow-left"></i></a>
                             </div><!-- End .banner-content -->
