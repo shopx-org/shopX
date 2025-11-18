@@ -362,3 +362,56 @@
     try { return JSON.parse(s); } catch { return null; }
   }
 })();
+
+// ======================= WISHLIST STATUS (icon + navbar count) =======================
+document.addEventListener("DOMContentLoaded", function () {
+    const btn = document.querySelector(".btn-wishlist");
+    if (!btn) return; // اگر روی صفحه دکمه وجود نداشت
+
+    const productId = btn.dataset.productId;
+    const url = btn.dataset.statusUrl;  // باید در HTML بگذاری
+    const icon = btn.querySelector("i");
+
+    if (!productId || !url || !icon) return;
+
+    fetch(`${url}?product_id=${productId}`, {
+        headers: { "X-Requested-With": "XMLHttpRequest" }
+    })
+    .then(res => res.json())
+    .then(data => {
+        // ست کردن آیکون
+        if (data.in_wishlist) {
+            icon.classList.remove("bi-heart");
+            icon.classList.add("bi-heart-fill");
+            btn.classList.add("added");
+            btn.querySelector("span").textContent = "حذف از علاقه‌مندی‌ها";
+        } else {
+            icon.classList.remove("bi-heart-fill");
+            icon.classList.add("bi-heart");
+            btn.classList.remove("added");
+            btn.querySelector("span").textContent = "افزودن به لیست علاقه‌مندی";
+        }
+
+        // آپدیت badge نوبار
+        const badge = document.querySelector(".wishlist-count");
+        if (badge) {
+            badge.textContent = data.count ?? 0;
+        }
+    })
+    .catch(err => console.error("Wishlist status error:", err));
+});
+
+
+// ------------- Compare Flag ----------------
+
+document.addEventListener("DOMContentLoaded", function() {
+    const messages = document.querySelectorAll(".flash-message");
+    messages.forEach(msg => {
+        // بعد 5 ثانیه شروع به کم رنگ شدن می‌کنیم
+        setTimeout(() => {
+            msg.style.opacity = '0';
+            // بعد از اتمام انیمیشن حذف از DOM
+            setTimeout(() => msg.remove(), 800);
+        }, 5000);
+    });
+});

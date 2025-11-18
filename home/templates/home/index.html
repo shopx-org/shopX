@@ -9,7 +9,14 @@
         <div class="intro-slider-container">
             <div class="owl-carousel owl-simple owl-light owl-nav-inside"
                  data-toggle="owl"
-                 data-owl-options='{"nav": false, "rtl": true}'>
+                 data-owl-options='{
+                    "nav": false,
+                    "rtl": true,
+                    "loop": true,
+                    "autoplay": true,
+                    "autoplayTimeout": 5000,
+                    "autoplayHoverPause": true
+                 }'>
 
 
                 {% for b in hero_banners %}

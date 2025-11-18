@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% load static %}
+{% block meta %}
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+{% endblock %}
+
+{% block CSS-JS %}
+<link rel="stylesheet" href="{% static 'css/product.css' %}">
+<script src="{% static 'js/product.js' %}" defer></script>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container mt-4">
+    <h2 class="mb-4 text-center">لیست مقایسه محصولات</h2>
+
+    {% if messages %}
+    <div class="container mt-3">
+        <div class="d-flex flex-column align-items-center gap-2">
+            {% for message in messages %}
+                <div class="flash-message">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+
+    {% if products %}
+        <div class="table-responsive mt-3">
+            <table class="table table-bordered text-center align-middle">
+                <thead>
+                    <tr>
+                        <th style="width:200px">ویژگی</th>
+                        {% for p in products %}
+                            <th>
+                                <div class="d-flex flex-column align-items-center">
+                                    {% if p.images.all %}
+                                        <img src="{{ p.images.all.0.image.url }}" width="120" class="mb-2">
+                                    {% else %}
+                                        <img src="{% static 'images/broken-image.png' %}" width="120" class="mb-2">
+                                    {% endif %}
+                                    <a href="{{ p.get_absolute_url }}">{{ p.name }}</a>
+                                </div>
+                            </th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>قیمت</td>
+                        {% for p in products %}
+                            <td>{{ p.price|floatformat:0 }} تومان</td>
+                        {% endfor %}
+                    </tr>
+
+                    <tr>
+                        <td>وضعیت موجودی</td>
+                        {% for p in products %}
+                            <td>
+                                {% if p.total_stock > 0 %}
+                                    <span class="text-success">موجود ({{ p.total_stock }} عدد)</span>
+                                {% else %}
+                                    <span class="text-danger">ناموجود</span>
+                                {% endif %}
+                            </td>
+                        {% endfor %}
+                    </tr>
+
+                    <tr>
+                        <td>رنگ‌ها</td>
+                        {% for p in products %}
+                            <td>
+                                {% if p.color_list %}
+                                    <div class="d-flex justify-content-center flex-wrap gap-1">
+                                        {% for c in p.color_list %}
+                                            <span style="display:inline-block;width:20px;height:20px;border:1px solid #ccc;border-radius:50%;background-color:{{ c }};"
+                                                title="{{ c }}"></span>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    ندارد
+                                {% endif %}
+                            </td>
+                        {% endfor %}
+                    </tr>
+
+                    <tr>
+                        <td>سایز‌ها</td>
+                        {% for p in products %}
+                            <td>
+                                {% if p.size_list %}
+                                    {% for s in p.size_list %}
+                                        <span class="badge bg-secondary me-1">{{ s }}</span>
+                                    {% endfor %}
+                                {% else %}
+                                    ندارد
+                                {% endif %}
+                            </td>
+                        {% endfor %}
+                    </tr>
+
+                    {% comment %} مشخصات فنی (attr_values) {% endcomment %}
+                    {% for attr in products.0.attr_values.all %}
+                        <tr>
+                            <td>{{ attr.attribute.name }}</td>
+                            {% for p in products %}
+                                <td>
+                                    {% for av in p.attr_values.all %}
+                                        {% if av.attribute.id == attr.attribute.id %}
+                                            {% if av.attribute.kind == "choice" and av.value_choice %}
+                                                {{ av.value_choice.label }}
+                                            {% elif av.attribute.kind == "multi" and av.values_multi.all %}
+                                                {% for v in av.values_multi.all %}
+                                                    {{ v.label }}{% if not forloop.last %}, {% endif %}
+                                                {% endfor %}
+                                            {% elif av.attribute.kind == "decimal" and av.value_decimal %}
+                                                {{ av.value_decimal }}
+                                            {% elif av.attribute.kind == "int" and av.value_int %}
+                                                {{ av.value_int }}
+                                            {% elif av.attribute.kind == "bool" and av.value_bool is not None %}
+                                                {{ av.value_bool|yesno:"بله,خیر" }}
+                                            {% elif av.attribute.kind == "text" and av.value_text %}
+                                                {{ av.value_text }}
+                                            {% endif %}
+                                        {% endif %}
+                                    {% empty %}
+                                        —
+                                    {% endfor %}
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+
+                    <tr>
+                        <td>حذف</td>
+                        {% for p in products %}
+                            <td>
+                                <a href="{% url 'products:remove_from_compare' p.id %}" class="btn btn-danger btn-sm">حذف</a>
+                            </td>
+                        {% endfor %}
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="alert alert-info text-center">هیچ محصولی در لیست مقایسه وجود ندارد.</p>
+    {% endif %}
+</div>
+
+{% endblock %}

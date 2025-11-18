@@ -72,14 +72,15 @@
                 </div><!-- End .compare-dropdown -->
 
                 <div class="wishlist">
-                    <a href="#" title="لیست محصولات مورد علاقه شما">
+                    <a href="{% url 'core:wishlist_page' %}" title="لیست محصولات مورد علاقه شما">
                         <div class="icon">
                             <i class="icon-heart-o"></i>
-                            <span class="wishlist-count badge">3</span>
+                            <span class="wishlist-count badge">{{ wishlist_count }}</span>
                         </div>
                         <p>لیست علاقه مندیها</p>
                     </a>
                 </div><!-- End .compare-dropdown -->
+
 
                 <div class="dropdown cart-dropdown">
                     <a href="#" class="dropdown-toggle" role="button" data-toggle="dropdown"

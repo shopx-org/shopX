@@ -1,6 +1,9 @@
 # products/context_processors.py
 from django.db.models import Prefetch
 from products.models import Category
+# core/context_processors.py
+from .models import Wishlist
+
 
 # ───────────────── helpers
 def _c2_qs():
@@ -54,3 +57,16 @@ def header_categories(request):
         )
     )
     return {"header_categories": qs[:12]}
+
+
+# ───────────────── wish list
+
+def wishlist_context(request):
+    if request.user.is_authenticated:
+        qs = Wishlist.objects.filter(user=request.user)
+        return {
+            "wishlist_count": qs.count(),
+            "user_wishlist": set(qs.values_list("product_id", flat=True))
+        }
+
+    return {"wishlist_count": 0, "user_wishlist": set()}

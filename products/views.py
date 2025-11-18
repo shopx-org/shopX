@@ -13,7 +13,8 @@ from django.views.generic import ListView, DetailView
 from django.templatetags.static import static
 from products.services.service_pricing import compute_service_unit_price
 from django.contrib import messages
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
+from django.views.generic import TemplateView
 
 from .models import (
     Product, ProductVariant, ProductImage, Color, Brand,
@@ -650,7 +651,67 @@ class ProductDetailView(DetailView):
 
         return ctx
     
-    
 
 
+
+
+# ---------------- Compare Products -----------------
+   
+def add_to_compare(request, product_id):
+    compare_list = request.session.get("compare_list", [])
+    product = get_object_or_404(Product, id=product_id)
+
+    # محدودیت ۳ محصول
+    if len(compare_list) >= 3:
+        messages.warning(request, "شما نمی‌توانید بیش از ۳ محصول را برای مقایسه انتخاب کنید.")
+        return redirect("products:compare_list")
+
+    # بررسی دسته‌بندی
+    if compare_list:
+        first_product = Product.objects.filter(id=compare_list[0]).first()
+        if first_product.category_id != product.category_id:
+            messages.warning(request, "شما فقط می‌توانید محصولات یک دسته‌بندی را مقایسه کنید.")
+            return redirect("products:compare_list")
+
+    # اضافه کردن محصول
+    if product_id not in compare_list:
+        compare_list.append(product_id)
+        request.session["compare_list"] = compare_list
+        request.session.modified = True
+        messages.success(request, f"محصول {product.name} به لیست مقایسه اضافه شد.")
+
+    return redirect("products:compare_list")
+
+
+def remove_from_compare(request, product_id):
+    compare_list = request.session.get("compare_list", [])
+    if product_id in compare_list:
+        compare_list.remove(product_id)
+    request.session["compare_list"] = compare_list
+    request.session.modified = True
+    return redirect("products:compare_list")
+
+
+def compare_list(request):
+    ids = request.session.get("compare_list", [])
     
+    products = Product.objects.filter(id__in=ids).prefetch_related(
+        "images", "variants", "attr_values__attribute"
+    )
+
+    # مرتب کردن طبق session
+    products_dict = {p.id: p for p in products}
+    ordered_products = [products_dict[pid] for pid in ids if pid in products_dict]
+
+    for p in ordered_products:
+        # موجودی کل
+        p.total_stock = p.variants.aggregate(total=Sum("stock"))["total"] or 0
+        
+        # رنگ‌ها و سایز‌ها از variant یا رنگ اصلی محصول
+        # رنگ‌ها را به شکل لیستی از hex_code بسازیم
+        p.color_list = sorted({v.color.hex_code for v in p.variants.all() if v.color})
+        p.size_list = sorted({v.size for v in p.variants.all() if v.size})
+
+    return render(request, "products/compare_list.html", {
+        "products": ordered_products
+    })
