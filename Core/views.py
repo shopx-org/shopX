@@ -2,7 +2,7 @@
 from django.contrib import messages
 from django.utils import timezone
 from django.views.decorators.http import require_POST
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError, PermissionDenied
@@ -12,9 +12,8 @@ from .models import *
 from .forms import CommentForm
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Avg, Count
-from .models import Rating
-
-
+from products.models import Product
+import json
 
 
 @login_required
@@ -269,3 +268,54 @@ def get_user_rating(request):
             pass
 
     return JsonResponse({'user_score': user_score})
+
+
+@login_required
+def wishlist_status(request):
+    product_id = request.GET.get("product_id")
+
+    exists = Wishlist.objects.filter(
+        user=request.user, product_id=product_id
+    ).exists()
+
+    count = Wishlist.objects.filter(user=request.user).count()
+
+    return JsonResponse({"exists": exists, "count": count})
+
+
+@login_required
+def toggle_wishlist(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid request"}, status=400)
+
+    data = json.loads(request.body)
+    product_id = data.get("product_id")
+
+    product = get_object_or_404(Product, id=product_id)
+
+    obj, created = Wishlist.objects.get_or_create(user=request.user, product=product)
+
+    if created:
+        status = "added"
+    else:
+        obj.delete()
+        status = "removed"
+
+    count = Wishlist.objects.filter(user=request.user).count()
+
+    return JsonResponse({"status": status, "count": count})
+
+
+@login_required
+def wishlist_page(request):
+    # فقط ID محصولات ذخیره شده
+    product_ids = Wishlist.objects.filter(user=request.user).values_list("product_id", flat=True)
+
+    # کوئری محصولات
+    products = Product.objects.filter(id__in=product_ids)
+
+    # استفاده از همان لیست محصولات
+    return render(request, "products/product_list.html", {
+        "products": products
+    })
+

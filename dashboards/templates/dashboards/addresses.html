@@ -140,13 +140,14 @@
         </div>
     </div>
 
-
-    {#    {% include 'dashboards/dash_partials/address-parts.html' %}#}
 {% endblock %}
-{% block CSS-JS %}
 
+
+{% block CSS-JS %}
     <script>
         const setDefaultAddressURL = "/shipping/set-default-address/";
     </script>
     <script src="{% static 'js/user_dashboard_addresses.js' %}" defer></script>
 {% endblock %}
+
+

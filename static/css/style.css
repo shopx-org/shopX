@@ -7126,6 +7126,7 @@ a:focus {
 .btn-product:focus span {
     color: #FA523C;
     box-shadow: 0 1px 0 0 #FA523C;
+    text-decoration: none !important;
 }
 
 .btn-product-icon {
@@ -29889,4 +29890,37 @@ input[type=number]{ -moz-appearance:textfield }
     .checkout-items-table .col-discount {
         display: none;   /* اگر خواستی، می‌تونی حذف کنی که خیلی شلوغ نشه */
     }
+}
+
+/* لینک علاقه‌مندی — حالت عادی */
+.wishlist-toggle {
+    color: #666 !important; /* مشکی */
+    font-weight: 500;
+    transition: 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* آیکون قلب در حالت عادی */
+.wishlist-toggle i {
+    color: #666 !important; /* مشکی */
+    font-size: 20px;
+    transition: 0.2s ease;
+}
+
+/* هاور: متن و آیکون نارنجی می‌شود */
+.wishlist-toggle:hover,
+.wishlist-toggle:hover i {
+    color: #FA523C !important;
+}
+
+/* اگر محصول در علاقه‌مندی باشد => همیشه قلب نارنجی */
+.wishlist-toggle i.bi-heart-fill {
+    color: #FA523C !important;
+}
+
+
+a .btn-product .btn-compare span :hover{
+    text-decoration: none !important;
 }

@@ -138,3 +138,28 @@ class Rating(models.Model):
 
     def __str__(self):
         return f"{self.user} → {self.content_object} ({self.score}★)"
+    
+
+
+class Wishlist(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name="wishlists",
+        on_delete=models.CASCADE
+    )
+
+    product = models.ForeignKey(
+        "products.Product",     # ✔ lazy reference — NO circular import!
+        related_name="wishlisted_users",
+        on_delete=models.CASCADE
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'product')
+        verbose_name = "علاقه‌مندی"
+        verbose_name_plural = "لیست علاقه‌مندی‌ها"
+
+    def __str__(self):
+        return f"{self.user} → {self.product}"

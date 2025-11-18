@@ -4,7 +4,16 @@
 {% load humanize %}
 {% load promos_tags %}
 {% load core_extras %}
+{% block meta %}
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+
+{% endblock %}
 {% block CSS-JS %}
+
+    <script src="{% static 'js/wishlist.js' %}"></script>
+
     {# JSON برای JS #}
     <script id="variant-matrix" type="application/json">{{ variant_matrix_json|default:'{}'|safe }}</script>
     <script id="price-chart-data" type="application/json">{{ price_chart_json|default:'{}'|safe }}</script>
@@ -455,8 +464,48 @@
                                     </div>
 
                                     <div class="dk-mini-actions" role="group" aria-label="لینک‌های ثانویه محصول">
-                                        <a href="#" class="btn-product btn-wishlist" title="لیست علاقه‌مندی"><span>افزودن به لیست علاقه‌مندی</span></a>
-                                        <a href="#" class="btn-product btn-compare" title="مقایسه"><span>افزودن به لیست مقایسه</span></a>
+                                        {% comment %} <a href="#" class="btn-product btn-wishlist" title="لیست علاقه‌مندی"><span>افزودن به لیست علاقه‌مندی</span></a> {% endcomment %}
+                                    {% comment %} <a href="#" class="btn-product"
+                                    data-product-id="{{ product.id }}"
+                                    data-toggle-url="{% url 'core:toggle_wishlist' %}"
+                                    data-csrf-token="{{ csrf_token }}"
+                                    onclick="toggleWishlist(this); return false;">
+
+                                        {% if product.id in wishlist_product_ids %}
+                                            <i class="bi bi-heart-fill"></i>
+                                            <span>حذف از علاقه‌مندی‌ها</span>
+                                        {% else %}
+                                            <i class="bi bi-heart"></i>
+                                            <span>افزودن به لیست علاقه‌مندی</span>
+                                        {% endif %}
+                                    </a> {% endcomment %}
+
+                                    <a href="#" class="wishlist-toggle"
+                                    data-product-id="{{ product.id }}"
+                                    data-toggle-url="{% url 'core:toggle_wishlist' %}"
+                                    data-status-url="{% url 'core:wishlist_status' %}"
+                                    data-csrf-token="{{ csrf_token }}"
+                                    onclick="toggleWishlist(this); return false;">
+
+                                        <i class="bi {% if product.id in user_wishlist %}bi-heart-fill{% else %}bi-heart{% endif %}"></i>
+
+                                        <span>
+                                            {% if product.id in user_wishlist %}
+                                                حذف از علاقه‌مندی‌ها
+                                            {% else %}
+                                                افزودن به لیست علاقه‌مندی
+                                            {% endif %}
+                                        </span>
+                                    </a>
+
+
+                                    {% comment %} <a href="#" class="btn-product btn-compare" title="مقایسه"><span>افزودن به لیست مقایسه</span></a> {% endcomment %}
+                                    <a href="{% url 'products:add_to_compare' product.id %}" class="btn-product btn-compare" title="مقایسه">
+                                        <span>افزودن به لیست مقایسه</span>
+                                    </a>
+
+
+
                                     </div>
 
                                     <hr>
@@ -710,3 +759,5 @@
 
     </main>
 {% endblock %}
+
+

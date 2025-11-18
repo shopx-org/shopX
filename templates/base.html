@@ -4,6 +4,14 @@
 
 <head>
     {% include 'partials/header_reference.html' %}
+    {% block meta %}
+    
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    
+    {% endblock %}
+
     {% block CSS-JS %}{% endblock %}
     <title>{% block title %}{% endblock %}</title>
 </head>
@@ -27,6 +35,22 @@
 
 {% include 'partials/footer_reference.html' %}
 {% include "partials/svg-sprite.html" %}
+
+<script>
+window.addEventListener("pageshow", function(event) {
+    // اگر صفحه از BFCache لود شده، رفرش شود
+    if (event.persisted) {
+        window.location.reload();
+    }
+});
+
+// برای برخی مرورگرها (Safari) باید از pagehide هم استفاده شود
+window.addEventListener("pagehide", function() {
+    // این موجب می‌شود صفحه کش نشود
+});
+</script>
+
+
 </body>
 
 </html>
