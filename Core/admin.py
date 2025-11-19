@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Comment, LikeDislike
+from .models import *
 from django.contrib.contenttypes.models import ContentType
 
 
@@ -105,3 +105,14 @@ class CommentAdmin(admin.ModelAdmin):
         count = to_delete.count()
         to_delete.delete()
         self.message_user(request, f"{count} کامنت تایید نشده حذف شد 🗑")
+
+
+
+@admin.register(Wishlist)
+class WishlistAdmin(admin.ModelAdmin):
+    list_display = ("user", "product", "created_at")
+    list_filter = ("user", "product", "created_at")
+    search_fields = ("user__username", "user__email", "product__title", "product__id")
+    readonly_fields = ("created_at",)
+
+    ordering = ("-created_at",)
