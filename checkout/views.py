@@ -1150,6 +1150,6 @@ def checkout_confirm(request: HttpRequest) -> HttpResponse:
 #         messages.error(request, "آدرس نامعتبر است.")
 #         return redirect("checkout:address")
 #
-#     # TODO: در اینجا ایجاد Order + پرداخت انجام می‌شود.
+#
 #     messages.success(request, "سفارش شما تایید اولیه شد. (ایجاد Order/Payment به‌زودی)")
 #     return redirect("checkout:review")
