@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "promos.apps.PromosConfig",
     "cart.apps.CartConfig",
     "checkout.apps.CheckoutConfig",
+    "orders.apps.OrdersConfig",
 
 
     # Third-party

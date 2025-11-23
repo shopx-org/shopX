@@ -1,290 +1,538 @@
+{#/home/atusa92/PycharmProjects/ShopX/checkout/templates/checkout/review.html#}
 {% extends "base.html" %}
 {% load static humanize %}
+
 {% block content %}
-    <main class="main">
-        <br/>
-        <div class="header-checkout col-xl-12 align-center pt-2" style="color:#f1f0ef;height:190px">
-            <a href="{% url 'home:home' %}" class="logo" style="align-content:center;">
-                <img src="{% static 'images/demos/demo-2/output-onlinepngtools.png' %}" alt="ShopX Logo" width="200"
-                     height="48">
-                <h2 style="font-weight:bold;">فروشگاه شاپیکس</h2>
-            </a>
+<main class="main">
+    <br/>
+    <div class="header-checkout col-xl-12 align-center pt-2" style="color:#f1f0ef;height:190px">
+        <a href="{% url 'home:home' %}" class="logo" style="align-content:center;">
+            <img src="{% static 'images/demos/demo-2/output-onlinepngtools.png' %}"
+                 alt="ShopX Logo" width="200" height="48">
+            <h2 style="font-weight:bold;">فروشگاه شاپیکس</h2>
+        </a>
+    </div>
+
+    <nav aria-label="breadcrumb" class="breadcrumb-nav mb-3">
+        <div class="container">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'home:home' %}">خانه</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'cart:cart_detail' %}">سبد خرید</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'checkout:address' %}">آدرس و گیرنده</a></li>
+                <li class="breadcrumb-item active" aria-current="page">مرور سفارش</li>
+            </ol>
         </div>
+    </nav>
 
-        <nav aria-label="breadcrumb" class="breadcrumb-nav mb-3">
-            <div class="container">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{% url 'home:home' %}">خانه</a></li>
-                    <li class="breadcrumb-item"><a href="{% url 'cart:cart_detail' %}">سبد خرید</a></li>
-                    <li class="breadcrumb-item"><a href="{% url 'checkout:address' %}">آدرس و گیرنده</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">مرور سفارش</li>
-                </ol>
-            </div>
-        </nav>
+    <div class="page-content">
+        <div class="container">
+            <div class="row g-4">
 
-        <div class="page-content">
-            <div class="container">
-                <div class="row g-4">
+                {# ستون اصلی #}
+                <div class="col-lg-9 col-xl-9">
 
-                    {# ستون اصلی: آدرس، گیرنده، آیتم‌ها #}
-                    <div class="col-lg-9 col-xl-9">
-
-                        {# آدرس و مشخصات گیرنده #}
-                        <section class="checkout-box mb-4">
-                            <div class="checkout-box-header">
-                                <div>
-                                    <h4 class="checkout-box-title">آدرس تحویل و مشخصات گیرنده</h4>
-                                    <p class="checkout-box-subtitle">لطفاً آدرس و اطلاعات گیرنده را یک بار دیگر چک
-                                        کنید.</p>
-                                </div>
-                                <a href="{% url 'checkout:address' %}" class="btn btn-sm btn-outline-primary">
-                                    ویرایش اطلاعات
-                                </a>
+                    {# آدرس و مشخصات گیرنده #}
+                    <section class="checkout-box mb-4">
+                        <div class="checkout-box-header">
+                            <div>
+                                <h4 class="checkout-box-title">آدرس تحویل و مشخصات گیرنده</h4>
+                                <p class="checkout-box-subtitle">
+                                    لطفاً آدرس و اطلاعات گیرنده را یک بار دیگر چک کنید.
+                                </p>
                             </div>
+                            <a href="{% url 'checkout:address' %}" class="btn btn-sm btn-outline-primary">
+                                ویرایش اطلاعات
+                            </a>
+                        </div>
 
-                            <div class="checkout-box-body">
-                                <div class="row">
-                                    <div class="col-md-12 mb-3">
-                                        <div class="info-group">
-                                            <div class="info-group-title">
-                                                آدرس ارسال
-                                                {% if address.title %}
-                                                    <span class="badge badge-light ms-1">{{ address.title }}</span>
-                                                {% endif %}
-                                            </div>
-                                            <div class="info-group-content ">
-                                                {{ address.province }}، {{ address.city }}، {{ address.address }}
-                                                {% if address.number %}، پلاک {{ address.number }}{% endif %}
-                                                {% if address.unit %}، واحد {{ address.unit }}{% endif %}
-                                                <div class="text-muted text-secondary mt-1  mb-2">
-                                                    کد پستی: {{ address.postal_code }}
-                                                </div>
+                        <div class="checkout-box-body">
+                            <div class="row">
+                                <div class="col-md-12 mb-3">
+                                    <div class="info-group">
+                                        <div class="info-group-title">
+                                            آدرس ارسال
+                                            {% if address.title %}
+                                                <span class="badge badge-light ms-1">{{ address.title }}</span>
+                                            {% endif %}
+                                        </div>
+                                        <div class="info-group-content ">
+                                            {{ address.province }}، {{ address.city }}، {{ address.address }}
+                                            {% if address.number %}، پلاک {{ address.number }}{% endif %}
+                                            {% if address.unit %}، واحد {{ address.unit }}{% endif %}
+                                            <div class="text-muted text-secondary mt-1 mb-2">
+                                                کد پستی: {{ address.postal_code }}
                                             </div>
                                         </div>
                                     </div>
+                                </div>
 
-                                    <div class="col-md-6 mb-3">
-                                        <div class="info-row">
-                                            <span class="info-label">نام و نام خانوادگی</span>
-                                            <span class="info-value">
-                                                {{ receiver.first_name|default:"" }} {{ receiver.last_name|default:"" }}
-                                            </span>
-                                        </div>
-                                        <div class="info-row mt-2">
-                                            <span class="info-label">کد ملی</span>
-                                            <span class="info-value">
-                                                {{ receiver.national_id|default:"-" }}
-                                            </span>
-                                        </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="info-row">
+                                        <span class="info-label">نام و نام خانوادگی</span>
+                                        <span class="info-value">
+                                            {{ receiver.first_name|default:"" }} {{ receiver.last_name|default:"" }}
+                                        </span>
                                     </div>
-
-                                    <div class="col-md-6 mb-2">
-                                        <div class="info-row">
-                                            <span class="info-label">شماره موبایل</span>
-                                            <span class="info-value">{{ phone }}</span>
-                                        </div>
-                                        <div class="info-row mt-2">
-                                            <span class="info-label">ایمیل</span>
-                                            <span class="info-value">
-                                                {{ receiver.email|default:"-" }}
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-6 mt-2">
-                                        <div class="info-row">
-                                            <span class="info-label">روش ارسال</span>
-                                            <span class="info-value">
-                                                <span class="shipping-badge">
-                                                    {{ shipping_method_display }}
-                                                </span>
-                                            </span>
-                                        </div>
+                                    <div class="info-row mt-2">
+                                        <span class="info-label">کد ملی</span>
+                                        <span class="info-value">
+                                            {{ receiver.national_id|default:"-" }}
+                                        </span>
                                     </div>
                                 </div>
-                            </div>
-                        </section>
 
-                        <section class="checkout-box mb-4">
-                            <div class="checkout-box-header">
-                                <h4 class="checkout-box-title mb-0">آیتم‌های سبد خرید</h4>
-                                <a href="{% url 'cart:cart_detail' %}"
-                                   class="btn btn-sm btn-outline-secondary ">
-                                    ویرایش سبد
-                                </a>
-                            </div>
-
-                            {% if review_rows %}
-                                <div class="table-responsive checkout-items-table">
-                                    <table class="table align-middle text-right mb-0">
-                                        <colgroup>
-                                            <col class="col-product">
-                                            <col class="col-qty">
-                                            <col class="col-price">
-                                            <col class="col-service">
-                                            <col class="col-discount">
-                                            <col class="col-total">
-                                        </colgroup>
-                                        <thead>
-                                        <tr>
-                                            <th>کالا</th>
-                                            <th class="text-center">تعداد</th>
-                                            <th>قیمت واحد</th>
-                                            <th>خدمات</th>
-                                            <th>تخفیف</th>
-                                            <th>جمع ردیف</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        {% for row in review_rows %}
-                                            <tr>
-                                                <td class="product-cell">
-                                                    <div class="product-title">
-                                                        {{ row.product_name }}
-                                                    </div>
-                                                    {% if row.variant_name %}
-                                                        <div class="product-variant">
-                                                            {{ row.variant_name }}
-                                                        </div>
-                                                    {% endif %}
-                                                </td>
-
-                                                <td class="text-center nowrap">{{ row.qty }}</td>
-
-                                                <td class="nowrap">
-                                                    {% if row.unit_price %}
-                                                        {{ row.unit_price|floatformat:0|intcomma }} تومان
-                                                    {% else %}
-                                                        <span class="text-muted small">-</span>
-                                                    {% endif %}
-                                                </td>
-
-                                                <td>
-                                                    {% if row.services %}
-                                                        <ul class="mb-0 small ps-3">
-                                                            {% for svc in row.services %}
-                                                                <li>{{ svc }}</li>
-                                                            {% endfor %}
-                                                        </ul>
-                                                    {% else %}
-                                                        <span class="text-muted small">بدون سرویس</span>
-                                                    {% endif %}
-                                                </td>
-
-                                                <td class="nowrap">
-                                                    {% if row.row_discount %}
-                                                        <span class="text-danger">
-                                    {{ row.row_discount|floatformat:0|intcomma }} تومان
-                                </span>
-                                                    {% else %}
-                                                        <span class="text-muted small">۰</span>
-                                                    {% endif %}
-                                                </td>
-
-                                                <td class="fw-bold nowrap">
-                                                    {{ row.row_total|floatformat:0|intcomma }} تومان
-                                                </td>
-                                            </tr>
-                                        {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            {% else %}
-                                <div class="text-center text-muted py-3">
-                                    سبد خرید شما خالی است.
-                                </div>
-                            {% endif %}
-                        </section>
-
-
-                        {# دکمه تایید نهایی #}
-                        <section class="checkout-box mb-4">
-                            <form method="post" action="#">
-                                {% csrf_token %}
-                                <div class="d-flex cols-sm-6 flex-md-row justify-content-between align-items-stretch gap-2">
-                                    <a href="{% url 'checkout:address' %}"
-                                       class="btn btn-outline-secondary btn-back">
-                                        بازگشت به مرحله قبل
-                                    </a>
-
-                                </div>
-                            </form>
-                        </section>
-
-                    </div>
-
-                    {# ستون سایدبار: خلاصه سبد خرید #}
-                    <aside class="col-lg-3 col-xl-3">
-                        <div id="summary"
-                             class="checkout-summary shadow-sm rounded-3 sticky-top"
-                             style="top:90px;border-radius:16px;overflow:hidden;"
-                             data-sub="{{ cart_subtotal|default:0 }}"
-                             data-disc="{{ cart_total_discount|default:0 }}"
-                             data-total="{{ cart_total|default:0 }}"
-                             data-svc="{{ cart_services_total|default:0 }}">
-
-                            <div class="checkout-summary-header">
-                                <span class="checkout-summary-title">جمع سبد خرید</span>
-                            </div>
-
-                            <div class="checkout-summary-body">
-                                <div class="summary-row">
-                                    <span>جمع جزء</span>
-                                    <strong id="s-sub">
-                                        {{ cart_subtotal|default:0|floatformat:0|intcomma }} تومان
-                                    </strong>
-                                </div>
-
-                                <div class="summary-row"
-                                     id="s-svcline"
-                                     style="{% if not cart_services_total %}display:none{% endif %}">
-                                    <span>هزینهٔ سرویس‌ها</span>
-                                    <strong id="s-svc">
-                                        {{ cart_services_total|default:0|floatformat:0|intcomma }} تومان
-                                    </strong>
-                                </div>
-
-                                <div class="summary-row">
-                                    <span>تخفیف</span>
-                                    <strong id="s-disc" class="text-danger">
-                                        {{ cart_total_discount|default:0|floatformat:0|intcomma }} تومان
-                                    </strong>
-                                </div>
-
-                                <div class="summary-row">
-                                    <span>هزینه ارسال</span>
-                                    <strong>
-                                        {{ shipping_cost|floatformat:0|intcomma }} تومان
-                                    </strong>
-                                </div>
-                            <form id="coupon-form" class="mt-3" method="post"
-                                      action="{% url 'cart:cart_set_coupon' %}">
-                                    {% csrf_token %}
-                                    <div class="input-group">
-                                        <input name="coupon" type="text" class="form-control" placeholder="کد تخفیف"
-                                               value="{{ cart_coupon }}">
-                                        <button class="btn btn-outline-secondary" type="submit">اعمال</button>
+                                <div class="col-md-6 mb-2">
+                                    <div class="info-row">
+                                        <span class="info-label">شماره موبایل</span>
+                                        <span class="info-value">{{ phone }}</span>
                                     </div>
-                                </form>
-
-                                <hr class="my-3">
-
-                                <div class="summary-row summary-row-total">
-                                    <span>مبلغ پرداختی نهایی</span>
-                                    <strong id="s-total">
-                                        {{ cart_total|default:0|floatformat:0|intcomma }} تومان
-                                    </strong>
-
+                                    <div class="info-row mt-2">
+                                        <span class="info-label">ایمیل</span>
+                                        <span class="info-value">
+                                            {{ receiver.email|default:"-" }}
+                                        </span>
+                                    </div>
                                 </div>
-                                <button type="submit" class="btn btn-primary payment-link px-4 w-100 w-md-auto">
-                                    تایید و ادامه به درگاه پرداخت
-                                </button>
+
+                                <div class="col-md-6 mt-2">
+                                    <div class="info-row">
+                                        <span class="info-label">روش ارسال</span>
+                                        <span class="info-value">
+                                            <span class="shipping-badge">
+                                                {{ shipping_method_display }}
+                                            </span>
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </aside>
+                    </section>
 
+                    {# آیتم‌های سبد خرید #}
+                    <section class="checkout-box mb-4">
+                        <div class="checkout-box-header">
+                            <h4 class="checkout-box-title mb-0">آیتم‌های سبد خرید</h4>
+                            <a href="{% url 'cart:cart_detail' %}"
+                               class="btn btn-sm btn-outline-secondary">
+                                ویرایش سبد
+                            </a>
+                        </div>
+
+                        <div id="review-rows">
+                            {% include "checkout/partials/_review_rows.html" %}
+                        </div>
+                    </section>
+
+                    {# دکمه بازگشت #}
+                    <section class="checkout-box mb-4">
+                        <form method="post" action="#">
+                            {% csrf_token %}
+                            <div class="d-flex cols-sm-6 flex-md-row justify-content-between align-items-stretch gap-2">
+                                <a href="{% url 'checkout:address' %}"
+                                   class="btn btn-outline-secondary btn-back">
+                                    بازگشت به مرحله قبل
+                                </a>
+                            </div>
+                        </form>
+                    </section>
                 </div>
+
+                {# سایدبار #}
+                <aside class="col-lg-3 col-xl-3">
+                    <div id="summary"
+                         class="checkout-summary shadow-sm rounded-3 sticky-top"
+                         style="top:90px;border-radius:16px;overflow:hidden;"
+                         data-sub="{{ cart_subtotal|default:0 }}"
+                         data-disc="{{ cart_total_discount|default:0 }}"
+                         data-total="{{ cart_total|default:0 }}"
+                         data-svc="{{ cart_services_total|default:0 }}">
+
+                        <div class="checkout-summary-header">
+                            <span class="checkout-summary-title">جمع سبد خرید</span>
+                        </div>
+
+                        <div class="checkout-summary-body">
+
+                            <div id="summary-body">
+                                {% include "checkout/partials/_summary.html" %}
+                            </div>
+
+{#                            <form id="coupon-form" class="mt-3" method="post"#}
+{#                                  action="{% url 'cart:cart_set_coupon' %}">#}
+{#                                {% csrf_token %}#}
+{#                                <input type="hidden" name="next" value="{% url 'checkout:review' %}">#}
+{##}
+{#                                <div class="input-group">#}
+{#                                    <input name="coupon" type="text" class="form-control" placeholder="کد تخفیف"#}
+{#                                           value="{{ cart_coupon }}">#}
+{#                                    <button class="btn btn-outline-secondary" type="submit">اعمال</button>#}
+{#                                </div>#}
+{##}
+{#                                <div id="coupon-msg" class="small mt-2"></div>#}
+{#                            </form>#}
+
+                            <button type="submit" class="btn btn-primary payment-link px-4 w-100 w-md-auto mt-2">
+                                تایید و ادامه به درگاه پرداخت
+                            </button>
+                        </div>
+                    </div>
+                </aside>
+
             </div>
         </div>
-    </main>
+    </div>
+</main>
+
+{# --- AJAX Coupon Script --- #}
+<script>
+(function () {
+  const form = document.getElementById('coupon-form');
+  if (!form) return;
+
+  const msgBox = document.getElementById('coupon-msg');
+  const rowsBox = document.getElementById('review-rows');
+  const summaryBox = document.getElementById('summary-body');
+  const csrftoken = form.querySelector('[name=csrfmiddlewaretoken]')?.value;
+
+  const setMsg = (text, ok=true) => {
+    if (!msgBox) return;
+    msgBox.textContent = text || '';
+    msgBox.className = ok ? 'small mt-2 text-success' : 'small mt-2 text-danger';
+  };
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    setMsg('در حال اعمال کد تخفیف ...', true);
+
+    const body = new FormData(form);
+
+    try {
+      const res = await fetch(form.action, {
+        method: 'POST',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRFToken': csrftoken,
+        },
+        body,
+      });
+
+      const data = await res.json();
+
+      if (!data.ok) {
+        setMsg(data.message || 'کد تخفیف نامعتبر است.', false);
+        return;
+      }
+
+      if (summaryBox && data.summary_html) {
+        summaryBox.innerHTML = data.summary_html;
+      }
+
+      if (rowsBox && data.rows_html) {
+        rowsBox.innerHTML = data.rows_html;
+      }
+
+      setMsg(data.message || 'کد تخفیف اعمال شد.', true);
+
+    } catch (err) {
+      console.error(err);
+      setMsg('خطا در ارتباط با سرور.', false);
+    }
+  });
+})();
+</script>
+
 {% endblock %}
+
+
+{#{% extends "base.html" %}#}
+{#{% load static humanize %}#}
+{#{% block content %}#}
+{#    <main class="main">#}
+{#        <br/>#}
+{#        <div class="header-checkout col-xl-12 align-center pt-2" style="color:#f1f0ef;height:190px">#}
+{#            <a href="{% url 'home:home' %}" class="logo" style="align-content:center;">#}
+{#                <img src="{% static 'images/demos/demo-2/output-onlinepngtools.png' %}" alt="ShopX Logo" width="200"#}
+{#                     height="48">#}
+{#                <h2 style="font-weight:bold;">فروشگاه شاپیکس</h2>#}
+{#            </a>#}
+{#        </div>#}
+{##}
+{#        <nav aria-label="breadcrumb" class="breadcrumb-nav mb-3">#}
+{#            <div class="container">#}
+{#                <ol class="breadcrumb">#}
+{#                    <li class="breadcrumb-item"><a href="{% url 'home:home' %}">خانه</a></li>#}
+{#                    <li class="breadcrumb-item"><a href="{% url 'cart:cart_detail' %}">سبد خرید</a></li>#}
+{#                    <li class="breadcrumb-item"><a href="{% url 'checkout:address' %}">آدرس و گیرنده</a></li>#}
+{#                    <li class="breadcrumb-item active" aria-current="page">مرور سفارش</li>#}
+{#                </ol>#}
+{#            </div>#}
+{#        </nav>#}
+{##}
+{#        <div class="page-content">#}
+{#            <div class="container">#}
+{#                <div class="row g-4">#}
+{##}
+                    {# ستون اصلی: آدرس، گیرنده، آیتم‌ها #}
+{#                    <div class="col-lg-9 col-xl-9">#}
+{##}
+                        {# آدرس و مشخصات گیرنده #}
+{#                        <section class="checkout-box mb-4">#}
+{#                            <div class="checkout-box-header">#}
+{#                                <div>#}
+{#                                    <h4 class="checkout-box-title">آدرس تحویل و مشخصات گیرنده</h4>#}
+{#                                    <p class="checkout-box-subtitle">لطفاً آدرس و اطلاعات گیرنده را یک بار دیگر چک#}
+{#                                        کنید.</p>#}
+{#                                </div>#}
+{#                                <a href="{% url 'checkout:address' %}" class="btn btn-sm btn-outline-primary">#}
+{#                                    ویرایش اطلاعات#}
+{#                                </a>#}
+{#                            </div>#}
+{##}
+{#                            <div class="checkout-box-body">#}
+{#                                <div class="row">#}
+{#                                    <div class="col-md-12 mb-3">#}
+{#                                        <div class="info-group">#}
+{#                                            <div class="info-group-title">#}
+{#                                                آدرس ارسال#}
+{#                                                {% if address.title %}#}
+{#                                                    <span class="badge badge-light ms-1">{{ address.title }}</span>#}
+{#                                                {% endif %}#}
+{#                                            </div>#}
+{#                                            <div class="info-group-content ">#}
+{#                                                {{ address.province }}، {{ address.city }}، {{ address.address }}#}
+{#                                                {% if address.number %}، پلاک {{ address.number }}{% endif %}#}
+{#                                                {% if address.unit %}، واحد {{ address.unit }}{% endif %}#}
+{#                                                <div class="text-muted text-secondary mt-1  mb-2">#}
+{#                                                    کد پستی: {{ address.postal_code }}#}
+{#                                                </div>#}
+{#                                            </div>#}
+{#                                        </div>#}
+{#                                    </div>#}
+{##}
+{#                                    <div class="col-md-6 mb-3">#}
+{#                                        <div class="info-row">#}
+{#                                            <span class="info-label">نام و نام خانوادگی</span>#}
+{#                                            <span class="info-value">#}
+{#                                                {{ receiver.first_name|default:"" }} {{ receiver.last_name|default:"" }}#}
+{#                                            </span>#}
+{#                                        </div>#}
+{#                                        <div class="info-row mt-2">#}
+{#                                            <span class="info-label">کد ملی</span>#}
+{#                                            <span class="info-value">#}
+{#                                                {{ receiver.national_id|default:"-" }}#}
+{#                                            </span>#}
+{#                                        </div>#}
+{#                                    </div>#}
+{##}
+{#                                    <div class="col-md-6 mb-2">#}
+{#                                        <div class="info-row">#}
+{#                                            <span class="info-label">شماره موبایل</span>#}
+{#                                            <span class="info-value">{{ phone }}</span>#}
+{#                                        </div>#}
+{#                                        <div class="info-row mt-2">#}
+{#                                            <span class="info-label">ایمیل</span>#}
+{#                                            <span class="info-value">#}
+{#                                                {{ receiver.email|default:"-" }}#}
+{#                                            </span>#}
+{#                                        </div>#}
+{#                                    </div>#}
+{##}
+{#                                    <div class="col-md-6 mt-2">#}
+{#                                        <div class="info-row">#}
+{#                                            <span class="info-label">روش ارسال</span>#}
+{#                                            <span class="info-value">#}
+{#                                                <span class="shipping-badge">#}
+{#                                                    {{ shipping_method_display }}#}
+{#                                                </span>#}
+{#                                            </span>#}
+{#                                        </div>#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                        </section>#}
+{##}
+{#                        <section class="checkout-box mb-4">#}
+{#                            <div class="checkout-box-header">#}
+{#                                <h4 class="checkout-box-title mb-0">آیتم‌های سبد خرید</h4>#}
+{#                                <a href="{% url 'cart:cart_detail' %}"#}
+{#                                   class="btn btn-sm btn-outline-secondary ">#}
+{#                                    ویرایش سبد#}
+{#                                </a>#}
+{#                            </div>#}
+{##}
+{#                            {% if review_rows %}#}
+{#                                <div class="table-responsive checkout-items-table">#}
+{#                                    <table class="table align-middle text-right mb-0">#}
+{#                                        <colgroup>#}
+{#                                            <col class="col-product">#}
+{#                                            <col class="col-qty">#}
+{#                                            <col class="col-price">#}
+{#                                            <col class="col-service">#}
+{#                                            <col class="col-discount">#}
+{#                                            <col class="col-total">#}
+{#                                        </colgroup>#}
+{#                                        <thead>#}
+{#                                        <tr>#}
+{#                                            <th>کالا</th>#}
+{#                                            <th class="text-center">تعداد</th>#}
+{#                                            <th>قیمت واحد</th>#}
+{#                                            <th>خدمات</th>#}
+{#                                            <th>تخفیف</th>#}
+{#                                            <th>جمع ردیف</th>#}
+{#                                        </tr>#}
+{#                                        </thead>#}
+{#                                        <tbody>#}
+{#                                        {% for row in review_rows %}#}
+{#                                            <tr>#}
+{#                                                <td class="product-cell">#}
+{#                                                    <div class="product-title">#}
+{#                                                        {{ row.product_name }}#}
+{#                                                    </div>#}
+{#                                                    {% if row.variant_name %}#}
+{#                                                        <div class="product-variant">#}
+{#                                                            {{ row.variant_name }}#}
+{#                                                        </div>#}
+{#                                                    {% endif %}#}
+{#                                                </td>#}
+{##}
+{#                                                <td class="text-center nowrap">{{ row.qty }}</td>#}
+{##}
+{#                                                <td class="nowrap">#}
+{#                                                    {% if row.unit_price %}#}
+{#                                                        {{ row.unit_price|floatformat:0|intcomma }} تومان#}
+{#                                                    {% else %}#}
+{#                                                        <span class="text-muted small">-</span>#}
+{#                                                    {% endif %}#}
+{#                                                </td>#}
+{##}
+{#                                                <td>#}
+{#                                                    {% if row.services %}#}
+{#                                                        <ul class="mb-0 small ps-3">#}
+{#                                                            {% for svc in row.services %}#}
+{#                                                                <li>{{ svc }}</li>#}
+{#                                                            {% endfor %}#}
+{#                                                        </ul>#}
+{#                                                    {% else %}#}
+{#                                                        <span class="text-muted small">بدون سرویس</span>#}
+{#                                                    {% endif %}#}
+{#                                                </td>#}
+{##}
+{#                                                <td class="nowrap">#}
+{#                                                    {% if row.row_discount %}#}
+{#                                                        <span class="text-danger">#}
+{#                                    {{ row.row_discount|floatformat:0|intcomma }} تومان#}
+{#                                </span>#}
+{#                                                    {% else %}#}
+{#                                                        <span class="text-muted small">۰</span>#}
+{#                                                    {% endif %}#}
+{#                                                </td>#}
+{##}
+{#                                                <td class="fw-bold nowrap">#}
+{#                                                    {{ row.row_total|floatformat:0|intcomma }} تومان#}
+{#                                                </td>#}
+{#                                            </tr>#}
+{#                                        {% endfor %}#}
+{#                                        </tbody>#}
+{#                                    </table>#}
+{#                                </div>#}
+{#                            {% else %}#}
+{#                                <div class="text-center text-muted py-3">#}
+{#                                    سبد خرید شما خالی است.#}
+{#                                </div>#}
+{#                            {% endif %}#}
+{#                        </section>#}
+{##}
+{##}
+                        {# دکمه تایید نهایی #}
+{#                        <section class="checkout-box mb-4">#}
+{#                            <form method="post" action="#">#}
+{#                                {% csrf_token %}#}
+{#                                <div class="d-flex cols-sm-6 flex-md-row justify-content-between align-items-stretch gap-2">#}
+{#                                    <a href="{% url 'checkout:address' %}"#}
+{#                                       class="btn btn-outline-secondary btn-back">#}
+{#                                        بازگشت به مرحله قبل#}
+{#                                    </a>#}
+{##}
+{#                                </div>#}
+{#                            </form>#}
+{#                        </section>#}
+{##}
+{#                    </div>#}
+{##}
+                    {# ستون سایدبار: خلاصه سبد خرید #}
+{#                    <aside class="col-lg-3 col-xl-3">#}
+{#                        <div id="summary"#}
+{#                             class="checkout-summary shadow-sm rounded-3 sticky-top"#}
+{#                             style="top:90px;border-radius:16px;overflow:hidden;"#}
+{#                             data-sub="{{ cart_subtotal|default:0 }}"#}
+{#                             data-disc="{{ cart_total_discount|default:0 }}"#}
+{#                             data-total="{{ cart_total|default:0 }}"#}
+{#                             data-svc="{{ cart_services_total|default:0 }}">#}
+{##}
+{#                            <div class="checkout-summary-header">#}
+{#                                <span class="checkout-summary-title">جمع سبد خرید</span>#}
+{#                            </div>#}
+{##}
+{#                            <div class="checkout-summary-body">#}
+{#                                <div class="summary-row">#}
+{#                                    <span>جمع جزء</span>#}
+{#                                    <strong id="s-sub">#}
+{#                                        {{ cart_subtotal|default:0|floatformat:0|intcomma }} تومان#}
+{#                                    </strong>#}
+{#                                </div>#}
+{##}
+{#                                <div class="summary-row"#}
+{#                                     id="s-svcline"#}
+{#                                     style="{% if not cart_services_total %}display:none{% endif %}">#}
+{#                                    <span>هزینهٔ سرویس‌ها</span>#}
+{#                                    <strong id="s-svc">#}
+{#                                        {{ cart_services_total|default:0|floatformat:0|intcomma }} تومان#}
+{#                                    </strong>#}
+{#                                </div>#}
+{##}
+{#                                <div class="summary-row">#}
+{#                                    <span>تخفیف</span>#}
+{#                                    <strong id="s-disc" class="text-danger">#}
+{#                                        {{ cart_total_discount|default:0|floatformat:0|intcomma }} تومان#}
+{#                                    </strong>#}
+{#                                </div>#}
+{##}
+{#                                <div class="summary-row">#}
+{#                                    <span>هزینه ارسال</span>#}
+{#                                    <strong>#}
+{#                                        {{ shipping_cost|floatformat:0|intcomma }} تومان#}
+{#                                    </strong>#}
+{#                                </div>#}
+{#                                <form id="coupon-form" class="mt-3" method="post"#}
+{#                                      action="{% url 'cart:cart_set_coupon' %}">#}
+{#                                    {% csrf_token %}#}
+{#                                    <input type="hidden" name="next" value="{% url 'checkout:review' %}">#}
+{##}
+{#                                    <div class="input-group">#}
+{#                                        <input name="coupon" type="text" class="form-control" placeholder="کد تخفیف"#}
+{#                                               value="{{ cart_coupon }}">#}
+{#                                        <button class="btn btn-outline-secondary" type="submit">اعمال</button>#}
+{#                                    </div>#}
+{#                                </form>#}
+{##}
+{#                                <hr class="my-3">#}
+{##}
+{#                                <div class="summary-row summary-row-total">#}
+{#                                    <span>مبلغ پرداختی نهایی</span>#}
+{#                                    <strong id="s-total">#}
+{#                                        {{ cart_total|default:0|floatformat:0|intcomma }} تومان#}
+{#                                    </strong>#}
+{##}
+{#                                </div>#}
+{#                                <button type="submit" class="btn btn-primary payment-link px-4 w-100 w-md-auto">#}
+{#                                    تایید و ادامه به درگاه پرداخت#}
+{#                                </button>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </aside>#}
+{##}
+{#                </div>#}
+{#            </div>#}
+{#        </div>#}
+{#    </main>#}
+{#{% endblock %}#}

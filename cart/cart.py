@@ -134,8 +134,11 @@ class Cart:
         lines = []
         for it in self.items():
             base = build_pricing_line_public(it.variant or it.product, it.qty)
+
             if it.unit_price is not None:
                 base.unit_price = Decimal(str(it.unit_price))  # snapshot
+                base.line_subtotal = base.unit_price * base.quantity  # ✅ خیلی مهم
+
             lines.append(base)
 
             for svc in it.services:
@@ -143,8 +146,26 @@ class Cart:
                     service=svc, base_line=base,
                     item_unit_price=base.unit_price, qty=it.qty,
                 )
+                # برای اطمینان (اگر build_service_line_public قیمت داد، خودش subtotal رو ساخته)
+                svc_line.line_subtotal = svc_line.unit_price * svc_line.quantity  # ✅ safe
                 lines.append(svc_line)
+
         return lines
+    # def _build_pricing_lines(self):
+    #     lines = []
+    #     for it in self.items():
+    #         base = build_pricing_line_public(it.variant or it.product, it.qty)
+    #         if it.unit_price is not None:
+    #             base.unit_price = Decimal(str(it.unit_price))  # snapshot
+    #         lines.append(base)
+    #
+    #         for svc in it.services:
+    #             svc_line = build_service_line_public(
+    #                 service=svc, base_line=base,
+    #                 item_unit_price=base.unit_price, qty=it.qty,
+    #             )
+    #             lines.append(svc_line)
+    #     return lines
 
     def pricing_result(self):
         lines = self._build_pricing_lines()

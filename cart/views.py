@@ -1,16 +1,16 @@
 # cart/views.py
 from __future__ import annotations
-
+from django.template.loader import render_to_string
 from decimal import Decimal, ROUND_HALF_UP
 from types import SimpleNamespace
-from typing import Any, Dict, Iterable, List, Tuple
-
+from typing import Any, Dict, Iterable, List, Tuple,Optional
+from promos.models import Coupon, CouponRedemption
 from django.contrib import messages
 from django.http import HttpRequest, JsonResponse, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 from django.urls import reverse
-
+from django.utils import timezone
 from .cart import Cart
 from products.models import Product, ProductVariant, ProductImage
 from promos.services.pricing import PricingEngine
@@ -23,6 +23,62 @@ from products.services.pricing_adapter import (
 # =========================
 # Helpers (pure)
 # =========================
+def _review_rows_from_result(result, groups):
+    """
+    review_rows مثل checkout_review
+    """
+    D0 = Decimal("0")
+    per_gid: Dict[str, Dict[str, Any]] = {}
+
+    for ln in getattr(result, "lines", []) or []:
+        gid = getattr(ln, "_cart_gid", None)
+        if not gid:
+            continue
+
+        row = per_gid.setdefault(
+            gid,
+            {"items_subtotal": D0, "services_total": D0, "discount": D0, "total": D0, "services": []},
+        )
+
+        line_sub = getattr(ln, "line_subtotal", D0)
+        line_disc = getattr(ln, "line_discount", D0)
+        line_total = getattr(ln, "line_total", line_sub - line_disc)
+
+        is_service = getattr(ln, "_exclude_from_discounts", False)
+        if is_service:
+            row["services_total"] += line_sub
+            label = getattr(ln, "label", None) or getattr(ln, "name", None) or getattr(ln, "title", None)
+            if label:
+                row["services"].append(label)
+        else:
+            row["items_subtotal"] += line_sub
+
+        row["discount"] += line_disc
+        row["total"] += line_total
+
+    review_rows: List[Dict[str, Any]] = []
+    for gid, it in groups:
+        pricing = per_gid.get(
+            gid,
+            {"items_subtotal": D0, "services_total": D0, "discount": D0, "total": D0, "services": []},
+        )
+
+        product_obj = it.variant or it.product
+        review_rows.append({
+            "gid": gid,
+            "product_name": getattr(product_obj, "name", str(product_obj)),
+            "variant_name": getattr(getattr(it, "variant", None), "name", "") if getattr(it, "variant", None) else "",
+            "qty": getattr(it, "qty", 1),
+            "unit_price": getattr(it, "unit_price", None),
+            "services": pricing["services"],
+            "row_subtotal": pricing["items_subtotal"],
+            "row_services_total": pricing["services_total"],
+            "row_discount": pricing["discount"],
+            "row_total": pricing["total"],
+        })
+
+    return review_rows
+
 
 def _to_number(x: Decimal | int | float | None) -> float:
     if x is None:
@@ -78,6 +134,7 @@ def _build_lines_with_gids(cart: Cart) -> Tuple[List[Any], List[Tuple[str, Simpl
         base = build_pricing_line_public(it.variant or it.product, it.qty)
         if getattr(it, "unit_price", None) is not None:
             base.unit_price = Decimal(str(it.unit_price))
+            base.line_subtotal = base.unit_price * base.quantity
         setattr(base, "_cart_gid", gid)
         lines.append(base)
 
@@ -227,6 +284,8 @@ def cart_detail(request: HttpRequest) -> HttpResponse:
     eps = build_ephemeral_campaigns_for_lines(lines, channel=ctx.get("channel", "web"))
     if eps:
         ctx["ephemeral_campaigns"] = eps
+
+
 
     result = PricingEngine().evaluate(lines, ctx)
     summary = _summary_payload(result, request)  # ← منبع واحد حقیقت برای سایدبار
@@ -443,16 +502,161 @@ def cart_clear(request: HttpRequest) -> HttpResponse:
     return redirect("cart:cart_detail")
 
 @require_POST
-def cart_set_coupon(request: HttpRequest) -> HttpResponse:
-    code = (request.POST.get("coupon") or "").strip()
+
+def cart_set_coupon(request: HttpRequest):
     cart = Cart(request)
-    cart.set_coupon(code if code else None)
 
-    if _ajax(request):
-        return _json_cart_summary(request)
+    raw_code = (request.POST.get("coupon") or "").strip()
+    code = raw_code.upper()
 
-    messages.success(request, "کوپن ثبت شد." if code else "کوپن حذف شد.")
-    return redirect("cart:cart_detail")
+    next_url = (
+        request.POST.get("next")
+        or request.META.get("HTTP_REFERER")
+        or reverse("cart:cart_detail")
+    )
+
+    def is_ajax(req: HttpRequest) -> bool:
+        return req.headers.get("X-Requested-With") == "XMLHttpRequest"
+
+    def set_cart_coupon(value: Optional[str]):
+        """
+        با هر APIای که کارت داشته باشه سازگار می‌شه.
+        """
+        if value:
+            # set
+            if hasattr(cart, "set_coupon"):
+                cart.set_coupon(value)
+            else:
+                cart.session[cart.KEY_COUPON] = value
+                cart.session.modified = True
+        else:
+            # clear
+            if hasattr(cart, "clear_coupon"):
+                cart.clear_coupon()
+            elif hasattr(cart, "set_coupon"):
+                cart.set_coupon(None)
+            else:
+                cart.session.pop(cart.KEY_COUPON, None)
+                cart.session.modified = True
+
+
+    def respond(ok: bool, message: str):
+        """
+        خروجی AJAX: دوباره price می‌کنه و partialها رو می‌فرسته.
+        """
+        lines, groups = _build_lines_with_gids(cart)
+
+        ctx = {"channel": "web"}
+        user = request.user if request.user.is_authenticated else None
+        if user:
+            ctx["user"] = user  # اگر engine از user استفاده می‌کند
+
+        cp = cart.get_coupon() if hasattr(cart, "get_coupon") else getattr(cart, "coupon", None)
+        if cp:
+            cp = str(cp).strip()
+            ctx["coupons"] = [cp]
+            ctx["coupon_codes"] = [cp]   # alias safe
+            ctx["coupon"] = cp           # alias safe
+
+        eps = build_ephemeral_campaigns_for_lines(lines, channel=ctx.get("channel", "web"))
+        if eps:
+            ctx["ephemeral_campaigns"] = eps
+
+
+        result = PricingEngine().evaluate(lines, ctx)
+
+        summary = _summary_payload(result, request)
+        review_rows = _review_rows_from_result(result, groups)
+
+        summary_html = render_to_string(
+            "checkout/partials/_summary.html",
+            {
+                "cart_subtotal": summary["subtotal"],
+                "cart_services_total": summary["services_total"],
+                "cart_total_discount": summary["total_discount"],
+                "cart_total": summary["total"],
+                "cart_coupon": cp or "",
+            },
+            request=request,
+        )
+
+        rows_html = render_to_string(
+            "checkout/partials/_review_rows.html",
+            {"review_rows": review_rows},
+            request=request,
+        )
+        # print("=== PRICING DEBUG ===")
+        # print(result.explain)
+        # return JsonResponse({
+        #     "ok": ok,
+        #     "message": message,
+        #     "summary_html": summary_html,
+        #     "rows_html": rows_html,
+        # })
+
+    # ---------- اگر کد خالی بود => حذف کوپن ----------
+    if not code:
+        set_cart_coupon(None)
+
+        if is_ajax(request):
+            return respond(True, "کد تخفیف حذف شد.")
+        messages.info(request, "کد تخفیف از سبد شما حذف شد.")
+        return redirect(next_url)
+
+    now = timezone.now()
+    try:
+        coupon = Coupon.objects.select_related("campaign").get(code=code, is_active=True)
+    except Coupon.DoesNotExist:
+        set_cart_coupon(None)
+        if is_ajax(request):
+            return respond(False, "کد تخفیف معتبر نیست.")
+        messages.error(request, "کد تخفیف معتبر نیست.")
+        return redirect(next_url)
+
+    if not coupon.is_running(now):
+        set_cart_coupon(None)
+        if is_ajax(request):
+            return respond(False, "مهلت استفاده از این کد تخفیف تمام شده یا هنوز شروع نشده است.")
+        messages.error(request, "مهلت استفاده از این کد تخفیف تمام شده یا هنوز شروع نشده است.")
+        return redirect(next_url)
+
+    camp = coupon.campaign
+    if camp and not camp.is_running(now):
+        set_cart_coupon(None)
+        if is_ajax(request):
+            return respond(False, "کمپین مربوط به این کد تخفیف فعال نیست.")
+        messages.error(request, "کمپین مربوط به این کد تخفیف فعال نیست.")
+        return redirect(next_url)
+
+    user = request.user if request.user.is_authenticated else None
+
+    if coupon.usage_limit_total is not None and coupon.used_count >= coupon.usage_limit_total:
+        set_cart_coupon(None)
+        if is_ajax(request):
+            return respond(False, "سقف استفاده از این کد تخفیف تمام شده است.")
+        messages.error(request, "سقف استفاده از این کد تخفیف تمام شده است.")
+        return redirect(next_url)
+
+    if user and coupon.usage_limit_per_user:
+        active_redemptions = CouponRedemption.objects.filter(
+            coupon=coupon,
+            user=user,
+            status__in=["reserved", "consumed"],
+        ).count()
+        if active_redemptions >= coupon.usage_limit_per_user:
+            set_cart_coupon(None)
+            if is_ajax(request):
+                return respond(False, "شما قبلاً از این کد تخفیف استفاده کرده‌اید.")
+            messages.error(request, "شما قبلاً از این کد تخفیف استفاده کرده‌اید.")
+            return redirect(next_url)
+
+    # ---------- همه چیز OK ----------
+    set_cart_coupon(code)
+
+    if is_ajax(request):
+        return respond(True, "کد تخفیف با موفقیت اعمال شد.")
+    messages.success(request, "کد تخفیف با موفقیت روی سبد شما اعمال شد.")
+    return redirect(next_url)
 
 @require_POST
 def cart_toggle_service(request: HttpRequest, product_id: int, variant_id: int, service_id: int) -> HttpResponse:

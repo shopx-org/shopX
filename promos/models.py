@@ -52,6 +52,11 @@ class Coupon(models.Model):
         now = now or timezone.now()
         return self.is_active and self.starts_at <= now <= self.ends_at
 
+    stack_with_sales = models.BooleanField(
+        default=False,
+        verbose_name="تجمیع با تخفیف‌های دیگر",
+        help_text="اگر غیرفعال باشد، این کوپن فقط روی کالاهایی اعمال می‌شود که قبلاً تخفیف دیگری نگرفته‌اند."
+    )
 class CouponRedemption(models.Model):
     STATUS = (("reserved","رزروشده"), ("consumed","مصرف‌شده"), ("canceled","لغوشده"))
     coupon = models.ForeignKey(Coupon, related_name="redemptions", on_delete=models.CASCADE)

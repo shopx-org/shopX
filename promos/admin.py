@@ -47,6 +47,7 @@ class CampaignAdmin(admin.ModelAdmin):
         "starts_at",
         "ends_at",
         "is_running_now",
+
     )
     list_filter = ("channel", "is_active", "exclusive")
     search_fields = ("name",)
@@ -82,6 +83,7 @@ class CouponAdmin(admin.ModelAdmin):
         "usage_limit_total",
         "usage_limit_per_user",
         "used_count",
+
     )
     list_filter = ("is_active", "campaign")
     search_fields = ("code", "campaign__name")
@@ -90,13 +92,13 @@ class CouponAdmin(admin.ModelAdmin):
 
     fieldsets = (
         (None, {
-            "fields": ("code", "campaign")
+            "fields": ("code", "campaign","stack_with_sales")
         }),
         ("بازه زمانی و وضعیت", {
             "fields": ("is_active", "starts_at", "ends_at")
         }),
         ("محدودیت استفاده", {
-            "fields": ("usage_limit_total", "usage_limit_per_user", "used_count")
+            "fields": ("usage_limit_total", "usage_limit_per_user","used_count")
         }),
     )
 

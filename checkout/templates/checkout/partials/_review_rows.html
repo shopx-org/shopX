@@ -1,0 +1,78 @@
+{% load humanize %}
+
+{% if review_rows %}
+    <div class="table-responsive checkout-items-table">
+        <table class="table align-middle text-right mb-0">
+            <colgroup>
+                <col class="col-product">
+                <col class="col-qty">
+                <col class="col-price">
+                <col class="col-service">
+                <col class="col-discount">
+                <col class="col-total">
+            </colgroup>
+            <thead>
+            <tr>
+                <th>کالا</th>
+                <th class="text-center">تعداد</th>
+                <th>قیمت واحد</th>
+                <th>خدمات</th>
+                <th>تخفیف</th>
+                <th>جمع ردیف</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for row in review_rows %}
+                <tr>
+                    <td class="product-cell">
+                        <div class="product-title">{{ row.product_name }}</div>
+                        {% if row.variant_name %}
+                            <div class="product-variant">{{ row.variant_name }}</div>
+                        {% endif %}
+                    </td>
+
+                    <td class="text-center nowrap">{{ row.qty }}</td>
+
+                    <td class="nowrap">
+                        {% if row.unit_price %}
+                            {{ row.unit_price|floatformat:0|intcomma }} تومان
+                        {% else %}
+                            <span class="text-muted small">-</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if row.services %}
+                            <ul class="mb-0 small ps-3">
+                                {% for svc in row.services %}
+                                    <li>{{ svc }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <span class="text-muted small">بدون سرویس</span>
+                        {% endif %}
+                    </td>
+
+                    <td class="nowrap">
+                        {% if row.row_discount %}
+                            <span class="text-danger">
+                                {{ row.row_discount|floatformat:0|intcomma }} تومان
+                            </span>
+                        {% else %}
+                            <span class="text-muted small">۰</span>
+                        {% endif %}
+                    </td>
+
+                    <td class="fw-bold nowrap">
+                        {{ row.row_total|floatformat:0|intcomma }} تومان
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <div class="text-center text-muted py-3">
+        سبد خرید شما خالی است.
+    </div>
+{% endif %}

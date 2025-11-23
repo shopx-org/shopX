@@ -1,0 +1,40 @@
+{% load humanize %}
+
+<div class="summary-row">
+    <span>جمع جزء</span>
+    <strong id="s-sub">
+        {{ cart_subtotal|default:0|floatformat:0|intcomma }} تومان
+    </strong>
+</div>
+
+<div class="summary-row"
+     id="s-svcline"
+     style="{% if not cart_services_total %}display:none{% endif %}">
+    <span>هزینهٔ سرویس‌ها</span>
+    <strong id="s-svc">
+        {{ cart_services_total|default:0|floatformat:0|intcomma }} تومان
+    </strong>
+</div>
+
+<div class="summary-row">
+    <span>تخفیف</span>
+    <strong id="s-disc" class="text-danger">
+        {{ cart_total_discount|default:0|floatformat:0|intcomma }} تومان
+    </strong>
+</div>
+
+<div class="summary-row">
+    <span>هزینه ارسال</span>
+    <strong>
+        {{ shipping_cost|floatformat:0|intcomma }} تومان
+    </strong>
+</div>
+
+<hr class="my-3">
+
+<div class="summary-row summary-row-total">
+    <span>مبلغ پرداختی نهایی</span>
+    <strong id="s-total">
+        {{ cart_total|default:0|floatformat:0|intcomma }} تومان
+    </strong>
+</div>

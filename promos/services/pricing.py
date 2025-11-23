@@ -71,15 +71,75 @@ class _ActiveProvider:
 
 
 class _Resolver:
+    """
+    Exclusive فقط روی کمپین‌های عادی اعمال می‌شود.
+    کوپن‌ها همیشه در خروجی باقی می‌مانند.
+    """
     def pick(self, camps):
-        ex = [c for c in camps if getattr(c, "exclusive", False)]
-        return [ex[0]] if ex else camps
+        coupons = [c for c in camps if getattr(c, "_is_coupon_campaign", False)]
+        normals = [c for c in camps if not getattr(c, "_is_coupon_campaign", False)]
+
+        # اگر یک کمپین عادی exclusive باشد
+        ex = [c for c in normals if getattr(c, "exclusive", False)]
+        picked_normals = [ex[0]] if ex else normals
+
+        return coupons + picked_normals
+
+
+# --- FIXED rules_match_line ---
+def _rules_match_line(campaign, line, all_lines):
+    """قوانین سطح خط را چک می‌کند."""
+    def _iter_rules(c):
+        rules = getattr(c, "rules", None)
+        if rules is None:
+            return []
+        if hasattr(rules, "all") and callable(rules.all):
+            return rules.all()
+        return rules
+
+    for r in _iter_rules(campaign):
+        kind = getattr(r, "kind", None)
+        p = getattr(r, "payload", {}) or {}
+
+        if kind == "variant_in":
+            ids = set(p.get("variant_ids", []))
+            if getattr(line, "variant_id", None) not in ids:
+                return False
+
+        elif kind == "product_in":
+            ids = set(p.get("product_ids", []))
+            if line.product_id not in ids:
+                return False
+
+        elif kind == "category_in":
+            ids = set(p.get("category_ids", []))
+            ec = getattr(line, "extra_category_ids", []) or []
+            if line.category_id not in ids and not any(cid in ids for cid in ec):
+                return False
+
+        elif kind == "brand_in":
+            ids = set(p.get("brand_ids", []))
+            if getattr(line, "brand_id", None) not in ids:
+                return False
+
+        elif kind == "qty_at_least":
+            if line.quantity < int(p.get("qty", 1)):
+                return False
+
+        elif kind == "cart_min_total":
+            # این نوع rule در سطح سطر skip می‌شود (در سطح سبد چک می‌شود)
+            continue
+
+    return True
 
 
 class PricingEngine:
     def __init__(self, provider=None, resolver=None):
         self.provider = provider or _ActiveProvider()
         self.resolver = resolver or _Resolver()
+
+
+
 
     def evaluate(self, lines, ctx: dict) -> PricingResult:
         now = timezone.now()
@@ -236,10 +296,15 @@ class PricingEngine:
         # 2) کوپن‌ها را در صدر بگذار
         codes = ctx.get("coupons") or []
         if codes:
-            for cp in Coupon.objects.filter(code__in=codes, is_active=True):
+            for cp in Coupon.objects.select_related("campaign").filter(code__in=codes, is_active=True):
                 if cp.is_running(now) and cp.campaign and cp.campaign.is_running(now):
-                    camps.insert(0, cp.campaign)
+                    camp = cp.campaign
+                    setattr(camp, "_is_coupon_campaign", True)
 
+                    # ✅ فلگ کوپن را روی کمپین runtime ست کن
+                    setattr(camp, "stack_with_sales", bool(cp.stack_with_sales))
+
+                    camps.append(camp)
         # 3) فیلتر و انتخاب
         qualified = [c for c in camps if _ok_local(c, lines)]
         picked = self.resolver.pick(qualified)
@@ -250,19 +315,42 @@ class PricingEngine:
         subtotal: Decimal = sum((l.line_subtotal for l in lines), D0)
 
         for c in picked:
+            # 🔹 تشخیص نوع کمپین
+            is_coupon_camp = getattr(c, "_is_coupon_campaign", False)
+            stack_with_sales = getattr(c, "stack_with_sales", False)
+            # اگر کوپن است و اجازه‌ی جمع‌شدن با تخفیف‌های قبلی را ندارد:
+            exclude_discounted = is_coupon_camp and not stack_with_sales
+
             for a in _iter_actions(c):
                 kind = getattr(a, "kind", "")
                 scope = getattr(a, "scope", "")
                 val = getattr(a, "value", None)
                 cap = getattr(a, "cap", None)
-                tag = f"{getattr(c,'name','camp')}:{kind}:{scope}"
-
+                tag = f"{getattr(c, 'name', 'camp')}:{kind}:{scope}"
                 if scope == "line":
                     eligible = [
                         l for l in lines
                         if not getattr(l, "_exclude_from_discounts", False)
                            and _rules_match_line(c, l, lines)
                     ]
+
+                    # اگر این کمپین/کوپن اجازه‌ی تجمیع با دیگر تخفیف‌ها را نمی‌دهد،
+                    # خطوطی که از قبل سیل/تخفیف دارند را حذف کن.
+                    stack = getattr(c, "stack_with_others", True)  # یا no_stack_with_other_discounts برعکسش
+                    if not stack:
+                        eligible = [
+                            l for l in eligible
+                            if not (
+                                    getattr(l, "_variant_sale_active", False)
+                                    or getattr(l, "_product_sale_active", False)
+                            )
+                        ]
+                    # ⬇️ اگر این کوپن نباید روی کالاهای از قبل تخفیف‌خورده اعمال شود:
+                    if exclude_discounted:
+                        eligible = [
+                            l for l in eligible
+                            if getattr(l, "line_discount", D0) <= 0
+                        ]
 
                     base = sum((l.line_subtotal for l in eligible), D0)
                     if base <= 0:
@@ -280,6 +368,7 @@ class PricingEngine:
 
                     self._spread(eligible, amt)
                     explain["applied"].append({"tag": tag, "amount": str(amt)})
+
 
                 elif scope == "cart":
                     base = subtotal
