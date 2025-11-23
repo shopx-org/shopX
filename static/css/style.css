@@ -797,7 +797,7 @@ blockquote.text-white cite span {
     margin-right: auto;
 }
 
-.logo {
+/* .logo {
     display: block;
     margin-top: 3.5rem;
     margin-bottom: 2.5rem;
@@ -809,7 +809,7 @@ blockquote.text-white cite span {
     display: block;
     max-width: 90%;
     height: 70%;
-}
+} */
 
 .header-top {
     font-weight: 300;
@@ -2058,6 +2058,123 @@ blockquote.text-white cite span {
         display: none !important;
     }
 }
+
+/* --- Fix Mobile Header Layout --- */
+@media (max-width: 575px) {
+
+    .header-middle {
+        padding: 0.5rem 0 !important;
+    }
+
+    .logo {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .logo img {
+        max-height: 40px !important;
+        height: auto !important;
+    }
+
+    .header-left,
+    .header-center,
+    .header-right {
+        align-items: center !important;
+    }
+
+    /* فاصله اضافی آیکون‌ها */
+    .wishlist-link,
+    .cart-dropdown,
+    .mobile-menu-toggler {
+        margin: 0 .5rem !important;
+    }
+
+    /* پنهان کردن متن حساب کاربری، لیست علاقه مندی ها و سبد خرید */
+    .header-right .account p,
+    .header-right .wishlist p,
+    .header-right .cart-dropdown p {
+        display: none !important;
+    }
+
+    /* تنظیم سایز آیکون‌ها */
+    .header-right .account i,
+    .header-right .cart-dropdown i {
+        font-size: 2rem !important; /* کمی کوچکتر برای موبایل */
+        display: inline-block;
+    }
+
+    /* آیکون قلب لیست علاقه مندی ها کمی کوچکتر */
+    .header-right .wishlist i {
+        font-size: 1.8rem !important;
+        display: inline-block;
+    }
+}
+
+
+@media (min-width: 992px) and (max-width: 1200px) {
+
+    /* فقط متن حساب کاربری، لیست علاقه مندی ها و سبد خرید مخفی شود */
+    .header-right .account p,
+    .header-right .wishlist p,
+    .header-right .cart-dropdown p {
+        display: none !important;
+    }
+
+    /* آیکون ها کمی بزرگ‌تر (به جز قلب) */
+    .header-right .account i,
+    .header-right .cart-dropdown i {
+        font-size: 2.2rem !important;
+        display: inline-block;
+    }
+
+    /* آیکون قلب لیست علاقه مندی ها کمی کوچکتر */
+    .header-right .wishlist i {
+        font-size: 2rem !important;
+        display: inline-block;
+    }
+
+    /* فاصله آیتم‌ها کمتر برای جا شدن بهتر */
+    .header-right .account,
+    .header-right .wishlist,
+    .header-right .cart-dropdown {
+        padding: 0 5px !important;
+    }
+
+    /* جلوگیری از شکستن خطوط */
+    .header-right {
+        flex-wrap: nowrap !important;
+        white-space: nowrap !important;
+    }
+
+    /* کمی کوچک کردن لوگو */
+    .logo img {
+        max-width: 80% !important;
+        height: auto !important;
+    }
+}
+
+
+/* کاهش سایز متن لینک‌های حساب کاربری در دراپ‌داون */
+.header-right .account .dropdown-menu .product-cart-details .product-title a {
+    font-size: 1.25rem; /* اندازه دلخواه، می‌توانید تغییر دهید */
+    white-space: nowrap; /* جلوگیری از شکستن خط */
+}
+
+@media (min-width: 1200px) and (max-width: 1537px) {
+    .header-right .account p,
+    .header-right .cart-dropdown p,
+    .header-right p {
+        display: none !important;
+    }
+
+    /* اگر فاصله اضافی افتاد، با این خط حل می‌شود */
+    .header-right .icon {
+        margin: 0 !important;
+    }
+}
+
+
+
 
 /*--------------------- 2.1.Menu -------------------- */
 .main-nav {
@@ -29926,12 +30043,15 @@ input[type=number]{ -moz-appearance:textfield }
 a .btn-product .btn-compare span :hover{
     text-decoration: none !important;
 }
+
 :root {
     --shopx-accent: var(--accent, #FA523C);
     --shopx-soft-bg: #fff7f5;
 }
 
-/* خود باکس دراپ‌داون */
+/* ========================================= */
+/* استایل دراپ‌داون سبد خرید (Cart Dropdown) */
+/* ========================================= */
 .cart-dropdown .cart-panel-menu {
     width: 420px;
     max-height: 540px;
@@ -29939,12 +30059,10 @@ a .btn-product .btn-compare span :hover{
     border: none;
     margin-top: 4rem;
     margin-bottom: 2rem;
-
     box-shadow: 0 18px 40px rgba(0, 0, 0, .18);
     overflow: hidden;
 }
 
-/* کانتینر داخلی */
 .cart-panel {
     display: flex;
     flex-direction: column;
@@ -29952,7 +30070,6 @@ a .btn-product .btn-compare span :hover{
     background-color: #fff;
 }
 
-/* هدر بالا */
 .cart-panel-header {
     padding: 14px 18px;
     border-bottom: 1px solid #f0f0f0;
@@ -29965,19 +30082,9 @@ a .btn-product .btn-compare span :hover{
     font-weight: 600;
 }
 
-.cart-panel-sub {
-    font-size: 1rem;
-    color: #FA523C;
-}
+.cart-panel-sub { font-size: 1rem; color: #FA523C; }
+.cart-panel-link { font-size: 1.4rem; color: var(--shopx-accent); text-decoration: none; font-weight: 500; }
 
-.cart-panel-link {
-    font-size: 1.4rem;
-    color: var(--shopx-accent);
-    text-decoration: none;
-    font-weight: 500;
-}
-
-/* بدنه (لیست آیتم‌ها) */
 .cart-panel-body {
     padding: 10px 14px;
     overflow-y: auto;
@@ -29992,9 +30099,7 @@ a .btn-product .btn-compare span :hover{
     border-bottom: 1px solid #f4f4f4;
 }
 
-.cart-panel-item:last-child {
-    border-bottom: none;
-}
+.cart-panel-item:last-child { border-bottom: none; }
 
 .cart-item-image img {
     width: 68px;
@@ -30004,81 +30109,29 @@ a .btn-product .btn-compare span :hover{
     border: 1px solid #eee;
 }
 
-.cart-item-info {
-    flex: 1;
-}
+.cart-item-info { flex: 1; }
 
-.cart-item-title {
-    font-size: 1.4rem;
-    font-weight: 800;
-    margin-bottom: 4px;
-}
+.cart-item-title { font-size: 1.4rem; font-weight: 800; margin-bottom: 4px; }
+.cart-item-title a { color: #333; text-decoration: none; }
+.cart-item-title a:hover { color: var(--shopx-accent); }
 
-.cart-item-title a {
-    color: #333;
-    text-decoration: none;
-}
+.cart-item-meta { font-size: 1.3rem; }
+.cart-discount-badge { background: var(--shopx-soft-bg); color: var(--shopx-accent); padding: 2px 6px; border-radius: 999px; font-size: 1.4rem; font-weight: 600; }
+.cart-product-info { font-size: 1.2rem; font-weight: 500; }
+.cart-item-oldprice { font-size: 1.2rem; color: #999; text-decoration: line-through; margin-top: 2px 0 0; }
 
-.cart-item-title a:hover {
-    color: var(--shopx-accent);
-}
+.cart-item-remove { border: none; background: transparent; color: #bbb; padding: 0; margin-right: 4px; }
+.cart-item-remove:hover { color: #ff4b4b; }
 
-.cart-item-meta {
-    font-size: 1.3rem;
-}
-
-.cart-discount-badge {
-    background: var(--shopx-soft-bg);
-    color: var(--shopx-accent);
-    padding: 2px 6px;
-    border-radius: 999px;
-    font-size: 1.4rem;
-    font-weight: 600;
-}
-
-.cart-product-info {
-    font-size: 1.2rem;
-    font-weight: 500;
-}
-
-.cart-item-oldprice {
-    font-size: 1.2rem;
-    color: #999;
-    text-decoration: line-through;
-    margin-top: 2px;
-}
-
-/* دکمه حذف آیتم */
-.cart-item-remove {
-    border: none;
-    background: transparent;
-    color: #bbb;
-    padding: 0;
-    margin-right: 4px;
-}
-
-.cart-item-remove:hover {
-    color: #ff4b4b;
-}
-
-/* فوتر پایین */
 .cart-panel-footer {
     border-top: 1px solid #f0f0f0;
     padding: 10px 16px 14px;
     background: #fff;
 }
 
-.cart-total-label {
-    font-size: 1.4rem;
-    color: #555;
-}
+.cart-total-label { font-size: 1.4rem; color: #555; }
+.cart-total-value { font-size: 1.2rem; font-weight: 600; }
 
-.cart-total-value {
-    font-size: 1.2rem;
-    font-weight: 600;
-}
-
-/* دکمه اصلی ثبت سفارش */
 .btn-cart-primary {
     background: var(--shopx-accent);
     border-color: var(--shopx-accent);
@@ -30086,7 +30139,6 @@ a .btn-product .btn-compare span :hover{
     border-radius: 999px;
     font-size: 1.2rem;
     padding: 8px 14px;
-    text-align: center;
 }
 
 .btn-cart-primary:hover {
@@ -30094,37 +30146,24 @@ a .btn-product .btn-compare span :hover{
     border-color: #e34832;
 }
 
-/* تصویر + بج تخفیف روی عکس */
-.cart-item-image {
-    position: relative;
-}
-
-.cart-item-image img {
-    width: 68px;
-    height: 68px;
-    object-fit: cover;
-    border-radius: 12px;
-    border: 1px solid #eee;
-}
+.cart-item-image { position: relative; }
 
 .cart-discount-badge.over-image {
     position: absolute;
     top: 4px;
-    right: 4px; /* برای RTL */
+    right: 4px;
     z-index: 2;
     background: var(--shopx-accent, #FA523C);
     color: #fff;
     padding: 2px 6px;
     border-radius: 999px;
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     font-weight: 600;
 }
 
-/* رنگ کالا زیر عنوان */
 .cart-item-color {
     display: flex;
     align-items: center;
-
     gap: 4px;
     margin-top: 2px;
     font-size: 0.9rem;
@@ -30133,24 +30172,69 @@ a .btn-product .btn-compare span :hover{
 
 .cart-item-color .color-dot {
     width: 12px;
-    box-shadow: 0 18px 40px rgba(0, 0, 0, .14);
     height: 12px;
     border-radius: 50%;
     border: 1px solid #ddd;
-}
-.cart-item-image {
-    position: relative;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, .14);
 }
 
-.cart-discount-badge.over-image {
+/* =============================================== */
+/* فیکس ریسپانسیو منوی همبرگر (آخرین تغییرات جدید) */
+/* =============================================== */
+.category-toggler {
+    position: relative;
+    direction: rtl;
+    display: inline-flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    gap: 10px;
+    color: #fff !important;
+    font-size: 16px;
+    font-weight: 900;
+    padding: 18px 16px;
+    text-decoration: none;
+    cursor: pointer;
+    border-radius: 4px;
+    line-height: 1;
+    height: 100%;
+}
+
+.category-toggler > *:not(.hamburger-icon) {
+    position: relative;
+    top: 2px;
+}
+
+.category-toggler .hamburger-icon {
+    position: relative;
+    width: 20px;
+    height: 14px;
+    display: inline-block;
+}
+
+.category-toggler .hamburger-icon::before,
+.category-toggler .hamburger-icon::after,
+.category-toggler .hamburger-icon span {
+    content: "";
     position: absolute;
-    top: 4px;
-    right: 4px;   /* چون RTL هستی */
-    z-index: 2;
-    background: var(--shopx-accent, #FA523C);
-    color: #fff;
-    padding: 2px 6px;
-    border-radius: 999px;
-    font-size: 0.75rem;
-    font-weight: 600;
+    right: 0;
+    width: 20px;
+    height: 2px;
+    background: #fff !important;
+    transition: none !important;
+}
+
+.category-toggler .hamburger-icon::before { top: 0; }
+.category-toggler .hamburger-icon span { top: 6px; }
+.category-toggler .hamburger-icon::after { bottom: 0; }
+
+.category-toggler.active .hamburger-icon::before,
+.category-toggler.active .hamburger-icon::after,
+.category-toggler.active .hamburger-icon span {
+    transform: none !important;
+    opacity: 1 !important;
+}
+
+.category-toggler:hover {
+    background: #FA523C !important;
+    border-radius: 4px;
 }

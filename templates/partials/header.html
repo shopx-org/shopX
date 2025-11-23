@@ -3,9 +3,9 @@
 <header class="header header-2 header-intro-clearance">
     <div class="header-top">
         <div class="container">
-            <div class="header-left">
-                <p>کالکشن های جدید به زودی در دسترس قرا می گیرند</p><a href="#">&nbsp;مطالعه بیشتر ...</a>
-            </div><!-- End .header-left -->
+           {# <div class="header-left"> #}
+            {#    <p>کالکشن های جدید به زودی در دسترس قرا می گیرند</p><a href="#">&nbsp;مطالعه بیشتر ...</a> #}
+            {#</div><!-- End .header-left --> #}
 
             <div class="header-right">
 
@@ -25,7 +25,18 @@
                                 {#                                    </div><!-- End .header-menu -->#}
                                 {#                                </div><!-- End .header-dropdown -->#}
                             </li>
-                            <li><a href="#" data-toggle="modal">ورود / ثبت نام</a></li>
+                            {% if user.is_authenticated %}
+                                <!-- کاربر وارد شده، فقط خروج نمایش داده شود -->
+                                <li>
+                                    <a href="{% url 'account:logout' %}">خروج</a>
+                                </li>
+                            {% else %}
+                                <!-- کاربر وارد نشده، فقط ورود / ثبت نام نمایش داده شود -->
+                                <li>
+                                    <a href="{% url 'account:otp_login' %}" data-toggle="modal">ورود / ثبت نام</a>
+                                </li>
+                            {% endif %}
+
                         </ul>
                     </li>
                 </ul><!-- End .top-menu -->
@@ -51,14 +62,59 @@
             {% include "search/header_search.html" %}
 
             <div class="header-right">
-                <div class="account">
+                {% comment %} <div class="account">
                     <a href="{% url 'dashboards:dashboard' %}" title="My account">
                         <div class="icon">
                             <i class="icon-user"></i>
                         </div>
                         <p>حساب کاربری</p>
                     </a>
-                </div><!-- End .compare-dropdown -->
+                </div><!-- End .compare-dropdown --> {% endcomment %}
+
+                <div class="dropdown cart-dropdown account">
+                    <a href="#" class="dropdown-toggle" role="button" data-toggle="dropdown"
+                       aria-haspopup="true" aria-expanded="false" data-display="static">
+                        <div class="icon">
+                            <i class="icon-user"></i>
+                        </div>
+                        <p>حساب کاربری</p>
+                    </a>
+                   {% if user.is_authenticated %}
+                    <!-- منوی واحد برای پروفایل و خروج -->
+                    <div class="dropdown-menu dropdown-menu-right">
+                        <div class="dropdown-cart-products">
+                            <div class="product">
+                                <div class="product-cart-details">
+                                    <h4 class="product-title">
+                                        <a href="{% url 'dashboards:dashboard' %}">پروفایل کاربری</a>
+                                    </h4>
+                                </div><!-- End .product-cart-details -->
+                            </div><!-- End .product -->
+
+                            <div class="product">
+                                <div class="product-cart-details">
+                                    <h4 class="product-title">
+                                        <a href="{% url 'account:logout' %}">خروج</a>
+                                    </h4>
+                                </div><!-- End .product-cart-details -->
+                            </div><!-- End .product -->
+                        </div><!-- End .dropdown-cart-products -->
+                    </div><!-- End .dropdown-menu -->
+                    {% else %}
+                    <!-- کاربر وارد نشده، فقط ورود / ثبت نام -->
+                    <div class="dropdown-menu dropdown-menu-right">
+                        <div class="dropdown-cart-products">
+                            <div class="product">
+                                <div class="product-cart-details">
+                                    <h4 class="product-title">
+                                        <a href="{% url 'account:otp_login' %}">ورود / ثبت نام</a>
+                                    </h4>
+                                </div><!-- End .product-cart-details -->
+                            </div><!-- End .product -->
+                        </div><!-- End .dropdown-cart-products -->
+                    </div><!-- End .dropdown-menu -->
+                    {% endif %}
+                </div><!-- End .cart-dropdown -->
 
                 <div class="wishlist">
                     <a href="{% url 'core:wishlist_page' %}" title="لیست محصولات مورد علاقه شما">
