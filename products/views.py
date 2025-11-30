@@ -105,12 +105,17 @@ class ProductBaseQS:
             .distinct()
         )
 
+
 class ProductListView(ProductBaseQS, ListView):
     model = Product
     template_name = "products/product_list.html"
     context_object_name = "products"
     paginate_by = 12
+    MAX_SCROLL_PAGES = 2   # فقط صفحه 1 و 2 اسکرول AJAX → از صفحه 3 به بعد pagination
 
+    # ------------------------------------------------------------------
+    # دسته‌بندی
+    # ------------------------------------------------------------------
     def get_category(self) -> Optional[Category]:
         path = self.kwargs.get("path")
         if path:
@@ -124,38 +129,49 @@ class ProductListView(ProductBaseQS, ListView):
                 return None
         return None
 
+    # ------------------------------------------------------------------
+    # QuerySet
+    # ------------------------------------------------------------------
     def get_queryset(self):
         qs = super().get_queryset() if hasattr(super(), "get_queryset") else self.base_qs()
 
+        # دسته‌بندی
         category = self.get_category()
         if category:
             tree_ids = list(category.get_descendants(include_self=True).values_list("id", flat=True))
             if hasattr(Product, "additional_categories"):
-                qs = qs.filter(Q(category_id__in=tree_ids) | Q(additional_categories__in=tree_ids))
+                qs = qs.filter(
+                    Q(category_id__in=tree_ids) |
+                    Q(additional_categories__in=tree_ids)
+                )
             else:
                 qs = qs.filter(category_id__in=tree_ids)
 
-        # brand filter
+        # برند
         brand_str = self.request.GET.get("brand", "").strip()
         if brand_str:
             try:
-                ids: Iterable[int] = [int(x) for x in brand_str.split(",") if x]
+                ids = [int(x) for x in brand_str.split(",") if x]
                 if ids:
                     qs = qs.filter(brand_fk_id__in=ids)
             except ValueError:
                 pass
 
-        # price range
+        # قیمت
         price_min = self.request.GET.get("min")
         price_max = self.request.GET.get("max")
         if price_min:
-            try: qs = qs.filter(price__gte=int(price_min))
-            except ValueError: pass
+            try:
+                qs = qs.filter(price__gte=int(price_min))
+            except ValueError:
+                pass
         if price_max:
-            try: qs = qs.filter(price__lte=int(price_max))
-            except ValueError: pass
+            try:
+                qs = qs.filter(price__lte=int(price_max))
+            except ValueError:
+                pass
 
-        # q
+        # جستجو
         q = self.request.GET.get("q", "").strip()
         if q:
             qs = qs.filter(
@@ -164,7 +180,7 @@ class ProductListView(ProductBaseQS, ListView):
                 Q(description__icontains=q)
             )
 
-        # sort
+        # مرتب‌سازی
         sort = self.request.GET.get("sort", "pop")
         if sort == "new":
             qs = qs.order_by("-created_at", "-id")
@@ -177,6 +193,7 @@ class ProductListView(ProductBaseQS, ListView):
         else:
             qs = qs.order_by("-views", "-id") if hasattr(Product, "views") else qs.order_by("-created_at", "-id")
 
+        # Prefetch‌ها
         return qs.prefetch_related(
             Prefetch(
                 "variants",
@@ -184,8 +201,11 @@ class ProductListView(ProductBaseQS, ListView):
                     ProductVariant.objects
                     .filter(is_active=True, color__is_active=True)
                     .select_related("color")
-                    .only("id", "product_id", "color_id",
-                          "color__id", "color__name", "color__hex_code", "color__slug")
+                    .only(
+                        "id", "product_id", "color_id",
+                        "color__id", "color__name",
+                        "color__hex_code", "color__slug"
+                    )
                 ),
                 to_attr="_prefetch_variants",
             ),
@@ -193,36 +213,49 @@ class ProductListView(ProductBaseQS, ListView):
             attr_prefetch_list(),
         ).distinct()
 
+    # ------------------------------------------------------------------
+    # Context
+    # ------------------------------------------------------------------
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
+
+        # دسته‌بندی و breadcrumb
         category = self.get_category()
         ctx["category"] = category
         ctx["ancestors"] = list(category.get_ancestors(include_self=True)) if category else []
 
+        # فیلترهای سایدبار
         full_qs = self.get_queryset().order_by()
-        brand_facets = (
+        ctx["brand_facets"] = (
             full_qs.values("brand_fk_id", "brand_fk__name")
             .annotate(cnt=Count("id"))
             .order_by("brand_fk__name")
         )
-        ctx["brand_facets"] = brand_facets
         ctx["brands"] = Brand.objects.filter(products__is_active=True).distinct().order_by("position", "name")
 
         agg = full_qs.aggregate(minp=Min("price"), maxp=Max("price"))
         ctx["price_min"] = agg["minp"]
         ctx["price_max"] = agg["maxp"]
 
-        b = self.request.GET.get("brand", "")
+        # برندهای انتخاب شده
+        selected = self.request.GET.get("brand", "")
         try:
-            ctx["selected_brands"] = {int(x) for x in b.split(",") if x}
+            ctx["selected_brands"] = {int(x) for x in selected.split(",") if x}
         except ValueError:
             ctx["selected_brands"] = set()
+
         ctx["q"] = self.request.GET.get("q", "").strip()
         ctx["current_sort"] = self.request.GET.get("sort", "pop")
 
-        # رنگ‌های روی کارت لیست
+        # صفحه‌بندی 
+        ctx["max_scroll_pages"] = self.MAX_SCROLL_PAGES  # مثلاً 2
+        ctx["paginate_by"]      = self.paginate_by       # مثلاً 12
+        ctx["enable_infinite_scroll"] = True
+
+
+        # تولید رنگ‌ها (همون قبلی)
         for p in ctx["products"]:
-            uniq: dict[int, dict] = {}
+            uniq = {}
             for v in getattr(p, "_prefetch_variants", []):
                 c = getattr(v, "color", None)
                 if c and c.id not in uniq:
@@ -235,10 +268,21 @@ class ProductListView(ProductBaseQS, ListView):
 
         return ctx
 
+    # ------------------------------------------------------------------
+    # پاسخ AJAX HTML (اسکرول HTML — برای نسخه حرفه‌ای **غیر فعال** می‌شود)
+    # ------------------------------------------------------------------
+    def render_to_response(self, context, **response_kwargs):
+        # نسخه HTML اسکرول قدیمی؛ در حالت JSON API از این استفاده نمی‌کنیم.
+        if self.request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return render(self.request, "products/_product_items.html", context)
+        return super().render_to_response(context, **response_kwargs)
+
+
 class CategoryProductListView(ProductListView):
     def get_category(self) -> Optional[Category]:
         path = self.kwargs.get("path", "")
         return _resolve_category_by_path(path)
+
 
 # ---------------- Variant Price API ----------------
 class VariantPriceView(View):

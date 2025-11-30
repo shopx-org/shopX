@@ -89,10 +89,136 @@
 
                         {# --- گرید محصولات: DROP-IN --- #}
                         <div class="products mb-3">
-                            <div class="row">
+                            <div class="row" id="product-list">
                                 {% for p in products %}
                                     <div class="col-6 col-md-4 col-xl-3">
-                                        <div class="product product-7">
+                                        <div class="product product-7 dk-product-card">
+
+                                            <figure class="product-media">
+
+                                                {% if p.is_new %}
+                                                    <span class="product-label label-new">جدید</span>
+                                                {% endif %}
+
+                                                {% if p.compare_at_price and p.compare_at_price > p.price %}
+                                                    <span class="product-label label-sale">
+                                                        {{ p.discount_percent|default:p.get_discount_percent }}٪ تخفیف
+                                                    </span>
+                                                {% endif %}
+
+                                                <a href="{{ p.get_absolute_url }}">
+                                                    {% if p.cover_image %}
+                                                        <img src="{{ p.cover_image.image.url }}" class="product-image" alt="{{ p.name }}">
+                                                    {% else %}
+                                                        <img src="{% static 'images/placeholder-600x600.png' %}" class="product-image" alt="{{ p.name }}">
+                                                    {% endif %}
+                                                </a>
+
+                                                <div class="product-action-vertical">
+                                                    <a href="#" class="btn-product-icon btn-wishlist btn-expandable"><span>علاقه‌مندی</span></a>
+                                                    <a href="{{ p.get_absolute_url }}" class="btn-product-icon btn-quickview" title="مشاهده سریع">
+                                                        <span>مشاهده</span>
+                                                    </a>
+                                                    <a href="#" class="btn-product-icon btn-compare"><span>مقایسه</span></a>
+                                                </div>
+
+                                                {% if p.stock <= 0 %}
+                                                    <div class="sold-out-badge">ناموجود</div>
+                                                {% endif %}
+                                            </figure>
+
+
+
+                                            <div class="product-body">
+
+                                                <div class="product-cat text-right">
+                                                    {% if p.category %}
+                                                        <a href="{{ p.category.get_absolute_url }}">{{ p.category.name }}</a>
+                                                    {% endif %}
+
+                                                    <div class="rating-compact text-right">
+                                                        <span class="score">
+                                                         {% if p.rating_count %}
+                                                            {{ p.rating_count }}
+                                                        {% else %}
+                                                            0
+                                                        {% endif %}
+                                                    </span>
+                                                        <span class="star" aria-hidden="true">★</span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="details-filter-row details-row-size">
+                                                    <label>رنگ : </label>
+                                                    <div class="product-nav product-nav-dots">
+                                                        {% if p.colors_list %}
+                                                            {% for c in p.colors_list|slice:":6" %}
+                                                                <a href="{{ p.get_absolute_url }}?color={{ c.slug }}"
+                                                                   class="{% if forloop.first %}active{% endif %}"
+                                                                   style="background: {{ c.hex }};"
+                                                                   title="{{ c.name }}">
+                                                                    <span class="sr-only">{{ c.name }}</span>
+                                                                </a>
+                                                            {% endfor %}
+                                                            {% if p.colors_list|length > 6 %}
+                                                                <span class="more-colors">+{{ p.colors_list|length|add:"-6" }}</span>
+                                                            {% endif %}
+                                                        {% else %}
+                                                            {# فال‌بک: از QuerySet رنگ‌های مدل (فیلد درست: hex_code) #}
+                                                            {% with colors=p.colors.all %}
+                                                                {% if colors %}
+                                                                    {% for c in colors|slice:":6" %}
+                                                                        <a href="{{ p.get_absolute_url }}?color={{ c.slug }}"
+                                                                           class="{% if forloop.first %}active{% endif %}"
+                                                                           style="background: {{ c.hex_code }};"
+                                                                           title="{{ c.name }}">
+                                                                            <span class="sr-only">{{ c.name }}</span>
+                                                                        </a>
+                                                                    {% endfor %}
+                                                                {% else %}
+                                                                    <span class="text-muted">بدون تنوع رنگ</span>
+                                                                {% endif %}
+                                                            {% endwith %}
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+
+
+
+
+                                                <h3 class="product-title text-right">
+                                                    <a href="{{ p.get_absolute_url }}">{{ p.name }}</a>
+                                                </h3>
+
+
+                                                {% if p.stock and p.stock < 5 %}
+                                                    <p class="low-stock mt-1">تنها {{ p.stock }} عدد باقی مانده</p>
+                                                {% endif %}
+
+
+                                                <div class="product-price text-right">
+
+                                                    {% if p.compare_at_price and p.compare_at_price > p.price %}
+                                                        <span class="new-price">
+                                                            {{ p.price|fa_price }} <small>تومان</small>
+                                                        </span>
+
+                                                        <span class="old-price">
+                                                            {{ p.compare_at_price|fa_price }} <small>تومان</small>
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="new-price">{{ p.price|fa_price }} <small>تومان</small></span>
+                                                    {% endif %}
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+
+
+
+                                        {% comment %} <div class="product product-7">
                                             {# text-center رو برداشتیم تا بتونیم راست‌چین کنیم #}
 
                                             <figure class="product-media">
@@ -203,7 +329,7 @@
                                                     {% endif %}
                                                 </div>
                                             </div>
-                                        </div>
+                                        </div> {% endcomment %}
                                     </div>
                                 {% empty %}
                                     <div class="col-12">
@@ -214,50 +340,26 @@
                         </div>
 
 
-                        <!-- صفحه‌بندی -->
+                        <!-- صفحه‌بندی -->                        
+                        {% comment %} {% if is_paginated and page_obj.number > max_scroll_pages %} {% endcomment %}
                         {% if is_paginated %}
-                            <nav aria-label="Page navigation">
-                                <ul class="pagination">
-                                    {% if page_obj.has_previous %}
-                                        <li class="page-item">
-                                            <a class="page-link page-link-prev"
-                                               href="?{% querystring page=page_obj.previous_page_number %}">
-                                                <span aria-hidden="true"><i class="icon-long-arrow-right"></i></span>قبلی
-                                            </a>
-                                        </li>
-                                    {% else %}
-                                        <li class="page-item disabled">
-                                            <a class="page-link page-link-prev" href="#" tabindex="-1"
-                                               aria-disabled="true">
-                                                <span aria-hidden="true"><i class="icon-long-arrow-right"></i></span>قبلی
-                                            </a>
-                                        </li>
-                                    {% endif %}
-
-                                    {% for i in paginator.page_range %}
-                                        <li class="page-item {% if page_obj.number == i %}active{% endif %}">
-                                            <a class="page-link" href="?{% querystring page=i %}">{{ i }}</a>
-                                        </li>
-                                    {% endfor %}
-
-                                    {% if page_obj.has_next %}
-                                        <li class="page-item">
-                                            <a class="page-link page-link-next"
-                                               href="?{% querystring page=page_obj.next_page_number %}">
-                                                بعدی <span aria-hidden="true"><i
-                                                    class="icon-long-arrow-left"></i></span>
-                                            </a>
-                                        </li>
-                                    {% else %}
-                                        <li class="page-item disabled">
-                                            <a class="page-link page-link-next" href="#">
-                                                بعدی <span aria-hidden="true"><i
-                                                    class="icon-long-arrow-left"></i></span>
-                                            </a>
-                                        </li>
-                                    {% endif %}
-                                </ul>
-                            </nav>
+                                                    <nav aria-label="Page navigation" class="mt-5">
+                                                        <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item"><a class="page-link" href="?{% querystring page=page_obj.previous_page_number %}">قبلی</a></li>
+                        {% endif %}
+                        {% for num in paginator.page_range %}
+                        {% if num >= page_obj.number|add:-2 and num <= page_obj.number|add:2 %}
+                                                                    <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                                                                        <a class="page-link" href="?{% querystring page=num %}">{{ num }}</a>
+                                                                    </li>
+                        {% endif %}
+                        {% endfor %}
+                        {% if page_obj.has_next %}
+                        <li class="page-item"><a class="page-link" href="?{% querystring page=page_obj.next_page_number %}">بعدی</a></li>
+                        {% endif %}
+                                                        </ul>
+                                                    </nav>
                         {% endif %}
                     </div><!-- End .col-lg-9 -->
 
@@ -465,6 +567,7 @@
             </div>
         </div>
     </main>
+{% comment %} {% block CSS-JS %} {% endcomment %}
 
     <script>
         // چند انتخاب برند را به یک CSV در name=brand تبدیل می‌کند
@@ -489,4 +592,131 @@
             document.getElementById('price-max').value = (max !== '' && max !== null) ? max : '';
         }
     </script>
+
+
+    <script>
+    window.MAX_SCROLL_PAGES = {{ max_scroll_pages|default:2 }};
+    window.PAGINATE_BY = {{ paginate_by|default:12 }};
+    window.THRESHOLD = {{ threshold|default:24 }};
+</script>
+
+   <script>
+// چند انتخاب برند را به یک CSV در name=brand تبدیل می‌کند
+function toggleBrand(chk) {
+const form = document.getElementById('brand-form');
+const checks = form.querySelectorAll('input[name="brand"]');
+const vals = [];
+            checks.forEach(c => {
+if (c.checked) vals.push(c.value);
+            });
+            checks.forEach(c => c.disabled = true);
+const hidden = document.createElement('input');
+            hidden.type = 'hidden';
+            hidden.name = 'brand';
+            hidden.value = vals.join(',');
+            form.appendChild(hidden);
+        }
+// تنظیم بازه قیمت از رادیویی‌های پرست
+function setRange(min, max) {
+            document.getElementById('price-min').value = (min !== '' && min !== null) ? min : '';
+            document.getElementById('price-max').value = (max !== '' && max !== null) ? max : '';
+        }
+    </script>
+
+<script>
+    window.MAX_SCROLL_PAGES = {{ max_scroll_pages|default:2 }};
+</script>
+
+<script>
+    {% if page_obj.number <= max_scroll_pages and not page_obj.has_previous %}
+        const API_URL = "{% url 'products:product_list_api' %}";
+        let currentPage = {{ page_obj.number }};
+        const MAX_SCROLL_PAGES = {{ max_scroll_pages }};
+        let loading = false;
+
+        async function loadMore() {
+            if (loading || currentPage >= MAX_SCROLL_PAGES) return;
+
+            loading = true;
+            currentPage++;
+
+            const params = new URLSearchParams(window.location.search);
+            params.set('page', currentPage);
+
+            try {
+                const res = await fetch(`${API_URL}?${params.toString()}`);
+                if (!res.ok) return;
+
+                const data = await res.json();
+
+                // اگر هیچ محصولی نیومد → دیگه ادامه نده (مهم!)
+                if (!data.products || data.products.length === 0) {
+                    loading = false;
+                    return;
+                }
+
+                const container = document.getElementById('product-list');
+
+                data.products.forEach(p => {
+                    if (!document.querySelector(`[data-product-id="${p.id}"]`)) {
+                        container.insertAdjacentHTML('beforeend', `
+                            <div class="col-6 col-md-4 col-xl-3" data-product-id="${p.id}">
+                                <div class="product product-7 dk-product-card">
+                                    <figure class="product-media">
+                                        ${p.is_new ? '<span class="product-label label-new">جدید</span>' : ''}
+                                        ${p.discount_percent ? '<span class="product-label label-sale">'+p.discount_percent+'%</span>' : ''}
+                                        <a href="${p.url}">
+                                            <img src="${p.cover}" class="product-image" alt="${p.name}">
+                                        </a>
+                                        ${p.stock <= 0 ? '<div class="sold-out-badge">ناموجود</div>' : ''}
+                                    </figure>
+                                    <div class="product-body">
+                                        <h3 class="product-title text-right"><a href="${p.url}">${p.name}</a></h3>
+                                        <div class="product-price text-right">
+                                            ${p.compare_at_price && p.compare_at_price > p.price 
+                                                ? `<span class="new-price">${p.price.toLocaleString()} <small>تومان</small></span>
+                                                   <span class="old-price">${p.compare_at_price.toLocaleString()} <small>تومان</small></span>`
+                                                : `<span class="new-price">${p.price.toLocaleString()} <small>تومان</small></span>`
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `);
+                    }
+                });
+
+                // وقتی صفحه ۲ لود شد → صفحه ۲ رو در پجینیشن اکتیو کن
+                if (currentPage === MAX_SCROLL_PAGES) {
+                    const link = document.querySelector('.pagination a.page-link[href*="page=2"]');
+                    if (link) {
+                        document.querySelectorAll('.pagination .page-item').forEach(el => el.classList.remove('active'));
+                        link.parentElement.classList.add('active');
+                    }
+                }
+
+            } catch (e) {
+                console.error('خطا در لود:', e);
+            } finally {
+                loading = false;
+            }
+        }
+
+        // اسکرول خزنده
+        window.addEventListener('scroll', () => {
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 800) {
+                loadMore();
+            }
+        });
+
+        // فقط اگه واقعاً بیشتر از ۱۲ محصول داریم، صفحه ۲ رو لود کن
+        const totalProducts = {{ page_obj.paginator.count }};
+        if (totalProducts > {{ paginate_by }} && currentPage < MAX_SCROLL_PAGES) {
+            loadMore();
+        }
+
+    {% endif %}
+</script>
+
+{% comment %} {% endblock %} {% endcomment %}
 {% endblock %}

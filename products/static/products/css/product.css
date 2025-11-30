@@ -2974,3 +2974,69 @@ body.no-scroll {
 
 
 /* end compare product */
+
+
+/* product list style */
+.dk-product-card {
+    position: relative;
+}
+
+/* درصد تخفیف */
+.product-label.label-sale {
+    background: #f44336;
+    color: #fff;
+    padding: 2px 6px;
+    font-size: 0.75rem;
+    border-radius: 4px;
+    right: 10px;
+    top: 10px;
+    position: absolute;
+}
+
+/* ناموجود */
+.sold-out-badge {
+    background: rgba(0,0,0,0.7);
+    color: #fff;
+    padding: 6px 12px;
+    font-size: 0.9rem;
+    border-radius: 6px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+}
+
+/* رنگ‌ها */
+.color-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: inline-block;
+    border: 1px solid #ddd;
+    margin-left: 4px;
+}
+
+.more-colors {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+/* امتیاز */
+.rating-compact {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 0.9rem;
+}
+
+.rating-compact .star {
+    color: #ffcc00;
+    font-size: 1.1rem;
+}
+
+.old-price {
+    text-decoration: line-through;
+    color: #888;
+    margin-right: 5px;
+}
+/* end product list style */
