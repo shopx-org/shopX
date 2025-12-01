@@ -1,8 +1,5 @@
 # checkout/views.py
-
-# checkout/views.py
 from __future__ import annotations
-
 from decimal import Decimal
 from types import SimpleNamespace
 from typing import Any, Dict, Iterable, List, Optional, Tuple
@@ -444,18 +441,12 @@ def checkout_review(request: HttpRequest) -> HttpResponse:
         "shipping_cost": shipping_cost,
     }
     ctx.update(_cart_summary_ctx(cart))
-    print("=== PRICING DEBUG ===")
-    print(result.explain)
+
     return render(request, "checkout/review.html", ctx)
 
 
 @login_required
 def checkout_confirm(request: HttpRequest) -> HttpResponse:
-    """
-    مرحله 3:
-      - الان فقط POST می‌گیریم
-      - بعداً ایجاد Order + Payment
-    """
     if request.method != "POST":
         return redirect("checkout:review")
 
@@ -464,15 +455,84 @@ def checkout_confirm(request: HttpRequest) -> HttpResponse:
         messages.info(request, "سبد خرید شما خالی است.")
         return redirect("cart:cart_detail")
 
+    # 1) آدرس انتخاب‌شده از سشن
     addr_id = request.session.get(SESSION_KEY_ADDR)
     address = Address.objects.filter(user=request.user, pk=addr_id).first()
     if not address:
         messages.error(request, "آدرس نامعتبر است.")
         return redirect("checkout:address")
 
+    # 2) پرایسینگ نهایی با همون موتور review
+    from decimal import Decimal
+    from orders.models import Order, OrderItem
 
-    messages.success(request, "سفارش شما تایید اولیه شد. (ایجاد Order/Payment به‌زودی)")
-    return redirect("checkout:review")
+    result, lines, groups = _evaluate_cart(cart)
+    summary = _summary_from_result(result)
+
+    # 3) ساخت Order در اپ orders
+    order = Order.objects.create(
+        user=request.user,
+        address=address,
+        subtotal=summary["subtotal"],
+        total_discount=summary["total_discount"],
+        total=summary["total"],
+        payment_status=Order.PaymentStatus.PENDING,
+        fulfillment_status=Order.FulfillmentStatus.NEW,
+    )
+
+    # 4) خلاصه‌ی پر-گید (دقیقاً همون منطق checkout_review)
+    D0 = Decimal("0")
+    per_gid: Dict[str, Dict[str, Any]] = {}
+
+    for ln in getattr(result, "lines", []) or []:
+        gid = getattr(ln, "_cart_gid", None)
+        if not gid:
+            continue
+
+        row = per_gid.setdefault(
+            gid,
+            {"items_subtotal": D0, "services_total": D0, "discount": D0, "total": D0, "services": []},
+        )
+
+        line_sub = getattr(ln, "line_subtotal", D0)
+        line_disc = getattr(ln, "line_discount", D0)
+        line_total = getattr(ln, "line_total", line_sub - line_disc)
+
+        is_service = getattr(ln, "_exclude_from_discounts", False)
+        if is_service:
+            row["services_total"] += line_sub
+        else:
+            row["items_subtotal"] += line_sub
+
+        row["discount"] += line_disc
+        row["total"] += line_total
+
+    # 5) ساخت OrderItem بر اساس هر ردیف سبد
+    for gid, it in groups:
+        pricing = per_gid.get(
+            gid,
+            {"items_subtotal": D0, "services_total": D0, "discount": D0, "total": D0, "services": []},
+        )
+
+        product_obj = getattr(it, "product")
+        variant_obj = getattr(it, "variant", None)
+        qty = getattr(it, "qty", 1) or 1
+
+        unit_price = (pricing["items_subtotal"] / qty) if qty else pricing["items_subtotal"]
+
+        OrderItem.objects.create(
+            order=order,
+            product=product_obj,
+            variant=variant_obj,
+            qty=qty,
+            unit_price=unit_price,
+            discount=pricing["discount"],
+            total=pricing["total"],
+            product_name=getattr(product_obj, "name", str(product_obj)),
+        )
+
+    # 6) رفتن به مرحله پرداخت (فعلاً همون payment_start تستی)
+    return redirect("orders:payment_start", order_id=order.id)
 
 # from __future__ import annotations
 #

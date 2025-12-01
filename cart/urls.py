@@ -25,5 +25,6 @@ urlpatterns = [
     path("toggle-service/<int:product_id>/<int:service_id>/", views.cart_toggle_service_no_variant,
          name="cart_toggle_service_no_variant"),
     path("set-coupon/", views.cart_set_coupon, name="cart_set_coupon"),
+    path("api/header-summary/", views.cart_header_summary, name="cart_header_summary"),
 ]
 

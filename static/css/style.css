@@ -1020,6 +1020,7 @@ blockquote.text-white cite span {
 
 .header-middle {
     border-bottom: .1rem solid #213555;
+    margin-bottom: 2rem;
 }
 
 .header-middle .menu > li > a {
@@ -14732,6 +14733,7 @@ small.form-text {
     padding-left: 2.6rem;
     margin-top: 1rem;
     margin-bottom: 1rem;
+    color: #FA523C;
 }
 
 .custom-control-label {
@@ -14765,7 +14767,7 @@ small.form-text {
 }
 
 .custom-checkbox .custom-control-label::before {
-    border-radius: 0;
+    border-radius: 15;
 }
 
 .custom-checkbox .custom-control-label::after {
@@ -14787,8 +14789,8 @@ small.form-text {
 
 .custom-checkbox .custom-control-input:checked ~ .custom-control-label::before {
     color: #fff;
-    border-color: #333;
-    background-color: #333;
+    border-color: #989595;
+    background-color: #FA523C;
 }
 
 .custom-checkbox .custom-control-input:indeterminate ~ .custom-control-label::before {
@@ -28979,7 +28981,7 @@ html {
     height: var(--media-h);
     padding: 8px;
     margin: 0;
-    background: #a9a5a5;
+    background: #ffffff;
 }
 
 .page-content .products .product.product-7 img.product-image {
@@ -29923,4 +29925,232 @@ input[type=number]{ -moz-appearance:textfield }
 
 a .btn-product .btn-compare span :hover{
     text-decoration: none !important;
+}
+:root {
+    --shopx-accent: var(--accent, #FA523C);
+    --shopx-soft-bg: #fff7f5;
+}
+
+/* خود باکس دراپ‌داون */
+.cart-dropdown .cart-panel-menu {
+    width: 420px;
+    max-height: 540px;
+    padding: 0;
+    border: none;
+    margin-top: 4rem;
+    margin-bottom: 2rem;
+
+    box-shadow: 0 18px 40px rgba(0, 0, 0, .18);
+    overflow: hidden;
+}
+
+/* کانتینر داخلی */
+.cart-panel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background-color: #fff;
+}
+
+/* هدر بالا */
+.cart-panel-header {
+    padding: 14px 18px;
+    border-bottom: 1px solid #f0f0f0;
+    background: #fafafa;
+}
+
+.cart-panel-title {
+    direction: rtl;
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.cart-panel-sub {
+    font-size: 1rem;
+    color: #FA523C;
+}
+
+.cart-panel-link {
+    font-size: 1.4rem;
+    color: var(--shopx-accent);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+/* بدنه (لیست آیتم‌ها) */
+.cart-panel-body {
+    padding: 10px 14px;
+    overflow-y: auto;
+    max-height: 440px;
+}
+
+.cart-panel-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid #f4f4f4;
+}
+
+.cart-panel-item:last-child {
+    border-bottom: none;
+}
+
+.cart-item-image img {
+    width: 68px;
+    height: 68px;
+    object-fit: cover;
+    border-radius: 12px;
+    border: 1px solid #eee;
+}
+
+.cart-item-info {
+    flex: 1;
+}
+
+.cart-item-title {
+    font-size: 1.4rem;
+    font-weight: 800;
+    margin-bottom: 4px;
+}
+
+.cart-item-title a {
+    color: #333;
+    text-decoration: none;
+}
+
+.cart-item-title a:hover {
+    color: var(--shopx-accent);
+}
+
+.cart-item-meta {
+    font-size: 1.3rem;
+}
+
+.cart-discount-badge {
+    background: var(--shopx-soft-bg);
+    color: var(--shopx-accent);
+    padding: 2px 6px;
+    border-radius: 999px;
+    font-size: 1.4rem;
+    font-weight: 600;
+}
+
+.cart-product-info {
+    font-size: 1.2rem;
+    font-weight: 500;
+}
+
+.cart-item-oldprice {
+    font-size: 1.2rem;
+    color: #999;
+    text-decoration: line-through;
+    margin-top: 2px;
+}
+
+/* دکمه حذف آیتم */
+.cart-item-remove {
+    border: none;
+    background: transparent;
+    color: #bbb;
+    padding: 0;
+    margin-right: 4px;
+}
+
+.cart-item-remove:hover {
+    color: #ff4b4b;
+}
+
+/* فوتر پایین */
+.cart-panel-footer {
+    border-top: 1px solid #f0f0f0;
+    padding: 10px 16px 14px;
+    background: #fff;
+}
+
+.cart-total-label {
+    font-size: 1.4rem;
+    color: #555;
+}
+
+.cart-total-value {
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+/* دکمه اصلی ثبت سفارش */
+.btn-cart-primary {
+    background: var(--shopx-accent);
+    border-color: var(--shopx-accent);
+    color: #fff;
+    border-radius: 999px;
+    font-size: 1.2rem;
+    padding: 8px 14px;
+    text-align: center;
+}
+
+.btn-cart-primary:hover {
+    background: #e34832;
+    border-color: #e34832;
+}
+
+/* تصویر + بج تخفیف روی عکس */
+.cart-item-image {
+    position: relative;
+}
+
+.cart-item-image img {
+    width: 68px;
+    height: 68px;
+    object-fit: cover;
+    border-radius: 12px;
+    border: 1px solid #eee;
+}
+
+.cart-discount-badge.over-image {
+    position: absolute;
+    top: 4px;
+    right: 4px; /* برای RTL */
+    z-index: 2;
+    background: var(--shopx-accent, #FA523C);
+    color: #fff;
+    padding: 2px 6px;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+/* رنگ کالا زیر عنوان */
+.cart-item-color {
+    display: flex;
+    align-items: center;
+
+    gap: 4px;
+    margin-top: 2px;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.cart-item-color .color-dot {
+    width: 12px;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, .14);
+    height: 12px;
+    border-radius: 50%;
+    border: 1px solid #ddd;
+}
+.cart-item-image {
+    position: relative;
+}
+
+.cart-discount-badge.over-image {
+    position: absolute;
+    top: 4px;
+    right: 4px;   /* چون RTL هستی */
+    z-index: 2;
+    background: var(--shopx-accent, #FA523C);
+    color: #fff;
+    padding: 2px 6px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
 }

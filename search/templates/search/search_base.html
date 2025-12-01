@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block title %}
+جستجو{% if query %} | {{ query }}{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    {% block search_content %}{% endblock %}
+</div>
+{% endblock %}

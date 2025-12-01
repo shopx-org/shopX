@@ -98,6 +98,19 @@ class Cart:
             self._data.pop(key)
             self._save()
 
+    def clear(self, *, keep_coupon: bool = False) -> None:
+        """
+        خالی کردن کامل سبد خرید.
+        اگر keep_coupon=False باشد، کوپن هم پاک می‌شود.
+        """
+        # همه‌ی آیتم‌ها را خالی کن
+        self._data = {}
+        self._save()
+
+        # در صورت نیاز کوپن را هم پاک کن
+        if not keep_coupon:
+            self.session.pop(self.KEY_COUPON, None)
+            self.session.modified = True
     # ---------- iteration ----------
     def items(self) -> Generator[SimpleNamespace, None, None]:
         for row in self._data.values():
@@ -128,6 +141,37 @@ class Cart:
                 unit_price = Decimal(str((variant.price if (variant and variant.price is not None) else product.price)))
 
             yield SimpleNamespace(product=product, variant=variant, qty=qty, services=svc_objs, unit_price=unit_price)
+
+    def get_total(self) -> Decimal:
+        """
+        مبلغ نهایی قابل پرداخت (بعد از تخفیف‌ها)، برای استفاده در هدر/مینی‌کارت.
+        منطقش با _summary_payload در cart/views.py هماهنگ است.
+        """
+        try:
+            result = self.pricing_result()
+        except Exception:
+            return Decimal("0")
+
+        lines = getattr(result, "lines", []) or []
+
+        sub_exclusive = Decimal("0")  # جمع خطوطی که تخفیف می‌خورند (کالاها)
+        services_total = Decimal("0")  # جمع سرویس‌ها (exclude شده)
+        line_disc = Decimal("0")  # جمع تخفیف‌های خطی
+
+        for ln in lines:
+            line_sub = getattr(ln, "line_subtotal", Decimal("0"))
+            if getattr(ln, "_exclude_from_discounts", False):
+                services_total += line_sub
+            else:
+                sub_exclusive += line_sub
+
+            line_disc += getattr(ln, "line_discount", Decimal("0"))
+
+        cart_disc = getattr(result, "cart_discount", Decimal("0"))
+        total_discount = line_disc + cart_disc
+
+        payable = (sub_exclusive - total_discount) + services_total
+        return payable
 
     # ---------- pricing ----------
     def _build_pricing_lines(self):

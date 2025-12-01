@@ -11,7 +11,35 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 env = environ.Env(DEBUG=(bool, True))
 environ.Env.read_env(BASE_DIR / ".env")
 
+
+
+# ── ZARINPAL ───────────────────────────────────────────────────────────────────────
+
+ZARINPAL_MERCHANT_ID = env("ZARINPAL_MERCHANT_ID")
+ZARINPAL_SANDBOX = env.bool("ZARINPAL_SANDBOX", default=True)
+
+ZARINPAL_REQUEST_URL = (
+    "https://sandbox.zarinpal.com/pg/v4/payment/request.json"
+    if ZARINPAL_SANDBOX else
+    "https://api.zarinpal.com/pg/v4/payment/request.json"
+)
+
+ZARINPAL_VERIFY_URL = (
+    "https://sandbox.zarinpal.com/pg/v4/payment/verify.json"
+    if ZARINPAL_SANDBOX else
+    "https://api.zarinpal.com/pg/v4/payment/verify.json"
+)
+
+ZARINPAL_STARTPAY_URL = (
+    "https://sandbox.zarinpal.com/pg/StartPay/"
+    if ZARINPAL_SANDBOX else
+    "https://www.zarinpal.com/pg/StartPay/"
+)
+
+
 # ── Core ───────────────────────────────────────────────────────────────────────
+
+
 SECRET_KEY = env("SECRET_KEY", default="django-insecure-change-me-in-.env")
 DEBUG = env.bool("DEBUG", default=True)
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["127.0.0.1", "localhost"])
@@ -39,7 +67,7 @@ INSTALLED_APPS = [
     "cart.apps.CartConfig",
     "checkout.apps.CheckoutConfig",
     "orders.apps.OrdersConfig",
-
+    "search.apps.SearchConfig",
 
     # Third-party
     "widget_tweaks",
@@ -84,7 +112,8 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "Core.context_processors.header_categories",
-                "cart.context_processors.cart_badge",
+                'cart.context_processors.cart_badge',
+                'cart.context_processors.mini_cart',
                 "Core.context_processors.wishlist_context",
             ],
         },

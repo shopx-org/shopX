@@ -1,0 +1,652 @@
+/* موقعیت کلی dropdown */
+.header-search-wrapper {
+    position: relative;
+}
+
+/* ظرف اصلی dropdown */
+#search-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    left: 0;
+    margin-top: 6px;
+    background: #ffffff;
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12);
+    border-radius: 12px;
+    max-height: 420px;
+    overflow-y: auto;
+    z-index: 1000;
+    padding: 8px 0 4px;
+    border: 1px solid #f1f5f9;
+}
+
+/* وقتی خالی است */
+.search-suggest-empty {
+    padding: 12px 16px;
+    font-size: 0.9rem;
+    color: #313439;
+}
+
+/* گروه هر دسته‌بندی */
+.search-suggest-group {
+    padding: 6px 14px 8px;
+}
+
+.search-suggest-group + .search-suggest-group {
+    border-top: 1px solid #f3f4f6;
+}
+
+/* عنوان دسته‌بندی */
+.search-suggest-group-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #313439;
+    margin-bottom: 6px;
+}
+
+/* آیتم محصول */
+.search-suggest-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 6px;
+    text-decoration: none;
+    color: inherit;
+    border-radius: 8px;
+}
+
+.search-suggest-item:hover {
+    background: #f3efed;
+}
+
+/* تصویر کوچک محصول */
+.search-suggest-thumb {
+    width: 54px;
+    height: 45px;
+    flex: 0 0 52px;
+    margin-left: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: 8px;
+    background: #f3f4f6;
+}
+
+.search-suggest-thumb img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: cover;
+}
+
+.search-suggest-thumb.no-thumb {
+    background: #f9fafb;
+}
+
+/* متن محصول */
+.search-suggest-meta {
+    flex: 1;
+    min-width: 0;
+}
+
+/* نام محصول: بزرگ و بولد */
+.search-suggest-name {
+    text-align: right ;
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: #111827;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* برند / متن فرعی */
+.search-suggest-brand {
+    font-size: 0.95rem;
+    color: #313439;
+    margin-top: 2px;
+}
+
+/* بخش پایین: مشاهده همه نتایج */
+.search-suggest-footer {
+    border-top: 1px solid #f3f4f6;
+    padding: 6px 14px 8px;
+    margin-top: 4px;
+}
+
+.search-suggest-view-all {
+    display: block;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 600;
+     color: #1d2124;
+    text-decoration: none;
+}
+
+.search-suggest-view-all:hover {
+    text-decoration: none;
+    color: #FA523C;
+
+}
+
+/* برای RTL که از راست تراز بشود */
+html[dir="rtl"] .search-suggest-thumb {
+    margin-right: 0;
+    margin-left: 10px;
+}
+/* ===== Search Results Cards ===== */
+
+.search-results-grid .product {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    background: #fff;
+}
+
+.search-results-grid .product:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.10);
+}
+
+/* باکس تصویر */
+.search-results-grid .product-media {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    min-height: 250px;
+    max-height: 260px;
+    background: #f9fafb;
+}
+
+/* خود تصویر */
+.search-results-grid .product-image {
+    width: 100%;
+    max-width: 100%;
+    height: 220px;
+    object-fit: contain;   /* تصویر بدون کشیدگی داخل باکس */
+}
+
+/* بدنه کارت */
+.search-results-grid .product-body {
+    padding: 10px 14px 14px;
+}
+
+/* دسته و امتیاز */
+.search-results-grid .product-cat {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    margin-bottom: 4px;
+}
+
+/* عنوان محصول: حداکثر دو خط */
+.search-results-grid .product-title a {
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;       /* دو خط */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* قیمت‌ها */
+.search-results-grid .product-price .new-price .num {
+    font-size: 2.3rem;
+    font-weight: 700;
+}
+
+.search-results-grid .product-price .old-price .num {
+    font-size: 0.8rem;
+}
+
+/* کارت‌ها روی موبایل کمی جمع‌وجورتر */
+@media (max-width: 576px) {
+    .search-results-grid .product-media {
+        min-height: 210px;
+        max-height: 210px;
+    }
+    .search-results-grid .product-image {
+        height: 190px;
+    }
+}
+
+.filters-card {
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    background: #fff;
+    overflow: hidden;
+    font-size: 0.875rem;
+}
+
+.filters-card-header {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #eee;
+    background-color: #f9f9f9;
+}
+
+.filters-card-title {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.filters-card-toggle {
+    width: 24px;
+    height: 24px;
+    border-radius: 999px;
+    border: 1px solid #ddd;
+    font-size: 0.75rem;
+}
+
+.filters-card-body {
+    padding: 0.75rem 1rem 1rem;
+}
+
+.filters-row {
+    font-size: 0.85rem;
+}
+
+.filters-divider {
+    border-top: 1px solid #eee;
+}
+
+.filters-group {
+    margin-bottom: 0.5rem;
+}
+
+.filters-group-title {
+    padding: 0.45rem 0;
+    cursor: pointer;
+    color: #333;
+    text-decoration: none;
+    font-size: 0.85rem;
+}
+
+.filters-group-title i {
+    font-size: 0.8rem;
+}
+
+.filters-group-body {
+    padding: 0.4rem 0 0.6rem;
+}
+
+.filters-group-body .form-control-sm,
+.filters-group-body .form-select-sm {
+    font-size: 0.8rem;
+}
+/* کارت فیلترها کلی */
+.filters-card {
+    border: 1px solid #e5e5e5;
+    border-radius: 10px;
+    background: #fff;
+    font-size: 1.8rem;
+}
+
+/* هدر کارت */
+.filters-card-header {
+    padding: 0.9rem 1.5rem;
+    border-bottom: 1px solid #eee;
+    background-color: #f9fafb;
+}
+
+.filters-card-title {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-right: 1rem;
+}
+
+/* بدنه */
+.filters-card-body {
+    padding: 0.75rem 1rem 1rem;
+}
+
+.price-filter {
+    font-size: 1.5rem;
+    color: #252424;
+}
+
+/* نوار قیمت شبیه تکنولایف */
+.price-range-track {
+    position: relative;
+    height: 8px;
+    width: 100%;
+    align-content: center;
+    border-radius: 888px;
+    background: #e5edff;      /* آبی خیلی روشن */
+    overflow: hidden;
+}
+
+.price-range-handle {
+    position: absolute;
+    top: 50%;
+    width: 16px;
+    height: 16px;
+    border-radius: 999px;
+    background: #FA523C;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 0 2px #fff, 0 0 4px rgba(15, 23, 42, 0.3);
+}
+
+/* محل تقریبی دستگیره‌ها – انجام دکوراتیو */
+.price-range-handle.left-handle {
+    left: 10%;
+}
+
+.price-range-handle.right-handle {
+
+    left: 90%;
+}
+
+
+.price-input .form-control {
+    font-size: 1.5rem;
+    height: 4rem;
+    border-radius: 8px !important;
+}
+
+
+.price-input .input-group-text {
+    font-size: 1.4rem;
+    padding: 0.25rem 0.9rem;
+    background: #f9fafb;
+    border-color: #e5e5e5;
+    margin-top: 1rem;
+    border-radius: 8px;  /* گوشه‌های راست گرد */
+    height: 4rem;                /* هم‌ارتفاع با اینپوت */
+    display: flex;
+
+    align-items: center;
+}
+/* عنوان‌های گروه فیلتر */
+.filters-group-title {
+    padding: 0.4rem 0;
+    font-size: 1.9rem;
+    cursor: pointer;
+    margin-top: 1rem;
+    border-radius: 8px;
+    text-align: center;
+    align-content: center;
+}
+.price-input {
+    display: flex;              /* اینپوت و تومان کنار هم */
+    align-items: center;
+}
+
+.price-range {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #252424;
+}
+
+.is-stock {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #252424;
+}
+.price-range-label{
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #252424;
+
+}
+
+.btn-price-range{
+    color: #FA523C;
+    background-color: transparent;
+    border-radius: 8px !important;
+    padding: 1.2rem .8rem;
+    font-size: 1.3rem;
+    font-weight: 600;
+    line-height: 1.5;
+}
+
+.btn-brand-filter{
+    color: #FA523C;
+    background-color: transparent;
+    border-radius: 8px !important;
+    padding: 1.2rem .8rem;
+    font-size: 1.3rem;
+    font-weight: 600;
+    line-height: 1.5;
+}
+
+.btn-cat-filter{
+    color: #FA523C;
+    background-color: transparent;
+    border-radius: 8px !important;
+    padding: 1.2rem .8rem;
+    font-size: 1.3rem;
+    font-weight: 600;
+    line-height: 1.5;
+
+}
+
+.filter-remove{
+     color: #FA523C;
+    background-color: transparent;
+    border-radius: 8px !important;
+    padding: 1.2rem .8rem;
+    font-size: 1.3rem;
+    font-weight: 600;
+    line-height: 1.5;
+}
+
+.cat-select-wrapper {
+    position: relative;
+}
+
+.cat-select {
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    padding: 0.6rem 0.8rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    font-size: 1.4rem;
+    background: #fff;
+}
+
+.cat-select i {
+    font-size: 1.2rem;
+    color: #888;
+}
+
+.cat-select-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    left: 0;
+    margin-top: 0.4rem;
+    background: #fff;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    max-height: 220px;
+    overflow-y: auto;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12);
+    display: none; /* با کلاس open باز می‌شود */
+    z-index: 20;
+}
+
+.cat-select-menu.open {
+    display: block;
+}
+
+.cat-option {
+    width: 100%;
+    text-align: right;
+    padding: 0.35rem 0.9rem;
+    border: none;
+    background: transparent;
+    font-size: 1.4rem;
+    cursor: pointer;
+}
+
+.cat-option:hover {
+    background: #f9fafb;
+}
+
+.cat-option.is-active {
+    color: #FA523C;
+    font-weight: 600;
+    background: #fff5f2;
+}
+
+
+/*++++++++++++++++++++++استایل جدیدا +++++++++++++++++*/
+
+.price-range-bar {
+    position: relative;
+    padding: 0.4rem 0;
+}
+
+/* input[type=range] های نامرئی روی نوار */
+.price-range-native {
+    position: absolute;
+    top: -6px;
+    left: 0;
+    width: 100%;
+    height: 22px;
+    opacity: 0;          /* نامرئی ولی کلیک‌پذیر */
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+/* برای اینکه انگشت/ماوس روی شَست‌ها کار کند */
+.price-range-native::-webkit-slider-thumb {
+    pointer-events: all;
+}
+.price-range-native::-moz-range-thumb {
+    pointer-events: all;
+}
+
+/*++++++++++++++++++++++استایل جدیدا +++++++++++++++++*/
+
+.price-range-bar {
+    position: relative;
+    padding: 0.4rem 0;
+}
+
+/* input[type=range] های نامرئی روی نوار */
+.price-range-native {
+    position: absolute;
+    top: -6px;
+    left: 0;
+    width: 100%;
+    height: 22px;
+    opacity: 0;          /* نامرئی ولی کلیک‌پذیر */
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+/* برای اینکه انگشت/ماوس روی شَست‌ها کار کند */
+.price-range-native::-webkit-slider-thumb {
+    pointer-events: all;
+}
+.price-range-native::-moz-range-thumb {
+    pointer-events: all;
+}
+.price-range-bar {
+    position: relative;
+    padding: 0.4rem 0;
+}
+
+/* دو range نامرئی که روی نوار قرار می‌گیرند */
+.price-range-native {
+    position: absolute;
+    top: -6px;
+    left: 0;
+    width: 100%;
+    height: 22px;
+    opacity: 0;              /* نامرئی ولی درگیر */
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+
+    /* نکته ۱: خود input کلیک‌پذیر نباشه، فقط شَست‌ها */
+    pointer-events: none;
+
+    /* نکته ۲: جهت LTR تا محاسبات درصدها برعکس نشه */
+    direction: ltr;
+}
+
+/* شَست‌ها باید ایونت بگیرند */
+.price-range-native::-webkit-slider-thumb {
+    pointer-events: all;
+}
+.price-range-native::-moz-range-thumb {
+    pointer-events: all;
+}
+
+/* ترتیب لایه‌ها – شَستِ مین روی max قرار بگیره */
+#price-range-min {
+    z-index: 3;
+}
+#price-range-max {
+    z-index: 2;
+}
+
+/* قبلی‌های تو هم می‌تونن همون بمونن: */
+.price-range-track {
+    position: relative;
+    height: 8px;
+    width: 100%;
+    border-radius: 888px;
+    background: #e5edff;
+    overflow: hidden;
+}
+
+.price-range-handle {
+    position: absolute;
+    top: 50%;
+    width: 16px;
+    height: 16px;
+    border-radius: 999px;
+    background: #FA523C;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 0 2px #fff, 0 0 4px rgba(15, 23, 42, 0.3);
+}
+
+.price-range-handle.left-handle  { left: 10%; }
+.price-range-handle.right-handle { left: 90%; }
+
+.search-history {
+    padding-top: .75rem;
+    border-top: 1px solid #eee;
+    margin-top: .75rem;
+}
+
+.search-history-header .history-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+}
+
+.search-history-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    margin-top: .5rem;
+}
+
+.search-history-pill {
+    border-radius: 999px;
+    border: 1px solid #e5e7eb;
+    background: #f9fafb;
+    padding: .2rem .9rem;
+    font-size: 1.3rem;
+    color: #374151;
+    line-height: 1.4;
+}
+
+.search-history-pill:hover {
+    border-color: #FA523C;
+    color: #FA523C;
+    background: #fff;
+}

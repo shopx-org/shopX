@@ -877,3 +877,70 @@ document.addEventListener('click', function (e) {
   input.value = v;
 });
 
+    // ---- Cart header summary (badge + total) ----
+    (function () {
+        var $badge = $('.cart-dropdown .cart-count');
+        var $total = $('.cart-dropdown .cart-total-price');
+
+        if (!$badge.length && !$total.length) {
+            return;
+        }
+
+        $.ajax({
+            url: '/cart/api/header-summary/',
+            method: 'GET',
+            headers: {'X-Requested-With': 'XMLHttpRequest'}
+        }).done(function (data) {
+            if (!data || !data.ok || !data.summary) return;
+
+            var sum = data.summary;
+
+            // تعداد آیتم‌ها
+            if ($badge.length) {
+                $badge.text(sum.items_count || 0);
+            }
+
+            // مبلغ کل پرداختی
+            if ($total.length) {
+                var formatter = new Intl.NumberFormat('fa-IR');
+                var t = sum.total || 0;
+                $total.text(formatter.format(t) + ' تومان');
+            }
+        }).fail(function () {
+            // در صورت خطا چیزی تغییر نده
+        });
+    })();
+
+    // ---- Cart header summary (badge + total) ----
+    (function () {
+        var $badge = $('.cart-dropdown .cart-count');
+        var $total = $('.cart-dropdown .cart-total-price');
+
+        if (!$badge.length && !$total.length) {
+            return;
+        }
+
+        $.ajax({
+            url: '/cart/api/header-summary/',
+            method: 'GET',
+            headers: {'X-Requested-With': 'XMLHttpRequest'}
+        }).done(function (data) {
+            if (!data || !data.ok || !data.summary) return;
+
+            var sum = data.summary;
+
+            // تعداد آیتم‌ها
+            if ($badge.length) {
+                $badge.text(sum.items_count || 0);
+            }
+
+            // مبلغ کل پرداختی
+            if ($total.length) {
+                var formatter = new Intl.NumberFormat('fa-IR');
+                var t = sum.total || 0;
+                $total.text(formatter.format(t) + ' تومان');
+            }
+        }).fail(function () {
+            // در صورت خطا چیزی تغییر نده
+        });
+    })();

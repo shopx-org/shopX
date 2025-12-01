@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block content %}
+<main class="container my-5 text-center">
+  <h2 class="text-danger mb-3">❌ پرداخت ناموفق بود</h2>
+  <p>سفارش شماره <b>#{{ order.id }}</b> پرداخت نشد.</p>
+  <p>در صورت کسر مبلغ، حداکثر تا ۷۲ ساعت به حسابت برمی‌گردد.</p>
+  <a class="btn btn-outline-secondary mt-3" href="{% url 'checkout:review' %}">
+    بازگشت به مرور سفارش
+  </a>
+</main>
+{% endblock %}

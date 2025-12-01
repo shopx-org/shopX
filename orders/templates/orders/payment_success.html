@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block content %}
+<main class="container my-5 text-center">
+  <h2 class="text-success mb-3">✅ پرداخت موفق بود</h2>
+  <p>سفارش شماره <b>#{{ order.id }}</b> با موفقیت ثبت و پرداخت شد.</p>
+  <p>مبلغ پرداختی: {{ order.total|intcomma }} تومان</p>
+  <a class="btn btn-primary mt-3" href="{% url 'home:home' %}">
+    بازگشت به صفحه اصلی
+  </a>
+</main>
+{% endblock %}

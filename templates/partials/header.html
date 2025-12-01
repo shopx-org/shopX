@@ -1,4 +1,5 @@
-{% load static %}
+{#/home/atusa92/PycharmProjects/ShopX/templates/partials/header.html#}
+{% load static humanize %}
 <header class="header header-2 header-intro-clearance">
     <div class="header-top">
         <div class="container">
@@ -13,16 +14,16 @@
                         <a href="#">لینک ها</a>
                         <ul>
                             <li>
-{#                                <div class="header-dropdown">#}
-{#                                    <a href="#">فارسی</a>#}
-{#                                    <div class="header-menu">#}
-{#                                        <ul>#}
-{#                                            <li><a href="#">انگلیسی</a></li>#}
-{#                                            <li><a href="#">فرانسوی</a></li>#}
-{#                                            <li><a href="#">ترکی استانبولی</a></li>#}
-{#                                        </ul>#}
-{#                                    </div><!-- End .header-menu -->#}
-{#                                </div><!-- End .header-dropdown -->#}
+                                {#                                <div class="header-dropdown">#}
+                                {#                                    <a href="#">فارسی</a>#}
+                                {#                                    <div class="header-menu">#}
+                                {#                                        <ul>#}
+                                {#                                            <li><a href="#">انگلیسی</a></li>#}
+                                {#                                            <li><a href="#">فرانسوی</a></li>#}
+                                {#                                            <li><a href="#">ترکی استانبولی</a></li>#}
+                                {#                                        </ul>#}
+                                {#                                    </div><!-- End .header-menu -->#}
+                                {#                                </div><!-- End .header-dropdown -->#}
                             </li>
                             <li><a href="#" data-toggle="modal">ورود / ثبت نام</a></li>
                         </ul>
@@ -42,24 +43,12 @@
                 </button>
 
                 <a href="{% url 'home:home' %}" class="logo">
-                    <img src="{% static 'images/demos/demo-2/output-onlinepngtools.png' %}" alt="Molla Logo" width="104" height="24">
+                    <img src="{% static 'images/demos/demo-2/output-onlinepngtools.png' %}" alt="Molla Logo" width="104"
+                         height="24">
                 </a>
             </div><!-- End .header-left -->
 
-            <div class="header-center">
-                <div
-                        class="header-search header-search-extended header-search-visible header-search-no-radius d-none d-lg-block">
-                    <a href="#" class="search-toggle" role="button"><i class="icon-search"></i></a>
-                    <form action="#" method="get">
-                        <div class="header-search-wrapper search-wrapper-wide">
-                            <label for="q" class="sr-only">جستجو</label>
-                            <input type="search" class="form-control" name="q" id="q"
-                                   placeholder="جستجوی محصول ..." required>
-                            <button class="btn btn-primary" type="submit"><i class="icon-search"></i></button>
-                        </div><!-- End .header-search-wrapper -->
-                    </form>
-                </div><!-- End .header-search -->
-            </div>
+            {% include "search/header_search.html" %}
 
             <div class="header-right">
                 <div class="account">
@@ -87,70 +76,118 @@
                        aria-haspopup="true" aria-expanded="false" data-display="static">
                         <div class="icon">
                             <i class="icon-shopping-cart"></i>
-                            <span class="cart-count">2</span>
+                            <span class="cart-count">{{ cart_count|default:0 }}</span>
                         </div>
                         <p>سبد خرید</p>
                     </a>
 
-                    <div class="dropdown-menu dropdown-menu-right">
-                        <div class="dropdown-cart-products">
-                            <div class="product">
-                                <div class="product-cart-details">
-                                    <h4 class="product-title">
-                                        <a href="#">کتونی ورزشی مخصوص دویدن رنگ بژ</a>
-                                    </h4>
+                    <div class="dropdown-menu dropdown-menu-right cart-panel-menu">
+                        <div class="cart-panel">
 
-                                    <span class="cart-product-info">
-                                                <span class="cart-product-qty">1 x </span>
-                                                84,000 تومان
-                                            </span>
-                                </div><!-- End .product-cart-details -->
+                            {# --- هدر --- #}
+                            <div class="cart-panel-header d-flex justify-content-between align-items-center">
+                                <div class="cart-panel-title">
+                                    سبد خرید شما
+                                    <span class="cart-panel-sub">{{ cart_count|default:0 }} کالا</span>
+                                </div>
+                                <a href="{% url 'cart:cart_detail' %}" class="cart-panel-link">
+                                    مشاهده سبد خرید
+                                </a>
+                            </div>
 
-                                <figure class="product-image-container">
-                                    <a href="#" class="product-image">
-                                        <img src="{% static 'images/products/cart/product-1.jpg' %}" alt="product">
+                            {# --- بدنه: لیست آیتم‌ها --- #}
+                            <div class="cart-panel-body">
+
+                                {% for item in mini_cart_items %}
+                                    <div class="cart-panel-item">
+                                        <div class="cart-item-image">
+                                            <a href="{{ item.url|default:'#' }}">
+                                                {% if item.image %}
+                                                    <img src="{{ item.image }}" alt="{{ item.name }}">
+                                                {% else %}
+                                                    <img src="{% static 'images/placeholder.png' %}"
+                                                         alt="{{ item.name }}">
+                                                {% endif %}
+                                            </a>
+
+                                            {# بج تخفیف روی عکس #}
+                                            {% if item.discount_percent %}
+                                                <span class="cart-discount-badge over-image">
+                                {{ item.discount_percent }}٪
+                            </span>
+                                            {% endif %}
+                                        </div>
+
+                                        <div class="cart-item-info">
+                                            <h4 class="cart-item-title">
+                                                <a href="{{ item.url|default:'#' }}">{{ item.name }}</a>
+                                            </h4>
+
+                                            {# رنگ کالا (اگر در کانتکست هست) #}
+                                            {% if item.color_name %}
+                                                <div class="cart-item-color">
+                                <span class="color-dot"
+                                      style="background-color: {{ item.color_code|default:'#ccc' }}"></span>
+                                                    <span class="color-name">{{ item.color_name }}</span>
+                                                </div>
+                                            {% endif %}
+
+                                            <div class="cart-item-meta d-flex justify-content-between align-items-center">
+                                                <div class="cart-product-qty">
+                                                    <span>تعداد:</span>
+                                                    <span>{{ item.qty }}</span>
+                                                </div>
+
+                                                <div class="cart-product-info">
+                                                    <span>قیمت:</span>
+                                                    <span>
+                                    {% with item.unit_price_after|default:item.unit_price_before as final_price %}
+                                        {{ final_price|floatformat:0|intcomma }} تومان
+                                    {% endwith %}
+                                </span>
+                                                </div>
+                                            </div>
+
+                                            {% if item.discount_percent and item.unit_price_before %}
+                                                <div class="cart-item-oldprice">
+                                                    {{ item.unit_price_before|floatformat:0|intcomma }} تومان
+                                                </div>
+                                            {% endif %}
+                                        </div>
+
+                                        <button type="button" class="cart-item-remove" title="حذف محصول">
+                                            <i class="icon-close"></i>
+                                        </button>
+                                    </div>
+                                {% empty %}
+                                    <p class="text-center py-3 mb-0">سبد خرید خالی است</p>
+                                {% endfor %}
+
+                            </div>
+
+                            {# --- فوتر: مجموع و دکمه‌ها --- #}
+                            <div class="cart-panel-footer">
+                                <div class="d-flex justify-content-between mb-3">
+                                    <span class="cart-total-label">مجموع پرداختی</span>
+                                    <span class="cart-total-value">
+                    {{ mini_cart_total|default:0|floatformat:0|intcomma }} تومان
+                </span>
+                                </div>
+
+                                <div class="d-flex">
+                                    <a href="{% url 'checkout:review' %}"
+                                       class="btn btn-cart-primary flex-grow-1">
+                                         ثبت سفارش
                                     </a>
-                                </figure>
-                                <a href="#" class="btn-remove" title="حذف محصول"><i class="icon-close"></i></a>
-                            </div><!-- End .product -->
+                                </div>
+                            </div>
 
-                            <div class="product">
-                                <div class="product-cart-details">
-                                    <h4 class="product-title">
-                                        <a href="#">لباس زنانه آبی</a>
-                                    </h4>
+                        </div><!-- .cart-panel -->
+                    </div><!-- .dropdown-menu -->
+                </div><!-- End .header-right -->
+            </div><!-- End .container -->
+        </div><!-- End .header-middle -->
 
-                                    <span class="cart-product-info">
-                                                <span class="cart-product-qty">1 x </span>
-                                                76,000 تومان
-                                            </span>
-                                </div><!-- End .product-cart-details -->
-
-                                <figure class="product-image-container">
-                                    <a href="#" class="product-image">
-                                        <img src="{% static 'images/products/cart/product-2.jpg' %}" alt="product">
-                                    </a>
-                                </figure>
-                                <a href="#" class="btn-remove" title="حذف محصول"><i class="icon-close"></i></a>
-                            </div><!-- End .product -->
-                        </div><!-- End .cart-product -->
-
-                        <div class="dropdown-cart-total">
-                            <span>مجموع</span>
-
-                            <span class="cart-total-price">160,000 تومان</span>
-                        </div><!-- End .dropdown-cart-total -->
-
-                        <div class="dropdown-cart-action">
-                            <a href="#" class="btn btn-primary">مشاهده سبد خرید</a>
-                            <a href="#" class="btn btn-outline-primary-2"><span>پرداخت</span><i
-                                    class="icon-long-arrow-left"></i></a>
-                        </div><!-- End .dropdown-cart-total -->
-                    </div><!-- End .dropdown-menu -->
-                </div><!-- End .cart-dropdown -->
-            </div><!-- End .header-right -->
-        </div><!-- End .container -->
-    </div><!-- End .header-middle -->
-
-    {% include 'partials/navbar.html' %}
+        {% include 'partials/navbar.html' %}
+    </div>
 </header><!-- End .header -->

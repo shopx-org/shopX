@@ -19,7 +19,7 @@ from products.services.pricing_adapter import (
     build_service_line_public,
     build_ephemeral_campaigns_for_lines,
 )
-
+from django.views.decorators.http import require_GET
 # =========================
 # Helpers (pure)
 # =========================
@@ -246,6 +246,14 @@ def _json_cart_summary(request: HttpRequest) -> JsonResponse:
         ctx["ephemeral_campaigns"] = eps
     res = PricingEngine().evaluate(lines, ctx)
     return JsonResponse({"ok": True, "summary": _summary_payload(res, request)})
+
+@require_GET
+def cart_header_summary(request: HttpRequest) -> JsonResponse:
+    """
+    خلاصه‌ی سبد برای هدر (بج و مبلغ کل).
+    از همان منطق _json_cart_summary استفاده می‌کند.
+    """
+    return _json_cart_summary(request)
 
 def _json_cart_for_row(request: HttpRequest, product_id: int, variant_id: int | None) -> JsonResponse:
     cart = Cart(request)

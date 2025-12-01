@@ -1,0 +1,37 @@
+{# search/templates/search/header_search.html #}
+<div class="header-center">
+    <div
+        class="header-search header-search-extended header-search-visible header-search-no-radius d-none d-lg-block">
+        <a href="#" class="search-toggle" role="button">
+            <i class="icon-search"></i>
+        </a>
+
+        {# اینجا مهمه: بفرست به ویوی search_results #}
+        <form id="header-search-form" action="{% url 'search:search_results' %}" method="get">
+
+            <div
+                class="header-search-wrapper search-wrapper-wide"
+                data-suggest-url="{% url 'search:search_suggest' %}">
+
+                <label for="site-search-input" class="sr-only">جستجو</label>
+
+                <input
+                    type="search"
+                    class="form-control"
+                    name="q"
+                    id="site-search-input"
+                    placeholder="جستجوی محصول ..."
+                    value="{{ request.GET.q|default_if_none:'' }}"
+                    autocomplete="off"
+                    required>
+
+                <button class="btn btn-primary" type="submit">
+                    <i class="icon-search"></i>
+                </button>
+
+                {# ظرف دراپ‌داون اتوکامپلیت #}
+                {% include "search/partials/_search_dropdown.html" %}
+            </div><!-- End .header-search-wrapper -->
+        </form>
+    </div><!-- End .header-search -->
+</div>

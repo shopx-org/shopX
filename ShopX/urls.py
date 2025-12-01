@@ -17,6 +17,9 @@ urlpatterns = [
     path('core/', include('Core.urls', namespace='core')),
 
     path("checkout/",include(("checkout.urls", "checkout"), namespace="checkout")),
+    path("orders/", include("orders.urls")),
+    path("search/", include("search.urls", namespace="search")),
+
 ]
 
 if settings.DEBUG:
