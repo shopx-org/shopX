@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block CSS-JS %}
+    <link rel="stylesheet" href="{% static 'css/faq.css' %}">
+{% endblock%}
+
+
+{% block content %}
+<main class="main">
+
+    <!-- Page Header -->
+    <div class="page-header text-center" style="background-image: url({% static 'assets/images/page-header-bg.jpg' %})">
+        <div class="container">
+            <h1 class="page-title">سوالات متداول<span>شما</span></h1>
+        </div>
+    </div>
+
+    <!-- FAQ Content -->
+    <div class="page-content pb-5">
+        <div class="container">
+
+            {% for category in categories %}
+            <div class="row justify-content-center">
+                <div class="col-12 col-md-10 col-lg-9">
+
+                    <h2 class="title text-right mb-4 mt-5">{{ category.title }}</h2>
+
+                    <div class="accordion accordion-rounded" id="accordion-{{ forloop.counter }}">
+
+                        {% for faq in category.faqs.all %}
+                        <div class="card card-box card-sm bg-light">
+
+                            <!-- Card Header -->
+                            <div class="card-header" id="heading-{{ category.id }}-{{ faq.id }}">
+                                <h2 class="card-title mb-0">
+                                    <a class="collapsed text-right"
+                                       role="button"
+                                       data-toggle="collapse"
+                                       href="#collapse-{{ category.id }}-{{ faq.id }}"
+                                       aria-expanded="false"
+                                       aria-controls="collapse-{{ category.id }}-{{ faq.id }}">
+                                        {{ faq.question }}
+                                    </a>
+                                </h2>
+                            </div>
+
+                            <!-- Card Body -->
+                            <div id="collapse-{{ category.id }}-{{ faq.id }}"
+                                 class="collapse"
+                                 aria-labelledby="heading-{{ category.id }}-{{ faq.id }}"
+                                 data-parent="#accordion-{{ forloop.parentloop.counter }}">
+                                <div class="card-body">
+                                    {{ faq.answer|linebreaks }}
+                                </div>
+                            </div>
+
+                        </div><!-- /.card -->
+                        {% endfor %}
+
+                    </div><!-- /.accordion -->
+
+                </div><!-- /.col -->
+            </div><!-- /.row -->
+            {% endfor %}
+
+        </div><!-- /.container -->
+    </div><!-- /.page-content -->
+
+    <!-- CTA Section -->
+    <div class="cta cta-display bg-image pt-6 pb-6" style="background-image: url({% static 'assets/images/backgrounds/cta/bg-7.jpg' %});">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-10 col-lg-9 col-xl-7">
+                    <div class="row no-gutters flex-column flex-sm-row align-items-sm-center">
+                        <div class="col-sm-8 text-right text-sm-right mb-3 mb-sm-0">
+                            <h3 class="cta-title text-black">اگر سوالات بیشتری دارید</h3>
+                        </div>
+
+                        <div class="col-sm-auto text-center text-sm-left">
+                            <a href="#" class="btn btn-outline-primary-2 call">
+                                <span>تماس با ما</span>
+                                <i class="icon-long-arrow-left"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Styles for FAQ -->
+</main>
+
+{% endblock %}

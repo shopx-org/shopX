@@ -1,0 +1,32 @@
+/* شکستن متن طولانی در عنوان سوال */
+.card-header a {
+    word-wrap: break-word;
+    white-space: normal;
+}
+
+.call{
+    border-radius: 10px;
+}
+
+
+/* تنظیمات ریسپانسیو برای موبایل */
+@media (max-width: 768px) {
+.card-header a {
+    font-size: 1.1rem;
+}
+.card-body {
+    font-size: 1.1rem;
+    padding: 1rem;
+}
+
+/* هاور برای موبایل */
+.call:hover {
+    color: #ffffff !important;
+    background-color: #FA523C !important;
+    border-color: #FA523C !important;
+}
+
+.title {
+    font-size: 1.6rem;
+}
+}

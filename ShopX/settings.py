@@ -68,6 +68,7 @@ INSTALLED_APPS = [
     "checkout.apps.CheckoutConfig",
     "orders.apps.OrdersConfig",
     "search.apps.SearchConfig",
+    "faq.apps.FaqConfig",
 
     # Third-party
     "widget_tweaks",
