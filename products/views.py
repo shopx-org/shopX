@@ -252,6 +252,9 @@ class ProductListView(ProductBaseQS, ListView):
         ctx["paginate_by"]      = self.paginate_by       # مثلاً 12
         ctx["enable_infinite_scroll"] = True
 
+        total_count = self.get_queryset().count()   
+        ctx["total_count"] = total_count
+
 
         # تولید رنگ‌ها (همون قبلی)
         for p in ctx["products"]:

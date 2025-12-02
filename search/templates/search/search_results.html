@@ -232,17 +232,17 @@
 
                                                 <div class="cat-select-wrapper">
                                                     <div class="cat-select" id="cat-select-toggle">
-                    <span id="cat-select-label">
-                        {% if selected_cat_id %}
-                            {% for c in categories %}
-                                {% if c.id == selected_cat_id %}
-                                    {{ c.name }}
-                                {% endif %}
-                            {% endfor %}
-                        {% else %}
-                            همه دسته‌ها
-                        {% endif %}
-                    </span>
+                                                        <span id="cat-select-label">
+                                                            {% if selected_cat_id %}
+                                                                {% for c in categories %}
+                                                                    {% if c.id == selected_cat_id %}
+                                                                        {{ c.name }}
+                                                                    {% endif %}
+                                                                {% endfor %}
+                                                            {% else %}
+                                                                همه دسته‌ها
+                                                            {% endif %}
+                                                        </span>
                                                         <i class="icon-angle-down"></i>
                                                     </div>
 
@@ -427,7 +427,39 @@
                                     </div>
                                 {% endfor %}
                             </div>
+
+                        
+                    <!-- صفحه‌بندی -->
+                        {% if is_paginated %}
+                        <nav aria-label="Page navigation" class="mt-5">
+                            <ul class="pagination justify-content-center">
+
+                                {% if page_obj.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="{% querystring page=page_obj.previous_page_number %}">قبلی</a>
+                                    </li>
+                                {% endif %}
+
+                                {% for num in paginator.page_range %}
+                                    {% if num >= page_obj.number|add:-2 and num <= page_obj.number|add:2 %}
+                                        <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                                            <a class="page-link" href="{% querystring page=num %}">{{ num }}</a>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% if page_obj.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="{% querystring page=page_obj.next_page_number %}">بعدی</a>
+                                    </li>
+                                {% endif %}
+
+                            </ul>
+                        </nav>
+                        {% endif %}
+
                         </div>
+                        
                     {% else %}
                         <p class="text-muted mt-3">
                             هیچ محصولی برای این جستجو پیدا نشد.
@@ -438,17 +470,82 @@
         </div>
     </div>
 
-    <script>
-        // جمع کردن id برندهای تیک‌خورده در input hidden=brand
-        function toggleBrandFilter() {
-            const form = document.getElementById('brand-form');
-            const checks = form.querySelectorAll('input.custom-control-input[type="checkbox"]');
-            const vals = [];
-            checks.forEach(c => {
-                if (c.checked) vals.push(c.value);
-            });
-            document.getElementById('brand-hidden').value = vals.join(',');
-        }
-    </script>
+<script>
+function updateBrandFilter() {
+    const vals = Array.from(document.querySelectorAll('#filter-brands input[type="checkbox"]:checked'))
+                  .map(cb => cb.value);
+    document.getElementById('brand-hidden').value = vals.join(',');
+}
+</script>
 
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const MAX_SCROLL = 2; // ← بعداً بکن 10
+
+    {% if page_obj.number == 1 %}
+        const API = "{% url 'search:search_results_api' %}";
+        let page = 1;
+        let loading = false;
+
+        const load = async () => {
+            if (loading || page >= MAX_SCROLL) return;
+            loading = true;
+            page++;
+
+            const params = new URLSearchParams(location.search);
+            params.set('page', page);
+
+            const res = await fetch(`${API}?${params}`);
+            const data = await res.json();
+
+            if (!data.products?.length) return;
+
+            const row = document.querySelector('.products .row');
+            data.products.forEach(p => {
+                if (document.querySelector(`[data-product-id="${p.id}"]`)) return;
+
+                const discount = p.discount_percent ? `<span class="product-label label-sale">${p.discount_percent}%</span>` : '';
+                const isNew = p.is_new ? '<span class="product-label label-new">جدید</span>' : '';
+                const price = p.compare_at_price > p.price
+                    ? `<span class="new-price"><span class="num">${p.price.toLocaleString()}</span> <small>تومان</small></span>
+                       <span class="old-price"><span class="num">${p.compare_at_price.toLocaleString()}</span> <small>تومان</small></span>`
+                    : `<span class="new-price"><span class="num">${p.price.toLocaleString()}</span> <small>تومان</small></span>`;
+
+                row.insertAdjacentHTML('beforeend', `
+                    <div class="col-6 col-md-4 col-xl-3" data-product-id="${p.id}">
+                        <div class="product product-7">
+                            <figure class="product-media">
+                                ${isNew}${discount}
+                                <a href="${p.url}"><img src="${p.cover}" class="product-image" loading="lazy"></a>
+                            </figure>
+                            <div class="product-body">
+                                <h3 class="product-title text-right"><a href="${p.url}">${p.name}</a></h3>
+                                <div class="product-price text-right">${price}</div>
+                            </div>
+                        </div>
+                    </div>
+                `);
+            });
+
+            // فعال کردن عدد ۲ در pagination
+            if (page === 2) {
+                document.querySelectorAll('.pagination .page-item.active').forEach(el => el.classList.remove('active'));
+                const link = document.querySelector('.pagination a[href*="page=2"]');
+                if (link) link.closest('.page-item').classList.add('active');
+            }
+
+            loading = false;
+        };
+
+        window.addEventListener('scroll', () => {
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 600) {
+                load();
+            }
+        });
+
+        // لود خودکار صفحه ۲ اگر محصول زیاد باشه
+        if ({{ paginator.count }} > 12) load();
+    {% endif %}
+});
+</script>
 {% endblock %}

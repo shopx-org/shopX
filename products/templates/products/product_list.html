@@ -341,7 +341,6 @@
 
 
                         <!-- صفحه‌بندی -->                        
-                        {% comment %} {% if is_paginated and page_obj.number > max_scroll_pages %} {% endcomment %}
                         {% if is_paginated %}
                                                     <nav aria-label="Page navigation" class="mt-5">
                                                         <ul class="pagination justify-content-center">
@@ -567,8 +566,8 @@
             </div>
         </div>
     </main>
-{% comment %} {% block CSS-JS %} {% endcomment %}
 
+{% block CSS-JS %}
     <script>
         // چند انتخاب برند را به یک CSV در name=brand تبدیل می‌کند
         function toggleBrand(chk) {
@@ -595,128 +594,127 @@
 
 
     <script>
-    window.MAX_SCROLL_PAGES = {{ max_scroll_pages|default:2 }};
-    window.PAGINATE_BY = {{ paginate_by|default:12 }};
-    window.THRESHOLD = {{ threshold|default:24 }};
-</script>
-
-   <script>
-// چند انتخاب برند را به یک CSV در name=brand تبدیل می‌کند
-function toggleBrand(chk) {
-const form = document.getElementById('brand-form');
-const checks = form.querySelectorAll('input[name="brand"]');
-const vals = [];
-            checks.forEach(c => {
-if (c.checked) vals.push(c.value);
-            });
-            checks.forEach(c => c.disabled = true);
-const hidden = document.createElement('input');
-            hidden.type = 'hidden';
-            hidden.name = 'brand';
-            hidden.value = vals.join(',');
-            form.appendChild(hidden);
-        }
-// تنظیم بازه قیمت از رادیویی‌های پرست
-function setRange(min, max) {
-            document.getElementById('price-min').value = (min !== '' && min !== null) ? min : '';
-            document.getElementById('price-max').value = (max !== '' && max !== null) ? max : '';
-        }
+        window.MAX_SCROLL_PAGES = {{ max_scroll_pages|default:2 }};
+        window.PAGINATE_BY = {{ paginate_by|default:12 }};
+        window.THRESHOLD = {{ threshold|default:24 }};
     </script>
 
-<script>
-    window.MAX_SCROLL_PAGES = {{ max_scroll_pages|default:2 }};
-</script>
-
-<script>
-    {% if page_obj.number <= max_scroll_pages and not page_obj.has_previous %}
-        const API_URL = "{% url 'products:product_list_api' %}";
-        let currentPage = {{ page_obj.number }};
-        const MAX_SCROLL_PAGES = {{ max_scroll_pages }};
-        let loading = false;
-
-        async function loadMore() {
-            if (loading || currentPage >= MAX_SCROLL_PAGES) return;
-
-            loading = true;
-            currentPage++;
-
-            const params = new URLSearchParams(window.location.search);
-            params.set('page', currentPage);
-
-            try {
-                const res = await fetch(`${API_URL}?${params.toString()}`);
-                if (!res.ok) return;
-
-                const data = await res.json();
-
-                // اگر هیچ محصولی نیومد → دیگه ادامه نده (مهم!)
-                if (!data.products || data.products.length === 0) {
-                    loading = false;
-                    return;
+   <script>
+        // چند انتخاب برند را به یک CSV در name=brand تبدیل می‌کند
+        function toggleBrand(chk) {
+        const form = document.getElementById('brand-form');
+        const checks = form.querySelectorAll('input[name="brand"]');
+        const vals = [];
+                    checks.forEach(c => {
+        if (c.checked) vals.push(c.value);
+                    });
+                    checks.forEach(c => c.disabled = true);
+        const hidden = document.createElement('input');
+                    hidden.type = 'hidden';
+                    hidden.name = 'brand';
+                    hidden.value = vals.join(',');
+                    form.appendChild(hidden);
                 }
+        // تنظیم بازه قیمت از رادیویی‌های پرست
+        function setRange(min, max) {
+                    document.getElementById('price-min').value = (min !== '' && min !== null) ? min : '';
+                    document.getElementById('price-max').value = (max !== '' && max !== null) ? max : '';
+                }
+    </script>
 
-                const container = document.getElementById('product-list');
+    <script>
+        window.MAX_SCROLL_PAGES = {{ max_scroll_pages|default:2 }};
+    </script>
 
-                data.products.forEach(p => {
-                    if (!document.querySelector(`[data-product-id="${p.id}"]`)) {
-                        container.insertAdjacentHTML('beforeend', `
-                            <div class="col-6 col-md-4 col-xl-3" data-product-id="${p.id}">
-                                <div class="product product-7 dk-product-card">
-                                    <figure class="product-media">
-                                        ${p.is_new ? '<span class="product-label label-new">جدید</span>' : ''}
-                                        ${p.discount_percent ? '<span class="product-label label-sale">'+p.discount_percent+'%</span>' : ''}
-                                        <a href="${p.url}">
-                                            <img src="${p.cover}" class="product-image" alt="${p.name}">
-                                        </a>
-                                        ${p.stock <= 0 ? '<div class="sold-out-badge">ناموجود</div>' : ''}
-                                    </figure>
-                                    <div class="product-body">
-                                        <h3 class="product-title text-right"><a href="${p.url}">${p.name}</a></h3>
-                                        <div class="product-price text-right">
-                                            ${p.compare_at_price && p.compare_at_price > p.price 
-                                                ? `<span class="new-price">${p.price.toLocaleString()} <small>تومان</small></span>
-                                                   <span class="old-price">${p.compare_at_price.toLocaleString()} <small>تومان</small></span>`
-                                                : `<span class="new-price">${p.price.toLocaleString()} <small>تومان</small></span>`
-                                            }
+    <script>
+        {% if page_obj.number <= max_scroll_pages and not page_obj.has_previous %}
+            const API_URL = "{% url 'products:product_list_api' %}";
+            let currentPage = {{ page_obj.number }};
+            const MAX_SCROLL_PAGES = {{ max_scroll_pages }};
+            let loading = false;
+
+            async function loadMore() {
+                if (loading || currentPage >= MAX_SCROLL_PAGES) return;
+
+                loading = true;
+                currentPage++;
+
+                const params = new URLSearchParams(window.location.search);
+                params.set('page', currentPage);
+
+                try {
+                    const res = await fetch(`${API_URL}?${params.toString()}`);
+                    if (!res.ok) return;
+
+                    const data = await res.json();
+
+                    // اگر هیچ محصولی نیومد → دیگه ادامه نده (مهم!)
+                    if (!data.products || data.products.length === 0) {
+                        loading = false;
+                        return;
+                    }
+
+                    const container = document.getElementById('product-list');
+
+                    data.products.forEach(p => {
+                        if (!document.querySelector(`[data-product-id="${p.id}"]`)) {
+                            container.insertAdjacentHTML('beforeend', `
+                                <div class="col-6 col-md-4 col-xl-3" data-product-id="${p.id}">
+                                    <div class="product product-7 dk-product-card">
+                                        <figure class="product-media">
+                                            ${p.is_new ? '<span class="product-label label-new">جدید</span>' : ''}
+                                            ${p.discount_percent ? '<span class="product-label label-sale">'+p.discount_percent+'%</span>' : ''}
+                                            <a href="${p.url}">
+                                                <img src="${p.cover}" class="product-image" alt="${p.name}">
+                                            </a>
+                                            ${p.stock <= 0 ? '<div class="sold-out-badge">ناموجود</div>' : ''}
+                                        </figure>
+                                        <div class="product-body">
+                                            <h3 class="product-title text-right"><a href="${p.url}">${p.name}</a></h3>
+                                            <div class="product-price text-right">
+                                                ${p.compare_at_price && p.compare_at_price > p.price 
+                                                    ? `<span class="new-price">${p.price.toLocaleString()} <small>تومان</small></span>
+                                                    <span class="old-price">${p.compare_at_price.toLocaleString()} <small>تومان</small></span>`
+                                                    : `<span class="new-price">${p.price.toLocaleString()} <small>تومان</small></span>`
+                                                }
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        `);
-                    }
-                });
+                            `);
+                        }
+                    });
 
-                // وقتی صفحه ۲ لود شد → صفحه ۲ رو در پجینیشن اکتیو کن
-                if (currentPage === MAX_SCROLL_PAGES) {
-                    const link = document.querySelector('.pagination a.page-link[href*="page=2"]');
-                    if (link) {
-                        document.querySelectorAll('.pagination .page-item').forEach(el => el.classList.remove('active'));
-                        link.parentElement.classList.add('active');
+                    // وقتی صفحه ۲ لود شد → صفحه ۲ رو در پجینیشن اکتیو کن
+                    if (currentPage === MAX_SCROLL_PAGES) {
+                        const link = document.querySelector('.pagination a.page-link[href*="page=2"]');
+                        if (link) {
+                            document.querySelectorAll('.pagination .page-item').forEach(el => el.classList.remove('active'));
+                            link.parentElement.classList.add('active');
+                        }
                     }
+
+                } catch (e) {
+                    console.error('خطا در لود:', e);
+                } finally {
+                    loading = false;
                 }
-
-            } catch (e) {
-                console.error('خطا در لود:', e);
-            } finally {
-                loading = false;
             }
-        }
 
-        // اسکرول خزنده
-        window.addEventListener('scroll', () => {
-            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 800) {
+            // اسکرول خزنده
+            window.addEventListener('scroll', () => {
+                if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 800) {
+                    loadMore();
+                }
+            });
+
+            // فقط اگه واقعاً بیشتر از ۱۲ محصول داریم، صفحه ۲ رو لود کن
+            const totalProducts = {{ page_obj.paginator.count }};
+            if (totalProducts > {{ paginate_by }} && currentPage < MAX_SCROLL_PAGES) {
                 loadMore();
             }
-        });
 
-        // فقط اگه واقعاً بیشتر از ۱۲ محصول داریم، صفحه ۲ رو لود کن
-        const totalProducts = {{ page_obj.paginator.count }};
-        if (totalProducts > {{ paginate_by }} && currentPage < MAX_SCROLL_PAGES) {
-            loadMore();
-        }
-
-    {% endif %}
-</script>
-
-{% comment %} {% endblock %} {% endcomment %}
+        {% endif %}
+    </script>
+{% endblock %}
 {% endblock %}
