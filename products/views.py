@@ -1,37 +1,38 @@
 # products/views.py
+
 from decimal import Decimal
-from typing import Optional, Iterable, Any, Dict, List
+from typing import Optional, Any
 from dataclasses import dataclass
+
 from django.db.models import Q, Count, Sum, Min, Max, Prefetch
 from django.db.models.functions import Coalesce
 from django.http import Http404, HttpResponse, JsonResponse
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.http import http_date
 from django.utils.timezone import now
 from django.views import View
-from django.views.generic import ListView, DetailView
+from django.views.generic import ListView, DetailView, TemplateView
 from django.templatetags.static import static
-from products.services.service_pricing import compute_service_unit_price
 from django.contrib import messages
-from django.shortcuts import redirect, render
-from django.views.generic import TemplateView
+from django.contrib.contenttypes.models import ContentType
 
 from .models import (
-    Product, ProductVariant, ProductImage, Color, Brand,
-    Category, ProductAttributeValue,Service, CategoryService, ProductService
+    Product, ProductVariant, ProductImage, Color, Brand, Category,
+    ProductAttributeValue, Service, CategoryService, ProductService
 )
 from .services.pricing_adapter import price_single_product
-
-from django.contrib.contenttypes.models import ContentType
+from products.services.service_pricing import compute_service_unit_price
 from Core.models import Comment
 from Core.forms import CommentForm
 
 
-# ---------------- Utils (single source of truth) ----------------
+# ---------------- Utils (single source of truth) ---------------- #
+
 def _normalize_unit_price(obj):
     """
-    اگر obj.price خالی/نامعتبر بود، از محصولش بردار.
-    اگر باز هم خالی بود، صفر می‌گذاریم تا Decimal خطا ندهد.
+    Normalize the price of an object:
+    - If obj.price is invalid or empty, fallback to its product's price.
+    - If still invalid, set price = 0 to avoid Decimal errors.
     """
     try:
         p = getattr(obj, "price", None)
@@ -40,7 +41,7 @@ def _normalize_unit_price(obj):
             fallback = getattr(base, "price", None) if base else None
             setattr(obj, "price", fallback or 0)
         else:
-            # اگر رشته‌ای با جداکننده بود، تمیزش کن
+            # Clean string prices with comma
             if isinstance(p, str):
                 pp = p.replace(",", "").strip()
                 setattr(obj, "price", float(pp) if pp else 0)
@@ -50,21 +51,25 @@ def _normalize_unit_price(obj):
         except Exception:
             setattr(obj, "price", 0)
 
+
 def _float(v):
     try:
         return float(v)
     except Exception:
         return 0.0
 
+
 def _json(data: Any) -> str:
     import json
     from django.utils.safestring import mark_safe
     return mark_safe(json.dumps(data, ensure_ascii=False, separators=(",", ":")))
 
+
 def _etag_for_product(p: Product) -> str:
     import hashlib
     src = f"{p.pk}:{p.updated_at.isoformat() if p.updated_at else ''}"
     return hashlib.md5(src.encode("utf-8")).hexdigest()
+
 
 def _resolve_category_by_path(path: str) -> Optional[Category]:
     parts = [p for p in (path or "").strip("/").split("/") if p]
@@ -73,6 +78,7 @@ def _resolve_category_by_path(path: str) -> Optional[Category]:
         parent = get_object_or_404(Category, slug=slug, parent=parent)
     return parent
 
+
 def images_prefetch() -> Prefetch:
     return Prefetch(
         "images",
@@ -80,8 +86,8 @@ def images_prefetch() -> Prefetch:
         to_attr="image_list",
     )
 
+
 def attr_prefetch_list() -> Prefetch:
-    # برای لیست‌ها (نه دیتیل)، به لیست تبدیل می‌کنیم تا سبک‌تر باشد
     return Prefetch(
         "attr_values",
         queryset=(
@@ -93,7 +99,9 @@ def attr_prefetch_list() -> Prefetch:
         to_attr="attr_values_list",
     )
 
-# ---------------- List / Category ----------------
+
+# ---------------- Base QuerySet / ListView ---------------- #
+
 class ProductBaseQS:
     def base_qs(self):
         return (
@@ -111,27 +119,34 @@ class ProductListView(ProductBaseQS, ListView):
     template_name = "products/product_list.html"
     context_object_name = "products"
     paginate_by = 12
-    MAX_SCROLL_PAGES = 2   # فقط صفحه 1 و 2 اسکرول AJAX → از صفحه 3 به بعد pagination
+    MAX_SCROLL_PAGES = 2  # فقط صفحه 1 و 2 اسکرول AJAX → از صفحه 3 به بعد pagination
 
-    # ------------------------------------------------------------------
-    # دسته‌بندی
-    # ------------------------------------------------------------------
+    # ---------------- Category ---------------- #
+
     def get_category(self) -> Optional[Category]:
+        # مسیر از kwargs (مثلاً /c/electronics/)
         path = self.kwargs.get("path")
         if path:
             return _resolve_category_by_path(path)
 
-        cat_id = self.request.GET.get("category")
+        # پارامتر querystring ممکنه نام‌های مختلف داشته باشه: 'category' یا 'cat'
+        cat_id = self.request.GET.get("category") or self.request.GET.get("cat")
         if cat_id:
+            cat_id = str(cat_id).strip()
+            if cat_id.isdigit():
+                try:
+                    return Category.objects.get(id=int(cat_id))
+                except Category.DoesNotExist:
+                    return None
+            # ممکنه slug ارسال شده باشد
             try:
-                return Category.objects.get(id=cat_id)
+                return Category.objects.get(slug=cat_id)
             except Category.DoesNotExist:
                 return None
         return None
 
-    # ------------------------------------------------------------------
-    # QuerySet
-    # ------------------------------------------------------------------
+    # ---------------- QuerySet ---------------- #
+
     def get_queryset(self):
         qs = super().get_queryset() if hasattr(super(), "get_queryset") else self.base_qs()
 
@@ -140,10 +155,7 @@ class ProductListView(ProductBaseQS, ListView):
         if category:
             tree_ids = list(category.get_descendants(include_self=True).values_list("id", flat=True))
             if hasattr(Product, "additional_categories"):
-                qs = qs.filter(
-                    Q(category_id__in=tree_ids) |
-                    Q(additional_categories__in=tree_ids)
-                )
+                qs = qs.filter(Q(category_id__in=tree_ids) | Q(additional_categories__in=tree_ids))
             else:
                 qs = qs.filter(category_id__in=tree_ids)
 
@@ -194,7 +206,7 @@ class ProductListView(ProductBaseQS, ListView):
             qs = qs.order_by("-views", "-id") if hasattr(Product, "views") else qs.order_by("-created_at", "-id")
 
         # Prefetch‌ها
-        return qs.prefetch_related(
+        qs = qs.prefetch_related(
             Prefetch(
                 "variants",
                 queryset=(
@@ -202,9 +214,8 @@ class ProductListView(ProductBaseQS, ListView):
                     .filter(is_active=True, color__is_active=True)
                     .select_related("color")
                     .only(
-                        "id", "product_id", "color_id",
-                        "color__id", "color__name",
-                        "color__hex_code", "color__slug"
+                        "id", "product_id", "color_id", "color__id",
+                        "color__name", "color__hex_code", "color__slug"
                     )
                 ),
                 to_attr="_prefetch_variants",
@@ -213,50 +224,75 @@ class ProductListView(ProductBaseQS, ListView):
             attr_prefetch_list(),
         ).distinct()
 
-    # ------------------------------------------------------------------
-    # Context
-    # ------------------------------------------------------------------
+        return qs
+
+    # ---------------- Context ---------------- #
+
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-
-        # دسته‌بندی و breadcrumb
         category = self.get_category()
         ctx["category"] = category
         ctx["ancestors"] = list(category.get_ancestors(include_self=True)) if category else []
 
-        # فیلترهای سایدبار
+        # لیست دسته‌ها برای سایدبار
+        if category:
+            ctx["categories"] = list(
+                category.get_children().filter(is_active=True).order_by("position", "name")
+            )
+        else:
+            ctx["categories"] = list(
+                Category.objects.filter(parent__isnull=True, is_active=True).order_by("position", "name")
+            )
+
+        # QuerySet نهایی
         full_qs = self.get_queryset().order_by()
+
+        # برندها و Facets
         ctx["brand_facets"] = (
             full_qs.values("brand_fk_id", "brand_fk__name")
             .annotate(cnt=Count("id"))
             .order_by("brand_fk__name")
         )
-        ctx["brands"] = Brand.objects.filter(products__is_active=True).distinct().order_by("position", "name")
+        ctx["brands"] = Brand.objects.filter(
+            id__in=full_qs.values_list("brand_fk_id", flat=True)
+        ).order_by("position", "name")
 
+        # فست دسته‌ها
+        ctx["category_facets"] = full_qs.values("category_id").annotate(cnt=Count("id"))
+
+        # قیمت‌های حداقل/حداکثر
         agg = full_qs.aggregate(minp=Min("price"), maxp=Max("price"))
         ctx["price_min"] = agg["minp"]
         ctx["price_max"] = agg["maxp"]
 
-        # برندهای انتخاب شده
+        # برندهای انتخاب‌شده
         selected = self.request.GET.get("brand", "")
         try:
             ctx["selected_brands"] = {int(x) for x in selected.split(",") if x}
         except ValueError:
             ctx["selected_brands"] = set()
 
+        # سایر پارامترهای فیلتر
         ctx["q"] = self.request.GET.get("q", "").strip()
         ctx["current_sort"] = self.request.GET.get("sort", "pop")
+        ctx["available"] = self.request.GET.get("available")
 
-        # صفحه‌بندی 
-        ctx["max_scroll_pages"] = self.MAX_SCROLL_PAGES  # مثلاً 2
-        ctx["paginate_by"]      = self.paginate_by       # مثلاً 12
+        # pagination / infinite scroll flags
+        ctx["max_scroll_pages"] = self.MAX_SCROLL_PAGES
+        ctx["paginate_by"] = self.paginate_by
         ctx["enable_infinite_scroll"] = True
+        ctx["total_count"] = full_qs.count()
 
-        total_count = self.get_queryset().count()   
-        ctx["total_count"] = total_count
+        # slider global
+        slider_stats = Product.objects.filter(is_active=True).aggregate(slider_min=Min("price"), slider_max=Max("price"))
+        ctx["slider_min"] = slider_stats.get("slider_min") or 0
+        ctx["slider_max"] = slider_stats.get("slider_max") or 1_000_000
 
+        # selected_cat_id
+        cat = self.request.GET.get("cat") or self.request.GET.get("category")
+        ctx["selected_cat_id"] = int(cat) if cat and str(cat).isdigit() else (category.id if category else None)
 
-        # تولید رنگ‌ها (همون قبلی)
+        # تولید رنگ‌ها برای هر محصول
         for p in ctx["products"]:
             uniq = {}
             for v in getattr(p, "_prefetch_variants", []):
@@ -271,20 +307,21 @@ class ProductListView(ProductBaseQS, ListView):
 
         return ctx
 
-    # ------------------------------------------------------------------
-    # پاسخ AJAX HTML (اسکرول HTML — برای نسخه حرفه‌ای **غیر فعال** می‌شود)
-    # ------------------------------------------------------------------
+    # ---------------- AJAX HTML Response ---------------- #
+
     def render_to_response(self, context, **response_kwargs):
-        # نسخه HTML اسکرول قدیمی؛ در حالت JSON API از این استفاده نمی‌کنیم.
         if self.request.headers.get("X-Requested-With") == "XMLHttpRequest":
             return render(self.request, "products/_product_items.html", context)
         return super().render_to_response(context, **response_kwargs)
 
 
+# ---------------- Category Product List ---------------- #
+
 class CategoryProductListView(ProductListView):
     def get_category(self) -> Optional[Category]:
         path = self.kwargs.get("path", "")
         return _resolve_category_by_path(path)
+
 
 
 # ---------------- Variant Price API ----------------

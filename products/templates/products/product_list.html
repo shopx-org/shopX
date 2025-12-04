@@ -362,180 +362,281 @@
                         {% endif %}
                     </div><!-- End .col-lg-9 -->
 
-                    <!-- سایدبار -->
-                    <aside class="col-lg-2 col-xl-5col order-lg-first">
-                        <div class="sidebar sidebar-shop">
+                    {# ---- سایدبار فیلترها (راست) ---- #}
+                    <aside class="col-lg-2 order-lg-first mb-4 mb-lg-1 ml-3 pl-3 pr-3">
+                        <div class="filters-card shadow-sm">
 
-                            <div class="widget">
-                                <h3 class="widget-title">
-                                    <a data-toggle="collapse" href="#widget-4" role="button" aria-expanded="true"
-                                       aria-controls="widget-4">
-                                        برند
-                                    </a>
-                                </h3>
-                                <div class="collapse show" id="widget-4">
-                                    <div class="widget-body">
-                                        <form method="get" id="brand-form">
-                                            {% for k,v in request.GET.items %}
-                                                {% if k != 'brand' %}
-                                                    <input type="hidden" name="{{ k }}" value="{{ v }}">
-                                                {% endif %}
-                                            {% endfor %}
-                                            <div class="filter-items">
-                                                {% for b in brands %}
-                                                    <div class="filter-item">
-                                                        <div class="custom-control custom-checkbox">
-                                                            <input type="checkbox"
-                                                                   class="custom-control-input"
-                                                                   id="brand-{{ b.id }}"
-                                                                   name="brand"
-                                                                   value="{{ b.id }}"
-                                                                   {% if b.id in selected_brands %}checked{% endif %}
-                                                                   onclick="toggleBrand(this)">
-                                                            <label class="custom-control-label" for="brand-{{ b.id }}">
-                                                                {{ b.name }}
-                                                                {% for facet in brand_facets %}
-                                                                    {% if facet.brand_fk_id == b.id %}
-                                                                        <small class="text-muted">({{ facet.cnt }})</small>
-                                                                    {% endif %}
-                                                                {% endfor %}
-                                                            </label>
-                                                        </div>
-                                                    </div>
-                                                {% empty %}
-                                                    <div class="text-muted">برندی یافت نشد.</div>
-                                                {% endfor %}
-                                            </div>
-                                            <button class="btn btn-sm btn-outline-primary mt-2">اعمال</button>
-                                        </form>
-                                    </div>
+                            {# هدر کارت فیلترها #}
+                            <div class="filters-card-header d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center">
+                    <span class="filters-card-toggle d-inline-flex align-items-center justify-content-center mr-2">
+                        <i class="icon-angle-right" style="font-size: 18px; color: #ff4d4f;margin-top: 5px;"></i>
+                    </span>
+                                    <span class="filters-card-title">فیلترها</span>
                                 </div>
+                                <i class="icon-sliders"></i>
                             </div>
 
-                            <!-- قیمت -->
-                            <div class="widget">
-                                <h3 class="widget-title">قیمت</h3>
-                                <div class="widget-body">
-                                    <form method="get">
-                                        {% for k,v in request.GET.items %}
-                                            {% if k != 'min' and k != 'max' %}
-                                                <input type="hidden" name="{{ k }}" value="{{ v }}">
-                                            {% endif %}
-                                        {% endfor %}
-                                        <div class="filter-items">
-                                            {% with rmin=0 rmax=25000 %}
-                                                <div class="filter-item">
-                                                    <label class="custom-control custom-radio d-flex align-items-center">
-                                                        <input type="radio" class="custom-control-input"
-                                                               name="price-preset"
-                                                               onclick="setRange({{ rmin }},{{ rmax }})"
-                                                               {% if request.GET.min == rmin|stringformat:'s' and request.GET.max == rmax|stringformat:'s' %}checked{% endif %}>
-                                                        <span class="custom-control-label">زیر {{ rmax|floatformat:0 }} تومان</span>
-                                                    </label>
-                                                </div>
-                                            {% endwith %}
-                                            {% with a=25000 b=50000 %}
-                                                <div class="filter-item">
-                                                    <label class="custom-control custom-radio">
-                                                        <input type="radio" class="custom-control-input"
-                                                               name="price-preset"
-                                                               onclick="setRange({{ a }},{{ b }})"
-                                                               {% if request.GET.min == a|stringformat:'s' and request.GET.max == b|stringformat:'s' %}checked{% endif %}>
-                                                        <span class="custom-control-label">بین {{ a|floatformat:0 }} تا {{ b|floatformat:0 }} تومان</span>
-                                                    </label>
-                                                </div>
-                                            {% endwith %}
-                                            {% with a=50000 b=100000 %}
-                                                <div class="filter-item">
-                                                    <label class="custom-control custom-radio">
-                                                        <input type="radio" class="custom-control-input"
-                                                               name="price-preset"
-                                                               onclick="setRange({{ a }},{{ b }})"
-                                                               {% if request.GET.min == a|stringformat:'s' and request.GET.max == b|stringformat:'s' %}checked{% endif %}>
-                                                        <span class="custom-control-label">بین {{ a|floatformat:0 }} تا {{ b|floatformat:0 }} تومان</span>
-                                                    </label>
-                                                </div>
-                                            {% endwith %}
-                                            {% with a=100000 b=200000 %}
-                                                <div class="filter-item">
-                                                    <label class="custom-control custom-radio">
-                                                        <input type="radio" class="custom-control-input"
-                                                               name="price-preset"
-                                                               onclick="setRange({{ a }},{{ b }})"
-                                                               {% if request.GET.min == a|stringformat:'s' and request.GET.max == b|stringformat:'s' %}checked{% endif %}>
-                                                        <span class="custom-control-label">بین {{ a|floatformat:0 }} تا {{ b|floatformat:0 }} تومان</span>
-                                                    </label>
-                                                </div>
-                                            {% endwith %}
-                                            {% with a=200000 %}
-                                                <div class="filter-item">
-                                                    <label class="custom-control custom-radio">
-                                                        <input type="radio" class="custom-control-input"
-                                                               name="price-preset"
-                                                               onclick="setRange({{ a }},'')"
-                                                               {% if request.GET.min == a|stringformat:'s' and not request.GET.max %}checked{% endif %}>
-                                                        <span class="custom-control-label">بیشتر از {{ a|floatformat:0 }}</span>
-                                                    </label>
-                                                </div>
-                                            {% endwith %}
+                            <form method="get" id="filters-form">
+                                {# پارامترهای فعلی که نباید تغییر کنند (مثلاً q, sort, ...) #}
+                                {% for k, v in request.GET.items %}
+                                    {% if k != "available" and k != "min" and k != "max" and k != "brand" and k != "cat" and k != "page" %}
+                                        <input type="hidden" name="{{ k }}" value="{{ v }}">
+                                    {% endif %}
+                                {% endfor %}
 
-                                            {% if price_min != None and price_max != None %}
-                                                <small class="text-muted d-block mt-2">بازه فعلی
-                                                    نتایج: {{ price_min|floatformat:0 }}
-                                                    تا {{ price_max|floatformat:0 }}</small>
-                                            {% endif %}
+                                <div class="filters-card-body">
+
+                                    {# --- فقط کالاهای موجود (بالای همه) --- #}
+                                    <div class="filters-row mb-3">
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox"
+                                                class="custom-control-input"
+                                                id="available-only"
+                                                name="available"
+                                                value="1"
+                                                {% if available == "1" %}checked{% endif %}
+                                                onchange="document.getElementById('filters-form').submit();">
+                                            <label class="medium is-stock custom-control-label" for="available-only">
+                                                فقط کالاهای موجود
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="filters-divider mb-2"></div>
+
+                                    {# آکاردیون فیلترها #}
+                                    <div id="filters-accordion">
+
+                                        {# ===== فیلتر قیمت ===== #}
+                                        <div class="filters-group">
+                                            <a class="filters-group-title d-flex justify-content-between align-items-center"
+                                            data-toggle="collapse"
+                                            href="#filter-price"
+                                            role="button"
+                                            aria-expanded="true"
+                                            aria-controls="filter-price">
+                                                <span>فیلتر بر اساس قیمت</span>
+                                                <i class="icon-angle-down"></i>
+                                            </a>
+
+                                            {% with base_min=slider_min|default:0 base_max=slider_max|default:0 %}
+                                                <div class="collapse show" id="filter-price"
+                                                    data-parent="#filters-accordion">
+                                                    <div class="filters-group-body price-filter">
+
+                                                        {# --- نوار بازه قیمت با دو اسلایدر واقعی --- #}
+                                                        <div class="price-range-bar mb-3">
+                                                            <div class="price-range-track"
+                                                                data-min="{{ base_min }}"
+                                                                data-max="{{ base_max }}">
+                                                                <span class="price-range-handle left-handle"></span>
+                                                                <span class="price-range-handle right-handle"></span>
+                                                            </div>
+
+                                                            {# اسلایدرهای واقعی ولی نامرئی #}
+                                                            <input type="range"
+                                                                id="price-range-min"
+                                                                class="price-range-native"
+                                                                min="{{ base_min }}"
+                                                                max="{{ base_max }}"
+                                                                step="100000"
+                                                                value="{{ min_param|default:base_min }}">
+
+                                                            <input type="range"
+                                                                id="price-range-max"
+                                                                class="price-range-native"
+                                                                min="{{ base_min }}"
+                                                                max="{{ base_max }}"
+                                                                step="100000"
+                                                                value="{{ max_param|default:base_max }}">
+
+                                                            <div class="price-range-label text-center small text-muted mt-2">
+                                                                محدوده نتایج از
+                                                                {% if price_min %}{{ price_min|intcomma }}{% else %}
+                                                                    {{ base_min|intcomma }}{% endif %}
+                                                                تا
+                                                                {% if price_max %}{{ price_max|intcomma }}{% else %}
+                                                                    {{ base_max|intcomma }}{% endif %}
+                                                                تومان
+                                                            </div>
+                                                        </div>
+
+                                                        {# مقدار «از» #}
+                                                        <div class="form-group mb-2">
+                                                            <label class="medium price-range mb-1 d-block">
+                                                                محدوده قیمت از
+                                                                <span style="color:#ff4d4f;font-weight:400;font-size:10px;">(تومان)</span>
+                                                            </label>
+                                                            <div class="input-group input-group-sm price-input">
+                                                                <input type="number"
+                                                                    name="min"
+                                                                    class="form-control"
+                                                                    value="{{ min_param }}"
+                                                                    placeholder="{{ base_min|intcomma }}">
+                                                            </div>
+                                                        </div>
+
+                                                        {# مقدار «تا» #}
+                                                        <div class="form-group mb-2">
+                                                            <label class="medium price-range mb-1 d-block">
+                                                                محدوده قیمت تا
+                                                                <span style="color:#ff4d4f;font-weight:400;font-size:10px;">(تومان)</span>
+                                                            </label>
+                                                            <div class="input-group input-group-sm price-input">
+                                                                <input type="number"
+                                                                    name="max"
+                                                                    class="form-control"
+                                                                    value="{{ max_param }}"
+                                                                    placeholder="{{ base_max|intcomma }}">
+                                                            </div>
+                                                        </div>
+
+                                                        <button type="submit"
+                                                                class="btn btn-sm btn-outline-primary btn-price-range w-100 mt-2">
+                                                            اعمال قیمت
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            {% endwith %}
                                         </div>
 
-                                        <input type="hidden" name="min" id="price-min" value="{{ request.GET.min }}">
-                                        <input type="hidden" name="max" id="price-max" value="{{ request.GET.max }}">
-                                        <button class="btn btn-sm btn-outline-primary mt-3">اعمال</button>
-                                    </form>
-                                </div>
-                            </div>
 
-                            <!-- امتیاز مشتری (دمو) -->
-                            <div class="widget">
-                                <h3 class="widget-title">امتیاز مشتری</h3>
-                                <div class="widget-body">
-                                    <div class="text-muted small">(بعداً می‌تونیم با فیلتر real-rating وصلش کنیم)</div>
-                                </div>
-                            </div>
+                                        {# ===== فیلتر برندها ===== #}
+                                        <div class="filters-group">
+                                            <a class="filters-group-title d-flex justify-content-between align-items-center"
+                                            data-toggle="collapse"
+                                            href="#filter-brands"
+                                            role="button"
+                                            aria-expanded="true"
+                                            aria-controls="filter-brands">
+                                                <span>برندها</span>
+                                                <i class="icon-angle-down"></i>
+                                            </a>
+                                            <div class="collapse show" id="filter-brands" data-parent="#filters-accordion">
+                                                <div class="filters-group-body">
+                                                    <div class="filter-items">
+                                                        {% for b in brands %}
+                                                            <div class="filter-item">
+                                                                <div class="custom-control custom-checkbox">
+                                                                    <input type="checkbox"
+                                                                        class="custom-control-input"
+                                                                        id="brand-{{ b.id }}"
+                                                                        value="{{ b.id }}"
+                                                                        {% if b.id in selected_brands %}checked{% endif %}
+                                                                        onchange="updateBrandFilter()">
+                                                                    <label class="custom-control-label"
+                                                                        for="brand-{{ b.id }}">
+                                                                        {{ b.name }}
+                                                                        {% for facet in brand_facets %}
+                                                                            {% if facet.brand_fk_id == b.id %}
+                                                                                <small class="text-muted">
+                                                                                    ({{ facet.cnt }})
+                                                                                </small>
+                                                                            {% endif %}
+                                                                        {% endfor %}
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                        {% empty %}
+                                                            <div class="text-muted small">برندی در نتایج نیست.</div>
+                                                        {% endfor %}
+                                                    </div>
 
-                            <!-- رنگ‌ها (دمو) -->
-                            <div class="widget">
-                                <h3 class="widget-title">رنگ</h3>
-                                <div class="widget-body">
-                                    <div class="filter-colors">
-                                        <a href="#" style="background: #b87145;"><span
-                                                class="sr-only">نام رنگ</span></a>
-                                        <a href="#" style="background: #f0c04a;"><span
-                                                class="sr-only">نام رنگ</span></a>
-                                        <a href="#" style="background: #333333;"><span
-                                                class="sr-only">نام رنگ</span></a>
-                                        <a href="#" class="selected" style="background: #cc3333;"><span class="sr-only">نام رنگ</span></a>
-                                        <a href="#" style="background: #3399cc;"><span
-                                                class="sr-only">نام رنگ</span></a>
-                                        <a href="#" style="background: #669933;"><span
-                                                class="sr-only">نام رنگ</span></a>
-                                        <a href="#" style="background: #f2719c;"><span
-                                                class="sr-only">نام رنگ</span></a>
-                                        <a href="#" style="background: #ebebeb;"><span
-                                                class="sr-only">نام رنگ</span></a>
+                                                    <input type="hidden" name="brand" id="brand-hidden"
+                                                        value="{{ selected_brands|join:',' }}">
+                                                    <button type="submit"
+                                                            class="btn btn-sm btn-outline-primary btn-brand-filter w-100 mt-2">
+                                                        اعمال برندها
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {# ===== فیلتر دسته‌بندی‌ها ===== #}
+                                        {% comment %} <div class="filters-group">
+                                            {# تیتر آکاردیون #}
+                                            <a class="filters-group-title d-flex justify-content-between align-items-center"
+                                            data-toggle="collapse"
+                                            href="#filter-cats"
+                                            role="button"
+                                            aria-expanded="true"
+                                            aria-controls="filter-cats">
+                                                <span>دسته‌بندی‌ها</span>
+                                                <i class="icon-angle-down"></i>
+                                            </a>
+
+                                            {# بدنهٔ آکاردیون #}
+                                            <div class="collapse show" id="filter-cats" data-parent="#filters-accordion">
+                                                <div class="filters-group-body">
+
+                                                    <div class="cat-select-wrapper">
+                                                        <div class="cat-select" id="cat-select-toggle">
+                                                            <span id="cat-select-label">
+                                                                {% if selected_cat_id %}
+                                                                    {% for c in categories %}
+                                                                        {% if c.id == selected_cat_id %}
+                                                                            {{ c.name }}
+                                                                        {% endif %}
+                                                                    {% endfor %}
+                                                                {% else %}
+                                                                    همه دسته‌ها
+                                                                {% endif %}
+                                                            </span>
+                                                            <i class="icon-angle-down"></i>
+                                                        </div>
+
+                                                        <div class="cat-select-menu" id="cat-select-menu">
+                                                            <button type="button"
+                                                                    class="cat-option {% if not selected_cat_id %}is-active{% endif %}"
+                                                                    data-id="">
+                                                                همه دسته‌ها
+                                                            </button>
+
+                                                            {% for c in categories %}
+                                                                <button type="button"
+                                                                        class="cat-option {% if selected_cat_id == c.id %}is-active{% endif %}"
+                                                                        data-id="{{ c.id }}">
+                                                                    {{ c.name }}
+                                                                    {% for facet in category_facets %}
+                                                                        {% if facet.category_id == c.id %}
+                                                                            <small class="text-muted">({{ facet.cnt }})</small>
+                                                                        {% endif %}
+                                                                    {% endfor %}
+                                                                </button>
+                                                            {% endfor %}
+                                                        </div>
+                                                    </div>
+
+                                                    <input type="hidden" name="cat" id="cat-hidden"
+                                                        value="{{ selected_cat_id|default:'' }}">
+
+                                                    <button type="submit"
+                                                            class="btn btn-sm btn-outline-primary btn-cat-filter w-100 mt-2">
+                                                        اعمال دسته‌بندی
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div> {% endcomment %}
+
+
                                     </div>
-                                </div>
-                            </div>
+                                    {# دکمه پاک کردن همه #}
+                                    <div class="filters-divider mt-3 mb-2"></div>
+                                    <button type="submit"
+                                            class="btn btn-sm btn-outline-primary-2 filter-remove w-100"
+                                            name="reset"
+                                            value="1"
+                                            onclick="clearFilters(event)">
+                                        پاک کردن فیلترها
+                                    </button>
 
-                            <!-- بنر سایدبار -->
-                            <div class="widget widget-banner-sidebar">
-                                <div class="banner-sidebar-title" dir="ltr">218 x 430px</div>
-                                <div class="banner-sidebar banner-overlay">
-                                    <a href="#"><img src="{% static 'images/demos/demo-13/banners/banner-6.jpg' %}"
-                                                     alt="بنر"></a>
                                 </div>
-                            </div>
-
+                                {# /filters-card-body #}
+                            </form>
                         </div>
                     </aside>
+
                 </div>
             </div>
         </div>
@@ -568,153 +669,177 @@
     </main>
 
 {% block CSS-JS %}
-    <script>
-        // چند انتخاب برند را به یک CSV در name=brand تبدیل می‌کند
-        function toggleBrand(chk) {
-            const form = document.getElementById('brand-form');
-            const checks = form.querySelectorAll('input[name="brand"]');
-            const vals = [];
-            checks.forEach(c => {
-                if (c.checked) vals.push(c.value);
-            });
-            checks.forEach(c => c.disabled = true);
-            const hidden = document.createElement('input');
-            hidden.type = 'hidden';
-            hidden.name = 'brand';
-            hidden.value = vals.join(',');
-            form.appendChild(hidden);
-        }
 
-        // تنظیم بازه قیمت از رادیویی‌های پرست
-        function setRange(min, max) {
-            document.getElementById('price-min').value = (min !== '' && min !== null) ? min : '';
-            document.getElementById('price-max').value = (max !== '' && max !== null) ? max : '';
-        }
-    </script>
+<!-- چند انتخاب برند -->
+<script>
+function toggleBrand(chk) {
+    const form = document.getElementById('brand-form');
+    const checks = form.querySelectorAll('input[name="brand"]');
+    const vals = [];
+
+    checks.forEach(c => { if (c.checked) vals.push(c.value); });
+    checks.forEach(c => c.disabled = true);
+
+    const hidden = document.createElement('input');
+    hidden.type = 'hidden';
+    hidden.name = 'brand';
+    hidden.value = vals.join(',');
+    form.appendChild(hidden);
+}
+</script>
+
+<!-- بازه قیمت -->
+<script>
+function setRange(min, max) {
+    document.getElementById('price-min').value =
+        (min !== '' && min !== null) ? min : '';
+
+    document.getElementById('price-max').value =
+        (max !== '' && max !== null) ? max : '';
+}
+</script>
+
+<script>
+window.MAX_SCROLL_PAGES = {{ max_scroll_pages|default:2 }};
+window.PAGINATE_BY = {{ paginate_by|default:12 }};
+window.THRESHOLD = {{ threshold|default:24 }};
+</script>
 
 
-    <script>
-        window.MAX_SCROLL_PAGES = {{ max_scroll_pages|default:2 }};
-        window.PAGINATE_BY = {{ paginate_by|default:12 }};
-        window.THRESHOLD = {{ threshold|default:24 }};
-    </script>
+<script>
+{% if page_obj.number <= max_scroll_pages and not page_obj.has_previous %}
+const API_URL = "{% url 'products:product_list_api' %}";
+let currentPage = {{ page_obj.number }};
+const MAX_SCROLL_PAGES = {{ max_scroll_pages }};
+let loading = false;
 
-   <script>
-        // چند انتخاب برند را به یک CSV در name=brand تبدیل می‌کند
-        function toggleBrand(chk) {
-        const form = document.getElementById('brand-form');
-        const checks = form.querySelectorAll('input[name="brand"]');
-        const vals = [];
-                    checks.forEach(c => {
-        if (c.checked) vals.push(c.value);
-                    });
-                    checks.forEach(c => c.disabled = true);
-        const hidden = document.createElement('input');
-                    hidden.type = 'hidden';
-                    hidden.name = 'brand';
-                    hidden.value = vals.join(',');
-                    form.appendChild(hidden);
-                }
-        // تنظیم بازه قیمت از رادیویی‌های پرست
-        function setRange(min, max) {
-                    document.getElementById('price-min').value = (min !== '' && min !== null) ? min : '';
-                    document.getElementById('price-max').value = (max !== '' && max !== null) ? max : '';
-                }
-    </script>
+/** helper: ست کردن آیتم پاجینیشن فعلی به صفحه‌ی `pageNum` */
+function setActivePagination(pageNum) {
+    try {
+        // ابتدا تلاش سریع با selector ساده
+        let link = document.querySelector('.pagination a.page-link[href*="page=' + pageNum + '"]');
 
-    <script>
-        window.MAX_SCROLL_PAGES = {{ max_scroll_pages|default:2 }};
-    </script>
-
-    <script>
-        {% if page_obj.number <= max_scroll_pages and not page_obj.has_previous %}
-            const API_URL = "{% url 'products:product_list_api' %}";
-            let currentPage = {{ page_obj.number }};
-            const MAX_SCROLL_PAGES = {{ max_scroll_pages }};
-            let loading = false;
-
-            async function loadMore() {
-                if (loading || currentPage >= MAX_SCROLL_PAGES) return;
-
-                loading = true;
-                currentPage++;
-
-                const params = new URLSearchParams(window.location.search);
-                params.set('page', currentPage);
-
+        // اگر پیدا نشد، سعی کن با URL parsing تمام لینک‌ها را بررسی کنی
+        if (!link) {
+            const links = Array.from(document.querySelectorAll('.pagination a.page-link'));
+            for (const a of links) {
                 try {
-                    const res = await fetch(`${API_URL}?${params.toString()}`);
-                    if (!res.ok) return;
-
-                    const data = await res.json();
-
-                    // اگر هیچ محصولی نیومد → دیگه ادامه نده (مهم!)
-                    if (!data.products || data.products.length === 0) {
-                        loading = false;
-                        return;
+                    const u = new URL(a.href, location.origin);
+                    if (u.searchParams.get('page') === String(pageNum)) {
+                        link = a;
+                        break;
                     }
+                } catch (e) { /* ignore invalid href */ }
+            }
+        }
 
-                    const container = document.getElementById('product-list');
+        if (link) {
+            document.querySelectorAll('.pagination .page-item.active').forEach(el => el.classList.remove('active'));
+            const item = link.closest('.page-item') || link.parentElement;
+            if (item) item.classList.add('active');
+        }
+    } catch (e) {
+        console.error('setActivePagination error', e);
+    }
+}
 
-                    data.products.forEach(p => {
-                        if (!document.querySelector(`[data-product-id="${p.id}"]`)) {
-                            container.insertAdjacentHTML('beforeend', `
-                                <div class="col-6 col-md-4 col-xl-3" data-product-id="${p.id}">
-                                    <div class="product product-7 dk-product-card">
-                                        <figure class="product-media">
-                                            ${p.is_new ? '<span class="product-label label-new">جدید</span>' : ''}
-                                            ${p.discount_percent ? '<span class="product-label label-sale">'+p.discount_percent+'%</span>' : ''}
-                                            <a href="${p.url}">
-                                                <img src="${p.cover}" class="product-image" alt="${p.name}">
-                                            </a>
-                                            ${p.stock <= 0 ? '<div class="sold-out-badge">ناموجود</div>' : ''}
-                                        </figure>
-                                        <div class="product-body">
-                                            <h3 class="product-title text-right"><a href="${p.url}">${p.name}</a></h3>
-                                            <div class="product-price text-right">
-                                                ${p.compare_at_price && p.compare_at_price > p.price 
-                                                    ? `<span class="new-price">${p.price.toLocaleString()} <small>تومان</small></span>
-                                                    <span class="old-price">${p.compare_at_price.toLocaleString()} <small>تومان</small></span>`
-                                                    : `<span class="new-price">${p.price.toLocaleString()} <small>تومان</small></span>`
-                                                }
-                                            </div>
-                                        </div>
-                                    </div>
+async function loadMore() {
+    if (loading || currentPage >= MAX_SCROLL_PAGES) return;
+
+    loading = true;
+    currentPage++;
+
+    const params = new URLSearchParams(window.location.search);
+    params.set('page', currentPage);
+
+    try {
+        const res = await fetch(`${API_URL}?${params.toString()}`);
+        if (!res.ok) return;
+
+        const data = await res.json();
+
+        if (!data.products || data.products.length === 0) {
+            loading = false;
+            return;
+        }
+
+        const container = document.getElementById('product-list');
+
+        data.products.forEach(p => {
+            if (!document.querySelector(`[data-product-id="${p.id}"]`)) {
+                container.insertAdjacentHTML('beforeend', `
+                    <div class="col-6 col-md-4 col-xl-3" data-product-id="${p.id}">
+                        <div class="product product-7 dk-product-card">
+                            <figure class="product-media">
+                                ${p.is_new ? '<span class="product-label label-new">جدید</span>' : ''}
+                                ${p.discount_percent ? '<span class="product-label label-sale">'+p.discount_percent+'%</span>' : ''}
+                                <a href="${p.url}">
+                                    <img src="${p.cover}" class="product-image" alt="${p.name}">
+                                </a>
+                                ${p.stock <= 0 ? '<div class="sold-out-badge">ناموجود</div>' : ''}
+                            </figure>
+                            <div class="product-body">
+                                <h3 class="product-title text-right"><a href="${p.url}">${p.name}</a></h3>
+                                <div class="product-price text-right">
+                                    ${
+                                        p.compare_at_price && p.compare_at_price > p.price
+                                        ? `<span class="new-price">${p.price.toLocaleString()} <small>تومان</small></span>
+                                           <span class="old-price">${p.compare_at_price.toLocaleString()} <small>تومان</small></span>`
+                                        : `<span class="new-price">${p.price.toLocaleString()} <small>تومان</small></span>`
+                                    }
                                 </div>
-                            `);
-                        }
-                    });
-
-                    // وقتی صفحه ۲ لود شد → صفحه ۲ رو در پجینیشن اکتیو کن
-                    if (currentPage === MAX_SCROLL_PAGES) {
-                        const link = document.querySelector('.pagination a.page-link[href*="page=2"]');
-                        if (link) {
-                            document.querySelectorAll('.pagination .page-item').forEach(el => el.classList.remove('active'));
-                            link.parentElement.classList.add('active');
-                        }
-                    }
-
-                } catch (e) {
-                    console.error('خطا در لود:', e);
-                } finally {
-                    loading = false;
-                }
+                            </div>
+                        </div>
+                    </div>
+                `);
             }
+        });
 
-            // اسکرول خزنده
-            window.addEventListener('scroll', () => {
-                if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 800) {
-                    loadMore();
-                }
-            });
+        // ← اینجا: بعد از اضافه کردن آیتم‌ها، پاجینیشن را براساس currentPage آپدیت کن
+        setActivePagination(currentPage);
 
-            // فقط اگه واقعاً بیشتر از ۱۲ محصول داریم، صفحه ۲ رو لود کن
-            const totalProducts = {{ page_obj.paginator.count }};
-            if (totalProducts > {{ paginate_by }} && currentPage < MAX_SCROLL_PAGES) {
-                loadMore();
-            }
+    } catch (e) {
+        console.error('خطا در لود:', e);
+    } finally {
+        loading = false;
+    }
+}
 
-        {% endif %}
-    </script>
+// اسکرول خزنده (همان رفتار قبلی خودت)
+window.addEventListener('scroll', () => {
+    if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 800) {
+        loadMore();
+    }
+});
+
+// اگر تعداد کل محصول بیشتر از paginate_by است، صفحهٔ دوم را خودکار لود کن (مثل قبل)
+const totalProducts = {{ page_obj.paginator.count }};
+if (totalProducts > {{ paginate_by }} && currentPage < MAX_SCROLL_PAGES) {
+    loadMore();
+}
+
+// در بارگذاری اولیه هم وضعیت پاجینیشن را درست کن (مثلاً وقتی صفحهٔ سرور page=1 یا page=2 رندر شده)
+setTimeout(() => setActivePagination({{ page_obj.number }}), 100);
+
+{% endif %}
+</script>
+
+<script>
+function updateBrandFilter() {
+    // همه برندهای تیک‌خورده
+    const checked = Array.from(document.querySelectorAll('#filter-brands input[type="checkbox"]:checked'))
+                        .map(c => c.value);
+
+    // فقط مقدار hidden را آپدیت کن، هیچ input جدید نساز
+    document.getElementById('brand-hidden').value = checked.join(',');
+
+    // فرم را submit کن
+    document.getElementById('filters-form').submit();
+}
+</script>
+
+
 {% endblock %}
+
+
 {% endblock %}

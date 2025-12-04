@@ -268,13 +268,11 @@
                                                     </div>
                                                 </div>
 
-                                                <input type="hidden" name="cat" id="cat-hidden"
-                                                       value="{{ selected_cat_id|default:'' }}">
+                                            <form method="get" id="cat-filter-form">
+                                                <input type="hidden" name="cat" id="cat-hidden" value="{{ selected_cat_id|default:'' }}">
+                                                <button type="submit" class="btn btn-sm btn-outline-primary btn-cat-filter w-100 mt-2">اعمال دسته‌بندی</button>
+                                            </form>
 
-                                                <button type="submit"
-                                                        class="btn btn-sm btn-outline-primary btn-cat-filter w-100 mt-2">
-                                                    اعمال دسته‌بندی
-                                                </button>
                                             </div>
                                         </div>
                                     </div>
@@ -548,4 +546,12 @@ document.addEventListener('DOMContentLoaded', () => {
     {% endif %}
 });
 </script>
+
+document.querySelectorAll('.cat-option').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.getElementById('cat-hidden').value = btn.dataset.id;
+        document.getElementById('cat-filter-form').submit();
+    });
+});
+
 {% endblock %}

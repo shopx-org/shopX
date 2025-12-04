@@ -785,7 +785,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 // ============================
-// ۵) Search History در باکس سرچ
+// ۵) Search History در باکس سرچ — نسخه نهایی و بدون باگ
 // ============================
 document.addEventListener('DOMContentLoaded', function () {
     const HISTORY_KEY    = 'shopx_search_history_v1';
@@ -793,39 +793,32 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const form           = document.querySelector('#header-search-form');
     const input          = form ? form.querySelector('input[name="q"]') : null;
-
     const historySection = document.getElementById('search-history-section');
     const historyList    = document.getElementById('search-history-list');
     const historyClear   = document.getElementById('search-history-clear');
-    const dropdown       = document.getElementById('search-dropdown');   // 👈 اضافه شد
+    const dropdown       = document.getElementById('search-dropdown');
 
-    if (!form || !input || !historySection || !historyList || !historyClear) return;
+    if (!form || !input || !historySection || !historyList) return;
 
     function loadHistory() {
         try {
             const raw = localStorage.getItem(HISTORY_KEY);
-            if (!raw) return [];
-            const arr = JSON.parse(raw);
-            return Array.isArray(arr) ? arr : [];
+            return raw ? JSON.parse(raw) : [];
         } catch (e) {
             return [];
         }
     }
 
     function saveHistory(list) {
-        localStorage.setItem(HISTORY_KEY, JSON.stringify(list));
+        localStorage.setItem(HISTORY_KEY, JSON.stringify(list.slice(0, MAX_ITEMS)));
     }
 
     function addToHistory(term) {
-        term = (term || '').trim();
+        term = term.trim();
         if (!term) return;
         let list = loadHistory();
-
-        list = list.filter(x => x !== term);   // حذف تکراری
-        list.unshift(term);                    // ابتدای لیست
-        if (list.length > MAX_ITEMS) {
-            list = list.slice(0, MAX_ITEMS);
-        }
+        list = list.filter(x => x !== term);
+        list.unshift(term);
         saveHistory(list);
     }
 
@@ -833,18 +826,17 @@ document.addEventListener('DOMContentLoaded', function () {
         const list = loadHistory();
         historyList.innerHTML = '';
 
-        if (!list.length) {
+        if (list.length === 0) {
             historySection.classList.add('d-none');
-            // اگه تاریخچه نداریم و اتوکامپلیت هم چیزی نذاشته، می‌تونی dropdown رو بسته نگه داری
             return;
         }
 
         list.forEach(term => {
             const btn = document.createElement('button');
             btn.type = 'button';
-            btn.className = 'btn btn-sm search-history-pill';
+            btn.className = 'btn btn-sm search-history-pill me-2 mb-2';
             btn.textContent = term;
-            btn.addEventListener('click', function () {
+            btn.addEventListener('click', () => {
                 input.value = term;
                 form.submit();
             });
@@ -852,34 +844,45 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         historySection.classList.remove('d-none');
-
-        // 👈 این مهمه: خود دراپ‌داون را هم نمایش بده
-        if (dropdown) {
+        
+        // فقط اگر دراپ‌داون بسته بود، بازش کن
+        if (dropdown && dropdown.classList.contains('d-none')) {
             dropdown.classList.remove('d-none');
         }
     }
 
-    // submit → اضافه به history
+    // فقط وقتی کاربر واقعاً می‌خواد سرچ کنه، تاریخچه نشون بده
+    input.addEventListener('focus', function () {
+        if (input.value.trim() === '') {
+            renderHistory();
+        }
+    });
+
+    // وقتی چیزی تایپ کرد و پاک کرد → دوباره تاریخچه نشون بده
+    input.addEventListener('input', function () {
+        if (input.value.trim() === '') {
+            renderHistory();
+        }
+    });
+
+    // وقتی فرم ارسال شد → اضافه به تاریخچه
     form.addEventListener('submit', function () {
         addToHistory(input.value);
     });
 
-    // focus → نمایش history
-    input.addEventListener('focus', function () {
-        renderHistory();
-    });
+    // پاک کردن تاریخچه
+    if (historyClear) {
+        historyClear.addEventListener('click', function () {
+            localStorage.removeItem(HISTORY_KEY);
+            historyList.innerHTML = '';
+            historySection.classList.add('d-none');
+        });
+    }
 
-    // تایپ → همچنان می‌تونه history را آپدیت/نمایش کند
-    input.addEventListener('input', function () {
-        renderHistory();
+    // وقتی کاربر بیرون از سرچ کلیک کرد → دراپ‌داون بسته بشه
+    document.addEventListener('click', function (e) {
+        if (!form.contains(e.target)) {
+            if (dropdown) dropdown.classList.add('d-none');
+        }
     });
-
-    // پاک‌کردن history
-    historyClear.addEventListener('click', function () {
-        localStorage.removeItem(HISTORY_KEY);
-        renderHistory();
-    });
-
-    // بار اول
-    renderHistory();
 });
