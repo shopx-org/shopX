@@ -536,7 +536,7 @@ class SizeAdmin(admin.ModelAdmin):
 
 @admin.register(ProductVariant)
 class ProductVariantAdmin(admin.ModelAdmin):
-    list_display = ("product", "color", "size", "sku", "price", "stock", "is_active", "updated_at")
+    list_display = ("product", "color",  "size", "sku", "price", "stock","weight_grams", "is_active", "updated_at")
     list_filter = ("is_active", "color", "size")
     search_fields = ("product__name", "sku", "barcode")
     autocomplete_fields = ("product", "color", "size")
@@ -570,6 +570,7 @@ class ProductVariantInlineForm(forms.ModelForm):
         model = ProductVariant
         fields = (
             "color", "size", "sku", "price", "stock", "is_active",
+
             "sale_active_variant", "sale_percent_variant", "sale_amount_variant",
         )
 
@@ -597,6 +598,7 @@ class ProductVariantInline(ParentAwareInlineMixin, admin.TabularInline):
     extra = 0
     fields = (
         "color", "size", "sku", "price", "stock", "is_active",
+
         "sale_active_variant", "sale_percent_variant", "sale_amount_variant",
     )
     autocomplete_fields = ("color", "size")
@@ -767,7 +769,7 @@ class ProductAdmin(admin.ModelAdmin):
 
     list_display = (
         "thumb", "name", "category", "price", "status", "is_active", "average_rating_display", "rating_count_display",
-        "variant_count_col", "stock_total_col", "created_at",
+        "variant_count_col", "stock_total_col", "created_at","shipping_flat_fee",
     )
     list_display_links = ("name", "thumb")
     list_editable = ("price", "status", "is_active")
@@ -792,6 +794,13 @@ class ProductAdmin(admin.ModelAdmin):
         (_("قیمت"), {"fields": ("price", "compare_at_price", "sale_active", "sale_percent", "sale_amount", "sale_starts_at",
                                 "sale_ends_at", "effective_price_admin")}),
         (_("امتیاز کاربران"), {"fields": ("average_rating_display", "rating_count_display")}),
+        (_("حمل‌ونقل"), {
+            "fields": (
+                "is_digital",
+                "default_weight_grams",
+                "default_length_cm", "default_width_cm", "default_height_cm","shipping_flat_fee",
+            )
+        }),
         (_("محتوا"), {"fields": ("short_description", "description")}),
         (_("SEO"), {"fields": ("meta_title", "meta_description"), "classes": ("collapse",)}),
         (_("زمان"), {"fields": ("created_at", "updated_at"), "classes": ("collapse",)}),
@@ -814,7 +823,7 @@ class ProductAdmin(admin.ModelAdmin):
         if count == 0:
             return "-"
         return format_html('<span style="color:#555;">{} رأی</span>', count)
-    
+
 
 
     @admin.display(description=_("گروه سایز"))
@@ -1003,7 +1012,7 @@ class ProductImageAdmin(admin.ModelAdmin):
             except Exception:
                 return "—"
         return "—"
-    
+
 
 
 

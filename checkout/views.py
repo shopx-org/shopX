@@ -19,7 +19,7 @@ from products.services.pricing_adapter import (
 )
 from shipping.models import Address
 from shipping.forms import AddressForm
-
+# from shipping.services import get_shipping_quotes_for_cart
 
 # =========================
 # constants
@@ -79,6 +79,33 @@ def _require_nonempty_cart(cart: Cart) -> bool:
     except Exception:
         return False
 
+def _cart_shipping_flat_fee(cart: Cart) -> Decimal:
+    """
+    جمع هزینه بسته‌بندی/ارسال بر اساس فیلد shipping_flat_fee
+    - اگر روی Variant تعریف شده بود، همونو می‌گیریم
+    - وگرنه از خود Product می‌گیریم
+    """
+    total = Decimal("0")
+
+    for it in cart.items():
+        product = it.product
+        variant = getattr(it, "variant", None)
+        qty = getattr(it, "qty", 1) or 1
+
+        fee = Decimal("0")
+
+        # اگر روی واریانت فیلد داشتیم
+        if variant is not None and hasattr(variant, "shipping_flat_fee"):
+            fee = getattr(variant, "shipping_flat_fee") or Decimal("0")
+        # وگرنه از روی خود محصول
+        elif hasattr(product, "shipping_flat_fee"):
+            fee = getattr(product, "shipping_flat_fee") or Decimal("0")
+
+        # تبدیل به Decimal مطمئن
+        fee = Decimal(str(fee))
+        total += fee * qty
+
+    return total
 
 def _build_lines_with_gids(cart: Cart) -> Tuple[List[Any], List[Tuple[str, SimpleNamespace]]]:
     """
@@ -378,9 +405,9 @@ def checkout_review(request: HttpRequest) -> HttpResponse:
     receiver_data = request.session.get(SESSION_KEY_RECEIVER, {}) or {}
     phone = _get_user_phone(request.user)
 
-    shipping_method = request.session.get(SESSION_KEY_SHIPPING, "tipax")
-    shipping_method_display = "ارسال پستی" if shipping_method == "post" else "ارسال تیپاکس"
-    shipping_cost = Decimal("0")
+    shipping_method = "flat_per_product"
+    shipping_method_display = "هزینه ارسال بر اساس هر کالا"
+    shipping_cost = _cart_shipping_flat_fee(cart)
 
     result, lines, groups = _evaluate_cart(cart)
 
@@ -468,14 +495,15 @@ def checkout_confirm(request: HttpRequest) -> HttpResponse:
 
     result, lines, groups = _evaluate_cart(cart)
     summary = _summary_from_result(result)
-
+    shipping_cost = _cart_shipping_flat_fee(cart)
     # 3) ساخت Order در اپ orders
     order = Order.objects.create(
         user=request.user,
         address=address,
         subtotal=summary["subtotal"],
         total_discount=summary["total_discount"],
-        total=summary["total"],
+        shipping_price=shipping_cost,
+        total=summary["total"] + shipping_cost,
         payment_status=Order.PaymentStatus.PENDING,
         fulfillment_status=Order.FulfillmentStatus.NEW,
     )

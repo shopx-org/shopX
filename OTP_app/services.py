@@ -1,6 +1,6 @@
-# /home/atusa92/PycharmProjects/ShopX/OTP_app/services.py
+# /home/atusa92/PycharmProjects/ShopX/OTP_app/order_checkout.py
 from .models import OtpSession, OtpBlock
-# otp/services.py
+# otp/order_checkout.py
 from django.utils import timezone
 from django.db import transaction
 from django.conf import settings

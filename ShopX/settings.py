@@ -37,6 +37,11 @@ ZARINPAL_STARTPAY_URL = (
 )
 
 
+# ── AMADAST API ───────────────────────────────────────────────────────────────────────
+
+AMADAST_API_KEY = os.getenv("AMADAST_API_KEY", "")
+SHOP_ORIGIN_POSTAL_CODE = os.getenv("SHOP_ORIGIN_POSTAL_CODE", "")
+
 # ── Core ───────────────────────────────────────────────────────────────────────
 
 

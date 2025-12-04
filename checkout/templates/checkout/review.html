@@ -157,31 +157,33 @@
                                     {% include "checkout/partials/_summary.html" %}
                                 </div>
 
-                                {#                            <form id="coupon-form" class="mt-3" method="post"#}
-                                {#                                  action="{% url 'cart:cart_set_coupon' %}">#}
-                                {#                                {% csrf_token %}#}
-                                {#                                <input type="hidden" name="next" value="{% url 'checkout:review' %}">#}
-                                {##}
-                                {#                                <div class="input-group">#}
-                                {#                                    <input name="coupon" type="text" class="form-control" placeholder="کد تخفیف"#}
-                                {#                                           value="{{ cart_coupon }}">#}
-                                {#                                    <button class="btn btn-outline-secondary" type="submit">اعمال</button>#}
-                                {#                                </div>#}
-                                {##}
-                                {#                                <div id="coupon-msg" class="small mt-2"></div>#}
-                                {#                            </form>#}
+                                {# --- هزینه ارسال و جمع نهایی --- #}
+                                {% if shipping_cost %}
+                                    <hr class="my-2">
+
+                                    <div class="d-flex justify-content-between small mb-1">
+                                        <span>{{ shipping_method_display }}</span>
+                                        <span>{{ shipping_cost|intcomma }} تومان</span>
+                                    </div>
+
+                                    {% with final_total=cart_total|add:shipping_cost %}
+                                        <div class="d-flex justify-content-between fw-semibold">
+                                            <span>مبلغ قابل پرداخت</span>
+                                            <span>{{ final_total|intcomma }} تومان</span>
+                                        </div>
+                                    {% endwith %}
+                                {% endif %}
 
                                 <form method="post" action="{% url 'checkout:confirm' %}">
                                     {% csrf_token %}
                                     <button type="submit"
-                                            class="btn btn-primary payment-link px-4 w-100 w-md-auto mt-2">
+                                            class="btn btn-primary payment-link px-4 w-100 w-md-auto mt-3">
                                         تایید و ادامه به درگاه پرداخت
                                     </button>
                                 </form>
                             </div>
                         </div>
                     </aside>
-
                 </div>
             </div>
         </div>

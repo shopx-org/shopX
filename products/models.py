@@ -350,49 +350,161 @@ class Product(models.Model):
 
     # دسته اصلی (برای قوانین Spec)
     category = models.ForeignKey(
-        "products.Category", on_delete=models.PROTECT, related_name="products", verbose_name="دسته‌بندی"
+        "products.Category",
+        on_delete=models.PROTECT,
+        related_name="products",
+        verbose_name="دسته‌بندی",
     )
     # دسته‌های اضافی (برای نمایش در چند مسیر)
     additional_categories = models.ManyToManyField(
-        "products.Category", blank=True, related_name="products_extra", verbose_name="دسته‌های دیگر"
+        "products.Category",
+        blank=True,
+        related_name="products_extra",
+        verbose_name="دسته‌های دیگر",
     )
 
     brand_fk = models.ForeignKey(
-        "products.Brand", on_delete=models.PROTECT, null=True, blank=True,
-        related_name="products", verbose_name="برند"
+        "products.Brand",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="products",
+        verbose_name="برند",
     )
 
-    short_description = models.CharField(max_length=280, blank=True, verbose_name="توضیح کوتاه")
+    short_description = models.CharField(
+        max_length=280,
+        blank=True,
+        verbose_name="توضیح کوتاه",
+    )
     description = models.TextField(blank=True, verbose_name="توضیحات")
 
-    price = models.DecimalField(max_digits=12, decimal_places=2, validators=[MinValueValidator(0)], verbose_name="قیمت")
-    compare_at_price = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True, verbose_name="قیمت قبلی")
+    # --- اطلاعات حمل‌ونقل (سطح محصول) ---
+    is_digital = models.BooleanField(
+        default=False,
+        verbose_name="محصول دیجیتال / بدون ارسال فیزیکی",
+        help_text="برای دوره آنلاین، فایل دانلودی و خدماتی که ارسال پستی ندارند این گزینه را فعال کن.",
+    )
 
-    status = models.CharField(max_length=5, choices=STATUS_CHOICES, default="draft", verbose_name="وضعیت")
+    default_weight_grams = models.PositiveIntegerField(
+        default=0,
+        verbose_name="وزن پیش‌فرض (گرم)",
+        help_text="اگر واریانت‌ها وزن جدا ندارند، وزن ارسال این محصول را اینجا بر حسب گرم وارد کن.",
+    )
+
+    default_length_cm = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        verbose_name="طول بسته (سانتی‌متر)",
+        help_text="برای محاسبه وزن حجمی؛ اختیاری.",
+    )
+    default_width_cm = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        verbose_name="عرض بسته (سانتی‌متر)",
+        help_text="برای محاسبه وزن حجمی؛ اختیاری.",
+    )
+    default_height_cm = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        verbose_name="ارتفاع بسته (سانتی‌متر)",
+        help_text="برای محاسبه وزن حجمی؛ اختیاری.",
+    )
+
+    # --- قیمت پایه ---
+    price = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        validators=[MinValueValidator(0)],
+        verbose_name="قیمت",
+    )
+    compare_at_price = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        verbose_name="قیمت قبلی",
+    )
+
+    shipping_flat_fee = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0,
+        verbose_name="هزینه بسته‌بندی و ارسال (تومان)",
+        help_text="برای هر عدد از این کالا، این مقدار به هزینه ارسال اضافه می‌شود.",
+    )
+    status = models.CharField(
+        max_length=5,
+        choices=STATUS_CHOICES,
+        default="draft",
+        verbose_name="وضعیت",
+    )
     is_active = models.BooleanField(default=True, verbose_name="فعال")
 
-    meta_title = models.CharField(max_length=70, blank=True, verbose_name="عنوان متا")
-    meta_description = models.CharField(max_length=160, blank=True, verbose_name="توضیحات متا")
+    meta_title = models.CharField(
+        max_length=70,
+        blank=True,
+        verbose_name="عنوان متا",
+    )
+    meta_description = models.CharField(
+        max_length=160,
+        blank=True,
+        verbose_name="توضیحات متا",
+    )
 
     # اختیاری: ذخیرهٔ خام؛ موتور اصلی مشخصات در جداول Attribute* است
-    attributes = models.JSONField(default=dict, blank=True, verbose_name="ویژگی‌ها")
+    attributes = models.JSONField(
+        default=dict,
+        blank=True,
+        verbose_name="ویژگی‌ها",
+    )
 
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ ایجاد")
-    updated_at = models.DateTimeField(auto_now=True, verbose_name="تاریخ به‌روزرسانی")
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="تاریخ ایجاد",
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name="تاریخ به‌روزرسانی",
+    )
+
     # === product-level sale fields (اختیاری: admin-only) ===
-    sale_active = models.BooleanField(default=False, verbose_name="تخفیف محصول فعال")
+    sale_active = models.BooleanField(
+        default=False,
+        verbose_name="تخفیف محصول فعال",
+    )
     sale_percent = models.DecimalField(
-        max_digits=5, decimal_places=2, null=True, blank=True,
+        max_digits=5,
+        decimal_places=2,
+        null=True,
+        blank=True,
         verbose_name="درصد تخفیف (مثلاً 10 برای 10%)",
-        help_text="اگر پر شد، درصدی از قیمت پایه کم می‌شود."
+        help_text="اگر پر شد، درصدی از قیمت پایه کم می‌شود.",
     )
     sale_amount = models.DecimalField(
-        max_digits=12, decimal_places=2, null=True, blank=True,
+        max_digits=12,
+        decimal_places=2,
+        null=True,
+        blank=True,
         verbose_name="مبلغ ثابت تخفیف (تومان)",
-        help_text="اگر پر شد، مبلغ ثابت از قیمت پایه کم می‌شود."
+        help_text="اگر پر شد، مبلغ ثابت از قیمت پایه کم می‌شود.",
     )
-    sale_starts_at = models.DateTimeField(null=True, blank=True, verbose_name="شروع تخفیف")
-    sale_ends_at = models.DateTimeField(null=True, blank=True, verbose_name="پایان تخفیف")
+    sale_starts_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="شروع تخفیف",
+    )
+    sale_ends_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="پایان تخفیف",
+    )
 
     class Meta:
         verbose_name = "محصول"
@@ -405,17 +517,33 @@ class Product(models.Model):
             models.Index(fields=["brand_fk"]),
         ]
 
+    # ==== Helpers ====
+    def get_default_weight_grams(self) -> int:
+        return int(self.default_weight_grams or 0)
+
+    @property
+    def is_shippable(self) -> bool:
+        """
+        محصولی که دیجیتال نیست و ارسال فیزیکی دارد.
+        """
+        return not self.is_digital
+
     def effective_services(self):
         """
         سرویس‌های موثر این محصول = سرویس‌های سطح محصول + سرویس‌های کتگوری‌های اجدادی.
         """
         cats = self.category.get_ancestors(include_self=True)
-        cat_services = (CategoryService.objects
-                        .filter(category__in=cats).select_related("service"))
-        prd_services = (ProductService.objects
-                        .filter(product=self).select_related("service"))
+        cat_services = (
+            CategoryService.objects
+            .filter(category__in=cats)
+            .select_related("service")
+        )
+        prd_services = (
+            ProductService.objects
+            .filter(product=self)
+            .select_related("service")
+        )
 
-        # ادغامِ یکتا با اولویت ProductService
         seen = set()
         result = []
         for link in list(prd_services) + list(cat_services):
@@ -423,16 +551,16 @@ class Product(models.Model):
             if not s.is_active or s.id in seen:
                 continue
             seen.add(s.id)
-            result.append({"service": s, "is_default_on": getattr(link, "is_default_on", False)})
+            result.append(
+                {"service": s, "is_default_on": getattr(link, "is_default_on", False)}
+            )
         return result
 
     @property
     def effective_price(self) -> Decimal:
         """
         قیمت مؤثر بدون درنظرگرفتن کوپن‌های سشن (برای ادمین/استفاده آفلاین).
-        توجه: چون به request دسترسی نداریم، کوپن‌ها لحاظ نمی‌شوند.
         """
-        # import داخل متد برای جلوگیری از circular import
         from products.services.pricing_adapter import price_single_product
         res = price_single_product(self, qty=1, coupons=[], channel="web")
         return res.total
@@ -453,41 +581,49 @@ class Product(models.Model):
     def get_absolute_url(self):
         return reverse("products:product_detail", kwargs={"slug": self.slug})
 
-
     @property
     def cover_image(self) -> Optional["ProductImage"]:
-        return self.images.filter(is_primary=True).first() or self.images.order_by("position", "id").first()
+        return (
+            self.images.filter(is_primary=True).first()
+            or self.images.order_by("position", "id").first()
+        )
 
     def get_size_group(self):
         cat = getattr(self, "category", None)
         if not cat:
             return None
-        # اگر کتگوری متد بالا را دارد:
         if hasattr(cat, "get_size_group"):
             return cat.get_size_group()
-        # یا مستقیم از خود کتگوری
         return getattr(cat, "size_group", None)
 
     @property
     def colors(self):
         ids = set(self.variants.values_list("color_id", flat=True))
-        ids.update(self.images.exclude(color__isnull=True).values_list("color_id", flat=True))
+        ids.update(
+            self.images
+            .exclude(color__isnull=True)
+            .values_list("color_id", flat=True)
+        )
         return Color.objects.filter(id__in=ids, is_active=True)
 
     def __str__(self):
         return self.name
-    
 
     @property
     def average_rating(self):
         ctype = ContentType.objects.get_for_model(self)
-        avg = Rating.objects.filter(content_type=ctype, object_id=self.id).aggregate(models.Avg("score"))["score__avg"]
+        avg = (
+            Rating.objects
+            .filter(content_type=ctype, object_id=self.id)
+            .aggregate(models.Avg("score"))["score__avg"]
+        )
         return round(avg or 0, 1)
 
     @property
     def rating_count(self):
         ctype = ContentType.objects.get_for_model(self)
         return Rating.objects.filter(content_type=ctype, object_id=self.id).count()
+
 
 
 # =========================
@@ -498,31 +634,82 @@ SKU_VALIDATOR = RegexValidator(
     message="SKU باید 3 تا 32 کاراکتر، فقط حروف بزرگ، اعداد و - _ . باشد.",
 )
 
+
 class ProductVariant(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="variants", verbose_name="محصول")
     color   = models.ForeignKey(Color, on_delete=models.PROTECT, related_name="variants", verbose_name="رنگ")
-    size    = models.ForeignKey("products.Size", null=True, blank=True, on_delete=models.PROTECT, related_name="variants", verbose_name="سایز")
+    size    = models.ForeignKey(
+        "products.Size",
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name="variants",
+        verbose_name="سایز",
+    )
 
     sku     = models.CharField(max_length=64, unique=True, validators=[SKU_VALIDATOR], verbose_name="SKU")
     barcode = models.CharField(max_length=64, blank=True, verbose_name="بارکد")
 
-    price   = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True, validators=[MinValueValidator(0)], verbose_name="قیمت واریانت")
+    price   = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(0)],
+        verbose_name="قیمت واریانت",
+    )
     stock   = models.PositiveIntegerField(default=0, verbose_name="موجودی")
     is_active = models.BooleanField(default=True, verbose_name="فعال")
 
-    # === sale fields (variant-level) ===
-    sale_active_variant = models.BooleanField(default=False, verbose_name="تخفیف روی این واریانت فعال")
-    sale_percent_variant = models.DecimalField(
-        max_digits=5, decimal_places=2, null=True, blank=True,
-        verbose_name="درصد تخفیف واریانت",
-        help_text="مثلاً 10 برای 10% (اختیاری)"
+    # --- Shipping info (سطح واریانت) ---
+    weight_grams = models.PositiveIntegerField(
+        default=0,
+        verbose_name="وزن این واریانت (گرم)",
+        help_text="اگر خالی بماند، از وزن پیش‌فرض محصول استفاده می‌شود.",
     )
-    sale_amount_variant = models.DecimalField(
-        max_digits=12, decimal_places=2, null=True, blank=True,
-        verbose_name="مبلغ ثابت تخفیف واریانت",
-        help_text="مثلاً 10000 (تومان) (اختیاری)"
+    length_cm = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        verbose_name="طول (سانتی‌متر)",
+    )
+    width_cm = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        verbose_name="عرض (سانتی‌متر)",
+    )
+    height_cm = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        verbose_name="ارتفاع (سانتی‌متر)",
     )
 
+    # === sale fields (variant-level) ===
+    sale_active_variant = models.BooleanField(
+        default=False,
+        verbose_name="تخفیف روی این واریانت فعال",
+    )
+    sale_percent_variant = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        verbose_name="درصد تخفیف واریانت",
+        help_text="مثلاً 10 برای 10% (اختیاری)",
+    )
+    sale_amount_variant = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        verbose_name="مبلغ ثابت تخفیف واریانت",
+        help_text="مثلاً 10000 (تومان) (اختیاری)",
+    )
 
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ ایجاد")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="تاریخ به‌روزرسانی")
@@ -531,13 +718,11 @@ class ProductVariant(models.Model):
         verbose_name = "واریانت"
         verbose_name_plural = "واریانت‌ها"
         constraints = [
-            # وقتی size مشخص است، ترکیب یکتا باشد
             models.UniqueConstraint(
                 fields=["product", "color", "size"],
                 condition=Q(size__isnull=False),
                 name="uniq_prod_color_size_when_size_not_null",
             ),
-            # وقتی size خالی است، فقط یک رکورد برای هر (product, color)
             models.UniqueConstraint(
                 fields=["product", "color"],
                 condition=Q(size__isnull=True),
@@ -550,12 +735,7 @@ class ProductVariant(models.Model):
         ]
     unique_together = (("product", "sku"),)
 
-    def clean(self):
-        super().clean()
-        sg = self.product.get_size_group() if self.product_id else None
-        if sg and self.size_id and self.size.group_id != sg.id:
-            raise ValidationError({"size": "سایز انتخابی با گروه سایز محصول/دسته سازگار نیست."})
-
+    # ==== Pricing & stock ====
     def get_price(self):
         return self.price if self.price is not None else self.product.price
 
@@ -563,6 +743,28 @@ class ProductVariant(models.Model):
     def in_stock(self) -> bool:
         return self.is_active and self.stock > 0
 
+    # ==== Helpers for shipping ====
+    @property
+    def shipping_weight_grams(self) -> int:
+        if self.weight_grams:
+            return int(self.weight_grams)
+        return getattr(self.product, "get_default_weight_grams", lambda: 0)()
+
+    @property
+    def shipping_dimensions_cm(self):
+        length = self.length_cm or self.product.default_length_cm
+        width  = self.width_cm or self.product.default_width_cm
+        height = self.height_cm or self.product.default_height_cm
+        return (length, width, height)
+
+    # ==== Validation ====
+    def clean(self):
+        super().clean()
+        sg = self.product.get_size_group() if self.product_id else None
+        if sg and self.size_id and self.size.group_id != sg.id:
+            raise ValidationError({"size": "سایز انتخابی با گروه سایز محصول/دسته سازگار نیست."})
+
+    # ==== Misc ====
     def __str__(self):
         size_label = self.size.label if self.size_id else ""
         return f"{self.product.name} — {self.color.name}" + (f" / {size_label}" if size_label else "")
@@ -584,7 +786,6 @@ class ProductVariant(models.Model):
                 sku = f"{base}-{i:02d}"
             self.sku = sku
         super().save(*args, **kwargs)
-
 
 # =========================
 # Product Image
