@@ -99,6 +99,8 @@ INSTALLED_APPS = [
     # apps
     "django_jalali",
     "django_social_share",
+    "ckeditor",
+    'imagekit',
 
 
 ]

@@ -19902,12 +19902,16 @@ button:focus {
     position: relative;
     text-align: right;
     padding-top: 4rem;
+    height: auto; /* برای موبایل */
 }
 
 .about-img-front {
     position: relative;
     z-index: 2;
-    border: 2rem solid #f9f9f9;
+    border: 1rem solid #f9f9f9;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    border-radius: .5rem; /* از قالب اضافه شد */
+    margin-left: 2rem;
 }
 
 .about-img-back {
@@ -19915,35 +19919,41 @@ button:focus {
     left: 0;
     top: 0;
     z-index: 1;
+    width: auto;
+    max-width: 72%; /* همگام با مدیا query */
+    top: 1.5rem;
+    left: 1.5rem;
+    transform: rotate(-5deg); /* از قالب اضافه شد */
+    box-shadow: 0 30px 50px rgba(0,0,0,0.1);
+    border: 1rem solid #f9f9f9;
+    border-radius: .5rem;
+    margin-left: 2rem;
 }
 
+/* Brands text */
 .brands-text {
     max-width: 430px;
     margin-top: .5rem;
     margin-bottom: 3rem;
 }
-
 .brands-text .title {
     line-height: 1.5;
 }
-
 .brands-display {
     margin-top: .5rem;
 }
-
 .brands-display .brand {
     min-height: 0;
     margin-bottom: 4rem;
 }
-
 .brands-display [class*="col-"] {
     display: flex;
 }
-
 .brands-display [class*="col-"] .brand {
     width: 100%;
 }
 
+/* Testimonials */
 .about-testimonials blockquote {
     color: #666666;
     max-width: 850px;
@@ -19953,11 +19963,23 @@ button:focus {
     line-height: 1.875;
 }
 
+
+/* Row که اعضای تیم داخلش هستند */
+.row.justify-content-center {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+/* Team Members */
 .member {
     margin-bottom: 2rem;
     max-width: 376px;
     margin-left: auto;
     margin-right: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    height: 100%; /* کارت‌ها به ارتفاع والد کشیده می‌شوند */
 }
 
 .member p {
@@ -19977,13 +19999,17 @@ button:focus {
 
 .member-media {
     position: relative;
-    margin: 0;
+    width: 320px; /* یا هر اندازه دلخواه */
+    height: 320px;
+    margin: 0 auto;
+    overflow: hidden;
 }
 
 .member-content {
     padding-top: 2.4rem;
     padding-bottom: 2.4rem;
     overflow: hidden;
+    flex-grow: 1; 
 }
 
 .member-title {
@@ -20056,6 +20082,10 @@ button:focus {
     opacity: 1;
 }
 
+.member-overlay-content p {
+    color: inherit;
+}
+
 .member:hover.member-anim .member-overlay .member-title,
 .member:hover.member-anim .member-overlay p,
 .member:hover.member-anim .member-overlay .social-icons {
@@ -20084,7 +20114,6 @@ button:focus {
         -webkit-transform: translate3d(0, 100px, 0);
         transform: translate3d(0, 100px, 0);
     }
-
     to {
         opacity: 1;
         -webkit-transform: translate3d(0, 0, 0);
@@ -20098,13 +20127,62 @@ button:focus {
         -webkit-transform: translate3d(0, 0, 0);
         transform: translate3d(0, 0, 0);
     }
-
     to {
         opacity: 0;
         -webkit-transform: translate3d(0, -100px, 0);
         transform: translate3d(0, -100px, 0);
     }
 }
+
+
+/*--------------------- Responsive -------------------- */
+@media (max-width: 768px) {
+    .about-img-back {
+        display: none !important;
+        position: static !important;
+        width: 0 !important;
+        height: 0 !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+    }
+    .about-images {
+        position: relative !important;
+        padding-top: 0 !important;
+        height: auto !important;
+        text-align: center !important;
+    }
+    .about-images img {
+        position: relative !important;
+        top: 0 !important;
+        left: 0 !important;
+        transform: none !important;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .about-img-front {
+        border: 1rem solid #f9f9f9;
+        max-width: 260px !important;
+        width: 100% !important;
+    }
+
+    .col-6.col-md-4.col-lg-4 {
+        display: flex;
+        flex-direction: column;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1200px) {
+    .about-img-front {
+        border-width: 1rem;
+        max-width: 82%;
+    }
+    .about-img-back {
+        max-width: 72%;
+        top: 1.5rem;
+        left: 1.5rem;
+    }
+}
+
 
 /*--------------------- 5.8.About 2 -------------------- */
 /* About us 2 */

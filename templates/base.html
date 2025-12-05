@@ -5,24 +5,30 @@
 
 <head>
     {% include 'partials/header_reference.html' %}
+
     {% block meta %}
-    
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-    <meta http-equiv="Pragma" content="no-cache" />
-    <meta http-equiv="Expires" content="0" />
-    
+        <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+        <meta http-equiv="Pragma" content="no-cache" />
+        <meta http-equiv="Expires" content="0" />
     {% endblock %}
 
-    {% block CSS-JS %}{% endblock %}
     <title>{% block title %}{% endblock %}</title>
+
+    {% block meta_description %}
+        <meta name="description" content="khane toshake online shop">
+    {% endblock %}
+
+
+    {% block CSS-JS %}{% endblock %}
+
 </head>
+
 
 <body>
 <div class="page-wrapper">
     {% include 'partials/header.html' %}
 
     {% block content %}
-
     {% endblock %}
 
     {% include 'partials/footer.html' %}

@@ -4,7 +4,9 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.conf import settings
 from django_jalali.db import models as jmodels
-
+from ckeditor.fields import RichTextField
+from imagekit.models import ImageSpecField
+from imagekit.processors import ResizeToFit, Adjust, Transpose, ResizeToFill
 
 class LikeDislike(models.Model):
     LIKE = 1
@@ -163,3 +165,106 @@ class Wishlist(models.Model):
 
     def __str__(self):
         return f"{self.user} → {self.product}"
+
+
+
+class About(models.Model):
+    title = models.CharField(max_length=200, default="درباره ما", verbose_name="عنوان صفحه درباره ما")
+
+    # **فیلدهای متا برای SEO**
+    meta_title = models.CharField(max_length=70, blank=True, null=True, verbose_name="متا تایتل (SEO)")
+    meta_description = models.CharField(max_length=160, blank=True, null=True, verbose_name="متا دیسکریپشن (SEO)")
+
+
+    header_image = models.ImageField(upload_to="about/", blank=True, null=True, verbose_name="تصویر هدر")
+    header_image_optimized = ImageSpecField(
+        source='header_image',
+        processors=[
+            ResizeToFit(1920, 600, upscale=False),  # حداکثر عرض 1920
+            Adjust(contrast=1.1, sharpness=1.2),
+        ],
+        format='WEBP',  # بهترین فرمت برای وب
+        options={'quality': 85},
+    )
+
+    vision_title = models.CharField(max_length=200, default="دید ما", verbose_name="عنوان دید ما")
+    vision_text = RichTextField(null=True, blank=True, verbose_name="متن دید ما")
+
+    mission_title = models.CharField(max_length=200, default="ماموریت ما", verbose_name="عنوان ماموریت ما")
+    mission_text = RichTextField(null=True, blank=True, verbose_name="متن ماموریت ما")
+
+    who_title = models.CharField(max_length=200, default="ما که هستیم", verbose_name="عنوان ما که هستیم")
+    who_lead = models.CharField(max_length=255, null=True, blank=True, verbose_name="متن پیش‌رو درباره ما")
+    who_text = RichTextField(null=True, blank=True, verbose_name="متن ما که هستیم")
+    who_image_front = models.ImageField(upload_to="about/", blank=True, null=True, verbose_name="تصویر جلو درباره ما")
+    who_image_front_optimized = ImageSpecField(
+        source='who_image_front',
+        processors=[ResizeToFit(500, 650)],
+        format='WEBP',
+        options={'quality': 80},
+    )
+    
+    who_image_back = models.ImageField(upload_to="about/", blank=True, null=True, verbose_name="تصویر عقب درباره ما")
+    who_image_back_optimized = ImageSpecField(
+            source='who_image_back',
+            processors=[ResizeToFit(400, 550)],
+            format='WEBP',
+            options={'quality': 75},
+    )
+
+    brands_text = RichTextField(null=True, blank=True, verbose_name="متن برندها")
+
+    class Meta:
+        verbose_name = "درباره ما"
+        verbose_name_plural = "درباره ما"
+
+    def __str__(self):
+        return self.title
+
+
+# بعد از کلاس About اضافه کن
+class Brand(models.Model):
+    about = models.ForeignKey(About, on_delete=models.CASCADE, related_name='brands')
+    name = models.CharField(max_length=100, verbose_name="نام برند")
+    logo = models.ImageField(upload_to="brands/", verbose_name="لوگو برند")
+    url = models.URLField(blank=True, null=True, verbose_name="لینک وبسایت برند")
+
+    class Meta:
+        verbose_name = "برند"
+        verbose_name_plural = "برندها"
+
+    def __str__(self):
+        return self.name
+
+# نسخه بهینه‌شده با imagekit (اختیاری ولی توصیه میشه)
+    logo_thumb = ImageSpecField(
+        source='logo',
+        processors=[ResizeToFit(200, 100)],
+        format='WEBP',
+        options={'quality': 80}
+    )
+
+
+class TeamMember(models.Model):
+    about = models.ForeignKey(About, on_delete=models.CASCADE, related_name="team_members")
+    name = models.CharField(max_length=200, verbose_name="نام عضو تیم")
+    role = models.CharField(max_length=200, verbose_name="سمت")
+    bio = RichTextField(null=True, blank=True, verbose_name="بیوگرافی کوتاه")
+    image = models.ImageField(upload_to="team/", blank=True, null=True, verbose_name="تصویر")
+    image_thumb = ImageSpecField(
+        source='image',
+        processors=[ResizeToFill(400, 400)],  # مربع دقیق
+        format='WEBP',
+        options={'quality': 85},
+    )
+
+    facebook = models.URLField(blank=True, null=True, verbose_name="فیسبوک")
+    twitter = models.URLField(blank=True, null=True, verbose_name="توییتر")
+    instagram = models.URLField(blank=True, null=True, verbose_name="اینستاگرام")
+
+    class Meta:
+        verbose_name = "عضو تیم"
+        verbose_name_plural = "اعضای تیم"
+
+    def __str__(self):
+        return self.name
