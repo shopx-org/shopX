@@ -54,7 +54,7 @@
                 </button>
 
                 <a href="{% url 'home:home' %}" class="logo">
-                    <img src="{% static 'images/demos/demo-2/output-onlinepngtools.png' %}" alt="Molla Logo" width="104"
+                    <img src="{{ site_info.logo_site_thumb.url }}" alt="{{ site_info.company_name }}" width="104"
                          height="24">
                 </a>
             </div><!-- End .header-left -->

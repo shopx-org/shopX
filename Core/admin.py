@@ -5,7 +5,6 @@ from django.contrib.contenttypes.models import ContentType
 from ckeditor.widgets import CKEditorWidget
 from django import forms
 
-
 class ReplyFilter(admin.SimpleListFilter):
     title = 'نوع نظر'
     parameter_name = 'is_reply'
@@ -201,5 +200,61 @@ class AboutAdmin(admin.ModelAdmin):
         ('متا SEO', {
             'fields': ('meta_title', 'meta_description'),
             'description': 'برای سئو: طول متا تایتل ~60 کاراکتر، طول متا دیسکریپشن ~160 کاراکتر'
+        }),
+    )
+
+
+# site info
+@admin.register(SiteInfo)
+class SiteInfoAdmin(admin.ModelAdmin):
+    list_display = ("company_name", "phone_number", "email", "working_hours", "show_logo")
+    list_display_links = ("company_name",)
+
+    # جلوگیری از ساخت بیش از یک رکورد
+    def has_add_permission(self, request):
+        if SiteInfo.objects.exists():
+            return False
+        return True
+
+    # نمایش لوگو در ادمین
+    def show_logo(self, obj):
+        if obj.logo_site_thumb:
+            return format_html(
+                '<img src="{}" width="80" style="border-radius:8px;"/>',
+                obj.logo_site_thumb.url
+            )
+        return "---"
+    show_logo.short_description = "لوگو"
+
+    fieldsets = (
+        ("اطلاعات اصلی مجموعه", {
+            "fields": (
+                "company_name",
+                "description",
+                "logo_site",
+            )
+        }),
+
+        ("ساعت کاری", {
+            "fields": ("working_hours",)
+        }),
+
+        ("اطلاعات تماس", {
+            "fields": (
+                "phone_number",
+                "phone_number2",
+                "phone_number3",
+                "email",
+                "address",
+            )
+        }),
+
+        ("شبکه‌های اجتماعی", {
+            "fields": (
+                "instagram",
+                "telegram",
+                "whatsapp",
+                "twitter",
+            )
         }),
     )

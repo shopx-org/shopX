@@ -10199,8 +10199,11 @@ a:focus {
 }
 
 .footer-logo {
-    margin-bottom: 2rem;
-    margin-top: -.8rem;
+    /* margin-bottom: 2rem;
+    margin-top: -.8rem; */
+    width: 100px;
+    height: 100px;
+    margin-top: 0px;
 }
 
 .widget-about p {
@@ -30315,4 +30318,18 @@ a .btn-product .btn-compare span :hover{
 .category-toggler:hover {
     background: #FA523C !important;
     border-radius: 4px;
+}
+
+.btn-save {
+    background: #FA523C;
+    border: 2px solid #FA523C;
+    border-radius: 5px;
+    color: #fff;
+    box-shadow: 1px;
+    padding: 10px 20px;
+}
+.btn-save:hover {
+    background: #e34832;
+    border-color: #e34832;
+    color: #fff;
 }

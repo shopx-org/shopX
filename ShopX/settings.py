@@ -89,6 +89,7 @@ INSTALLED_APPS = [
     "orders.apps.OrdersConfig",
     "search.apps.SearchConfig",
     "faq.apps.FaqConfig",
+    "contact.apps.ContactConfig",
 
     # Third-party
     "widget_tweaks",
@@ -138,6 +139,7 @@ TEMPLATES = [
                 'cart.context_processors.cart_badge',
                 'cart.context_processors.mini_cart',
                 "Core.context_processors.wishlist_context",
+                'Core.context_processors.site_info'
             ],
         },
     },

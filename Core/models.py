@@ -268,3 +268,38 @@ class TeamMember(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class SiteInfo(models.Model):
+    company_name = models.CharField(max_length=200, verbose_name="نام مجموعه")
+    description = models.TextField(verbose_name="توضیحات درباره مجموعه", blank=True)
+    logo_site = models.ImageField(upload_to="site_info/", verbose_name="لوگو سایت", blank=True, null=True)
+    logo_site_thumb = ImageSpecField(
+        source='logo_site',
+        processors=[ResizeToFit(150, 100)],
+        format='WEBP',
+        options={'quality': 80}
+    )
+
+    working_hours = models.CharField(max_length=200, verbose_name="ساعت کاری", blank=True)
+
+    phone_number = models.CharField(max_length=11, verbose_name="شماره تماس", blank=True)
+    phone_number2 = models.CharField(max_length=11, verbose_name="شماره تماس دوم", blank=True)
+    phone_number3 = models.CharField(max_length=11, verbose_name="شماره تماس سوم", blank=True)
+
+
+    email = models.EmailField(verbose_name="ایمیل", blank=True)
+
+    address = models.CharField(max_length=450, verbose_name="آدرس دقیق", blank=True)
+
+    instagram = models.URLField(verbose_name="اینستاگرام", blank=True)
+    telegram = models.URLField(verbose_name="تلگرام", blank=True)
+    whatsapp = models.URLField(verbose_name="واتساپ", blank=True)
+    twitter = models.URLField(verbose_name="توییتر", blank=True)
+
+    class Meta:
+        verbose_name = "اطلاعات سایت"
+        verbose_name_plural = "اطلاعات سایت"
+
+    def __str__(self):
+        return self.company_name

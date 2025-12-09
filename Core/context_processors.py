@@ -3,6 +3,8 @@ from django.db.models import Prefetch
 from products.models import Category
 # core/context_processors.py
 from .models import Wishlist
+# site info
+from .models import SiteInfo
 
 
 # ───────────────── helpers
@@ -70,3 +72,16 @@ def wishlist_context(request):
         }
 
     return {"wishlist_count": 0, "user_wishlist": set()}
+
+
+# ───────────────── site info
+
+def site_info(request):
+    try:
+        info = SiteInfo.objects.first()
+    except:
+        info = None
+
+    return {
+        "site_info": info
+    }
