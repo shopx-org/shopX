@@ -49,13 +49,13 @@ class OrderAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ("اطلاعات اصلی", {"fields": ("user", "address", "created_at")}),
-        ("وضعیت‌ها", {"fields": ("payment_status", "fulfillment_status")}),
         ("مبالغ", {"fields": ("subtotal", "total_discount", "total")}),
         ("پرداخت", {"fields": ("payment_gateway", "payment_ref", "paid_at")}),
+        ("وضعیت‌ها", {"fields": ("payment_status", "fulfillment_status")}),
         ("خلاصه آیتم‌ها", {"fields": ("items_count", "items_preview")}),
     )
 
-    actions = ("make_paid", "make_failed", "make_processing", "make_shipped", "make_delivered", "make_canceled")
+    actions = ("make_paid", "make_failed", "make_processing", "make_shipped", "make_delivered", "make_canceled","make_send_canceled",)
 
     # ---------- Pretty displays ----------
 
@@ -92,16 +92,18 @@ class OrderAdmin(admin.ModelAdmin):
         label = obj.get_fulfillment_status_display()
 
         color_map = {
-            Order.FulfillmentStatus.NEW:        "#6c757d",
-            Order.FulfillmentStatus.PROCESSING: "#0d6efd",
-            Order.FulfillmentStatus.SHIPPED:    "#6610f2",
-            Order.FulfillmentStatus.DELIVERED:  "#198754",
-            Order.FulfillmentStatus.RETURNED:   "#dc3545",
+            Order.FulfillmentStatus.NEW: "#6c757d",  # خاکستری
+            Order.FulfillmentStatus.PROCESSING: "#0d6efd",  # آبی
+            Order.FulfillmentStatus.SHIPPED: "#6610f2",  # بنفش
+            Order.FulfillmentStatus.DELIVERED: "#198754",  # سبز
+            Order.FulfillmentStatus.RETURNED: "#dc3545",  # قرمز
+            Order.FulfillmentStatus.SEND_CANCELED: "#fd7e14",  # نارنجی برای لغو ارسال
         }
         color = color_map.get(status, "#999")
 
         return format_html(
-            '<span style="padding:4px 8px;border-radius:999px;background:{};color:#fff;font-weight:700;font-size:12px;">{}</span>',
+            '<span style="padding:4px 8px;border-radius:999px;'
+            'background:{};color:#fff;font-weight:700;font-size:12px;">{}</span>',
             color, label
         )
 
@@ -156,6 +158,9 @@ class OrderAdmin(admin.ModelAdmin):
     def make_canceled(self, _request, queryset):
         queryset.update(payment_status=Order.PaymentStatus.CANCELED)
 
+    @admin.action(description="تغییر به لغو ارسال")
+    def make_send_canceled(self, _request, queryset):
+        queryset.update(fulfillment_status=Order.FulfillmentStatus.SEND_CANCELED)
 
 @admin.register(OrderItem)
 class OrderItemAdmin(admin.ModelAdmin):

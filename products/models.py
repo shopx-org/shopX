@@ -14,6 +14,7 @@ from django.utils.functional import cached_property
 from decimal import Decimal
 from django.contrib.contenttypes.models import ContentType
 from Core.models import Rating
+from django.utils import timezone
 
 
 # ---------- 1) گروه سرویس ها بیمه / نصب /گارانتی  ----------
@@ -566,6 +567,7 @@ class Product(models.Model):
         return res.total
 
     def save(self, *args, **kwargs):
+        # ---- 1) ساخت اسلاگ مثل قبل ----
         MAX = self._meta.get_field("slug").max_length
         if not self.slug:
             base = slugify(self.name, allow_unicode=True) or "product"
@@ -576,7 +578,53 @@ class Product(models.Model):
                 slug = f"{base}-{i}"
                 i += 1
             self.slug = slug
+
+        # ---- 2) تشخیص اینکه قیمت عوض شده یا نه ----
+        old_price = None
+        old_compare = None
+        if self.pk:
+            try:
+                old = Product.objects.only("price", "compare_at_price").get(pk=self.pk)
+                old_price = old.price
+                old_compare = old.compare_at_price
+            except Product.DoesNotExist:
+                pass
+
+        new_price = self.price
+        new_compare = self.compare_at_price
+
+        price_changed = (old_price != new_price)
+        base_changed  = (old_compare != new_compare)
+
+        # ---- 3) اول خود محصول را ذخیره کن ----
         super().save(*args, **kwargs)
+
+        # ---- 4) اگر قیمت/قیمت‌قبلی عوض شده، در PriceHistory ثبت کن ----
+        if price_changed or base_changed:
+            from .models import PriceHistory  # چون در همین فایل هستیم مشکلی ندارد
+            from django.utils import timezone
+
+            today = timezone.now().date()
+
+            # اگر دوست داری قیمت مؤثر با تخفیف و کمپین‌ها را ذخیره کنی:
+            try:
+                final_price = self.effective_price        # Decimal
+            except Exception:
+                final_price = new_price or 0
+
+            base_price = new_compare or None  # می‌تونی new_price رو بذاری اگر compare نداری
+
+            PriceHistory.objects.update_or_create(
+                product=self,
+                variant=None,
+                date=today,
+                defaults={
+                    "price":      final_price,
+                    "base_price": base_price,
+                    "source":     "product_save",
+                },
+            )
+
 
     def get_absolute_url(self):
         return reverse("products:product_detail", kwargs={"slug": self.slug})
@@ -624,11 +672,51 @@ class Product(models.Model):
         ctype = ContentType.objects.get_for_model(self)
         return Rating.objects.filter(content_type=ctype, object_id=self.id).count()
 
+# =========================
+# Product Variant
+# =========================
 
+class PriceHistory(models.Model):
+    product = models.ForeignKey(
+        "products.Product",
+        on_delete=models.CASCADE,
+        related_name="price_history",
+    )
+    # اگر خواستی برای هر واریانت جدا ذخیره کنی:
+    variant = models.ForeignKey(
+        "products.ProductVariant",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="price_history",
+    )
+
+    date = models.DateField(default=timezone.now)
+    price = models.DecimalField(max_digits=14, decimal_places=0)  # قیمت نهایی
+    base_price = models.DecimalField(
+        max_digits=14, decimal_places=0, null=True, blank=True
+    )  # قیمت اصلی بدون تخفیف (اختیاری)
+
+    source = models.CharField(
+        max_length=20,
+        default="auto",
+        help_text="مثلاً admin, script, auto, ...",
+        blank=True,
+    )
+
+    class Meta:
+        ordering = ["date"]
+        unique_together = ("product", "variant", "date")
+
+    def __str__(self):
+        return f"{self.product_id} @ {self.date} = {self.price}"
 
 # =========================
 # Product Variant
 # =========================
+
+
+
 SKU_VALIDATOR = RegexValidator(
     regex=r"^[A-Z0-9\-_\.]{3,32}$",
     message="SKU باید 3 تا 32 کاراکتر، فقط حروف بزرگ، اعداد و - _ . باشد.",

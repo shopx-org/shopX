@@ -100,34 +100,35 @@
                                                     <span class="product-label label-new">جدید</span>
                                                 {% endif %}
 
-                                                {% if p.compare_at_price and p.compare_at_price > p.price %}
+                                                {# بج تخفیف براساس موتور پرایسینگ #}
+                                                {% if p.has_discount %}
                                                     <span class="product-label label-sale">
-                                                        {{ p.discount_percent|default:p.get_discount_percent }}٪ تخفیف
+                                                        ٪{{ p.discount_percent|floatformat:0 }} تخفیف
                                                     </span>
                                                 {% endif %}
 
                                                 <a href="{{ p.get_absolute_url }}">
                                                     {% if p.cover_image %}
-                                                        <img src="{{ p.cover_image.image.url }}" class="product-image" alt="{{ p.name }}">
+                                                        <img src="{{ p.cover_image.image.url }}" class="product-image"
+                                                             alt="{{ p.name }}">
                                                     {% else %}
-                                                        <img src="{% static 'images/placeholder-600x600.png' %}" class="product-image" alt="{{ p.name }}">
+                                                        <img src="{% static 'images/placeholder-600x600.png' %}"
+                                                             class="product-image" alt="{{ p.name }}">
                                                     {% endif %}
                                                 </a>
 
                                                 <div class="product-action-vertical">
-                                                    <a href="#" class="btn-product-icon btn-wishlist btn-expandable"><span>علاقه‌مندی</span></a>
-                                                    <a href="{{ p.get_absolute_url }}" class="btn-product-icon btn-quickview" title="مشاهده سریع">
+                                                    <a href="#"
+                                                       class="btn-product-icon btn-wishlist btn-expandable"><span>علاقه‌مندی</span></a>
+                                                    <a href="{{ p.get_absolute_url }}"
+                                                       class="btn-product-icon btn-quickview" title="مشاهده سریع">
                                                         <span>مشاهده</span>
                                                     </a>
                                                     <a href="#" class="btn-product-icon btn-compare"><span>مقایسه</span></a>
                                                 </div>
 
-                                                {% if p.stock <= 0 %}
-                                                    <div class="sold-out-badge">ناموجود</div>
-                                                {% endif %}
+
                                             </figure>
-
-
 
                                             <div class="product-body">
 
@@ -137,13 +138,13 @@
                                                     {% endif %}
 
                                                     <div class="rating-compact text-right">
-                                                        <span class="score">
-                                                         {% if p.rating_count %}
-                                                            {{ p.rating_count }}
-                                                        {% else %}
-                                                            0
-                                                        {% endif %}
-                                                    </span>
+                                <span class="score">
+                                    {% if p.rating_count %}
+                                        {{ p.rating_count }}
+                                    {% else %}
+                                        0
+                                    {% endif %}
+                                </span>
                                                         <span class="star" aria-hidden="true">★</span>
                                                     </div>
                                                 </div>
@@ -160,6 +161,8 @@
                                                                     <span class="sr-only">{{ c.name }}</span>
                                                                 </a>
                                                             {% endfor %}
+
+
                                                             {% if p.colors_list|length > 6 %}
                                                                 <span class="more-colors">+{{ p.colors_list|length|add:"-6" }}</span>
                                                             {% endif %}
@@ -183,153 +186,36 @@
                                                     </div>
                                                 </div>
 
-
-
-
                                                 <h3 class="product-title text-right">
                                                     <a href="{{ p.get_absolute_url }}">{{ p.name }}</a>
                                                 </h3>
-
-
+{# بج ناموجود – کنار بج تخفیف #}
+                                                {% if p.stock <= 0 %}
+                                                    <span class="product-label label-out">ناموجود</span>
+                                                {% endif %}
                                                 {% if p.stock and p.stock < 5 %}
                                                     <p class="low-stock mt-1">تنها {{ p.stock }} عدد باقی مانده</p>
                                                 {% endif %}
 
-
                                                 <div class="product-price text-right">
-
-                                                    {% if p.compare_at_price and p.compare_at_price > p.price %}
+                                                    {% if p.has_discount %}
                                                         <span class="new-price">
-                                                            {{ p.price|fa_price }} <small>تومان</small>
-                                                        </span>
+                                    {{ p.price_final|fa_price }} <small>تومان</small>
+                                </span>
 
                                                         <span class="old-price">
-                                                            {{ p.compare_at_price|fa_price }} <small>تومان</small>
-                                                        </span>
+                                    {{ p.price_base|fa_price }} <small>تومان</small>
+                                </span>
                                                     {% else %}
-                                                        <span class="new-price">{{ p.price|fa_price }} <small>تومان</small></span>
+                                                        <span class="new-price">
+                                    {{ p.price_final|default:p.price|fa_price }} <small>تومان</small>
+                                </span>
                                                     {% endif %}
                                                 </div>
 
                                             </div>
 
                                         </div>
-
-
-
-
-                                        {% comment %} <div class="product product-7">
-                                            {# text-center رو برداشتیم تا بتونیم راست‌چین کنیم #}
-
-                                            <figure class="product-media">
-                                                {% if p.is_new %}
-                                                    <span class="product-label label-new">جدید</span>{% endif %}
-
-                                                <a href="{{ p.get_absolute_url|default:'#' }}">
-                                                    {% if p.cover_image %}
-                                                        <img src="{{ p.cover_image.image.url }}"
-                                                             alt="{{ p.cover_image.alt|default:p.name }}"
-                                                             class="product-image">
-                                                    {% elif p.image_list and p.image_list.0 %}
-                                                        <img src="{{ p.image_list.0.image.url }}"
-                                                             alt="{{ p.image_list.0.alt|default:p.name }}"
-                                                             class="product-image">
-                                                    {% else %}
-                                                        <img src="{% static 'images/placeholder-600x600.png' %}"
-                                                             alt="{{ p.name }}" class="product-image">
-                                                    {% endif %}
-                                                </a>
-
-
-
-
-
-
-                                                <div class="product-action">
-                                                    <a href="#"
-                                                       class="btn-product btn-cart"><span>افزودن به سبد خرید</span></a>
-                                                </div>
-                                            </figure>
-
-                                            <div class="product-body">
-                                                <div class="product-cat text-right">
-                                                    {% if p.category %}
-                                                        <a href="{% url 'products:category' path=p.category.slug_path %}">{{ p.category.name }}</a>
-                                                    {% else %}<span class="text-muted">بدون دسته</span>{% endif %}
-
-
-                                                    {# امتیاز فشرده: یک ستاره + عدد #}
-                                                    <div class="rating-compact text-right">
-                                                        <span class="score">
-                                                        {% if p.rating %}{{ p.rating|floatformat:1 }}{% else %}
-                                                            0.0{% endif %}
-                                                    </span>
-                                                        <span class="star" aria-hidden="true">★</span>
-                                                    </div>
-                                                </div>
-
-                                                <div class="details-filter-row details-row-size">
-                                                    <label>رنگ : </label>
-                                                    <div class="product-nav product-nav-dots">
-                                                        {% if p.colors_list %}
-                                                            {% for c in p.colors_list|slice:":6" %}
-                                                                <a href="{{ p.get_absolute_url }}?color={{ c.slug }}"
-                                                                   class="{% if forloop.first %}active{% endif %}"
-                                                                   style="background: {{ c.hex }};"
-                                                                   title="{{ c.name }}">
-                                                                    <span class="sr-only">{{ c.name }}</span>
-                                                                </a>
-                                                            {% endfor %}
-                                                            {% if p.colors_list|length > 6 %}
-                                                                <span class="more-colors">+{{ p.colors_list|length|add:"-6" }}</span>
-                                                            {% endif %}
-                                                        {% else %}
-                                                            {# فال‌بک: از QuerySet رنگ‌های مدل (فیلد درست: hex_code) #}
-                                                            {% with colors=p.colors.all %}
-                                                                {% if colors %}
-                                                                    {% for c in colors|slice:":6" %}
-                                                                        <a href="{{ p.get_absolute_url }}?color={{ c.slug }}"
-                                                                           class="{% if forloop.first %}active{% endif %}"
-                                                                           style="background: {{ c.hex_code }};"
-                                                                           title="{{ c.name }}">
-                                                                            <span class="sr-only">{{ c.name }}</span>
-                                                                        </a>
-                                                                    {% endfor %}
-                                                                {% else %}
-                                                                    <span class="text-muted">بدون تنوع رنگ</span>
-                                                                {% endif %}
-                                                            {% endwith %}
-                                                        {% endif %}
-                                                    </div>
-                                                </div>
-
-                                                <h3 class="product-title text-right">
-                                                    <a href="{{ p.get_absolute_url|default:'#' }}">{{ p.name }}</a>
-                                                </h3>
-
-
-                                                {% if p.stock and p.stock > 0 and p.stock < 5 %}
-                                                    <p class="low-stock mt-2">تنها
-                                                        {% if p.stock == 1 %}۱{% else %}
-                                                            {{ p.stock|fa_digits }}{% endif %}
-                                                        عدد در انبار باقی مانده
-                                                    </p>
-                                                {% endif %}
-
-
-
-                                                <div class="product-price text-right">
-                                                      <span class="new-price">
-                                                        <span class="num">{{ p.price|fa_price }}</span><small> تومان</small>
-                                                      </span>
-                                                    {% if p.compare_at_price %}
-                                                        <span class="old-price">
-                                                          <span class="num">{{ p.compare_at_price|fa_price }}</span><small> تومان</small>
-                                                        </span>
-                                                    {% endif %}
-                                                </div>
-                                            </div>
-                                        </div> {% endcomment %}
                                     </div>
                                 {% empty %}
                                     <div class="col-12">
@@ -340,25 +226,29 @@
                         </div>
 
 
-                        <!-- صفحه‌بندی -->                        
+                        <!-- صفحه‌بندی -->
                         {% if is_paginated %}
-                                                    <nav aria-label="Page navigation" class="mt-5">
-                                                        <ul class="pagination justify-content-center">
-                        {% if page_obj.has_previous %}
-                        <li class="page-item"><a class="page-link" href="?{% querystring page=page_obj.previous_page_number %}">قبلی</a></li>
-                        {% endif %}
-                        {% for num in paginator.page_range %}
-                        {% if num >= page_obj.number|add:-2 and num <= page_obj.number|add:2 %}
-                                                                    <li class="page-item {% if page_obj.number == num %}active{% endif %}">
-                                                                        <a class="page-link" href="?{% querystring page=num %}">{{ num }}</a>
-                                                                    </li>
-                        {% endif %}
-                        {% endfor %}
-                        {% if page_obj.has_next %}
-                        <li class="page-item"><a class="page-link" href="?{% querystring page=page_obj.next_page_number %}">بعدی</a></li>
-                        {% endif %}
-                                                        </ul>
-                                                    </nav>
+                            <nav aria-label="Page navigation" class="mt-5">
+                                <ul class="pagination justify-content-center">
+                                    {% if page_obj.has_previous %}
+                                        <li class="page-item"><a class="page-link"
+                                                                 href="?{% querystring page=page_obj.previous_page_number %}">قبلی</a>
+                                        </li>
+                                    {% endif %}
+                                    {% for num in paginator.page_range %}
+                                        {% if num >= page_obj.number|add:-2 and num <= page_obj.number|add:2 %}
+                                            <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                                                <a class="page-link" href="?{% querystring page=num %}">{{ num }}</a>
+                                            </li>
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% if page_obj.has_next %}
+                                        <li class="page-item"><a class="page-link"
+                                                                 href="?{% querystring page=page_obj.next_page_number %}">بعدی</a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
                         {% endif %}
                     </div><!-- End .col-lg-9 -->
 
@@ -391,12 +281,12 @@
                                     <div class="filters-row mb-3">
                                         <div class="custom-control custom-checkbox">
                                             <input type="checkbox"
-                                                class="custom-control-input"
-                                                id="available-only"
-                                                name="available"
-                                                value="1"
-                                                {% if available == "1" %}checked{% endif %}
-                                                onchange="document.getElementById('filters-form').submit();">
+                                                   class="custom-control-input"
+                                                   id="available-only"
+                                                   name="available"
+                                                   value="1"
+                                                   {% if available == "1" %}checked{% endif %}
+                                                   onchange="document.getElementById('filters-form').submit();">
                                             <label class="medium is-stock custom-control-label" for="available-only">
                                                 فقط کالاهای موجود
                                             </label>
@@ -411,45 +301,45 @@
                                         {# ===== فیلتر قیمت ===== #}
                                         <div class="filters-group">
                                             <a class="filters-group-title d-flex justify-content-between align-items-center"
-                                            data-toggle="collapse"
-                                            href="#filter-price"
-                                            role="button"
-                                            aria-expanded="true"
-                                            aria-controls="filter-price">
+                                               data-toggle="collapse"
+                                               href="#filter-price"
+                                               role="button"
+                                               aria-expanded="true"
+                                               aria-controls="filter-price">
                                                 <span>فیلتر بر اساس قیمت</span>
                                                 <i class="icon-angle-down"></i>
                                             </a>
 
                                             {% with base_min=slider_min|default:0 base_max=slider_max|default:0 %}
                                                 <div class="collapse show" id="filter-price"
-                                                    data-parent="#filters-accordion">
+                                                     data-parent="#filters-accordion">
                                                     <div class="filters-group-body price-filter">
 
                                                         {# --- نوار بازه قیمت با دو اسلایدر واقعی --- #}
                                                         <div class="price-range-bar mb-3">
                                                             <div class="price-range-track"
-                                                                data-min="{{ base_min }}"
-                                                                data-max="{{ base_max }}">
+                                                                 data-min="{{ base_min }}"
+                                                                 data-max="{{ base_max }}">
                                                                 <span class="price-range-handle left-handle"></span>
                                                                 <span class="price-range-handle right-handle"></span>
                                                             </div>
 
                                                             {# اسلایدرهای واقعی ولی نامرئی #}
                                                             <input type="range"
-                                                                id="price-range-min"
-                                                                class="price-range-native"
-                                                                min="{{ base_min }}"
-                                                                max="{{ base_max }}"
-                                                                step="100000"
-                                                                value="{{ min_param|default:base_min }}">
+                                                                   id="price-range-min"
+                                                                   class="price-range-native"
+                                                                   min="{{ base_min }}"
+                                                                   max="{{ base_max }}"
+                                                                   step="100000"
+                                                                   value="{{ min_param|default:base_min }}">
 
                                                             <input type="range"
-                                                                id="price-range-max"
-                                                                class="price-range-native"
-                                                                min="{{ base_min }}"
-                                                                max="{{ base_max }}"
-                                                                step="100000"
-                                                                value="{{ max_param|default:base_max }}">
+                                                                   id="price-range-max"
+                                                                   class="price-range-native"
+                                                                   min="{{ base_min }}"
+                                                                   max="{{ base_max }}"
+                                                                   step="100000"
+                                                                   value="{{ max_param|default:base_max }}">
 
                                                             <div class="price-range-label text-center small text-muted mt-2">
                                                                 محدوده نتایج از
@@ -470,10 +360,10 @@
                                                             </label>
                                                             <div class="input-group input-group-sm price-input">
                                                                 <input type="number"
-                                                                    name="min"
-                                                                    class="form-control"
-                                                                    value="{{ min_param }}"
-                                                                    placeholder="{{ base_min|intcomma }}">
+                                                                       name="min"
+                                                                       class="form-control"
+                                                                       value="{{ min_param }}"
+                                                                       placeholder="{{ base_min|intcomma }}">
                                                             </div>
                                                         </div>
 
@@ -485,10 +375,10 @@
                                                             </label>
                                                             <div class="input-group input-group-sm price-input">
                                                                 <input type="number"
-                                                                    name="max"
-                                                                    class="form-control"
-                                                                    value="{{ max_param }}"
-                                                                    placeholder="{{ base_max|intcomma }}">
+                                                                       name="max"
+                                                                       class="form-control"
+                                                                       value="{{ max_param }}"
+                                                                       placeholder="{{ base_max|intcomma }}">
                                                             </div>
                                                         </div>
 
@@ -505,28 +395,29 @@
                                         {# ===== فیلتر برندها ===== #}
                                         <div class="filters-group">
                                             <a class="filters-group-title d-flex justify-content-between align-items-center"
-                                            data-toggle="collapse"
-                                            href="#filter-brands"
-                                            role="button"
-                                            aria-expanded="true"
-                                            aria-controls="filter-brands">
+                                               data-toggle="collapse"
+                                               href="#filter-brands"
+                                               role="button"
+                                               aria-expanded="true"
+                                               aria-controls="filter-brands">
                                                 <span>برندها</span>
                                                 <i class="icon-angle-down"></i>
                                             </a>
-                                            <div class="collapse show" id="filter-brands" data-parent="#filters-accordion">
+                                            <div class="collapse show" id="filter-brands"
+                                                 data-parent="#filters-accordion">
                                                 <div class="filters-group-body">
                                                     <div class="filter-items">
                                                         {% for b in brands %}
                                                             <div class="filter-item">
                                                                 <div class="custom-control custom-checkbox">
                                                                     <input type="checkbox"
-                                                                        class="custom-control-input"
-                                                                        id="brand-{{ b.id }}"
-                                                                        value="{{ b.id }}"
-                                                                        {% if b.id in selected_brands %}checked{% endif %}
-                                                                        onchange="updateBrandFilter()">
+                                                                           class="custom-control-input"
+                                                                           id="brand-{{ b.id }}"
+                                                                           value="{{ b.id }}"
+                                                                           {% if b.id in selected_brands %}checked{% endif %}
+                                                                           onchange="updateBrandFilter()">
                                                                     <label class="custom-control-label"
-                                                                        for="brand-{{ b.id }}">
+                                                                           for="brand-{{ b.id }}">
                                                                         {{ b.name }}
                                                                         {% for facet in brand_facets %}
                                                                             {% if facet.brand_fk_id == b.id %}
@@ -544,7 +435,7 @@
                                                     </div>
 
                                                     <input type="hidden" name="brand" id="brand-hidden"
-                                                        value="{{ selected_brands|join:',' }}">
+                                                           value="{{ selected_brands|join:',' }}">
                                                     <button type="submit"
                                                             class="btn btn-sm btn-outline-primary btn-brand-filter w-100 mt-2">
                                                         اعمال برندها
@@ -553,71 +444,6 @@
                                             </div>
                                         </div>
 
-                                        {# ===== فیلتر دسته‌بندی‌ها ===== #}
-                                        {% comment %} <div class="filters-group">
-                                            {# تیتر آکاردیون #}
-                                            <a class="filters-group-title d-flex justify-content-between align-items-center"
-                                            data-toggle="collapse"
-                                            href="#filter-cats"
-                                            role="button"
-                                            aria-expanded="true"
-                                            aria-controls="filter-cats">
-                                                <span>دسته‌بندی‌ها</span>
-                                                <i class="icon-angle-down"></i>
-                                            </a>
-
-                                            {# بدنهٔ آکاردیون #}
-                                            <div class="collapse show" id="filter-cats" data-parent="#filters-accordion">
-                                                <div class="filters-group-body">
-
-                                                    <div class="cat-select-wrapper">
-                                                        <div class="cat-select" id="cat-select-toggle">
-                                                            <span id="cat-select-label">
-                                                                {% if selected_cat_id %}
-                                                                    {% for c in categories %}
-                                                                        {% if c.id == selected_cat_id %}
-                                                                            {{ c.name }}
-                                                                        {% endif %}
-                                                                    {% endfor %}
-                                                                {% else %}
-                                                                    همه دسته‌ها
-                                                                {% endif %}
-                                                            </span>
-                                                            <i class="icon-angle-down"></i>
-                                                        </div>
-
-                                                        <div class="cat-select-menu" id="cat-select-menu">
-                                                            <button type="button"
-                                                                    class="cat-option {% if not selected_cat_id %}is-active{% endif %}"
-                                                                    data-id="">
-                                                                همه دسته‌ها
-                                                            </button>
-
-                                                            {% for c in categories %}
-                                                                <button type="button"
-                                                                        class="cat-option {% if selected_cat_id == c.id %}is-active{% endif %}"
-                                                                        data-id="{{ c.id }}">
-                                                                    {{ c.name }}
-                                                                    {% for facet in category_facets %}
-                                                                        {% if facet.category_id == c.id %}
-                                                                            <small class="text-muted">({{ facet.cnt }})</small>
-                                                                        {% endif %}
-                                                                    {% endfor %}
-                                                                </button>
-                                                            {% endfor %}
-                                                        </div>
-                                                    </div>
-
-                                                    <input type="hidden" name="cat" id="cat-hidden"
-                                                        value="{{ selected_cat_id|default:'' }}">
-
-                                                    <button type="submit"
-                                                            class="btn btn-sm btn-outline-primary btn-cat-filter w-100 mt-2">
-                                                        اعمال دسته‌بندی
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div> {% endcomment %}
 
 
                                     </div>
@@ -668,178 +494,192 @@
         </div>
     </main>
 
-{% block CSS-JS %}
+    {% block CSS-JS %}
 
-<!-- چند انتخاب برند -->
-<script>
-function toggleBrand(chk) {
-    const form = document.getElementById('brand-form');
-    const checks = form.querySelectorAll('input[name="brand"]');
-    const vals = [];
+        <!-- چند انتخاب برند -->
+        <script>
+            function toggleBrand(chk) {
+                const form = document.getElementById('brand-form');
+                const checks = form.querySelectorAll('input[name="brand"]');
+                const vals = [];
 
-    checks.forEach(c => { if (c.checked) vals.push(c.value); });
-    checks.forEach(c => c.disabled = true);
+                checks.forEach(c => {
+                    if (c.checked) vals.push(c.value);
+                });
+                checks.forEach(c => c.disabled = true);
 
-    const hidden = document.createElement('input');
-    hidden.type = 'hidden';
-    hidden.name = 'brand';
-    hidden.value = vals.join(',');
-    form.appendChild(hidden);
-}
-</script>
-
-<!-- بازه قیمت -->
-<script>
-function setRange(min, max) {
-    document.getElementById('price-min').value =
-        (min !== '' && min !== null) ? min : '';
-
-    document.getElementById('price-max').value =
-        (max !== '' && max !== null) ? max : '';
-}
-</script>
-
-<script>
-window.MAX_SCROLL_PAGES = {{ max_scroll_pages|default:2 }};
-window.PAGINATE_BY = {{ paginate_by|default:12 }};
-window.THRESHOLD = {{ threshold|default:24 }};
-</script>
-
-
-<script>
-{% if page_obj.number <= max_scroll_pages and not page_obj.has_previous %}
-const API_URL = "{% url 'products:product_list_api' %}";
-let currentPage = {{ page_obj.number }};
-const MAX_SCROLL_PAGES = {{ max_scroll_pages }};
-let loading = false;
-
-/** helper: ست کردن آیتم پاجینیشن فعلی به صفحه‌ی `pageNum` */
-function setActivePagination(pageNum) {
-    try {
-        // ابتدا تلاش سریع با selector ساده
-        let link = document.querySelector('.pagination a.page-link[href*="page=' + pageNum + '"]');
-
-        // اگر پیدا نشد، سعی کن با URL parsing تمام لینک‌ها را بررسی کنی
-        if (!link) {
-            const links = Array.from(document.querySelectorAll('.pagination a.page-link'));
-            for (const a of links) {
-                try {
-                    const u = new URL(a.href, location.origin);
-                    if (u.searchParams.get('page') === String(pageNum)) {
-                        link = a;
-                        break;
-                    }
-                } catch (e) { /* ignore invalid href */ }
+                const hidden = document.createElement('input');
+                hidden.type = 'hidden';
+                hidden.name = 'brand';
+                hidden.value = vals.join(',');
+                form.appendChild(hidden);
             }
-        }
+        </script>
 
-        if (link) {
-            document.querySelectorAll('.pagination .page-item.active').forEach(el => el.classList.remove('active'));
-            const item = link.closest('.page-item') || link.parentElement;
-            if (item) item.classList.add('active');
-        }
-    } catch (e) {
-        console.error('setActivePagination error', e);
-    }
-}
+        <!-- بازه قیمت -->
+        <script>
+            function setRange(min, max) {
+                document.getElementById('price-min').value =
+                    (min !== '' && min !== null) ? min : '';
 
-async function loadMore() {
-    if (loading || currentPage >= MAX_SCROLL_PAGES) return;
+                document.getElementById('price-max').value =
+                    (max !== '' && max !== null) ? max : '';
+            }
+        </script>
 
-    loading = true;
-    currentPage++;
+        <script>
+            window.MAX_SCROLL_PAGES = {{ max_scroll_pages|default:2 }};
+            window.PAGINATE_BY = {{ paginate_by|default:12 }};
+            window.THRESHOLD = {{ threshold|default:24 }};
+        </script>
 
-    const params = new URLSearchParams(window.location.search);
-    params.set('page', currentPage);
+        <script>
+            {% if page_obj.number <= max_scroll_pages and not page_obj.has_previous %}
+                const API_URL = "{% url 'products:product_list_api' %}";
+                const CAT_ID = "{{ selected_cat_id|default:'' }}";   // 👈 همین خط جدید است
+                let currentPage = {{ page_obj.number }};
+                const MAX_SCROLL_PAGES = {{ max_scroll_pages }};
+                let loading = false;
+                let hasNext = true;
 
-    try {
-        const res = await fetch(`${API_URL}?${params.toString()}`);
-        if (!res.ok) return;
 
-        const data = await res.json();
+                /** helper: ست کردن آیتم پاجینیشن فعلی به صفحه‌ی `pageNum` */
+                function setActivePagination(pageNum) {
+                    try {
+                        // ابتدا تلاش سریع با selector ساده
+                        let link = document.querySelector('.pagination a.page-link[href*="page=' + pageNum + '"]');
 
-        if (!data.products || data.products.length === 0) {
-            loading = false;
-            return;
-        }
+                        // اگر پیدا نشد، سعی کن با URL parsing تمام لینک‌ها را بررسی کنی
+                        if (!link) {
+                            const links = Array.from(document.querySelectorAll('.pagination a.page-link'));
+                            for (const a of links) {
+                                try {
+                                    const u = new URL(a.href, location.origin);
+                                    if (u.searchParams.get('page') === String(pageNum)) {
+                                        link = a;
+                                        break;
+                                    }
+                                } catch (e) { /* ignore invalid href */
+                                }
+                            }
+                        }
 
-        const container = document.getElementById('product-list');
+                        if (link) {
+                            document.querySelectorAll('.pagination .page-item.active').forEach(el => el.classList.remove('active'));
+                            const item = link.closest('.page-item') || link.parentElement;
+                            if (item) item.classList.add('active');
+                        }
+                    } catch (e) {
+                        console.error('setActivePagination error', e);
+                    }
+                }
 
-        data.products.forEach(p => {
-            if (!document.querySelector(`[data-product-id="${p.id}"]`)) {
-                container.insertAdjacentHTML('beforeend', `
+                async function loadMore() {
+                    if (loading || !hasNext || currentPage >= MAX_SCROLL_PAGES) return;
+
+                    loading = true;
+                    currentPage++;
+
+                    const params = new URLSearchParams(window.location.search);
+
+                    // 👇 این بخش مهمه: اگر روی کتگوری هستیم، cat رو هم به API بفرست
+                    if (CAT_ID && !params.get('cat') && !params.get('category')) {
+                        params.set('cat', CAT_ID);
+                    }
+
+                    params.set('page', currentPage);
+
+                    try {
+                        const res = await fetch(`${API_URL}?${params.toString()}`);
+                        if (!res.ok) return;
+
+                        const data = await res.json();
+
+                        if (!data.products || data.products.length === 0) {
+                            hasNext = false;
+                            loading = false;
+                            return;
+                        }
+
+                        if (data.has_next === false) {   // توی JsonResponse همین کلید رو می‌فرستی
+                            hasNext = false;
+                        }
+                        const container = document.getElementById('product-list');
+
+                        data.products.forEach(p => {
+                            if (!document.querySelector(`[data-product-id="${p.id}"]`)) {
+                                container.insertAdjacentHTML('beforeend', `
                     <div class="col-6 col-md-4 col-xl-3" data-product-id="${p.id}">
                         <div class="product product-7 dk-product-card">
                             <figure class="product-media">
                                 ${p.is_new ? '<span class="product-label label-new">جدید</span>' : ''}
-                                ${p.discount_percent ? '<span class="product-label label-sale">'+p.discount_percent+'%</span>' : ''}
+                                ${p.discount_percent ? '<span class="product-label label-sale">' + p.discount_percent + '%</span>' : ''}
                                 <a href="${p.url}">
                                     <img src="${p.cover}" class="product-image" alt="${p.name}">
                                 </a>
-                                ${p.stock <= 0 ? '<div class="sold-out-badge">ناموجود</div>' : ''}
+                               ${p.stock <= 0 ? '<span class="product-label label-out">ناموجود</span>' : ''}
                             </figure>
                             <div class="product-body">
                                 <h3 class="product-title text-right"><a href="${p.url}">${p.name}</a></h3>
                                 <div class="product-price text-right">
                                     ${
-                                        p.compare_at_price && p.compare_at_price > p.price
+                                    p.compare_at_price && p.compare_at_price > p.price
                                         ? `<span class="new-price">${p.price.toLocaleString()} <small>تومان</small></span>
                                            <span class="old-price">${p.compare_at_price.toLocaleString()} <small>تومان</small></span>`
                                         : `<span class="new-price">${p.price.toLocaleString()} <small>تومان</small></span>`
-                                    }
+                                }
                                 </div>
                             </div>
                         </div>
                     </div>
                 `);
+                            }
+                        });
+
+                        setActivePagination(currentPage);
+
+                    } catch (e) {
+                        console.error('خطا در لود:', e);
+                    } finally {
+                        loading = false;
+                    }
+                }
+
+                // اسکرول خزنده
+                window.addEventListener('scroll', () => {
+                    if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 800) {
+                        loadMore();
+                    }
+                });
+
+                // اگر تعداد کل محصول بیشتر از paginate_by است، صفحهٔ دوم را خودکار لود کن
+                const totalProducts = {{ page_obj.paginator.count }};
+                if (totalProducts > {{ paginate_by }} && currentPage < MAX_SCROLL_PAGES) {
+                    loadMore();
+                }
+
+                // در بارگذاری اولیه هم وضعیت پاجینیشن را درست کن
+                setTimeout(() => setActivePagination({{ page_obj.number }}), 100);
+
+            {% endif %}
+        </script>
+
+        <script>
+            function updateBrandFilter() {
+                // همه برندهای تیک‌خورده
+                const checked = Array.from(document.querySelectorAll('#filter-brands input[type="checkbox"]:checked'))
+                    .map(c => c.value);
+
+                // فقط مقدار hidden را آپدیت کن، هیچ input جدید نساز
+                document.getElementById('brand-hidden').value = checked.join(',');
+
+                // فرم را submit کن
+                document.getElementById('filters-form').submit();
             }
-        });
-
-        // ← اینجا: بعد از اضافه کردن آیتم‌ها، پاجینیشن را براساس currentPage آپدیت کن
-        setActivePagination(currentPage);
-
-    } catch (e) {
-        console.error('خطا در لود:', e);
-    } finally {
-        loading = false;
-    }
-}
-
-// اسکرول خزنده (همان رفتار قبلی خودت)
-window.addEventListener('scroll', () => {
-    if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 800) {
-        loadMore();
-    }
-});
-
-// اگر تعداد کل محصول بیشتر از paginate_by است، صفحهٔ دوم را خودکار لود کن (مثل قبل)
-const totalProducts = {{ page_obj.paginator.count }};
-if (totalProducts > {{ paginate_by }} && currentPage < MAX_SCROLL_PAGES) {
-    loadMore();
-}
-
-// در بارگذاری اولیه هم وضعیت پاجینیشن را درست کن (مثلاً وقتی صفحهٔ سرور page=1 یا page=2 رندر شده)
-setTimeout(() => setActivePagination({{ page_obj.number }}), 100);
-
-{% endif %}
-</script>
-
-<script>
-function updateBrandFilter() {
-    // همه برندهای تیک‌خورده
-    const checked = Array.from(document.querySelectorAll('#filter-brands input[type="checkbox"]:checked'))
-                        .map(c => c.value);
-
-    // فقط مقدار hidden را آپدیت کن، هیچ input جدید نساز
-    document.getElementById('brand-hidden').value = checked.join(',');
-
-    // فرم را submit کن
-    document.getElementById('filters-form').submit();
-}
-</script>
+        </script>
 
 
-{% endblock %}
+    {% endblock %}
 
 
 {% endblock %}

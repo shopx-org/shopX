@@ -1,0 +1,192 @@
+{% extends 'dashboards/dashboard_base_user.html' %}
+{% load static %}
+{% block UserDash_content %}
+    {% load humanize %}
+    {% block CSS-JS %}
+        <link rel="stylesheet" href="{% static 'css/order_track_style.css' %}">
+        {#    <script src="{% static 'js/order_tracking.js' %}" defer></script>#}
+    {% endblock %}
+    {% block main %}
+        <div class="row">
+            <div class="col-12">
+                <div class="card custom-card order-card">
+                    <div class="card-header">
+                        <div class="d-flex align-items-center justify-content-between">
+                            {# متن (سمت راست در RTL) #}
+                            <div class="d-flex flex-column text-end">
+                                <h2 class="orders-title mb-1">سفارش‌های من</h2>
+                                <p class="orders-subtitle mb-0">
+                                    در این صفحه می‌توانید تمام سفارش‌هایی که با این حساب ثبت کرده‌اید را ببینید.
+                                </p>
+                            </div>
+
+                            {# آیکن (گوشه‌ی چپ هدر) #}
+                            <div class="orders-header-icon ms-3">
+                                <i class="fas fa-receipt"></i>
+                                {# می‌تونی این رو عوض کنی: fa-list-ul یا fa-shopping-bag #}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-body p-0">
+                        {% if orders %}
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0 table-orders">
+                                    <colgroup>
+                                        <col class="col-order-id">
+                                        <col class="col-title">
+                                        <col class="col-date">
+                                        <col class="col-pay">
+                                        <col class="col-ship">
+                                        <col class="col-total">
+                                    </colgroup>
+
+                                    <thead class="table-light">
+                                    <tr>
+                                        <th class="text-center col-order-id">شماره سفارش</th>
+                                        <th class="text-center col-title">جزئیات سفارش</th>
+                                        <th class="text-center col-date">تاریخ ثبت</th>
+                                        <th class="text-center col-pay">وضعیت پرداخت</th>
+                                        <th class="text-center col-ship">وضعیت ارسال</th>
+                                        <th class="text-center col-total">مبلغ نهایی</th>
+                                    </tr>
+                                    </thead>
+
+                                    <tbody>
+                                    {% for order in orders %}
+                                        <tr>
+                                            {# شماره سفارش #}
+                                            <td class="text-center fw-semibold text-danger col-order-id">
+                                                {{ order.code|default:order.id }}
+                                            </td>
+
+                                            {# جزئیات سفارش (عنوان + بقیه آیتم‌ها) #}
+                                            <td class="text-end col-title" dir="rtl">
+                                                <a href="{% url 'dashboards:order_detail' order.id %}"
+                                                   class="order-title-link">
+                                                    {% with first=order.items.first %}
+                                                        {% if first %}
+                                                            <span class="order-title-main">
+                                                        {{ first.product_name }}
+                                                    </span>
+                                                            {% if order.items.count > 1 %}
+                                                                <span class="order-title-extra">
+                                                            + {{ order.items.count|add:"-1" }} کالای دیگر
+                                                        </span>
+                                                            {% endif %}
+                                                        {% else %}
+                                                            <span class="text-muted">بدون آیتم</span>
+                                                        {% endif %}
+                                                    {% endwith %}
+                                                </a>
+                                            </td>
+
+                                            {# تاریخ ثبت #}
+                                            <td class="text-center col-date">
+                                        <span class="order-date">
+                                            {{ order.created_at|date:"Y/m/d" }}
+                                        </span>
+                                                <span class="order-time text-muted">
+                                            {{ order.created_at|date:"H:i" }}
+                                        </span>
+                                            </td>
+
+                                            {# وضعیت پرداخت #}
+                                            <td class="text-center col-pay">
+                                                <div class="status-cell">
+                                                    {% if order.payment_status == "paid" %}
+                                                        <span class="status-icon status-icon-success">
+                                                    <i class="fas fa-check-circle"></i>
+                                                </span>
+                                                    {% elif order.payment_status == "pending" %}
+                                                        <span class="status-icon status-icon-pending">
+                                                    <i class="fas fa-clock"></i>
+                                                </span>
+                                                    {% elif order.payment_status == "failed" %}
+                                                        <span class="status-icon status-icon-failed">
+                                                    <i class="fas fa-times-circle"></i>
+                                                </span>
+                                                    {% elif order.payment_status == "canceled" %}
+                                                        <span class="status-icon status-icon-canceled">
+                                                    <i class="fas fa-ban"></i>
+                                                </span>
+                                                    {% elif order.payment_status == "refunded" %}
+                                                        <span class="status-icon status-icon-refunded">
+                                                    <i class="fas fa-undo-alt"></i>
+                                                </span>
+                                                    {% else %}
+                                                        <span class="status-icon status-icon-default">
+                                                    <i class="far fa-circle"></i>
+                                                </span>
+                                                    {% endif %}
+                                                    <span class="status-text">
+                                                {{ order.get_payment_status_display }}
+                                            </span>
+                                                </div>
+                                            </td>
+
+                                            {# وضعیت ارسال #}
+                                            <td class="col-ship">
+                                                <div class="status-cell">
+                                                    {% if order.fulfillment_status == "new" %}
+                                                        <span class="status-icon status-icon-new">
+                                                                <i class="fas fa-clipboard-list"></i>
+                                                            </span>
+                                                    {% elif order.fulfillment_status == "processing" %}
+                                                        <span class="status-icon status-icon-processing">
+                                                            <i class="fas fa-box-open"></i>
+                                                        </span>
+                                                    {% elif order.fulfillment_status == "shipped" %}
+                                                        <span class="status-icon status-icon-shipped">
+                                                            <i class="fas fa-truck"></i>
+                                                        </span>
+                                                    {% elif order.fulfillment_status == "delivered" %}
+                                                        <span class="status-icon status-icon-success">
+                                                            <i class="fas fa-check-circle"></i>
+                                                        </span>
+                                                    {% elif order.fulfillment_status == "returned" %}
+                                                        <span class="status-icon status-icon-returned">
+                                                            <i class="fas fa-undo-alt"></i>
+                                                        </span>
+                                                    {% elif order.fulfillment_status == "send-canceled" %}
+                                                        <span class="status-icon status-icon-send-canceled">
+                                                            <i class="fas fa-ban"></i>
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="status-icon status-icon-default">
+                                                            <i class="far fa-circle"></i>
+                                                        </span>
+                                                    {% endif %}
+                                                    <span class="status-text">
+                                                        {{ order.get_fulfillment_status_display }}
+                                                    </span>
+                                                </div>
+                                            </td>
+
+
+                                            {# مبلغ نهایی #}
+                                            <td class="text-center fw-semibold col-total">
+                                        <span class="amount-value">
+                                            {{ order.total_payable|default:order.total|intcomma }}
+                                        </span>
+                                                <span class="amount-currency">تومان</span>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="p-4 text-center text-muted">
+                                هنوز سفارشی ثبت نکرده‌اید.
+                            </div>
+                        {% endif %}
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    {% endblock %}
+
+{% endblock %}

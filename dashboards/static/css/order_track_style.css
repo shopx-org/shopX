@@ -1,0 +1,633 @@
+/* کارت کلی فاکتور */
+.invoice1 .invoice-popup {
+
+    border-radius: 16px;
+    padding: 24px 24px 32px;
+    box-shadow: 0 12px 35px rgba(15, 23, 42, 0.06);
+}
+
+/*!* بلاک‌های بالای فاکتور *!*/
+/*.invoice-breadcrumb .iblock {*/
+/*    background: #f9fafb !important;*/
+/*    border-radius: 12px;*/
+/*    border: 1px solid #e5e7eb;*/
+/*}*/
+
+.invoice-breadcrumb ul li {
+    margin-bottom: 4px;
+}
+
+.invoice-breadcrumb .label {
+    /*color: #6b7280;*/
+    font-size: 16px;
+}
+
+.invoice-breadcrumb .value {
+    color: #111827;
+    font-weight: 500;
+}
+
+/* نوار پیگیری سفارش */
+.trackorder-wrapper {
+    margin-top: 16px;
+    padding: 20px 24px;
+    border-radius: 14px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+}
+
+.trackorder-id {
+    font-size: 20px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.trackorder-detail div {
+    margin-bottom: 4px;
+}
+
+.trackorder-detail span {
+    color: #ef4444; /* accent برای متن قرمز بالا */
+}
+
+/* خود progress bar */
+.trackorder-progressbar {
+    list-style: none;
+    margin: 24px 0 0;
+    padding: 0;
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+}
+
+.trackorder-step {
+    flex: 1;
+    text-align: center;
+    position: relative;
+    opacity: 0.25; /* حالت پیش‌فرض محو */
+    transition: opacity 0.2s ease;
+}
+
+.trackorder-step .track-icon img {
+    max-width: 40px;
+}
+
+/* خط بین استپ‌ها */
+.trackorder-step .progressbar-track {
+    display: block;
+    height: 3px;
+    background: #e5e7eb;
+    position: absolute;
+    top: 22px;
+    right: 50%;
+    left: -50%;
+    z-index: -1;
+}
+
+.trackorder-step:first-child .progressbar-track {
+    display: none;
+}
+
+/* وقتی active می‌شود */
+.trackorder-step.active {
+    opacity: 1;
+}
+
+.trackorder-step.active .progressbar-track {
+    background: #f97316; /* accent سایت؛ اگر چیز دیگری است عوض کن */
+}
+
+.track-title {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 12px;
+    line-height: 1.6;
+    color: #4b5563;
+}
+
+/* جدول آیتم‌ها */
+.invoice-table {
+    border-radius: 12px;
+    overflow: hidden;
+    font-size: 13px;
+}
+
+.invoice-table thead th {
+    background: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+    font-weight: 600;
+}
+
+.invoice-table tbody td {
+    vertical-align: middle;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.invoice-table tfoot td {
+    border-top: 1px solid #e5e7eb !important;
+}
+
+.invoice-table tfoot tr:last-child td {
+    font-size: 14px;
+}
+
+/* باکس کلی پیگیری سفارش */
+.order-status-box {
+    background: #fbf8f4;
+    padding: 20px 24px 24px;
+    margin-top: 16px;
+}
+
+/* هدر بالای نوار (متن بازه زمانی + عنوان سفارش) */
+.order-status-top {
+    margin-bottom: 12px;
+}
+
+.order-status-id {
+    font-size: 20px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.order-status-detail div {
+    margin-bottom: 4px;
+}
+
+.order-status-detail span {
+    color: #ef4444; /* قرمز برای تاکید؛ اگر دوست نداری تغییرش بده */
+}
+
+/* خود نوار پیگیری */
+.order-status-steps {
+    list-style: none;
+    margin: 20px 0 0;
+    padding: 0;
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+}
+
+/* خط پس‌زمینه از زیر همه استپ‌ها */
+.order-status-steps::before {
+    content: "";
+    position: absolute;
+    top: 16px;
+    right: 0;
+    left: 0;
+    height: 3px;
+    background: #e5e7eb;
+    z-index: 0;
+}
+
+/* هر استپ */
+.order-status-step {
+    flex: 1;
+    text-align: center;
+    position: relative;
+    padding-top: 28px;
+    font-size: 12px;
+    color: #9ca3af;
+}
+
+/* دایره استپ */
+.order-status-step::before {
+    content: "";
+    position: absolute;
+    top: 6px;
+    right: 50%;
+    transform: translateX(50%);
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    border: 2px solid #e5e7eb;
+    background: #fff;
+    box-sizing: border-box;
+    z-index: 1;
+}
+
+/* خط پرشده تا این استپ (فقط برای استپ‌های done) */
+.order-status-step.is-done::after {
+    content: "";
+    position: absolute;
+    top: 16px;
+    right: 0;
+    left: 0;
+    height: 3px;
+    background: #f97316; /* accent سایت، نارنجی */
+    z-index: 1;
+}
+
+/* برای استپ اول و آخر که خط فقط در یک جهت است */
+.order-status-step:first-child.is-done::after {
+    right: 50%;
+}
+
+.order-status-step:last-child.is-done::after {
+    left: 50%;
+}
+
+/* رنگ و دایره استپ‌های انجام شده */
+.order-status-step.is-done {
+    color: #111827;
+}
+
+.order-status-step.is-done::before {
+    background: #f97316;
+    border-color: #f97316;
+}
+
+/* متن‌های زیر هر استپ */
+.step-label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+
+.step-caption {
+    display: block;
+    font-size: 11px;
+    color: #9ca3af;
+}
+.table-orders a.order-title-link {
+    color: #111827;
+    font-weight: 600;
+    text-decoration: none;
+}
+.table-orders a.order-title-link:hover {
+    color: #ef4444;
+}
+
+/* نمونه استایل برای بدج‌ها – مطابق استاتوس‌های مدل‌ات */
+.badge.payment-paid        { background: #16a34a; }
+.badge.payment-pending     { background: #f59e0b; }
+.badge.payment-failed      { background: #dc2626; }
+.badge.payment-canceled    { background: #6b7280; }
+
+.badge.shipping-new        { background: #6b7280; }
+.badge.shipping-processing { background: #0ea5e9; }
+.badge.shipping-shipped    { background: #6366f1; }
+.badge.shipping-delivered  { background: #16a34a; }
+.badge.shipping-returned   { background: #dc2626; }
+
+.badge {
+    border-radius: 999px;
+    padding: 6px 6px;
+    font-size: 11px;
+    color: #fff;
+}
+/* سلول وضعیت (آیکن + متن) */
+.table-orders td.status-cell {
+    white-space: nowrap;
+}
+
+.status-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+/* آیکن‌ها */
+.status-icon {
+    font-size: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* متن کنار آیکن */
+.status-text {
+    font-size: 12px;
+}
+
+/* رنگ‌بندی وضعیت پرداخت/ارسال */
+.status-icon-success   { color: #16a34a; }  /* سبز تیک */
+.status-icon-pending   { color: #f59e0b; }  /* نارنجی / منتظر */
+.status-icon-failed    { color: #dc2626; }  /* قرمز خطا */
+.status-icon-canceled  { color: #6b7280; }  /* خاکستری لغو */
+.status-icon-refunded  { color: #0ea5e9; }  /* آبی مرجوع پول */
+
+.status-icon-new        { color: #6b7280; } /* ثبت شده */
+.status-icon-processing { color: #6366f1; } /* در حال آماده‌سازی */
+.status-icon-shipped    { color: #0ea5e9; } /* ارسال شد */
+.status-icon-returned   { color: #dc2626; }
+
+.status-icon-default   { color: #9ca3af; }
+/* عرض ستون‌ها */
+.table-orders col.col-order-id { width: 8%; }
+.table-orders col.col-title    { width: 34%; }  /* جزئیات سفارش کمی جمع‌تر شد */
+.table-orders col.col-date     { width: 16%; }
+.table-orders col.col-pay      { width: 16%; }
+.table-orders col.col-ship     { width: 16%; }
+.table-orders col.col-total    { width: 10%; }
+
+/* تراز و ارتفاع ردیف‌ها */
+.table-orders th,
+.table-orders td {
+    vertical-align: middle;
+    font-size: 13px;
+}
+
+/* ستون جزئیات راست‌چین و قابل truncate */
+.table-orders .col-title {
+    max-width: 260px;
+}
+.table-orders .order-title-link {
+    display: inline-block;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #111827;
+    font-weight: 600;
+    text-decoration: none;
+}
+.table-orders .order-title-link:hover {
+    color: #ef4444;
+}
+
+/* سلول وضعیت: آیکن + متن در یک خط وسط‌چین عمودی */
+.table-orders .status-cell {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.status-icon {
+    font-size: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.status-text {
+    font-size: 12px;
+}
+
+/* رنگ آیکن‌ها */
+.status-icon-success   { color: #16a34a; }
+.status-icon-pending   { color: #f59e0b; }
+.status-icon-failed    { color: #dc2626; }
+.status-icon-canceled  { color: #6b7280; }
+.status-icon-refunded  { color: #0ea5e9; }
+
+.status-icon-new        { color: #6b7280; }
+.status-icon-processing { color: #6366f1; }
+.status-icon-shipped    { color: #0ea5e9; }
+.status-icon-returned   { color: #dc2626; }
+
+.status-icon-default   { color: #9ca3af; }
+
+/* عرض ستون‌ها */
+.table-orders col.col-order-id { width: 8%; }
+.table-orders col.col-title    { width: 34%; }
+.table-orders col.col-date     { width: 16%; }
+.table-orders col.col-pay      { width: 16%; }
+.table-orders col.col-ship     { width: 16%; }
+.table-orders col.col-total    { width: 10%; }
+
+.table-orders th,
+.table-orders td {
+    vertical-align: middle;
+    font-size: 13px;
+    border-top: 0;
+}
+
+/* ستون جزئیات سفارش */
+.table-orders .col-title {
+    max-width: 260px;
+    text-align: right;
+}
+.table-orders .order-title-link {
+    display: inline-flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 4px;
+    max-width: 100%;
+    text-decoration: none;
+    color: #111827;
+}
+.table-orders .order-title-main {
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.table-orders .order-title-extra {
+    font-size: 11px;
+    color: #9ca3af;
+    white-space: nowrap;
+}
+.table-orders .order-title-link:hover .order-title-main {
+    color: #ef4444;
+}
+
+/* تاریخ / ساعت */
+.table-orders .col-date {
+    white-space: nowrap;
+}
+.table-orders .order-date {
+    display: block;
+}
+.table-orders .order-time {
+    display: block;
+    font-size: 11px;
+}
+
+/* وضعیت‌ها: آیکن + متن در یک خط */
+.table-orders .status-cell {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+.status-icon {
+    font-size: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.status-text {
+    font-size: 12px;
+}
+
+/* رنگ آیکن‌ها */
+.status-icon-success   { color: #16a34a; }
+.status-icon-pending   { color: #f59e0b; }
+.status-icon-failed    { color: #dc2626; }
+.status-icon-canceled  { color: #6b7280; }
+.status-icon-refunded  { color: #0ea5e9; }
+
+.status-icon-new        { color: #6b7280; }
+.status-icon-processing { color: #6366f1; }
+.status-icon-shipped    { color: #0ea5e9; }
+.status-icon-returned   { color: #dc2626; }
+
+.status-icon-default   { color: #9ca3af; }
+
+/* مبلغ نهایی */
+.table-orders .col-total {
+    white-space: nowrap;
+}
+.amount-value {
+    font-weight: 600;
+}
+.amount-currency {
+    font-size: 11px;
+    color: #6b7280;
+    margin-right: 2px;
+}
+.status-cell {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    white-space: nowrap;
+}
+
+.status-icon {
+    font-size: 14px;
+}
+
+.status-text {
+    font-size: 13px;
+}
+
+/* وضعیت‌های دیگر... */
+
+.status-icon-send-canceled {
+    color: #fd7e14; /* نارنجی */
+}
+
+.order-card {
+    font-size: 2.5rem;
+    font-weight: 700;
+
+}
+
+.orders-header-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 999px;
+    background-color: #fff5f0;      /* پس‌زمینه ملایم نارنجی */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: #ff5b3c;                  /* همون رنگ اکسنت شاپ‌ـایکس اگه استفاده می‌کنی */
+}
+
+.orders-header-icon i {
+    line-height: 1;
+}
+/* هدر سفارش‌ها */
+.card-header {
+    border-bottom: 1px solid #f3f3f3;
+    background-color: #ffffff;
+}
+
+/* آیکن گرد کنار عنوان */
+.orders-header-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    background-color: #fff5f0;   /* پس‌زمینه ملایم */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: #ff5b3c;              /* رنگ اکسنت برندت */
+    flex-shrink: 0;
+}
+
+/* خود آیکن */
+.orders-header-icon i {
+    line-height: 1;
+}
+
+/* تیتر اصلی */
+.orders-title {
+    font-size: 1.4rem;           /* از h2 معمولی بزرگ‌تر و خواناتر */
+    font-weight: 700;
+    color: #252525;
+}
+
+/* زیرتیتر */
+.orders-subtitle {
+    font-size: 1rem;
+    color: #6c757d;
+}
+
+.orders-header-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    background-color: #fff5f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: #ff5b3c;
+    flex-shrink: 0;
+}
+
+.orders-header-icon i {
+    line-height: 1;
+}
+
+.orders-title {
+    font-size: 1.6rem;        /* تیتر بزرگ‌تر */
+    font-weight: 700;
+    color: #252525;
+}
+
+.orders-subtitle {
+    font-size: 0.78rem;
+    color: #6c757d;
+}
+.header-search-wrapper-mobile {
+    display: flex;
+    align-items: center;
+    background-color: #fdfdfd;
+    border-radius: 999px;
+    padding: 0 0.8rem;
+    height: 36px;
+    direction: rtl;
+    border: 1px solid #ffd7d0;
+}
+
+/* اینجا مهم است که selector حتما #mobile-search-input باشد */
+#mobile-search-input {
+    flex: 1 1 auto;
+    border: none !important;
+    background: transparent;
+    box-shadow: none !important;
+    outline: none;
+    font-size: 1.3rem;
+    height: 100%;
+    padding: 0 0.6rem 0 0.2rem;
+}
+
+.mobile-search-btn {
+    flex: 0 0 auto;
+    width: 26px;
+    height: 26px;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    margin-right: 0.2rem;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.mobile-search-btn i {
+    font-size: 1.4rem;
+    color: #FA523C;
+}

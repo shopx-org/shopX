@@ -1,5 +1,5 @@
+# orders/models
 from __future__ import annotations
-
 from decimal import Decimal
 from django.db import models
 from django.conf import settings
@@ -22,6 +22,7 @@ class Order(models.Model):
         SHIPPED    = "shipped",    "ارسال شده"
         DELIVERED  = "delivered",  "تحویل شده"
         RETURNED   = "returned",   "مرجوع شده"
+        SEND_CANCELED   = "send-canceled",   "لغو ارسال"
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,

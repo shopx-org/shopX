@@ -1,3 +1,4 @@
+{#/home/atusa92/PycharmProjects/ShopX/dashboards/templates/dashboards/dash_base.html#}
 {% load static %}
 <!DOCTYPE html>
 <html lang="fa" data-nav-layout="vertical" data-theme-mode="light" data-header-styles="light" data-width="fullwidth"
@@ -1653,7 +1654,7 @@
 
                     <!-- Start::slide -->
                     <li class="slide has-sub">
-                        <a href="{% url 'dashboards:user_profile' %}" class="side-menu__item">
+                        <a href="{% url 'dashboards:dashboard' %}" class="side-menu__item">
                             <svg xmlns="http://www.w3.org/2000/svg" class="side-menu__icon" viewbox="0 0 256 256">
                                 <rect width="256" height="256" fill="none"></rect>
                                 <rect x="48" y="48" width="64" height="64" rx="8" fill="none" stroke="currentColor"
@@ -1671,7 +1672,7 @@
                         </a>
                         <ul class="slide-menu child1">
                             <li class="slide side-menu__label1">
-                                <a href="{% url 'dashboards:user_profile' %}">حساب کاربری</a>
+                                <a href="{% url 'dashboards:personal_info' %}">حساب کاربری</a>
                             </li>
                             <li class="slide">
                                 <a href="full-calendar.html" class="side-menu__item">تقویم</a>

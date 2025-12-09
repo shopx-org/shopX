@@ -3040,3 +3040,89 @@ body.no-scroll {
     margin-right: 5px;
 }
 /* end product list style */
+
+/* استایل کلی بج‌ها روی کارت محصول */
+.product-media .product-label {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 5;
+
+    padding: 3px 9px;
+    border-radius: 999px;
+
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.5;
+
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.18);
+    pointer-events: none;
+}
+
+/* بج "جدید" */
+.product-media .label-new {
+    background: #22c55e; /* سبز */
+}
+
+/* بج "تخفیف" */
+.product-media .label-sale {
+    background: #c82828; /* قرمز تخفیف */
+}
+
+/* اگر هر دو با هم باشند، دومی یک کم پایین‌تر برود */
+.product-media .label-new + .label-sale {
+    top: 34px;
+}
+
+/* اختیاری: بج ناموجود اگر داشتی */
+.product-media .sold-out-badge {
+    position: absolute;
+    bottom: 10px;
+    inset-inline: 10px;
+    text-align: center;
+
+    padding: 4px 8px;
+    border-radius: 999px;
+
+    font-size: 11px;
+    font-weight: 500;
+    background: rgba(15, 23, 42, 0.9);
+    color: #fff;
+}
+
+
+
+/* مطمئن شو کانتینر تصویر position: relative داره */
+.product .product-media,
+.product-media {
+    position: relative;
+}
+
+
+
+
+/* استایل بج ناموجود */
+.label-out {
+    position: absolute;
+    top: 10px;
+    right: 10px;        /* برای RTL گوشه راست */
+    z-index: 5;
+
+    padding: 5px 12px;
+    border-radius: 999px;
+
+    background: #1f2937;   /* تیره؛ می‌تونی با رنگ برندت عوضش کنی */
+    color: #fff;
+    font-size: 0.75rem;
+    line-height: 1;
+    white-space: nowrap;
+
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+/* اگر از قبل استایل عجیب داشت، خنثی‌ش کن */
+.label-out::before,
+.label-out::after {
+    content: none !important;
+}

@@ -450,7 +450,7 @@
 // });
 
 // ============================
-// ۱) اتوکامپلیت سرچ هدر
+// ۱) اتوکامپلیت سرچ (دسکتاپ + موبایل)
 // ============================
 (function () {
     function debounce(fn, delay) {
@@ -465,8 +465,8 @@
         };
     }
 
-    function initSearchAutocomplete() {
-        const input = document.getElementById("site-search-input");
+    // این تابع برای هر input جداگانه اجرا می‌شود
+    function attachAutocompleteToInput(input) {
         if (!input) return;
 
         const wrapper = input.closest(".header-search-wrapper");
@@ -504,9 +504,7 @@
             let html = "";
 
             categories.forEach(function (cat) {
-                if (!cat.products || !cat.products.length) {
-                    return;
-                }
+                if (!cat.products || !cat.products.length) return;
 
                 html += '<div class="search-suggest-group">';
                 html +=
@@ -527,24 +525,16 @@
                         html += '<div class="search-suggest-thumb no-thumb"></div>';
                     }
                     html += '<div class="search-suggest-meta">';
-                    html +=
-                        '<div class="search-suggest-name">' +
-                        p.name +
-                        "</div>";
+                    html += '<div class="search-suggest-name">' + p.name + "</div>";
                     if (p.brand) {
-                        html +=
-                            '<div class="search-suggest-brand">' +
-                            p.brand +
-                            "</div>";
+                        html += '<div class="search-suggest-brand">' + p.brand + "</div>";
                     }
-                    html += "</div>";
-                    html += "</a>";
+                    html += "</div></a>";
                 });
 
                 html += "</div>";
             });
 
-            // ردیف «مشاهده همه نتایج برای …»
             const fullUrl =
                 searchUrlBase +
                 (searchUrlBase.indexOf("?") === -1 ? "?q=" : "&q=") +
@@ -578,9 +568,7 @@
                 headers: { "X-Requested-With": "XMLHttpRequest" }
             })
                 .then(function (res) {
-                    if (!res.ok) {
-                        throw new Error("Network response was not ok");
-                    }
+                    if (!res.ok) throw new Error("Network response was not ok");
                     return res.json();
                 })
                 .then(function (data) {
@@ -594,12 +582,17 @@
 
         input.addEventListener("input", handleInput);
 
-        // بستن دراپ‌داون وقتی بیرون کلیک می‌کنی
         document.addEventListener("click", function (event) {
             if (!wrapper.contains(event.target)) {
                 hideDropdown();
             }
         });
+    }
+
+    function initSearchAutocomplete() {
+        // روی هر input که این کلاس را دارد (دسکتاپ + موبایل) اتوکامپلیت فعال کن
+        const inputs = document.querySelectorAll(".js-site-search-input");
+        inputs.forEach(attachAutocompleteToInput);
     }
 
     if (document.readyState === "loading") {
@@ -608,6 +601,7 @@
         initSearchAutocomplete();
     }
 })();
+
 
 
 // ============================
@@ -783,7 +777,6 @@ document.addEventListener('DOMContentLoaded', function () {
     syncRangesFromInputs();
 });
 
-
 // ============================
 // ۵) Search History در باکس سرچ — نسخه نهایی و بدون باگ
 // ============================
@@ -791,12 +784,14 @@ document.addEventListener('DOMContentLoaded', function () {
     const HISTORY_KEY    = 'shopx_search_history_v1';
     const MAX_ITEMS      = 10;
 
+    // فقط فرم هدر
     const form           = document.querySelector('#header-search-form');
     const input          = form ? form.querySelector('input[name="q"]') : null;
+
     const historySection = document.getElementById('search-history-section');
     const historyList    = document.getElementById('search-history-list');
     const historyClear   = document.getElementById('search-history-clear');
-    const dropdown       = document.getElementById('search-dropdown');
+    const dropdown       = form ? form.querySelector('#search-dropdown') : null;
 
     if (!form || !input || !historySection || !historyList) return;
 
@@ -844,33 +839,28 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         historySection.classList.remove('d-none');
-        
-        // فقط اگر دراپ‌داون بسته بود، بازش کن
+
         if (dropdown && dropdown.classList.contains('d-none')) {
             dropdown.classList.remove('d-none');
         }
     }
 
-    // فقط وقتی کاربر واقعاً می‌خواد سرچ کنه، تاریخچه نشون بده
     input.addEventListener('focus', function () {
         if (input.value.trim() === '') {
             renderHistory();
         }
     });
 
-    // وقتی چیزی تایپ کرد و پاک کرد → دوباره تاریخچه نشون بده
     input.addEventListener('input', function () {
         if (input.value.trim() === '') {
             renderHistory();
         }
     });
 
-    // وقتی فرم ارسال شد → اضافه به تاریخچه
     form.addEventListener('submit', function () {
         addToHistory(input.value);
     });
 
-    // پاک کردن تاریخچه
     if (historyClear) {
         historyClear.addEventListener('click', function () {
             localStorage.removeItem(HISTORY_KEY);
@@ -879,7 +869,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // وقتی کاربر بیرون از سرچ کلیک کرد → دراپ‌داون بسته بشه
     document.addEventListener('click', function (e) {
         if (!form.contains(e.target)) {
             if (dropdown) dropdown.classList.add('d-none');

@@ -16,7 +16,7 @@
   const colorWrap    = $("#color-swatches");
   const sizeSelect   = $("#size");
   const mainImg      = $("#tlp-main");
-
+  const stickyImg    = $("#sticky-img");
   // قیمت/تخفیف UI
   const elPriceNum   = $("#price-num");
   const elCompareNum = $("#compare-num");
@@ -151,14 +151,40 @@
     btnAdd.classList.toggle('is-disabled', !enabled);
     btnAdd.setAttribute('aria-disabled', (!enabled).toString());
   }
+ function activateThumb(btn) {
+    if (!btn || !mainImg) return;
 
-  function swapImageForColor(colorId) {
-    if (!colorId || !mainImg) return;
-    const btn = document.querySelector(`.thumb[data-color-id="${colorId}"]`);
-    const src = btn?.dataset?.full || null;
-    if (src) mainImg.setAttribute("src", src);
-    $$(".thumb").forEach(b => b.classList.toggle("is-active", b === btn));
+    // آدرس تصویر بزرگ
+    const full = btn.dataset.full || btn.querySelector("img")?.getAttribute("src");
+    if (full) {
+      mainImg.setAttribute("src", full);
+      if (stickyImg) {
+        stickyImg.setAttribute("src", full);
+      }
+    }
+
+    // کلاس active + aria-pressed روی تامب‌ها
+    $$(".thumb").forEach(t => {
+      const isActive = t === btn;
+      t.classList.toggle("is-active", isActive);
+      t.setAttribute("aria-pressed", isActive ? "true" : "false");
+    });
   }
+
+ function swapImageForColor(colorId) {
+    if (!colorId) return;
+    // سعی می‌کنیم تامبی پیدا کنیم که رنگش با colorId یکی است
+    let btn = document.querySelector(`.thumb[data-color-id="${colorId}"]`);
+    // اگر نبود، حداقل اولین تامب را فعال کن
+    if (!btn) {
+      btn = document.querySelector(".thumb");
+    }
+    if (btn) {
+      activateThumb(btn);
+    }
+  }
+
+
 
   // ---------- State ----------
   let selectedColorId = (colorWrap?.querySelector(".active")?.dataset?.colorId) || null;
@@ -203,7 +229,7 @@
 
   // ---------- Events ----------
   // رنگ
-  if (colorWrap) {
+ if (colorWrap) {
     $$("#color-swatches a[data-color-id]").forEach(a => {
       // انتقال color-id به dataset برای اطمینان
       if (!a.dataset.colorId) a.dataset.colorId = a.getAttribute("data-color-id") || "";
@@ -227,6 +253,14 @@
       onSelectionChange();
     });
   }
+
+  // گالری تصاویر: کلیک روی تامب‌ها
+  $$(".thumbs .thumb").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      activateThumb(btn);
+    });
+  });
 
   // اعتبارسنجی نهایی فرم قبل از ارسال
   if (form) {
@@ -255,113 +289,7 @@
   onSelectionChange();
 
 })();
-(function () {
-  // فقط بعد از آماده‌شدن DOM اجرا شود
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", boot, { once: true });
-  } else {
-    boot();
-  }
 
-  function cssVar(name, fallback) {
-    const v = getComputedStyle(document.documentElement).getPropertyValue(name);
-    return (v && v.trim()) || fallback;
-  }
-
-  function faNum(n) {
-    return Number(n ?? 0).toLocaleString("fa-IR");
-  }
-
-  function boot() {
-    // 1) وجود عنصر و خود Chart.js را چک کن
-    const el = document.getElementById("priceLineChart");
-    if (!el || typeof window.Chart === "undefined") return;
-
-    // 2) گرفتن context به‌صورت امن
-    const ctx = el.getContext && el.getContext("2d");
-    if (!ctx) return;
-
-    // 3) امکان تزریق داده از data-* روی canvas
-    //   <canvas id="priceLineChart" data-labels='["فروردین",...]' data-points='[12,42,...]'></canvas>
-    let labels =
-      tryJSON(el.dataset.labels) ??
-      ["فروردین","اردیبهشت","خرداد","تیر","مرداد","شهریور","مهر","آبان","آذر"];
-
-    let dataPoints =
-      tryJSON(el.dataset.points) ?? [12, 42, 36, 50, 49, 61, 68, 92, 150];
-
-    // هم‌طول‌کردنِ labels و data
-    const len = Math.min(labels.length, dataPoints.length);
-    labels = labels.slice(0, len);
-    dataPoints = dataPoints.slice(0, len);
-
-    // 4) رنگ‌ها از CSS Variables با fallback
-    const lineColor = cssVar("--line", "#6c8cff");
-    const gridColor = cssVar("--grid", "#eff3f8");
-    const ticksColor = cssVar("--axis-muted", "#9aa6b2");
-
-    // 5) ساخت چارت
-    try {
-      new Chart(ctx, {
-        type: "line",
-        data: {
-          labels,
-          datasets: [{
-            label: "روند قیمت ماهانه",
-            data: dataPoints,
-            borderColor: lineColor,
-            backgroundColor: "rgba(108,140,255,0.12)",
-            borderWidth: 3,
-            tension: 0.35,
-            pointRadius: 0,
-            fill: true
-          }]
-        },
-        options: {
-          locale: "fa-IR",
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              enabled: true,
-              callbacks: {
-                title: items => (items[0]?.label ?? ""),
-                label: item => " " + faNum(item.raw) + " واحد",
-              }
-            }
-          },
-          interaction: { mode: "nearest", intersect: false },
-          scales: {
-            x: {
-              grid: { display: false },
-              ticks: {
-                color: ticksColor,
-                callback: (v) => labels[v] // برای RTL هم جواب می‌دهد
-              }
-            },
-            y: {
-              beginAtZero: true,
-              grid: { color: gridColor },
-              ticks: {
-                color: ticksColor,
-                stepSize: 25,
-                callback: (value) => faNum(value)
-              }
-            }
-          }
-        }
-      });
-    } catch (_) {
-      // اگر هر مشکلی بود، در پروداکشن سکوت کن
-      // console.error("Chart init failed:", _);
-    }
-  }
-
-  function tryJSON(s) {
-    if (!s) return null;
-    try { return JSON.parse(s); } catch { return null; }
-  }
-})();
 
 // ======================= WISHLIST STATUS (icon + navbar count) =======================
 document.addEventListener("DOMContentLoaded", function () {
@@ -414,4 +342,164 @@ document.addEventListener("DOMContentLoaded", function() {
             setTimeout(() => msg.remove(), 800);
         }, 5000);
     });
+});
+
+// ================== Price History Chart ==================
+function initPriceChart() {
+  const jsonScript = document.getElementById("price-chart-data");
+  const canvas = document.getElementById("priceLineChart");
+  const card = document.querySelector("#line-chart");
+
+  if (!jsonScript || !canvas) return;
+
+  let chartData;
+  try {
+    chartData = JSON.parse(jsonScript.textContent || "{}");
+  } catch (e) {
+    console.error("price-chart-data JSON parse error", e);
+    return;
+  }
+
+  const labelsRaw = chartData.labels || [];
+  const minPrices = chartData.min_prices || [];
+  const avgPrices = chartData.avg_prices || [];
+
+  if (!labelsRaw.length || (!minPrices.length && !avgPrices.length)) {
+    if (card) {
+      card.innerHTML =
+        '<div class="p-3 text-muted" style="font-size:0.9rem;">برای این محصول هنوز سابقهٔ قیمت ثبت نشده است.</div>';
+    }
+    return;
+  }
+
+  // تبدیل تاریخ‌ها به فرمت فارسی قابل‌خواندن
+  const labels = labelsRaw.map((d) => {
+    try {
+      const dt = new Date(d);
+      return dt.toLocaleDateString("fa-IR");
+    } catch (e) {
+      return d;
+    }
+  });
+
+  const rootStyles = getComputedStyle(document.documentElement);
+  const colorMin =
+    rootStyles.getPropertyValue("--chart-min").trim() ||
+    rootStyles.getPropertyValue("--line").trim() ||
+    "#2563eb"; // آبی
+  const colorAvg =
+    rootStyles.getPropertyValue("--chart-avg").trim() ||
+    "#22c55e"; // سبز
+  const gridColor =
+    rootStyles.getPropertyValue("--grid").trim() || "#eff3f8";
+  const axisColor =
+    rootStyles.getPropertyValue("--axis-muted").trim() || "#9ca3af";
+  const fillBg =
+    rootStyles.getPropertyValue("--chart-fill").trim() || "rgba(250,106,53,0.08)";
+
+  const meta = chartData.meta || {};
+  const minY = meta.min_y ?? meta.min_overall;
+  const maxY = meta.max_y ?? meta.max_overall;
+
+  const ctx = canvas.getContext("2d");
+
+  if (canvas._priceChartInstance) {
+    canvas._priceChartInstance.destroy();
+  }
+
+  const datasets = [];
+
+  if (minPrices.length) {
+    datasets.push({
+      label: "کمترین قیمت",
+      data: minPrices,
+      borderColor: colorMin,
+      backgroundColor: colorMin,
+      pointBackgroundColor: colorMin,
+      pointRadius: 3,
+      pointHoverRadius: 4,
+      borderWidth: 2,
+      tension: 0.3,
+    });
+  }
+
+  if (avgPrices.length) {
+    datasets.push({
+      label: "میانگین قیمت",
+      data: avgPrices,
+      borderColor: colorAvg,
+      backgroundColor: fillBg, // برای fill زیر منحنی
+      pointBackgroundColor: colorAvg,
+      pointRadius: 3,
+      pointHoverRadius: 4,
+      borderWidth: 2,
+      tension: 0.3,
+      fill: "origin",
+    });
+  }
+
+  const chart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: labels,
+      datasets: datasets,
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: true,
+          labels: {
+            usePointStyle: true,
+            boxWidth: 8,
+            boxHeight: 8,
+          },
+        },
+        tooltip: {
+          callbacks: {
+            label: function (ctx) {
+              const val = ctx.parsed.y || 0;
+              const title = ctx.dataset.label || "";
+              return (
+                title +
+                ": " +
+                val.toLocaleString("fa-IR") +
+                " تومان"
+              );
+            },
+          },
+        },
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: {
+            color: axisColor,
+            maxRotation: 0,
+            autoSkip: true,
+            maxTicksLimit: 6,
+          },
+        },
+        y: {
+          grid: { color: gridColor },
+          ticks: {
+            color: axisColor,
+            callback: function (value) {
+              return value.toLocaleString("fa-IR");
+            },
+          },
+          // محور Y بین کمترین و بیشترین قیمت (با کمی حاشیه)
+          min: typeof minY === "number" ? minY : undefined,
+          max: typeof maxY === "number" ? maxY : undefined,
+        },
+      },
+    },
+  });
+
+  canvas._priceChartInstance = chart;
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  initPriceChart();
 });

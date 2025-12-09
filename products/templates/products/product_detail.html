@@ -5,9 +5,9 @@
 {% load promos_tags %}
 {% load core_extras %}
 {% block meta %}
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
 
 {% endblock %}
 {% block CSS-JS %}
@@ -30,117 +30,123 @@
     <script src="{% static 'products/js/product.js' %}" defer></script>
 
     <style>
-    .stars {
-        display: inline-flex;
-        gap: 4px;
-        cursor: pointer;
-    }
-    .stars i {
-        font-size: 1.5rem;
-        color: #ccc;
-        transition: color 0.2s ease, transform 0.2s ease;
-    }
-    .stars i.bi-star-fill {
-        color: #f5c518; /* طلایی */
-    }
-    .stars i.hovered {
-        color: #f8d24a !important;
-    }
-    .stars i:hover {
-        transform: scale(1.2);
-        color: #f8d24a;
-    }
-    .rating-average {
-        margin-left: 6px;
-        font-weight: 600;
-        color: #333;
-    }
-    .rating-count {
-        margin-left: 4px;
-        color: #777;
-        font-size: 1.2rem;
-    }
+        .stars {
+            display: inline-flex;
+            gap: 4px;
+            cursor: pointer;
+        }
+
+        .stars i {
+            font-size: 1.5rem;
+            color: #ccc;
+            transition: color 0.2s ease, transform 0.2s ease;
+        }
+
+        .stars i.bi-star-fill {
+            color: #f5c518; /* طلایی */
+        }
+
+        .stars i.hovered {
+            color: #f8d24a !important;
+        }
+
+        .stars i:hover {
+            transform: scale(1.2);
+            color: #f8d24a;
+        }
+
+        .rating-average {
+            margin-left: 6px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .rating-count {
+            margin-left: 4px;
+            color: #777;
+            font-size: 1.2rem;
+        }
     </style>
 
 
     <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const starsContainers = document.querySelectorAll('.stars');
+        document.addEventListener('DOMContentLoaded', function () {
+            const starsContainers = document.querySelectorAll('.stars');
 
-        starsContainers.forEach(container => {
-            const stars = container.querySelectorAll('i');
-            const objectId = container.dataset.objectId;
-            const contentTypeId = container.dataset.contentTypeId;
+            starsContainers.forEach(container => {
+                const stars = container.querySelectorAll('i');
+                const objectId = container.dataset.objectId;
+                const contentTypeId = container.dataset.contentTypeId;
 
-            let userHasRated = false;  // آیا کاربر قبلاً رأی داده؟
+                let userHasRated = false;  // آیا کاربر قبلاً رأی داده؟
 
-            // ⭐ Hover پیش‌نمایش فقط وقتی کاربر رأی نداده
-            stars.forEach((star, index) => {
-                star.addEventListener('mouseenter', function () {
-                    if (userHasRated) return;
-                    stars.forEach((s, i) => s.classList.toggle('hovered', i <= index));
+                // ⭐ Hover پیش‌نمایش فقط وقتی کاربر رأی نداده
+                stars.forEach((star, index) => {
+                    star.addEventListener('mouseenter', function () {
+                        if (userHasRated) return;
+                        stars.forEach((s, i) => s.classList.toggle('hovered', i <= index));
+                    });
+                    star.addEventListener('mouseleave', function () {
+                        if (userHasRated) return;
+                        stars.forEach(s => s.classList.remove('hovered'));
+                    });
                 });
-                star.addEventListener('mouseleave', function () {
-                    if (userHasRated) return;
-                    stars.forEach(s => s.classList.remove('hovered'));
+
+                // 🌟 ثبت امتیاز با کلیک
+                stars.forEach(star => {
+                    star.addEventListener('click', function () {
+                        if (userHasRated) return; // جلوگیری از رأی دوباره
+
+                        const score = parseInt(this.dataset.score);
+
+                        fetch("{% url 'core:add_rating' %}", {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRFToken': '{{ csrf_token }}',
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Content-Type': 'application/x-www-form-urlencoded'
+                            },
+                            body: `object_id=${objectId}&content_type_id=${contentTypeId}&score=${score}`
+                        })
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.status === 'success') {
+                                    userHasRated = true; // علامت‌گذاری برای جلوگیری از کلیک دوباره
+
+                                    // پر کردن ستاره‌ها با امتیاز کاربر
+                                    stars.forEach(s => s.classList.remove('bi-star-fill', 'hovered'));
+                                    for (let i = 0; i < data.user_score; i++) {
+                                        stars[i].classList.add('bi-star-fill');
+                                    }
+
+                                    // به‌روزرسانی عدد میانگین و تعداد رأی
+                                    container.parentElement.querySelector('.rating-average').textContent = data.average;
+                                    container.parentElement.querySelector('.rating-count').textContent = `(${data.count} رأی)`;
+
+                                    // غیرفعال کردن کلیک‌ها
+                                    stars.forEach(s => s.style.pointerEvents = 'none');
+                                } else {
+                                    alert(data.message || 'خطایی رخ داد.');
+                                }
+                            });
+                    });
                 });
-            });
 
-            // 🌟 ثبت امتیاز با کلیک
-            stars.forEach(star => {
-                star.addEventListener('click', function () {
-                    if (userHasRated) return; // جلوگیری از رأی دوباره
-
-                    const score = parseInt(this.dataset.score);
-
-                    fetch("{% url 'core:add_rating' %}", {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRFToken': '{{ csrf_token }}',
-                            'X-Requested-With': 'XMLHttpRequest',
-                            'Content-Type': 'application/x-www-form-urlencoded'
-                        },
-                        body: `object_id=${objectId}&content_type_id=${contentTypeId}&score=${score}`
-                    })
+                // 🔹 گرفتن امتیاز کاربر بعد از رفرش و غیرقابل تغییر کردن ستاره‌ها
+                fetch("{% url 'core:get_user_rating' %}?object_id=" + objectId + "&content_type_id=" + contentTypeId)
                     .then(res => res.json())
                     .then(data => {
-                        if (data.status === 'success') {
-                            userHasRated = true; // علامت‌گذاری برای جلوگیری از کلیک دوباره
-                            
-                            // پر کردن ستاره‌ها با امتیاز کاربر
-                            stars.forEach(s => s.classList.remove('bi-star-fill', 'hovered'));
+                        stars.forEach(s => s.classList.remove('bi-star-fill', 'hovered'));
+                        if (data.user_score) {
+                            userHasRated = true;
                             for (let i = 0; i < data.user_score; i++) {
                                 stars[i].classList.add('bi-star-fill');
                             }
-
-                            // به‌روزرسانی عدد میانگین و تعداد رأی
-                            container.parentElement.querySelector('.rating-average').textContent = data.average;
-                            container.parentElement.querySelector('.rating-count').textContent = `(${data.count} رأی)`;
-
-                            // غیرفعال کردن کلیک‌ها
-                            stars.forEach(s => s.style.pointerEvents = 'none');
-                        } else {
-                            alert(data.message || 'خطایی رخ داد.');
+                            stars.forEach(s => s.style.pointerEvents = 'none'); // غیرقابل تغییر
                         }
                     });
-                });
             });
-
-            // 🔹 گرفتن امتیاز کاربر بعد از رفرش و غیرقابل تغییر کردن ستاره‌ها
-            fetch("{% url 'core:get_user_rating' %}?object_id=" + objectId + "&content_type_id=" + contentTypeId)
-                .then(res => res.json())
-                .then(data => {
-                    stars.forEach(s => s.classList.remove('bi-star-fill', 'hovered'));
-                    if (data.user_score) {
-                        userHasRated = true;
-                        for (let i = 0; i < data.user_score; i++) {
-                            stars[i].classList.add('bi-star-fill');
-                        }
-                        stars.forEach(s => s.style.pointerEvents = 'none'); // غیرقابل تغییر
-                    }
-                });
         });
-    });
     </script>
 
 
@@ -205,7 +211,8 @@
                                                                     type="button" role="listitem"
                                                                     aria-pressed="{% if img.is_primary or forloop.first %}true{% else %}false{% endif %}"
                                                                     title="{{ product.name }} - {{ forloop.counter }}"
-                                                                    data-full="{{ img.url }}">
+                                                                    data-full="{{ img.url }}"
+                                                                    data-color-id="{{ img.color_id|default:'' }}">
                                                                 <img src="{{ img.url }}"
                                                                      alt="{{ img.alt|default:product.name }}"
                                                                      loading="lazy" decoding="async">
@@ -240,17 +247,17 @@
 
 
                                                 <div class="product-rating mt-2">
-                                                    <div class="stars" 
-                                                        data-object-id="{{ product.id }}" 
-                                                        data-content-type-id="{{ product|content_type_id }}">
+                                                    <div class="stars"
+                                                         data-object-id="{{ product.id }}"
+                                                         data-content-type-id="{{ product|content_type_id }}">
                                                         {% for i in "12345" %}
-                                                            <i class="bi bi-star" data-score="{{ forloop.counter }}"></i>
+                                                            <i class="bi bi-star"
+                                                               data-score="{{ forloop.counter }}"></i>
                                                         {% endfor %}
                                                     </div>
                                                     <span class="rating-average">{{ product.average_rating|default:"0" }}</span>
                                                     <span class="rating-count">({{ product.rating_count|default:"0" }} رأی)</span>
                                                 </div>
-
 
 
                                                 <div class="product-content pt-2 mb-2">
@@ -324,22 +331,22 @@
                                                         {% endif %}
                                                     </div>
                                                 {% endif %}
-{#                                                <details class="dk-acc card-like">#}
-{#                                                    <summary><span>خدمات نصب و راه‌اندازی</span> <label#}
-{#                                                            class="switch"><input#}
-{#                                                            type="checkbox"#}
-{#                                                            id="svc-toggle"><span#}
-{#                                                            class="slider"></span></label></summary>#}
-{#                                                    <div class="dk-acc-body"><label class="opt"> <input type="checkbox"#}
-{#                                                                                                        id="install-chk">#}
-{#                                                        <span#}
-{#                                                                class="ttl">نصب در محل</span> <span#}
-{#                                                                class="price muted">هزینه پس از خرید مشخص می‌شود</span>#}
-{#                                                    </label>#}
-{#                                                        <div class="dk-acc-foot"><a href="#" class="lnk">جزئیات</a>#}
-{#                                                        </div>#}
-{#                                                    </div>#}
-{#                                                </details>#}
+                                                {#                                                <details class="dk-acc card-like">#}
+                                                {#                                                    <summary><span>خدمات نصب و راه‌اندازی</span> <label#}
+                                                {#                                                            class="switch"><input#}
+                                                {#                                                            type="checkbox"#}
+                                                {#                                                            id="svc-toggle"><span#}
+                                                {#                                                            class="slider"></span></label></summary>#}
+                                                {#                                                    <div class="dk-acc-body"><label class="opt"> <input type="checkbox"#}
+                                                {#                                                                                                        id="install-chk">#}
+                                                {#                                                        <span#}
+                                                {#                                                                class="ttl">نصب در محل</span> <span#}
+                                                {#                                                                class="price muted">هزینه پس از خرید مشخص می‌شود</span>#}
+                                                {#                                                    </label>#}
+                                                {#                                                        <div class="dk-acc-foot"><a href="#" class="lnk">جزئیات</a>#}
+                                                {#                                                        </div>#}
+                                                {#                                                    </div>#}
+                                                {#                                                </details>#}
 
                                                 {% if show_insurance %}
                                                     <details class="dk-acc card-like" open>
@@ -389,11 +396,14 @@
                                                         {% endif %}
                                                     </div>
                                                     <div class="social-icons social-icons-sm">
-                                                    {% post_to_facebook product '<i class="icon-facebook-f"></i>' 'social-icon' %}  <!-- لینک جزئیات رو share می‌کنه -->
-                                                    {% post_to_twitter "این محصول عالی رو چک کن: {{ product.name }} - {{ request.build_absolute_uri }}{{ product.get_absolute_url }}" product '<i class="icon-twitter"></i>' 'social-icon' %}  <!-- متن با نام و لینک -->
-                                                    {% post_to_whatsapp product '<i class="icon-whatsapp"></i>' 'social-icon' %}  <!-- مشابه برای واتس‌اپ -->
-                                                    {% copy_to_clipboard product '<i class="icon-google"></i>' 'social-icon' %}
-                                                    
+                                                        {% post_to_facebook product '<i class="icon-facebook-f"></i>' 'social-icon' %}
+                                                        <!-- لینک جزئیات رو share می‌کنه -->
+                                                        {% post_to_twitter "این محصول عالی رو چک کن: {{ product.name }} - {{ request.build_absolute_uri }}{{ product.get_absolute_url }}" product '<i class="icon-twitter"></i>' 'social-icon' %}
+                                                        <!-- متن با نام و لینک -->
+                                                        {% post_to_whatsapp product '<i class="icon-whatsapp"></i>' 'social-icon' %}
+                                                        <!-- مشابه برای واتس‌اپ -->
+                                                        {% copy_to_clipboard product '<i class="icon-google"></i>' 'social-icon' %}
+
                                                     </div>
                                                 </div>
 
@@ -465,7 +475,7 @@
 
                                     <div class="dk-mini-actions" role="group" aria-label="لینک‌های ثانویه محصول">
                                         {% comment %} <a href="#" class="btn-product btn-wishlist" title="لیست علاقه‌مندی"><span>افزودن به لیست علاقه‌مندی</span></a> {% endcomment %}
-                                    {% comment %} <a href="#" class="btn-product"
+                                        {% comment %} <a href="#" class="btn-product"
                                     data-product-id="{{ product.id }}"
                                     data-toggle-url="{% url 'core:toggle_wishlist' %}"
                                     data-csrf-token="{{ csrf_token }}"
@@ -480,30 +490,30 @@
                                         {% endif %}
                                     </a> {% endcomment %}
 
-                                    <a href="#" class="wishlist-toggle"
-                                    data-product-id="{{ product.id }}"
-                                    data-toggle-url="{% url 'core:toggle_wishlist' %}"
-                                    data-status-url="{% url 'core:wishlist_status' %}"
-                                    data-csrf-token="{{ csrf_token }}"
-                                    onclick="toggleWishlist(this); return false;">
+                                        <a href="#" class="wishlist-toggle"
+                                           data-product-id="{{ product.id }}"
+                                           data-toggle-url="{% url 'core:toggle_wishlist' %}"
+                                           data-status-url="{% url 'core:wishlist_status' %}"
+                                           data-csrf-token="{{ csrf_token }}"
+                                           onclick="toggleWishlist(this); return false;">
 
-                                        <i class="bi {% if product.id in user_wishlist %}bi-heart-fill{% else %}bi-heart{% endif %}"></i>
+                                            <i class="bi {% if product.id in user_wishlist %}bi-heart-fill{% else %}bi-heart{% endif %}"></i>
 
-                                        <span>
+                                            <span>
                                             {% if product.id in user_wishlist %}
                                                 حذف از علاقه‌مندی‌ها
                                             {% else %}
                                                 افزودن به لیست علاقه‌مندی
                                             {% endif %}
                                         </span>
-                                    </a>
+                                        </a>
 
 
-                                    {% comment %} <a href="#" class="btn-product btn-compare" title="مقایسه"><span>افزودن به لیست مقایسه</span></a> {% endcomment %}
-                                    <a href="{% url 'products:add_to_compare' product.id %}" class="btn-product btn-compare" title="مقایسه">
-                                        <span>افزودن به لیست مقایسه</span>
-                                    </a>
-
+                                        {% comment %} <a href="#" class="btn-product btn-compare" title="مقایسه"><span>افزودن به لیست مقایسه</span></a> {% endcomment %}
+                                        <a href="{% url 'products:add_to_compare' product.id %}"
+                                           class="btn-product btn-compare" title="مقایسه">
+                                            <span>افزودن به لیست مقایسه</span>
+                                        </a>
 
 
                                     </div>
@@ -714,17 +724,17 @@
                                         <div class="card">
                                             <div class="card-header" id="heading-3">
                                                 <h2 class="card-title">
-                                                <a class="collapsed" role="button" data-toggle="collapse"
-                                                    href="#collapse-3" aria-expanded="false"
-                                                    aria-controls="collapse-3">نظرات</a>
+                                                    <a class="collapsed" role="button" data-toggle="collapse"
+                                                       href="#collapse-3" aria-expanded="false"
+                                                       aria-controls="collapse-3">نظرات</a>
                                                 </h2>
                                             </div>
 
                                             <div id="collapse-3" class="collapse" aria-labelledby="heading-3"
-                                                data-parent="#accordion-1">
+                                                 data-parent="#accordion-1">
                                                 <div class="card-body">
 
-                                                {% include "core/comments_section.html" with comments=comments form=comment_form %}
+                                                    {% include "core/comments_section.html" with comments=comments form=comment_form %}
                                                 </div>
                                             </div>
                                         </div>
@@ -742,9 +752,9 @@
                     <div class="sum">
                         {% with img=gallery_images.0 %}
                             {% if img %}
-                                <img src="{{ img.url }}" alt="{{ img.alt|default:product.name }}">
+                                <img id="sticky-img" src="{{ img.url }}" alt="{{ img.alt|default:product.name }}">
                             {% else %}
-                                <img src="{{ FALLBACK_THUMB }}" alt="{{ product.name }}">
+                                <img id="sticky-img" src="{{ FALLBACK_THUMB }}" alt="{{ product.name }}">
                             {% endif %}
                         {% endwith %}
                         <div class="txt">

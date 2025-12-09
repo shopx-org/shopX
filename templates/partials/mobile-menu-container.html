@@ -4,22 +4,39 @@
     <div class="mobile-menu-wrapper">
         <span class="mobile-menu-close"><i class="icon-close"></i></span>
 
-        <!-- جستجو -->
-        <form action="#" method="get" class="mobile-search">
-            <label for="mobile-search" class="sr-only">جستجو</label>
-            <input type="search" class="form-control" name="mobile-search" id="mobile-search" placeholder="جستجو در ..." required>
-            <button class="btn btn-primary" type="submit"><i class="icon-search"></i></button>
-        </form>
+        <form id="mobile-search-form"
+              class="header-search-mobile"
+              action="{% url 'search:search_results' %}"
+              method="get">
 
+            <div class="header-search-wrapper header-search-wrapper-mobile"
+                 data-suggest-url="{% url 'search:search_suggest' %}">
+
+                <input id="mobile-search-input"
+                       type="search"
+                       class="form-control js-site-search-input"
+                       name="q"
+                       placeholder="محصول، برند یا دسته مورد نظرت را جستجو کن"
+                       value="{{ request.GET.q|default_if_none:'' }}"
+                       autocomplete="off"
+                       required>
+
+                <button class="mobile-search-btn" type="submit">
+                    <i class="icon-search"></i>
+                </button>
+
+                {% include "search/partials/_search_dropdown.html" %}
+            </div>
+        </form>
         <!-- تب‌بندی -->
         <ul class="nav nav-pills-mobile nav-border-anim" role="tablist">
             <li class="nav-item">
                 <a class="nav-link active" id="mobile-menu-link" data-toggle="tab" href="#mobile-menu-tab"
-                    role="tab" aria-controls="mobile-menu-tab" aria-selected="true">منو</a>
+                   role="tab" aria-controls="mobile-menu-tab" aria-selected="true">منو</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" id="mobile-cats-link" data-toggle="tab" href="#mobile-cats-tab"
-                    role="tab" aria-controls="mobile-cats-tab" aria-selected="false">دسته بندی ها</a>
+                   role="tab" aria-controls="mobile-cats-tab" aria-selected="false">دسته بندی ها</a>
             </li>
         </ul>
 
@@ -28,7 +45,8 @@
             <!-- ================================ -->
             <!--          منوی اصلی               -->
             <!-- ================================ -->
-            <div class="tab-pane fade show active" id="mobile-menu-tab" role="tabpanel" aria-labelledby="mobile-menu-link">
+            <div class="tab-pane fade show active" id="mobile-menu-tab" role="tabpanel"
+                 aria-labelledby="mobile-menu-link">
                 <nav class="mobile-nav">
                     <ul class="mobile-menu">
 
@@ -46,11 +64,11 @@
                             <ul>
 
                                 {% if user.is_authenticated %}
-                                <li><a href="{% url 'dashboards:dashboard' %}">پروفایل کاربری</a></li>
-                                <li><a href="{% url 'account:logout' %}">خروج</a></li>
+                                    <li><a href="{% url 'dashboards:dashboard' %}">پروفایل کاربری</a></li>
+                                    <li><a href="{% url 'account:logout' %}">خروج</a></li>
 
                                 {% else %}
-                                <li><a href="{% url 'account:otp_login' %}">ورود / ثبت‌نام</a></li>
+                                    <li><a href="{% url 'account:otp_login' %}">ورود / ثبت‌نام</a></li>
                                 {% endif %}
 
                                 <li><a href="{% url 'core:wishlist_page' %}">لیست علاقه‌مندی ها</a></li>
@@ -71,46 +89,46 @@
                     <ul class="mobile-menu" dir="rtl">
 
                         {% with roots=top_categories|default:header_categories %}
-                        {% if roots %}
-                            {% for cat in roots %}
-                            <li>
-                                <!-- سطح اول -->
-                                <a href="{% url 'products:category' path=cat.slug_path|default:cat.slug %}"
-                                class="sf-with-ul">
-                                    {{ cat.name }}
-                                </a>
-
-                                {% with c1_list=cat.c1_list|default:cat.children.all %}
-                                {% if c1_list %}
-                                <ul style="display:none;">
-                                    {% for c1 in c1_list %}
+                            {% if roots %}
+                                {% for cat in roots %}
                                     <li>
-                                        <!-- سطح دوم -->
-                                        <a href="{% url 'products:category' path=c1.slug_path|default:c1.slug %}"
-                                        class="{% if c1.children.all %}sf-with-ul{% endif %}">
-                                            {{ c1.name }}
+                                        <!-- سطح اول -->
+                                        <a href="{% url 'products:category' path=cat.slug_path|default:cat.slug %}"
+                                           class="sf-with-ul">
+                                            {{ cat.name }}
                                         </a>
 
-                                        {% if c1.children.all %}
-                                        <ul style="display:none;">
-                                            {% for c2 in c1.children.all %}
-                                            <li>
-                                                <!-- سطح سوم -->
-                                                <a href="{% url 'products:category' path=c2.slug_path|default:c2.slug %}">
-                                                    {{ c2.name }}
-                                                </a>
-                                            </li>
-                                            {% endfor %}
-                                        </ul>
-                                        {% endif %}
+                                        {% with c1_list=cat.c1_list|default:cat.children.all %}
+                                            {% if c1_list %}
+                                                <ul style="display:none;">
+                                                    {% for c1 in c1_list %}
+                                                        <li>
+                                                            <!-- سطح دوم -->
+                                                            <a href="{% url 'products:category' path=c1.slug_path|default:c1.slug %}"
+                                                               class="{% if c1.children.all %}sf-with-ul{% endif %}">
+                                                                {{ c1.name }}
+                                                            </a>
+
+                                                            {% if c1.children.all %}
+                                                                <ul style="display:none;">
+                                                                    {% for c2 in c1.children.all %}
+                                                                        <li>
+                                                                            <!-- سطح سوم -->
+                                                                            <a href="{% url 'products:category' path=c2.slug_path|default:c2.slug %}">
+                                                                                {{ c2.name }}
+                                                                            </a>
+                                                                        </li>
+                                                                    {% endfor %}
+                                                                </ul>
+                                                            {% endif %}
+                                                        </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            {% endif %}
+                                        {% endwith %}
                                     </li>
-                                    {% endfor %}
-                                </ul>
-                                {% endif %}
-                                {% endwith %}
-                            </li>
-                            {% endfor %}
-                        {% endif %}
+                                {% endfor %}
+                            {% endif %}
                         {% endwith %}
 
                     </ul>

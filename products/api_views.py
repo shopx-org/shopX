@@ -24,7 +24,7 @@ class ProductListAPI(View):
             discount_percent = 0
             if p.compare_at_price and p.compare_at_price > p.price > 0:
                 discount_percent = round(((p.compare_at_price - p.price) / p.compare_at_price) * 100)
-
+            total_stock = int(getattr(p, "_stock_total", 0) or 0)
             # کاور تصویر با اولویت بالا
             cover = "/static/images/placeholder-600x600.png"
             if getattr(p, "cover_image", None) and p.cover_image and p.cover_image.image:
@@ -39,9 +39,10 @@ class ProductListAPI(View):
                 "price": float(p.price or 0),
                 "compare_at_price": float(p.compare_at_price or 0),
                 "discount_percent": discount_percent,
+                "stock": total_stock,
                 "is_new": getattr(p, "is_new", False),
                 "cover": cover,
-                "stock": getattr(p, "stock", 0),  # اگر داری
+
                 "colors": [
                     {"id": c["id"], "name": c["name"], "slug": c["slug"], "hex": c["hex"]}
                     for c in getattr(p, "colors_list", [])

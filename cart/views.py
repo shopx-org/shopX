@@ -129,16 +129,23 @@ def _build_lines_with_gids(cart: Cart) -> Tuple[List[Any], List[Tuple[str, Simpl
 
     for idx, it in enumerate(items):
         gid = f"g{idx}"
+        # برای UI همیشه group را نگه می‌داریم
+        groups.append((gid, it))
 
-        # خط پایه (محصول/واریانت)
+        # 🔹 اگر آیتم ناموجود است، اصلاً وارد محاسبات قیمت نشود
+        if hasattr(it, "in_stock") and not it.in_stock:
+            continue
+
+        # 🔹 خط پایه (محصول/واریانت)
         base = build_pricing_line_public(it.variant or it.product, it.qty)
         if getattr(it, "unit_price", None) is not None:
             base.unit_price = Decimal(str(it.unit_price))
             base.line_subtotal = base.unit_price * base.quantity
+
         setattr(base, "_cart_gid", gid)
         lines.append(base)
 
-        # خطوط سرویس‌های افزوده
+        # 🔹 خطوط سرویس‌های افزوده
         for svc in (getattr(it, "services", []) or []):
             svc_line = build_service_line_public(
                 service=svc,
@@ -148,8 +155,6 @@ def _build_lines_with_gids(cart: Cart) -> Tuple[List[Any], List[Tuple[str, Simpl
             )
             setattr(svc_line, "_cart_gid", gid)
             lines.append(svc_line)
-
-        groups.append((gid, it))
 
     return lines, groups
 
@@ -377,7 +382,7 @@ def cart_detail(request: HttpRequest) -> HttpResponse:
             "title": product.name if not variant else f"{product.name}",
             "qty": getattr(it, "qty", 1),
             "img": _first_image_url(product),
-            "in_stock": (variant.in_stock if variant else True),
+            "in_stock": getattr(it, "in_stock", True),
             "unit_price": getattr(it, "unit_price", None),
 
             "color": _color_payload_of(variant),

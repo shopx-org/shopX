@@ -1,3 +1,4 @@
+# /home/atusa92/PycharmProjects/ShopX/dashboards/views.py
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.views import View
@@ -10,6 +11,7 @@ from datetime import timedelta, datetime
 from .forms import DashboardAccountForm, ChangePhoneNumberForm
 from OTP_app import services as otp_services
 from Core.models import Comment
+from orders.models import Order
 from django.http import JsonResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 
@@ -206,4 +208,51 @@ class DeleteCommentAjaxView(LoginRequiredMixin, View):
             return JsonResponse({'status': 'ok'})
         except Comment.DoesNotExist:
             return JsonResponse({'status': 'error', 'message': 'کامنت پیدا نشد'}, status=404)
-    
+
+
+
+@method_decorator(login_required, name='dispatch')
+class UserOrdersView(View):
+    """
+    لیست سفارش‌های کاربر لاگین شده
+    """
+    template_name = 'dashboards/user_orders.html'
+
+    def get(self, request):
+        orders = (
+            Order.objects
+            .filter(user=request.user)
+            .order_by('-created_at')
+        )
+        return render(request, self.template_name, {
+            'orders': orders,
+        })
+
+
+@method_decorator(login_required, name="dispatch")
+class UserOrderDetailView(View):
+    template_name = "dashboards/user_order_detail.html"
+
+    def get(self, request, pk):
+        order = get_object_or_404(
+            Order.objects.select_related("address"),
+            pk=pk,
+            user=request.user,
+        )
+
+        # مپ کردن وضعیت ارسال به شماره استپ
+        status_to_step = {
+            Order.FulfillmentStatus.NEW:        1,  # تازه ثبت شده
+            Order.FulfillmentStatus.PROCESSING: 2,  # در حال آماده‌سازی / بسته‌بندی
+            Order.FulfillmentStatus.SHIPPED:    3,  # تحویل پیک / پست
+            Order.FulfillmentStatus.DELIVERED:  4,  # تحویل مشتری
+            Order.FulfillmentStatus.RETURNED:   4,  # فعلاً همون آخر، می‌تونی جدا استایل بدی
+            Order.FulfillmentStatus.SEND_CANCELED: 2,  # لغو قبل از ارسال؛ تا استپ آماده‌سازی
+        }
+
+        tracking_step = status_to_step.get(order.fulfillment_status, 1)
+
+        return render(request, self.template_name, {
+            "order": order,
+            "tracking_step": tracking_step,
+        })

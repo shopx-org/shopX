@@ -1,3 +1,4 @@
+# /home/atusa92/PycharmProjects/ShopX/dashboards/urls.py
 from django.urls import path
 from . import views
 from shipping.views import AddressesView
@@ -11,5 +12,7 @@ urlpatterns = [
     path("addresses/", AddressesView.as_view(), name="addresses"),
     path('my-comments/', views.UserCommentsView.as_view(), name='user_comments'),
     path('delete-comment/<int:pk>/', DeleteCommentAjaxView.as_view(), name='delete_comment'),
+    path('orders/', views.UserOrdersView.as_view(), name='user_orders'),
+    path('orders/<int:pk>/', views.UserOrderDetailView.as_view(), name='order_detail'),
 
 ]

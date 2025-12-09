@@ -134,13 +134,33 @@ class Cart:
                 except Service.DoesNotExist:
                     pass
 
+            # اول قیمت واحد را مثل قبل حساب کن
             snap = row.get("unit_price")
             if snap not in (None, ""):
                 unit_price = Decimal(str(snap))
             else:
-                unit_price = Decimal(str((variant.price if (variant and variant.price is not None) else product.price)))
+                unit_price = Decimal(str(
+                    (variant.price if (variant and variant.price is not None) else product.price)
+                ))
 
-            yield SimpleNamespace(product=product, variant=variant, qty=qty, services=svc_objs, unit_price=unit_price)
+            # بعد وضعیت موجودی را تعیین کن
+            in_stock = True
+            if variant is not None:
+                if getattr(variant, "stock", 0) <= 0:
+                    in_stock = False
+            else:
+                if getattr(product, "stock", 0) <= 0:
+                    in_stock = False
+
+            # فقط یک yield با فیلد جدید in_stock
+            yield SimpleNamespace(
+                product=product,
+                variant=variant,
+                qty=qty,
+                services=svc_objs,
+                unit_price=unit_price,
+                in_stock=in_stock,
+            )
 
     def get_total(self) -> Decimal:
         """

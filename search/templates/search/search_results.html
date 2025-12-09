@@ -547,11 +547,5 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
-document.querySelectorAll('.cat-option').forEach(btn => {
-    btn.addEventListener('click', () => {
-        document.getElementById('cat-hidden').value = btn.dataset.id;
-        document.getElementById('cat-filter-form').submit();
-    });
-});
 
 {% endblock %}

@@ -650,3 +650,247 @@ html[dir="rtl"] .search-suggest-thumb {
     color: #FA523C;
     background: #fff;
 }
+/* سرچ داخل منوی موبایل */
+.header-search-mobile {
+    padding: 0.80rem 0.80rem;
+    border-bottom: 1px solid #f1f1f1;
+}
+
+/* ظرف کلی نوار سرچ */
+.header-search-wrapper-mobile {
+    display: flex;
+    align-items: center;
+    background-color: #f7f7f8;
+    border-radius: 999px;
+    padding: 0.4rem 0.9rem;
+}
+
+/* خود input */
+#mobile-search-input {
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    outline: none;
+    font-size: 1.4rem;
+    padding: 0.4rem 0.6rem;
+    width: 100%;
+    direction: rtl;
+}
+
+/* رنگ placeholder */
+#mobile-search-input::placeholder {
+    color: #9ca3af;
+    font-size: 1.3rem;
+}
+
+/* دکمه سرچ گرد در سمت چپ (یا راست، بسته به RTL) */
+.mobile-search-btn {
+    flex: 0 0 auto;
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    background-color: #FA523C;   /* همون رنگ اصلی‌ت */
+    border: none;
+}
+
+.mobile-search-btn i {
+    font-size: 1.6rem;
+    color: #fff;
+}
+
+/* حالت فوکوس: نوار کمی پررنگ‌تر بشه */
+#mobile-search-input:focus + .mobile-search-btn,
+.header-search-wrapper-mobile:focus-within {
+    box-shadow: 0 0 0 1px rgba(250, 82, 60, 0.35);
+}
+
+/* اگر فقط در موبایل می‌خوای فعال باشه، با media query محدود کن */
+@media (min-width: 992px) {
+    .header-search-mobile {
+        display: none;
+    }
+}
+
+/* === سرچ منوی موبایل – نسخه جمع‌وجور === */
+
+.header-search-mobile {
+    padding: 0.8rem 1.2rem;
+    border-bottom: 1px solid #f1f1f1;
+}
+
+/* ظرف کلی نوار سرچ */
+.header-search-wrapper-mobile {
+    display: flex;
+    align-items: center;
+    background-color: #f7f7f8;
+    border-radius: 999px;
+    padding: 0.2rem 0.8rem;
+    height: 40px;              /* ارتفاع کم‌تر */
+}
+
+/* خود input */
+#mobile-search-input {
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    outline: none;
+    font-size: 1.3rem;         /* کوچیک‌تر */
+    padding: 0 0.5rem;
+    width: 100%;
+    direction: rtl;
+}
+
+/* placeholder */
+#mobile-search-input::placeholder {
+    color: #9ca3af;
+    font-size: 1.25rem;
+    margin-top: 0.7rem !important;
+}
+
+/* دکمه سرچ: فقط آیکن، بدون پس‌زمینه‌ی نارنجی بزرگ */
+.mobile-search-btn {
+    flex: 0 0 auto;
+    width: 4px;
+    height: 28px;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    background-color: transparent;   /* دیگه بلوک نارنجی نیست */
+    border: none;
+}
+
+.mobile-search-btn i {
+    font-size: 1.6rem;
+    color: #FA523C;                  /* فقط آیکن نارنجی */
+}
+
+/* وقتی فوکوس هست کمی دور کپسول خط بیفته */
+.header-search-wrapper-mobile:focus-within {
+    box-shadow: 0 0 0 1px rgba(250, 82, 60, 0.3);
+}
+
+/* فرم سرچ داخل منوی موبایل */
+.header-search-mobile {
+    padding: 0.8rem 1.2rem;
+    border-bottom: 1px solid #f1f1f1;
+}
+
+/* کپسول سرچ موبایل */
+.header-search-wrapper-mobile {
+    display: flex;
+    align-items: center;
+    background-color: #f7f7f8;
+    border-radius: 999px;
+    padding: 0 0.8rem;
+    height: 40px;
+    direction: rtl;          /* متن راست‌به‌چپ، دکمه سمت چپ دیده می‌شود */
+}
+
+/* input داخل کپسول */
+#mobile-search-input {
+    flex: 1 1 auto;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    outline: none;
+    font-size: 1.3rem;
+    padding: 0 0.4rem;
+}
+
+#mobile-search-input::placeholder {
+    color: #9ca3af;
+    font-size: 1.2rem;
+}
+
+/* دکمه‌ی کوچک گرد برای آیکن سرچ */
+.mobile-search-btn {
+    flex: 0 0 auto;
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    margin-right: 0.4rem;   /* کمی فاصله از متن */
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.mobile-search-btn i {
+    font-size: 1.5rem;
+    color: #FA523C;          /* فقط خود آیکن نارنجی باشد */
+}
+
+/* وقتی فوکوس روی input است، کپسول کمی هایلایت شود */
+.header-search-wrapper-mobile:focus-within {
+    box-shadow: 0 0 0 1px rgba(250, 82, 60, 0.3);
+}
+
+.header-search-mobile {
+    padding: 0.8rem 1.2rem;
+    border-bottom: 1px solid #f1f1f1;
+}
+
+/* کپسول سرچ موبایل */
+.header-search-wrapper-mobile {
+    display: flex;
+    align-items: center;
+    background-color: #fdfdfd;
+    border-radius: 999px;
+    padding: 0 0.8rem;
+    height: 36px;              /* کوچیک‌تر از قبل */
+    direction: rtl;
+    border: 1px solid #ffd7d0; /* مثل بقیه رنگ‌ها */
+}
+
+/* خود اینپوت موبایل */
+#mobile-search-input {
+    flex: 1 1 auto;
+    border: none !important;
+    background: transparent;
+    box-shadow: none !important;
+    outline: none;
+    font-size: 1.3rem;
+    height: 100%;              /* ارتفاع برابر با کپسول */
+    padding: 0 0.3rem 0 0.2rem; /* بالا/پایین صفر → متن وسط */
+}
+
+/* placeholder */
+#mobile-search-input::placeholder {
+    color: #9ca3af;
+    font-size: 1.2rem;
+}
+
+/* دکمه‌ی گرد آیکن */
+.mobile-search-btn {
+    flex: 0 0 auto;
+    width: 26px;
+    height: 26px;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    margin-right: 0.2rem;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.mobile-search-btn i {
+    font-size: 1.4rem;
+    color: #FA523C;
+}
+
+/* فوکوس روی کپسول */
+.header-search-wrapper-mobile:focus-within {
+    box-shadow: 0 0 0 1px rgba(250, 82, 60, 0.3);
+}

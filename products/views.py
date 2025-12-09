@@ -4,7 +4,7 @@ from decimal import Decimal
 from typing import Optional, Any
 from dataclasses import dataclass
 
-from django.db.models import Q, Count, Sum, Min, Max, Prefetch
+from django.db.models import Q, Count, Sum, Min, Max, Prefetch, Avg
 from django.db.models.functions import Coalesce
 from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -18,7 +18,8 @@ from django.contrib.contenttypes.models import ContentType
 
 from .models import (
     Product, ProductVariant, ProductImage, Color, Brand, Category,
-    ProductAttributeValue, Service, CategoryService, ProductService
+    ProductAttributeValue, Service, CategoryService, ProductService,
+    PriceHistory,
 )
 from .services.pricing_adapter import price_single_product
 from products.services.service_pricing import compute_service_unit_price
@@ -27,6 +28,7 @@ from Core.forms import CommentForm
 
 
 # ---------------- Utils (single source of truth) ---------------- #
+
 
 def _normalize_unit_price(obj):
     """
@@ -50,6 +52,34 @@ def _normalize_unit_price(obj):
             setattr(obj, "price", float(getattr(obj, "product", None).price or 0))
         except Exception:
             setattr(obj, "price", 0)
+
+
+def compute_pricing_for_item(item, request=None, qty: int = 1, channel: str = "web"):
+    from decimal import Decimal
+    _normalize_unit_price(item)
+
+    coupons = []
+    if request is not None and hasattr(request, "session"):
+        coupons = request.session.get("coupons", [])
+
+    pres = price_single_product(item, qty=qty, coupons=coupons, channel=channel)
+
+    subtotal = pres.subtotal or Decimal("0")
+    total = pres.total or Decimal("0")
+    discount_amount = pres.total_discount or Decimal("0")
+
+    if subtotal <= 0:
+        discount_percent = Decimal("0")
+    else:
+        discount_percent = (discount_amount / subtotal) * Decimal("100")
+
+    return {
+        "result": pres,
+        "price_base": subtotal,
+        "price_final": total,
+        "discount_amount": discount_amount,
+        "discount_percent": discount_percent,
+    }
 
 
 def _float(v):
@@ -99,20 +129,54 @@ def attr_prefetch_list() -> Prefetch:
         to_attr="attr_values_list",
     )
 
+#
+# def compute_pricing_for_item(item, request=None, qty: int = 1, channel: str = "web"):
+#     """
+#     یک آبجکت محصول یا واریانت را می‌گیرد، قیمت مؤثر را با موتور پرایسینگ
+#     حساب می‌کند و چهار مقدار استاندارد برمی‌گرداند:
+#     - price_base         قیمت قبل از تخفیف
+#     - price_final        قیمت بعد از تخفیف
+#     - discount_amount    مبلغ تخفیف
+#     - discount_percent   درصد تخفیف
+#     به‌اضافه‌ی خود PricingResult برای دیباگ/ریپورت.
+#     """
+#     from decimal import Decimal  # برای اطمینان داخل خود تابع
+#     _normalize_unit_price(item)
+#
+#     coupons = []
+#     if request is not None and hasattr(request, "session"):
+#         coupons = request.session.get("coupons", [])
+#
+#     pres = price_single_product(item, qty=qty, coupons=coupons, channel=channel)
+#
+#     subtotal = pres.subtotal or Decimal("0")
+#     total = pres.total or Decimal("0")
+#     discount_amount = pres.total_discount or Decimal("0")
+#
+#     if subtotal <= 0:
+#         discount_percent = Decimal("0")
+#     else:
+#         discount_percent = (discount_amount / subtotal) * Decimal("100")
+#
+#     return {
+#         "result": pres,
+#         "price_base": subtotal,
+#         "price_final": total,
+#         "discount_amount": discount_amount,
+#         "discount_percent": discount_percent,
+#     }
 
 # ---------------- Base QuerySet / ListView ---------------- #
 
 class ProductBaseQS:
-    def base_qs(self):
+    def get_queryset(self):
         return (
             Product.objects
             .filter(is_active=True, status="pub")
             .select_related("category", "brand_fk")
-            .prefetch_related(images_prefetch(), attr_prefetch_list())
             .annotate(_stock_total=Coalesce(Sum("variants__stock", distinct=True), 0))
             .distinct()
         )
-
 
 class ProductListView(ProductBaseQS, ListView):
     model = Product
@@ -148,7 +212,7 @@ class ProductListView(ProductBaseQS, ListView):
     # ---------------- QuerySet ---------------- #
 
     def get_queryset(self):
-        qs = super().get_queryset() if hasattr(super(), "get_queryset") else self.base_qs()
+        qs = super().get_queryset()
 
         # دسته‌بندی
         category = self.get_category()
@@ -298,12 +362,21 @@ class ProductListView(ProductBaseQS, ListView):
             for v in getattr(p, "_prefetch_variants", []):
                 c = getattr(v, "color", None)
                 if c and c.id not in uniq:
-                    uniq[c.id] = {"id": c.id, "name": c.name, "hex": c.hex_code, "slug": c.slug}
-            for img in getattr(p, "image_list", []):
-                c = getattr(img, "color", None)
-                if c and c.id not in uniq:
-                    uniq[c.id] = {"id": c.id, "name": c.name, "hex": c.hex_code, "slug": c.slug}
-            p.colors_list = sorted(uniq.values(), key=lambda x: x["name"])
+                    uniq[c.id] = {
+                        "id": c.id,
+                        "name": c.name,
+                        "hex": c.hex_code,
+                        "slug": c.slug,
+                    }
+            p.colors_list = sorted(uniq.values(), key=lambda x: (x["name"] or "").strip())
+
+            # --- قیمت و تخفیف مخصوص کارت ---
+            pricing = compute_pricing_for_item(p, request=self.request, qty=1)
+            p.price_base = pricing["price_base"]
+            p.price_final = pricing["price_final"]
+            p.discount_amount = pricing["discount_amount"]
+            p.discount_percent = pricing["discount_percent"]
+            p.has_discount = bool(p.discount_percent and p.discount_percent > 0)
 
         return ctx
 
@@ -448,9 +521,79 @@ class ProductDetailView(DetailView):
         return items[:limit]
 
     def _price_history(self, product: Product) -> dict:
-        labels = ["فروردین","اردیبهشت","خرداد","تیر","مرداد","شهریور"]
-        data = [68_800_000,66_500_000,64_900_000,63_200_000,62_200_000,61_880_000]
-        return {"labels": labels, "data": data, "currency": "تومان"}
+        """
+        خروجی برای Chart.js:
+        {
+          "labels": ["2025-11-01", ...],
+          "min_prices": [ ... ],
+          "avg_prices": [ ... ],
+          "currency": "تومان",
+          "meta": {
+              "min_overall": ...,
+              "max_overall": ...,
+              ...
+          }
+        }
+        """
+        from django.utils.timezone import now
+        from decimal import Decimal
+
+        today = now().date()
+
+        # می‌تونی بازه‌ رو محدود کنی به مثلا ۶۰ یا ۹۰ روز:
+        qs = (
+            PriceHistory.objects
+            .filter(product=product, date__lte=today)
+            .values("date")                 # گروه‌بندی بر اساس تاریخ
+            .annotate(
+                min_price=Min("price"),
+                avg_price=Avg("price"),
+            )
+            .order_by("date")
+        )
+
+        labels = []
+        min_prices = []
+        avg_prices = []
+
+        for row in qs:
+            labels.append(row["date"].isoformat())
+            min_prices.append(int(row["min_price"]))
+            avg_prices.append(int(row["avg_price"]))
+
+        if not labels:
+            return {
+                "labels": [],
+                "min_prices": [],
+                "avg_prices": [],
+                "currency": "تومان",
+                "meta": {},
+            }
+
+        all_vals = min_prices + avg_prices
+        min_overall = min(all_vals)
+        max_overall = max(all_vals)
+
+        # کمی پدینگ برای بالا/پایین نمودار
+        min_y = int(min_overall * Decimal("0.97"))
+        max_y = int(max_overall * Decimal("1.03"))
+
+        meta = {
+            "min_overall": min_overall,
+            "max_overall": max_overall,
+            "min_y": min_y,
+            "max_y": max_y,
+            "points": len(labels),
+        }
+
+        return {
+            "labels": labels,
+            "min_prices": min_prices,
+            "avg_prices": avg_prices,
+            "currency": "تومان",
+            "meta": meta,
+        }
+
 
     def _jsonld(self, product: Product) -> str:
         imgs = [img.image.url for img in product.images.all() if getattr(img, "image", None)]

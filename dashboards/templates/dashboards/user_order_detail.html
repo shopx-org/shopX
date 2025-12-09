@@ -1,0 +1,328 @@
+{#{% extends "dashboards/dash_base.html" %}#}
+{#{% load humanize %}#}
+{##}
+{#{% block main %}#}
+{#<div c lass="row">#}
+{#    <div class="col-12">#}
+{#        <div class="card custom-card">#}
+{#            <div class="card-header">#}
+{#                <h3 class="card-title mb-0">#}
+{#                    جزییات سفارش {{ order.code|default:order.id }}#}
+{#                </h3>#}
+{#            </div>#}
+{#            <div class="card-body">#}
+{#                <p class="mb-2"><strong>تاریخ ثبت:</strong> {{ order.created_at|date:"Y/m/d H:i" }}</p>#}
+{#                <p class="mb-2"><strong>وضعیت:</strong> {{ order.get_status_display|default:order.status }}</p>#}
+{#                <p class="mb-2"><strong>مبلغ نهایی:</strong> {{ order.total_payable|default:order.total|intcomma }} تومان</p>#}
+{##}
+{# بعداً لیست آیتم‌های سفارش، آدرس، وضعیت پرداخت و ... را اینجا اضافه می‌کنیم #}
+{#            </div>#}
+{#        </div>#}
+{#    </div>#}
+{#</div>#}
+{#{% endblock %}#}
+{##}
+
+{% extends 'dashboards/dashboard_base_user.html' %}
+{% load static humanize %}
+
+{# ✅ استایل و اسکریپت مخصوص این صفحه باید این بالا باشد نه داخل main #}
+{% block CSS-JS %}
+    <link rel="stylesheet" href="{% static 'css/order_track_style.css' %}">
+    {#    <script src="{% static 'js/order_tracking.js' %}" defer></script>#}
+{% endblock %}
+
+{% block UserDash_content %}
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card custom-card">
+                <div class="card-body">
+
+                    <!-- ===== هدر فاکتور ===== -->
+                    <section class="invoice1">
+                        <div class="invoice-popup overflow-auto">
+                            <div>
+
+                                <!-- ===== اطلاعات مشتری + سفارش ===== -->
+                                <div class="invoice-breadcrumb mb-4">
+                                    <div class="row g-3">
+
+                                        <!-- لوگو -->
+                                        <div class="col-md-3">
+                                            <div class="iblock bg-light p-3 rounded-3">
+                                                <div class="header-invoice-right d-flex align-items-center justify-content-center">
+                                                    <a href="{% url 'home:home' %}">
+                                                        <img src="{% static 'images/shopXlogo.png' %}" alt="لوگو"
+                                                             style="max-height:90px;">
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- اطلاعات مشتری -->
+                                        <div class="col-md-3">
+                                            <div class="iblock bg-light p-3 rounded-3">
+                                                <ul class="list-unstyled small mb-0">
+                                                    <li>
+                                                        <span class="label">نام مشتری :</span>
+                                                        <span class="value">
+                                                            {% if request.user.get_full_name %}
+                                                                {{ request.user.get_full_name }}
+                                                            {% elif request.user.phone %}
+                                                                {{ request.user.phone }}
+                                                            {% else %}
+                                                                {{ request.user }}
+                                                            {% endif %}
+                                                        </span>
+                                                    </li>
+                                                    <li>
+                                                        <span class="label">ایمیل :</span>
+                                                        <span class="value">{{ request.user.email|default:"-" }}</span>
+                                                    </li>
+
+                                                    {% if order.address %}
+                                                        <li>
+                                                            <span class="label">آدرس :</span>
+                                                            <span class="value">
+                                                                {{ order.address.province }}
+                                                                {{ order.address.city }}
+                                                                - {{ order.address.address }}
+                                                            </span>
+                                                        </li>
+                                                        <li>
+                                                            <span class="label">کد پستی :</span>
+                                                            <span class="value">{{ order.address.postal_code }}</span>
+                                                        </li>
+                                                    {% endif %}
+                                                </ul>
+                                            </div>
+                                        </div>
+
+                                        <!-- اطلاعات سفارش -->
+                                        <div class="col-md-3">
+                                            <div class="iblock bg-light p-3 rounded-3">
+                                                <ul class="list-unstyled small mb-0">
+                                                    <li>
+                                                        <span class="label">تاریخ ثبت :</span>
+                                                        <span class="value">{{ order.created_at|date:"Y/m/d H:i" }}</span>
+                                                    </li>
+                                                    <li>
+                                                        <span class="label">شماره سفارش :</span>
+                                                        <span class="value">{{ order.id }}</span>
+                                                    </li>
+                                                    <li>
+                                                        <span class="label">وضعیت پرداخت :</span>
+                                                        <span class="value">{{ order.get_payment_status_display }}</span>
+                                                    </li>
+                                                    <li>
+                                                        <span class="label">وضعیت ارسال :</span>
+                                                        <span class="value">{{ order.get_fulfillment_status_display }}</span>
+                                                    </li>
+                                                    {% if order.payment_ref %}
+                                                        <li>
+                                                            <span class="label">کد پیگیری پرداخت :</span>
+                                                            <span class="value">{{ order.payment_ref }}</span>
+                                                        </li>
+                                                    {% endif %}
+                                                </ul>
+                                            </div>
+                                        </div>
+
+                                        <!-- اطلاعات فروشگاه -->
+                                        <div class="col-md-3">
+                                            <div class="iblock bg-light p-3 rounded-3">
+                                                <ul class="list-unstyled small mb-0">
+                                                    <li><h5 class="mb-2">
+                                                        فروشگاه {{ site_info.site_name|default:"ShopX" }}</h5></li>
+                                                    <li>{{ site_info.address|default:"فروشگاه اینترنتی" }}</li>
+                                                    <li>تماس: {{ site_info.phone|default:"-" }}</li>
+                                                    <li>ایمیل: {{ site_info.email|default:"-" }}</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <!-- ===== نوار پیگیری سفارش ===== -->
+                                <div class="order-status-box">
+                                    <!-- هدر کوچک بالای نوار پیگیری -->
+                                    <div class="order-status-top d-flex justify-content-between align-items-center">
+                                        <div class="order-status-detail small text-muted">
+                                            <div>
+                                                بازه زمانی تحویل سفارش :
+                                                <span>{{ order.created_at|date:"Y/m/d" }} - 12:00 تا 15:00</span>
+                                            </div>
+                                            {% if order.address %}
+                                                <div>
+                                                    نام تحویل‌گیرنده :
+                                                    <span>
+                        {{ order.address.title|default:request.user.get_full_name|default:request.user }}
+                    </span>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+
+                                        <h2 class="order-status-id mb-0">
+                                            سفارش #{{ order.id }}
+                                        </h2>
+                                    </div>
+
+                                    <!-- خود نوار پیگیری -->
+                                    <ol class="order-status-steps" data-step="{{ tracking_step }}">
+                                        {# استپ ۱: ثبت سفارش #}
+                                        <li class="order-status-step {% if tracking_step >= 1 %}is-done{% endif %}">
+                                            <span class="step-label">ثبت سفارش</span>
+                                            <span class="step-caption">سفارش ثبت شد</span>
+                                        </li>
+
+                                        {# استپ ۲: آماده‌سازی #}
+                                        <li class="order-status-step {% if tracking_step >= 2 %}is-done{% endif %}">
+                                            <span class="step-label">آماده‌سازی</span>
+                                            <span class="step-caption">در حال آماده‌سازی</span>
+                                        </li>
+
+                                        {# استپ ۳: ارسال #}
+                                        <li class="order-status-step {% if tracking_step >= 3 %}is-done{% endif %}">
+                                            <span class="step-label">ارسال</span>
+                                            <span class="step-caption">سفارش ارسال شد</span>
+                                        </li>
+
+                                        {% if order.fulfillment_status == "send-canceled" %}
+                                            <div class="mt-2 text-danger small text-center">
+                                                وضعیت فعلی: لغو ارسال (سفارش قبل از ارسال لغو شده است)
+                                            </div>
+                                        {% endif %}
+
+                                        {# استپ ۴: تحویل #}
+                                        <li class="order-status-step {% if tracking_step >= 4 %}is-done{% endif %}">
+                                            <span class="step-label">تحویل</span>
+                                            <span class="step-caption">سفارش تحویل شد</span>
+                                        </li>
+                                    </ol>
+                                </div>
+
+
+                                <!-- ===== جدول آیتم‌های سفارش ===== -->
+                                <div class="table-responsive-md mt-4">
+                                    <table class="table invoice-table text-center align-middle mb-4">
+                                        <thead class="table-light">
+                                        <tr>
+                                            <th>ردیف</th>
+                                            <th class="text-start">جزئیات کالا</th>
+                                            <th>تعداد</th>
+                                            <th>قیمت واحد</th>
+                                            <th>تخفیف</th>
+                                            <th>جمع ردیف</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for item in order.items.all %}
+                                            <tr>
+                                                <td>{{ forloop.counter }}</td>
+                                                <td class="text-start">
+                                                    <strong>{{ item.product_name }}</strong>
+                                                    {% if item.variant %}
+                                                        <br>
+                                                        <small class="text-muted">واریانت: {{ item.variant.name }}</small>
+                                                    {% endif %}
+                                                </td>
+                                                <td>{{ item.qty }}</td>
+                                                <td>{{ item.unit_price|intcomma }} تومان</td>
+                                                <td>
+                                                    {% if item.discount %}
+                                                        {{ item.discount|intcomma }} تومان
+                                                    {% else %}
+                                                        -
+                                                    {% endif %}
+                                                </td>
+                                                <td>{{ item.total|intcomma }} تومان</td>
+                                            </tr>
+                                        {% empty %}
+                                            <tr>
+                                                <td colspan="6" class="text-muted">هیچ آیتمی ثبت نشده</td>
+                                            </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                        <tfoot class="small">
+                                        <tr>
+                                            <td colspan="4"></td>
+                                            <td class="text-end">جمع فاکتور :</td>
+                                            <td>{{ order.subtotal|intcomma }} تومان</td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="4"></td>
+                                            <td class="text-end">تخفیف :</td>
+                                            <td>- {{ order.total_discount|intcomma }} تومان</td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="4"></td>
+                                            <td class="text-end">هزینه ارسال :</td>
+                                            <td>{{ order.shipping_price|intcomma }} تومان</td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="4"></td>
+                                            <td class="text-end fw-bold">مبلغ نهایی :</td>
+                                            <td class="fw-bold">{{ order.total|intcomma }} تومان</td>
+                                        </tr>
+                                        </tfoot>
+                                    </table>
+
+                                    <div class="row justify-content-between align-items-center">
+                                        <div class="col-md-6">
+                                            <a href="{% url 'dashboards:user_orders' %}"
+                                               class="btn btn-outline-secondary btn-sm">
+                                                بازگشت به سفارش‌ها
+                                            </a>
+                                        </div>
+                                        <div class="col-md-6 text-md-end mt-2 mt-md-0">
+                                            <button onclick="window.print()" class="btn btn-primary btn-sm">
+                                                چاپ فاکتور
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+                    </section>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const bars = document.querySelectorAll(".trackorder-progressbar");
+
+            bars.forEach(function (bar) {
+                const step = parseInt(bar.dataset.step || "1", 10);
+                const status = bar.dataset.status;  // new, processing, shipped, delivered, returned
+
+                const steps = bar.querySelectorAll(".trackorder-step");
+
+                steps.forEach((li, index) => {
+                    // index از 0 شروع می‌شود، پس index < step یعنی این استپ باید active باشد
+                    if (index < step) {
+                        li.classList.add("active");
+                    } else {
+                        li.classList.remove("active");
+                    }
+                });
+
+                // اگر مرجوع شده بود، می‌تونی استایل ویژه بدهی
+                if (status === "returned") {
+                    bar.classList.add("trackorder-returned");
+                    // مثلا آخرین استپ را با کلاس دیگری مشخص کن
+                    const last = steps[steps.length - 1];
+                    last.classList.add("returned-step");
+                }
+            });
+        });
+
+    </script>
+{% endblock %}
+

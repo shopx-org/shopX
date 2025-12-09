@@ -1,12 +1,64 @@
 {% extends "base.html" %}
 {% load humanize %}
 {% block content %}
-<main class="container my-5 text-center">
-  <h2 class="text-success mb-3">✅ پرداخت موفق بود</h2>
-  <p>سفارش شماره <b>#{{ order.id }}</b> با موفقیت ثبت و پرداخت شد.</p>
-  <p>مبلغ پرداختی: {{ order.total|intcomma }} تومان</p>
-  <a class="btn btn-primary mt-3" href="{% url 'home:home' %}">
-    بازگشت به صفحه اصلی
-  </a>
+
+<main class="d-flex align-items-center justify-content-center py-5" style="min-height: 75vh;">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-8 col-lg-6">
+        <div class="card shadow-sm text-center">
+          <div class="card-body p-4 p-md-5">
+
+            {# pic / icon of success payment #}
+            <div class="display-3 mb-3 text-success">✅</div>
+
+            <h2 class="h4 mb-3 text-success">پرداخت با موفقیت انجام شد</h2>
+            <p class="mb-1">سفارش شما با موفقیت ثبت و پرداخت شد.</p>
+            <p class="mb-4 text-muted small">جزئیات سفارش در زیر قابل مشاهده است.</p>
+
+            {# order info box #}
+            <div class="border rounded-3 p-3 text-start bg-light mb-4">
+              {# order id #}
+              <div class="d-flex justify-content-between mb-2">
+                <span class="text-muted">شماره سفارش</span>
+                <span class="fw-bold">#{{ order.id }}</span>
+              </div>
+
+              {# date time #}
+              <div class="d-flex justify-content-between mb-2">
+                <span class="text-muted">تاریخ پرداخت</span>
+                <span>{{ order.paid_at|date:"Y/m/d H:i" }}</span>
+              </div>
+
+              {# amount #}
+              <div class="d-flex justify-content-between mb-2">
+                <span class="text-muted">مبلغ پرداختی</span>
+                <span class="fw-bold">{{ order.total|intcomma }} تومان</span>
+              </div>
+
+              {# track number / payment ref #}
+              <div class="d-flex justify-content-between">
+                <span class="text-muted">کد پیگیری پرداخت</span>
+                <span dir="ltr" class="font-monospace">{{ order.payment_ref }}</span>
+              </div>
+            </div>
+
+            {# link: see your order in your dashboard #}
+            <a class="btn btn-outline-primary w-100 mb-2"
+               href="{% url 'dashboards:user_orders' %}">
+              مشاهده سفارش در پنل کاربری
+            </a>
+
+            {# back to home #}
+            <a class="btn btn-primary w-100" href="{% url 'home:home' %}">
+              بازگشت به صفحه اصلی
+            </a>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </main>
+
 {% endblock %}
