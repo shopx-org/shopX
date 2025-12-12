@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load static %}
+{% load imagekit %}
+
+{% block title %}
+    {{ terms.meta_title|default:terms.title }}
+    <meta name="keywords" content="{{ terms.meta_title|default:terms.title }}">
+{% endblock %}
+
+{% block meta_description %}
+    <meta name="description" content="{{ terms.meta_description }}">
+{% endblock %}
+
+{% block content %}
+
+<section class="container"
+         style="direction: rtl; text-align: right; padding: 30px; line-height: 2;">
+
+    {% comment %} <h1 class="mb-4" style="text-align: right;">
+        {{ terms.title }}
+    </h1> {% endcomment %}
+
+    <div class="content" style="text-align: right;">
+        {{ terms.content|safe }}
+    </div>
+
+    {% if terms.updated_at %}
+    <p class="text-muted mt-4"
+       style="font-size: 0.9rem; text-align: right;">
+        آخرین بروزرسانی: {{ terms.updated_at|date:"Y/m/d" }}
+    </p>
+    {% endif %}
+
+</section>
+
+{% endblock %}
+{% block CCS-JS %}
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
