@@ -944,3 +944,97 @@ document.addEventListener('click', function (e) {
             // در صورت خطا چیزی تغییر نده
         });
     })();
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+        const cookies = document.cookie.split(";");
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + "=")) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    const methodInputs = document.querySelectorAll('input[name="shipping_method"]');
+    const summaryBox = document.getElementById("summary");
+    const shipLine = document.getElementById("s-shipline");
+    const shipValue = document.getElementById("s-ship");
+    const totalValue = document.getElementById("s-total");
+
+    if (!methodInputs.length || !summaryBox || !shipLine || !shipValue || !totalValue) {
+        return;
+    }
+
+    const csrftoken = getCookie("csrftoken");
+
+    function formatToman(num) {
+        // ساده: جداکننده هزار
+        const n = parseInt(num || 0, 10);
+        return n.toLocaleString("fa-IR") + " تومان";
+    }
+
+    function recalcTotal(shippingAmount) {
+        const sub = parseInt(summaryBox.dataset.sub || "0", 10);
+        const disc = parseInt(summaryBox.dataset.disc || "0", 10);
+        const svc = parseInt(summaryBox.dataset.svc || "0", 10);
+        const ship = parseInt(shippingAmount || "0", 10);
+
+        const total = (sub - disc) + svc + ship;
+        summaryBox.dataset.total = total;
+
+        shipLine.style.display = ship > 0 ? "flex" : "none";
+        shipValue.textContent = formatToman(ship);
+        totalValue.textContent = formatToman(total);
+    }
+
+    function sendQuote(methodId) {
+        if (!window.shippingQuoteURL) {
+            return;
+        }
+
+        fetch(window.shippingQuoteURL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrftoken,
+                "X-Requested-With": "XMLHttpRequest"
+            },
+            body: JSON.stringify({
+                shipping_method_id: methodId
+            })
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (!data.ok) {
+                    console.warn("Shipping quote error:", data.error);
+                    recalcTotal(0);
+                    return;
+                }
+                recalcTotal(data.shipping_amount);
+            })
+            .catch(err => {
+                console.error("Shipping quote exception:", err);
+                recalcTotal(0);
+            });
+    }
+
+    methodInputs.forEach(input => {
+        input.addEventListener("change", function () {
+            const methodId = this.value;
+            if (methodId) {
+                sendQuote(methodId);
+            }
+        });
+
+        // اگر از قبل یکی checked است، یک بار اول صفحه هم براش quote بگیر
+        if (input.checked) {
+            sendQuote(input.value);
+        }
+    });
+});

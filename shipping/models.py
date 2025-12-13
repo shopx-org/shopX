@@ -18,6 +18,9 @@ class Address(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ ایجاد")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="تاریخ به‌روزرسانی")
 
+    # tapin_province_id = models.IntegerField(null=True, blank=True)
+    # tapin_city_id = models.IntegerField(null=True, blank=True)
+
     class Meta:
         verbose_name = "آدرس"
         verbose_name_plural = "آدرس‌ها"
@@ -30,15 +33,19 @@ class Address(models.Model):
 # =========================
 # ShippingMethod
 # =========================
+from django.db import models
+
 class ShippingMethod(models.Model):
-    """
-    روش ارسال: پست سفارشی، پست پیشتاز، تیپاکس، پیک، ...
-    """
     CARRIER_CHOICES = (
         ("post", "پست"),
         ("tipax", "تیپاکس"),
         ("courier", "پیک / ارسال درون‌شهری"),
         ("custom", "سفارشی"),
+    )
+
+    POST_SERVICE_CHOICES = (
+        (0, "پست سفارشی"),
+        (1, "پست پیشتاز"),
     )
 
     code = models.SlugField(max_length=50, unique=True, verbose_name="کد")
@@ -49,6 +56,15 @@ class ShippingMethod(models.Model):
         default="post",
         verbose_name="نوع سرویس‌دهنده",
     )
+    # فقط برای carrier == "post" استفاده میشه:
+    tapin_post_service_type = models.IntegerField(
+        choices=POST_SERVICE_CHOICES,
+        null=True,
+        blank=True,
+        verbose_name="نوع سرویس پست در تاپین",
+        help_text="برای پست سفارشی ۰ و برای پیشتاز ۱ (مطابق مستندات تاپین).",
+    )
+
     is_active = models.BooleanField(default=True, verbose_name="فعال")
     base_fee = models.DecimalField(
         max_digits=12,
@@ -82,4 +98,31 @@ class ShippingMethod(models.Model):
     def __str__(self):
         return self.name
 
-
+#
+# # shipping/models.py
+# from django.db import models
+#
+# class TapinConfig(models.Model):
+#     shop_id = models.UUIDField(verbose_name="شناسه فروشگاه در تاپین")
+#     from_province_id = models.IntegerField(verbose_name="استان مبدا (تاپین)")
+#     from_city_id = models.IntegerField(verbose_name="شهر مبدا (تاپین)")
+#
+#     default_box_id = models.IntegerField(verbose_name="شناسه باکس پیش‌فرض پست")
+#
+#     # تنظیمات عمومی تیپاکس
+#     tipax_shop_id = models.UUIDField(verbose_name="شناسه فروشگاه تیپاکس", null=True, blank=True)
+#     tipax_product_type_id = models.IntegerField(default=0)
+#     tipax_packing_type_id = models.IntegerField(default=0)
+#     tipax_payment_type = models.IntegerField(default=1)
+#     tipax_service_type = models.IntegerField(default=1)
+#     tipax_delivery_type = models.IntegerField(default=1)
+#     tipax_pickup_type = models.IntegerField(default=1)
+#
+#     api_token = models.CharField(max_length=255, blank=True, verbose_name="توکن API تاپین")
+#
+#     class Meta:
+#         verbose_name = "تنظیمات تاپین"
+#         verbose_name_plural = "تنظیمات تاپین"
+#
+#     def __str__(self):
+#         return f"Tapin ({self.shop_id})"

@@ -11,7 +11,22 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 env = environ.Env(DEBUG=(bool, True))
 environ.Env.read_env(BASE_DIR / ".env")
 
-
+# # ==========================
+# # Tapin / Tipax settings
+# # ==========================
+# TAPIN_API_TOKEN = env("TAPIN_API_TOKEN", default="")
+# TAPIN_SHOP_ID = env("TAPIN_SHOP_ID", default=None)
+#
+# TAPIN_FROM_PROVINCE_ID = env.int("TAPIN_FROM_PROVINCE_ID", default=0)
+# TAPIN_FROM_CITY_ID = env.int("TAPIN_FROM_CITY_ID", default=0)
+# TAPIN_DEFAULT_BOX_ID = env.int("TAPIN_DEFAULT_BOX_ID", default=0)
+#
+# TIPAX_PRODUCT_TYPE_ID = env.int("TIPAX_PRODUCT_TYPE_ID", default=0)
+# TIPAX_PACKING_TYPE_ID = env.int("TIPAX_PACKING_TYPE_ID", default=0)
+# TIPAX_PAYMENT_TYPE = env.int("TIPAX_PAYMENT_TYPE", default=1)
+# TIPAX_SERVICE_TYPE = env.int("TIPAX_SERVICE_TYPE", default=1)
+# TIPAX_DELIVERY_TYPE = env.int("TIPAX_DELIVERY_TYPE", default=1)
+# TIPAX_PICKUP_TYPE = env.int("TIPAX_PICKUP_TYPE", default=1)
 
 # ── ZARINPAL ───────────────────────────────────────────────────────────────────────
 

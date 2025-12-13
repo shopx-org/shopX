@@ -673,7 +673,7 @@ class Product(models.Model):
         return Rating.objects.filter(content_type=ctype, object_id=self.id).count()
 
 # =========================
-# Product Variant
+#      Price   History
 # =========================
 
 class PriceHistory(models.Model):
