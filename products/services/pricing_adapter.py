@@ -4,7 +4,6 @@ from __future__ import annotations
 from decimal import Decimal, InvalidOperation
 from types import SimpleNamespace
 from typing import Optional, List
-
 from django.utils import timezone
 
 from products.models import Service
@@ -14,6 +13,16 @@ from products.models import Service
 # -----------------------------
 # Money / parsing helpers
 # -----------------------------
+
+def _is_within_window(starts_at, ends_at) -> bool:
+    now = timezone.now()
+    if starts_at and now < starts_at:
+        return False
+    if ends_at and now > ends_at:
+        return False
+    return True
+
+
 _PERSIAN_DIGITS = str.maketrans("۰۱۲۳۴۵۶۷۸۹٬, ", "0123456789,, ")
 
 def _to_money(val, *, fallback: str | int | float = "0") -> Decimal:
@@ -97,25 +106,51 @@ def _build_pricing_line(item, qty: int = 1):
 
     # product-level
     product = item
+
     unit_price = _to_money(getattr(product, "price", None), fallback=0)
 
+    # helpers for rules (safe)
     try:
         extra_cids = list(product.additional_categories.values_list("id", flat=True))
     except Exception:
         extra_cids = []
     brand_id = getattr(product, "brand_fk_id", None)
 
-    line = _new_pricing_line(product_id=product.id, category_id=product.category_id,
-                             unit_price=unit_price, quantity=int(qty))
-    for name, val in (
-        ("brand_id", brand_id),
-        ("extra_category_ids", extra_cids),
+    # build pricing line (attach helpers)
+    line = _new_pricing_line(
+        product_id=product.id,
+        category_id=product.category_id,
+        unit_price=unit_price,
+        quantity=int(qty),
+        brand_id=brand_id,
+        extra_category_ids=extra_cids,
+    )
+
+    # sale fields
+    p_active = bool(getattr(product, "sale_active", False))
+
+    p_percent_raw = getattr(product, "sale_percent", None)
+    p_amount_raw = getattr(product, "sale_amount", None)
+
+    p_percent = Decimal(str(p_percent_raw)) if p_percent_raw not in (None, "") else None
+    p_amount = Decimal(str(p_amount_raw)) if p_amount_raw not in (None, "") else None
+
+    p_starts = getattr(product, "sale_starts_at", None)
+    p_ends = getattr(product, "sale_ends_at", None)
+
+    for k, v in (
+            ("_product_sale_active", p_active),
+            ("_product_sale_percent", p_percent),
+            ("_product_sale_amount", p_amount),
+            ("_product_sale_starts_at", p_starts),
+            ("_product_sale_ends_at", p_ends),
     ):
         try:
-            setattr(line, name, val)
+            setattr(line, k, v)
         except Exception:
             pass
 
+    return line
     # product-level sale flags
     p_active  = bool(getattr(product, "sale_active", False))
     p_percent = getattr(product, "sale_percent", None)
@@ -191,6 +226,13 @@ def _ephemeral_from_variant_line(ln, channel: str) -> Optional[SimpleNamespace]:
 def _ephemeral_from_product_line(ln, channel: str) -> Optional[SimpleNamespace]:
     if not getattr(ln, "_product_sale_active", False):
         return None
+
+    starts_at = getattr(ln, "_product_sale_starts_at", None)
+    ends_at   = getattr(ln, "_product_sale_ends_at", None)
+
+    if not _is_within_window(starts_at, ends_at):
+        return None
+
     pp = getattr(ln, "_product_sale_percent", None)
     pa = getattr(ln, "_product_sale_amount", None)
 
@@ -202,6 +244,8 @@ def _ephemeral_from_product_line(ln, channel: str) -> Optional[SimpleNamespace]:
     if not acts:
         return None
 
+
+
     return SimpleNamespace(
         name=f"PRODUCT_SALE_{getattr(ln,'product_id', None)}",
         priority=998,
@@ -209,9 +253,10 @@ def _ephemeral_from_product_line(ln, channel: str) -> Optional[SimpleNamespace]:
         rules=[_ns_rule("product_in", {"product_ids": [getattr(ln, "product_id", None)]})],
         actions=acts,
         is_active=True,
-        starts_at=None,
-        ends_at=None,
+        starts_at=starts_at,
+        ends_at=ends_at,
         channel=channel,
+
     )
 
 def build_ephemeral_campaigns_for_lines(lines, channel: str = "web") -> List[SimpleNamespace]:

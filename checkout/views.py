@@ -19,7 +19,7 @@ from products.services.pricing_adapter import (
 )
 from shipping.models import Address
 from shipping.forms import AddressForm
-
+from orders.models import Order
 # from shipping.services import get_shipping_quotes_for_cart
 
 # =========================
@@ -28,7 +28,7 @@ from shipping.forms import AddressForm
 SESSION_KEY_ADDR = "checkout.address_id"
 SESSION_KEY_SHIPPING = "checkout.shipping_method"
 SESSION_KEY_RECEIVER = "checkout.receiver"
-
+SESSION_KEY_PENDING_ORDER = "checkout.pending_order_id"
 
 # =========================
 # forms
@@ -490,77 +490,95 @@ def checkout_confirm(request: HttpRequest) -> HttpResponse:
         messages.error(request, "آدرس نامعتبر است.")
         return redirect("checkout:address")
 
-    # 2) پرایسینگ نهایی با همون موتور review
+    # 2) پرایسینگ نهایی
     from decimal import Decimal
     from orders.models import Order, OrderItem
+    from django.db import transaction  # اگر بالا import نکردی
 
     result, lines, groups = _evaluate_cart(cart)
     summary = _summary_from_result(result)
     shipping_cost = _cart_shipping_flat_fee(cart)
-    # 3) ساخت Order در اپ orders
-    order = Order.objects.create(
-        user=request.user,
-        address=address,
-        subtotal=summary["subtotal"],
-        total_discount=summary["total_discount"],
-        shipping_price=shipping_cost,
-        total=summary["total"] + shipping_cost,
-        payment_status=Order.PaymentStatus.PENDING,
-        fulfillment_status=Order.FulfillmentStatus.NEW,
-    )
 
-    # 4) خلاصه‌ی پر-گید (دقیقاً همون منطق checkout_review)
-    D0 = Decimal("0")
-    per_gid: Dict[str, Dict[str, Any]] = {}
+    current_total = summary["total"] + shipping_cost
 
-    for ln in getattr(result, "lines", []) or []:
-        gid = getattr(ln, "_cart_gid", None)
-        if not gid:
-            continue
+    # 3) idempotency: اگر سفارش pending قبلی داریم و مبلغ هنوز همونه → reuse
+    pending_id = request.session.get(SESSION_KEY_PENDING_ORDER)
+    if pending_id:
+        prev = Order.objects.filter(id=pending_id, user=request.user).first()
+        if prev and prev.payment_status == Order.PaymentStatus.PENDING:
+            if prev.total == current_total:
+                return redirect("orders:payment_start", order_id=prev.id)
+            # اگر مبلغ عوض شده، این pending دیگه معتبر نیست
+        request.session.pop(SESSION_KEY_PENDING_ORDER, None)
 
-        row = per_gid.setdefault(
-            gid,
-            {"items_subtotal": D0, "services_total": D0, "discount": D0, "total": D0, "services": []},
+    # 4) ساخت Order و OrderItem ها به صورت اتمیک
+    with transaction.atomic():
+        order = Order.objects.create(
+            user=request.user,
+            address=address,
+            subtotal=summary["subtotal"],
+            total_discount=summary["total_discount"],
+            shipping_price=shipping_cost,
+            total=current_total,
+            payment_status=Order.PaymentStatus.PENDING,
+            fulfillment_status=Order.FulfillmentStatus.NEW,
         )
 
-        line_sub = getattr(ln, "line_subtotal", D0)
-        line_disc = getattr(ln, "line_discount", D0)
-        line_total = getattr(ln, "line_total", line_sub - line_disc)
+        # سشن را بعد از ساخت موفق order ست کن
+        request.session[SESSION_KEY_PENDING_ORDER] = order.id
 
-        is_service = getattr(ln, "_exclude_from_discounts", False)
-        if is_service:
-            row["services_total"] += line_sub
-        else:
-            row["items_subtotal"] += line_sub
+        # 5) خلاصه‌ی per-gid (مثل checkout_review)
+        D0 = Decimal("0")
+        per_gid: Dict[str, Dict[str, Any]] = {}
 
-        row["discount"] += line_disc
-        row["total"] += line_total
+        for ln in getattr(result, "lines", []) or []:
+            gid = getattr(ln, "_cart_gid", None)
+            if not gid:
+                continue
 
-    # 5) ساخت OrderItem بر اساس هر ردیف سبد
-    for gid, it in groups:
-        pricing = per_gid.get(
-            gid,
-            {"items_subtotal": D0, "services_total": D0, "discount": D0, "total": D0, "services": []},
-        )
+            row = per_gid.setdefault(
+                gid,
+                {"items_subtotal": D0, "services_total": D0, "discount": D0, "total": D0, "services": []},
+            )
 
-        product_obj = getattr(it, "product")
-        variant_obj = getattr(it, "variant", None)
-        qty = getattr(it, "qty", 1) or 1
+            line_sub = getattr(ln, "line_subtotal", D0)
+            line_disc = getattr(ln, "line_discount", D0)
+            line_total = getattr(ln, "line_total", line_sub - line_disc)
 
-        unit_price = (pricing["items_subtotal"] / qty) if qty else pricing["items_subtotal"]
+            is_service = getattr(ln, "_exclude_from_discounts", False)
+            if is_service:
+                row["services_total"] += line_sub
+            else:
+                row["items_subtotal"] += line_sub
 
-        OrderItem.objects.create(
-            order=order,
-            product=product_obj,
-            variant=variant_obj,
-            qty=qty,
-            unit_price=unit_price,
-            discount=pricing["discount"],
-            total=pricing["total"],
-            product_name=getattr(product_obj, "name", str(product_obj)),
-        )
+            row["discount"] += line_disc
+            row["total"] += line_total
 
-    # 6) رفتن به مرحله پرداخت (فعلاً همون payment_start تستی)
+        # 6) ساخت OrderItem بر اساس هر ردیف سبد
+        for gid, it in groups:
+            pricing = per_gid.get(
+                gid,
+                {"items_subtotal": D0, "services_total": D0, "discount": D0, "total": D0, "services": []},
+            )
+
+            product_obj = getattr(it, "product")
+            variant_obj = getattr(it, "variant", None)
+            qty = getattr(it, "qty", 1) or 1
+
+            unit_price = (pricing["items_subtotal"] / qty) if qty else pricing["items_subtotal"]
+
+            OrderItem.objects.create(
+                order=order,
+                product=product_obj,
+                variant=variant_obj,
+                qty=qty,
+                unit_price=unit_price,
+                discount=pricing["discount"],
+                total=pricing["total"],
+                product_name=getattr(product_obj, "name", str(product_obj)),
+            )
+
+    # 7) رفتن به مرحله پرداخت
     return redirect("orders:payment_start", order_id=order.id)
 
 # from __future__ import annotations

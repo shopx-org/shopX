@@ -13,6 +13,7 @@ from checkout.views import (
     SESSION_KEY_ADDR,
     SESSION_KEY_SHIPPING,
     SESSION_KEY_RECEIVER,
+    SESSION_KEY_PENDING_ORDER,
 )
 from django.views.decorators.http import require_POST
 from products.services.inventory import consume_stock_for_cart

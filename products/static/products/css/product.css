@@ -3126,3 +3126,365 @@ body.no-scroll {
 .label-out::after {
     content: none !important;
 }
+
+.zoom-box{
+    position: fixed;
+    width: min(560px, 42vw);
+    height: min(560px, 42vw);
+    max-width: 620px;
+    max-height: 620px;
+    display: none;
+    background: #fff;
+    border: 1px solid rgba(0,0,0,.08);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 18px 60px rgba(0,0,0,.12);
+    z-index: 1300;
+}
+
+/* --- thumb +X overlay --- */
+.thumbs .thumb { position: relative; }
+.thumbs .thumb .thumb-more{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:800;
+  font-size:14px;
+  border-radius:12px;
+  color:#111;
+  background: rgba(255,255,255,.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  cursor:pointer;
+}
+.thumbs .thumb:has(.thumb-more) img{
+  filter: blur(2px) saturate(.9);
+  transform: scale(1.02);
+}
+
+/* --- modal gallery --- */
+.tlp-modal{
+  position:fixed;
+  inset:0;
+  display:none;
+  z-index: 2000;
+}
+.tlp-modal.show{ display:block; }
+
+.tlp-modal-backdrop{
+  position:absolute;
+  inset:0;
+  background: rgba(0,0,0,.55);
+}
+
+.tlp-modal-dialog{
+  position:relative;
+  width: min(1040px, 92vw);     /* کمی بزرگتر */
+  height: min(680px, 88vh);
+  margin: 6vh auto 0;
+  background:#fff;
+  border-radius: 18px;
+  box-shadow: 0 20px 80px rgba(0,0,0,.25);
+  overflow:hidden;
+}
+
+.tlp-modal-close{
+  position:absolute;
+  top: 10px;
+  left: 12px; /* RTL-friendly */
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,.08);
+  background:#fff;
+  font-size: 22px;
+  line-height: 1;
+  cursor:pointer;
+  z-index: 3;
+}
+
+.tlp-modal-body{
+  display:grid;
+  grid-template-columns: 1fr 260px;
+  height:100%;
+}
+
+.tlp-modal-main{
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#fafafa;
+}
+
+.tlp-modal-main img{
+  max-width: 94%;
+  max-height: 92%;
+  object-fit: contain;
+}
+
+.tlp-modal-nav{
+  position:absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  border: 1px solid rgba(0,0,0,.08);
+  background: rgba(255,255,255,.9);
+  cursor:pointer;
+  font-size: 28px;
+  line-height: 1;
+}
+.tlp-modal-nav.prev{ right: 14px; } /* RTL: قبلی سمت راست */
+.tlp-modal-nav.next{ left: 14px; }
+
+.tlp-modal-thumbs{
+  padding: 16px 14px;
+  overflow:auto;
+  border-right: 1px solid rgba(0,0,0,.06);
+  background:#fff;
+  display:grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  align-content:start;
+}
+
+.tlp-modal-thumbs button{
+  border: 2px solid transparent;
+  border-radius: 12px;
+  padding: 0;
+  background: transparent;
+  cursor:pointer;
+}
+.tlp-modal-thumbs button.is-active{
+  border-color: rgba(250,106,53,.75);
+}
+.tlp-modal-thumbs img{
+  width:100%;
+  aspect-ratio: 1/1;
+  object-fit: cover;
+  border-radius: 10px;
+  display:block;
+}
+
+@media (max-width: 992px){
+  .tlp-modal-dialog{ width: 94vw; height: 88vh; }
+  .tlp-modal-body{ grid-template-columns: 1fr; }
+  .tlp-modal-thumbs{
+    grid-template-columns: repeat(5, 1fr);
+    border-right: 0;
+    border-top: 1px solid rgba(0,0,0,.06);
+    height: 120px;
+    overflow:auto;
+  }
+}
+
+/* سایز ثابت و یکسان برای تامب‌های مودال */
+.tlp-modal-thumbs button{
+  width: 100%;
+  height: 92px;            /* اندازه ثابت */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #fff;
+}
+
+.tlp-modal-thumbs img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;       /* همه یک اندازه و کراپ مرتب */
+  border-radius: 10px;
+  display: block;
+}
+.tlp-modal-header{
+  padding: 14px 18px;
+  border-bottom: 1px solid rgba(0,0,0,.08); /* مثل hr */
+  background: #fff;
+}
+
+.tlp-modal-title{
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #111;
+  padding-bottom: 16px;
+  padding-top: 14px;
+  text-align: start;
+  direction: rtl;
+
+}
+.tlp-modal-dialog{
+  display: flex;
+  flex-direction: column;
+}
+/* ناحیه تصویر بزرگ مودال: ارتفاع ثابت + مرکزچین */
+.tlp-modal-main{
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fafafa;
+  padding: 16px;
+  overflow: hidden;
+  height: 100%;          /* کل ارتفاع ستون */
+  min-height: 0;         /* مهم داخل grid/flex */
+}
+
+/* خود تصویر بزرگ: دقیقاً داخل باکس فیت شود */
+.tlp-modal-main img{
+  width: 100%;
+  height: 100%;
+  object-fit: contain;   /* متناسب، بدون کراپ */
+  display: block;
+}
+
+/* اگر هنوز body/grid درست قد نمی‌گیرد */
+.tlp-modal-body{
+  flex: 1;
+  min-height: 0;
+}
+
+/* اگر grid داری */
+.tlp-modal-body{
+  display: grid;
+  grid-template-columns: 1fr 260px;
+  height: 100%;
+}
+
+.tlp-modal-dialog{ height: min(680px, 88vh); }
+
+
+@media (max-width: 992px){
+  .tlp-modal-dialog{
+    width: 94vw;
+    height: 90vh;
+    margin: 3vh auto 0;
+    border-radius: 18px;
+  }
+
+  .tlp-modal-body{
+    grid-template-columns: 1fr;       /* یک ستون */
+    grid-template-rows: 1fr auto;     /* بالا عکس، پایین تامب */
+  }
+
+  .tlp-modal-main{
+    padding: 10px;
+  }
+
+  /* تامب‌ها پایین: اسکرول افقی */
+  .tlp-modal-thumbs{
+    border-right: 0;
+    border-top: 1px solid rgba(0,0,0,.06);
+    padding: 10px 12px;
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    align-items: center;
+    height: 112px;
+  }
+
+  .tlp-modal-thumbs button{
+    flex: 0 0 auto;
+    width: 76px;
+    height: 76px;
+    border-radius: 14px;
+  }
+
+  .tlp-modal-thumbs img{
+    border-radius: 12px;
+  }
+}
+.tlp-modal-close{
+  top: 10px;
+  left: 10px;
+  z-index: 5;
+}
+
+/* وقتی مودال بازه */
+body.modal-open{
+  overflow: hidden;
+  touch-action: none;
+}
+
+/* برای iOS بهتره */
+@supports (-webkit-touch-callout: none) {
+  body.modal-open{
+    position: fixed;
+    width: 100%;
+  }
+}
+/*کنترل روی مودال پاپ اپ گالری عکس محصولات*/
+.tlp-modal{ z-index: 99999; }
+.tlp-modal-backdrop{ z-index: 0; }
+.tlp-modal-dialog{ z-index: 1; }
+
+.tlp-modal{
+  position: fixed;
+  inset: 0;
+}
+
+
+/* ========== موبایل: مطمئن شو محتوا داخل خود مودال جا می‌گیرد ========== */
+@media (max-width: 992px){
+  .tlp-modal-dialog{
+    height: min(92vh, 760px) !important;
+    margin: 2vh auto 0 !important;
+  }
+
+  .tlp-modal-body{
+    flex: 1;
+    min-height: 0;
+  }
+
+  .tlp-modal-main{
+    flex: 1;
+    min-height: 0;
+  }
+
+  /* ردیف تامب‌ها پایین، جدا و تمیز */
+  .tlp-modal-thumbs{
+    flex: 0 0 auto;
+    background: #fff;
+    padding-bottom: calc(10px + env(safe-area-inset-bottom));
+  }
+}
+/* مودال تمام صفحه و خودش اسکرول‌گیر باشد */
+.tlp-modal{
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 2147483647 !important;
+}
+
+/* جلوگیری از انتقال اسکرول به پشت (scroll chaining) */
+.tlp-modal,
+.tlp-modal-dialog,
+.tlp-modal-thumbs{
+  overscroll-behavior: contain;
+}
+
+/* روی موبایل: دیالوگ را داخل مودال اسکرول‌پذیر کن */
+@media (max-width: 992px){
+  .tlp-modal{
+    overflow: auto;                 /* اسکرول فقط داخل مودال */
+    -webkit-overflow-scrolling: touch;
+    background: rgba(0,0,0,.55);    /* بک‌دراپ واقعی */
+  }
+
+  .tlp-modal-dialog{
+    margin: 2.5vh auto !important;
+    height: auto !important;        /* اجازه بده با محتوا تنظیم شود */
+    max-height: 95vh !important;
+  }
+
+  .tlp-modal-body{
+    height: auto !important;
+    min-height: 0 !important;
+  }
+}

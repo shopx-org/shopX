@@ -197,38 +197,145 @@
                                         <div class="col-lg-6 order-lg-2">
                                             <section class="tlp-gallery gallery-rtl-right" aria-label="گالری محصول"
                                                      dir="rtl">
-                                                <div class="stage card-like">
+
+                                                <div class="stage card-like" id="tlp-stage">
                                                     <img id="tlp-main"
                                                          src="{{ gallery_images.0.url|default:FALLBACK_IMG }}"
+                                                         data-zoom-src="{{ gallery_images.0.zoom_url|default:gallery_images.0.url|default:FALLBACK_IMG }}"
                                                          alt="{{ gallery_images.0.alt|default:product.name }}"
                                                          loading="eager" decoding="async">
+
+                                                    <div class="zoom-lens" aria-hidden="true"></div>
+                                                </div>
+
+                                                <div class="zoom-box" id="tlp-zoom-box" aria-hidden="true">
+                                                    <div class="zoom-img" id="tlp-zoom-img"></div>
                                                 </div>
 
                                                 <div class="thumbs" role="list">
                                                     {% if gallery_images %}
                                                         {% for img in gallery_images %}
-                                                            <button class="thumb{% if img.is_primary or forloop.first %} is-active{% endif %}"
-                                                                    type="button" role="listitem"
-                                                                    aria-pressed="{% if img.is_primary or forloop.first %}true{% else %}false{% endif %}"
-                                                                    title="{{ product.name }} - {{ forloop.counter }}"
-                                                                    data-full="{{ img.url }}"
-                                                                    data-color-id="{{ img.color_id|default:'' }}">
-                                                                <img src="{{ img.url }}"
-                                                                     alt="{{ img.alt|default:product.name }}"
-                                                                     loading="lazy" decoding="async">
-                                                            </button>
+                                                            {% if forloop.counter <= 5 %}
+                                                                <button class="thumb{% if img.is_primary or forloop.first %} is-active{% endif %}"
+                                                                        type="button"
+                                                                        role="listitem"
+                                                                        aria-pressed="{% if img.is_primary or forloop.first %}true{% else %}false{% endif %}"
+                                                                        title="{{ product.name }} - {{ forloop.counter }}"
+                                                                        data-full="{{ img.url }}"
+                                                                        data-zoom="{{ img.zoom_url|default:img.url }}"
+                                                                        data-color-id="{{ img.color_id|default:'' }}"
+                                                                        data-index="{{ forloop.counter0 }}">
+                                                                    <img src="{{ img.url }}"
+                                                                         alt="{{ img.alt|default:product.name }}"
+                                                                         loading="lazy" decoding="async">
+
+                                                                    {# روی تامب 5 اگر بیشتر از 5 تا بود: اوورلی +X #}
+                                                                    {% if forloop.counter == 5 and gallery_images|length > 5 %}
+                                                                        <span class="thumb-more" role="button"
+                                                                              aria-label="نمایش همه تصاویر">
+                                                                          +{{ gallery_images|length|add:"-5" }}
+                                                                        </span>
+                                                                    {% endif %}
+                                                                </button>
+                                                            {% endif %}
                                                         {% endfor %}
                                                     {% else %}
-                                                        <button class="thumb is-active" type="button" role="listitem"
-                                                                aria-pressed="true" title="{{ product.name }}"
-                                                                data-full="{{ FALLBACK_IMG }}">
+                                                        <button class="thumb is-active"
+                                                                type="button"
+                                                                role="listitem"
+                                                                aria-pressed="true"
+                                                                title="{{ product.name }}"
+                                                                data-full="{{ FALLBACK_IMG }}"
+                                                                data-zoom="{{ FALLBACK_IMG }}"
+                                                                data-index="0">
                                                             <img src="{{ FALLBACK_THUMB }}" alt="{{ product.name }}"
                                                                  loading="lazy" decoding="async">
                                                         </button>
                                                     {% endif %}
                                                 </div>
+                                                <script id="tlp-gallery-data" type="application/json">
+                                                    {
+                                                      "images": [
+                                                    {% for img in gallery_images %}
+                                                        {
+                                                           "full": "{{ img.url|escapejs }}",
+                                                           "zoom": "{{ img.zoom_url|default:img.url|escapejs }}",
+                                                           "thumb": "{{ img.url|escapejs }}",
+                                                           "alt": "{{ img.alt|default:product.name|escapejs }}",
+                                                           "color_id": "{{ img.color_id|default:''|escapejs }}"
+                                                          }{% if not forloop.last %},{% endif %}
+                                                        {% endfor %}
+                                                    ]
+                                                  }
+                                                </script>
+                                                {# مودال گالری #}
+                                                <div class="tlp-modal" id="tlp-gallery-modal" aria-hidden="true">
+                                                    <div class="tlp-modal-backdrop" data-close="1"></div>
+
+                                                    <div class="tlp-modal-dialog" role="dialog" aria-modal="true"
+                                                         aria-label="گالری تصاویر محصول">
+                                                        <button class="tlp-modal-close" type="button" aria-label="بستن"
+                                                                data-close="1">×
+                                                        </button>
+                                                            <div class="tlp-modal-header">
+                                                              <div class="tlp-modal-title">تصاویر رسمی این محصول</div>
+                                                            </div>
+                                                        <div class="tlp-modal-body">
+                                                            <div class="tlp-modal-main">
+                                                                <img id="tlp-modal-main-img" src="" alt="">
+                                                                <button class="tlp-modal-nav prev" type="button"
+                                                                        aria-label="قبلی">‹
+                                                                </button>
+                                                                <button class="tlp-modal-nav next" type="button"
+                                                                        aria-label="بعدی">›
+                                                                </button>
+                                                            </div>
+
+                                                            <div class="tlp-modal-thumbs" id="tlp-modal-thumbs"></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
                                             </section>
                                         </div>
+                                        {#                                        <div class="col-lg-6 order-lg-2">#}
+                                        {#                                            <section class="tlp-gallery gallery-rtl-right" aria-label="گالری محصول"#}
+                                        {#                                                     dir="rtl">#}
+                                        {#                                                <div class="stage card-like">#}
+                                        {#                                                    <img id="tlp-main"#}
+                                        {#                                                         src="{{ gallery_images.0.url|default:FALLBACK_IMG }}"#}
+                                        {#                                                         alt="{{ gallery_images.0.alt|default:product.name }}"#}
+                                        {#                                                         loading="eager" decoding="async">#}
+                                        {#                                                     <div class="zoom-lens" aria-hidden="true"></div>#}
+                                        {#                                                </div>#}
+                                        {#                                                <div class="zoom-box" id="tlp-zoom-box" aria-hidden="true">#}
+                                        {#                                                    <div class="zoom-img" id="tlp-zoom-img"></div>#}
+                                        {#                                                </div>#}
+                                        {#                                                <div class="thumbs" role="list">#}
+                                        {#                                                    {% if gallery_images %}#}
+                                        {#                                                        {% for img in gallery_images %}#}
+                                        {#                                                            <button class="thumb{% if img.is_primary or forloop.first %} is-active{% endif %}"#}
+                                        {#                                                                    type="button" role="listitem"#}
+                                        {#                                                                    aria-pressed="{% if img.is_primary or forloop.first %}true{% else %}false{% endif %}"#}
+                                        {#                                                                    title="{{ product.name }} - {{ forloop.counter }}"#}
+                                        {#                                                                    data-full="{{ img.url }}"#}
+                                        {#                                                                    data-color-id="{{ img.color_id|default:'' }}">#}
+                                        {#                                                                <img src="{{ img.url }}"#}
+                                        {#                                                                     alt="{{ img.alt|default:product.name }}"#}
+                                        {#                                                                     loading="lazy" decoding="async">#}
+                                        {#                                                            </button>#}
+                                        {#                                                        {% endfor %}#}
+                                        {#                                                    {% else %}#}
+                                        {#                                                        <button class="thumb is-active" type="button" role="listitem"#}
+                                        {#                                                                aria-pressed="true" title="{{ product.name }}"#}
+                                        {#                                                                data-full="{{ FALLBACK_IMG }}">#}
+                                        {#                                                            <img src="{{ FALLBACK_THUMB }}" alt="{{ product.name }}"#}
+                                        {#                                                                 loading="lazy" decoding="async">#}
+                                        {#                                                        </button>#}
+                                        {#                                                    {% endif %}#}
+                                        {#                                                </div>#}
+                                        {#                                            </section>#}
+                                        {#                                        </div>#}
 
                                         <!-- جزئیات/رنگ/سایز (چپ) -->
                                         <div class="col-lg-6 order-lg-1">
