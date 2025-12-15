@@ -109,11 +109,11 @@
                         <h4 class="widget-title">لینک های مفید</h4><!-- End .widget-title -->
 
                         <ul class="widget-list">
-                            <li><a href="#">درباره ما</a></li>
-                            <li><a href="#">خدمات</a></li>
-                            <li><a href="#">نحوه خرید</a></li>
-                            <li><a href="#">سوالات متداول</a></li>
-                            <li><a href="#">تماس با ما</a></li>
+                            <li><a href="{% url 'core:about' %}">درباره ما</a></li>
+                            <li><a href="{% url 'products:product_list' %}">محصولات</a></li>
+                            <li><a href="#">اخبار</a></li>
+                            <li><a href="{% url 'faq:faqs' %}">سوالات متداول</a></li>
+                            <li><a href="{% url 'contact:contact_page' %}">تماس با ما</a></li>
                         </ul><!-- End .widget-list -->
                     </div><!-- End .widget -->
                 </div><!-- End .col-sm-4 col-lg-2 -->
@@ -137,11 +137,18 @@
                         <h4 class="widget-title">حساب کاربری</h4><!-- End .widget-title -->
 
                         <ul class="widget-list">
-                            <li><a href="#">ورود</a></li>
-                            <li><a href="#">سبد خرید</a></li>
-                            <li><a href="#">لیست علاقه مندی ها</a></li>
-                            <li><a href="#">پیگیری سفارشات</a></li>
-                            <li><a href="#">راهنما</a></li>
+                            {% if user.is_authenticated %}
+                                <li>
+                                    <a href="{% url 'account:logout' %}">خروج</a>
+                                </li>
+                            {% else %}
+                                <li>
+                                    <a href="{% url 'account:otp_login' %}">ورود / ثبت نام</a>
+                                </li>
+                            {% endif %}
+                            <li><a href="{% url 'cart:cart_detail' %}">سبد خرید</a></li>
+                            <li><a href="{% url 'core:wishlist_page' %}">لیست علاقه مندی ها</a></li>
+                            <li><a href="{% url 'dashboards:user_orders' %}">پیگیری سفارشات</a></li>
                         </ul><!-- End .widget-list -->
                     </div><!-- End .widget -->
                 </div><!-- End .col-sm-4 col-lg-2 -->

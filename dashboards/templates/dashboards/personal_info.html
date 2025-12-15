@@ -13,7 +13,7 @@
                 <div class="alert alert-dismissible fade show" role="alert" dir="rtl">
                     {% for message in messages %}
                         <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %}">
-                            {{ message }}
+                            {{ message|escape }}
                             <button type="button" class="close" data-dismiss="alert"
                                     aria-label="Close">
                                 <span aria-hidden="true">&times;</span>

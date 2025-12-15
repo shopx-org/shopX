@@ -1,5 +1,50 @@
 {% extends 'dashboards/dashboard_base_user.html' %}
 {% load static %}
+
+{% block UserDash_content %}
+<div class="tab-pane fade show active">
+    <div class="col-lg-10 col-xl-8 mx-auto dashboard-card">
+        <h4 class="fw-bold border-bottom pb-2">📱 تغییر شماره همراه</h4>
+
+        <div id="alert-area" class="mb-3" role="alert" aria-live="polite"></div>
+
+        <form id="change-phone-form" novalidate>
+            {% csrf_token %}
+
+            <div id="step-new-phone">
+                <label class="form-label">{{ form.new_phone.label }}</label>
+                {{ form.new_phone }}
+                <button type="button" id="sendOtp" class="btn-save mt-3">ارسال کد</button>
+            </div>
+
+            <div id="step-old" hidden>
+                <label class="form-label">کد تأیید شماره فعلی</label>
+                <input id="otpOld" class="form-control" maxlength="6" inputmode="numeric">
+                <button type="button" id="verifyOld" class="btn-save mt-3">تأیید</button>
+            </div>
+
+            <div id="step-new" hidden>
+                <label class="form-label">کد تأیید شماره جدید</label>
+                <input id="otpNew" class="form-control" maxlength="6" inputmode="numeric">
+                <button type="button" id="verifyNew" class="btn-save mt-3">تغییر شماره</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block CSS-JS %}
+<meta name="csrf-token" content="{{ csrf_token }}">
+<script src="{% static 'js/change_phone_number.js' %}" defer></script>
+{% endblock %}
+
+
+
+
+
+
+{% comment %} {% extends 'dashboards/dashboard_base_user.html' %}
+{% load static %}
 {% block UserDash_content %}
 <div class="tab-pane fade show active" id="tab-dashboard" role="tabpanel">
     <div id="change-phone-card" class="col-lg-10 col-xl-8 mx-auto dashboard-card animate__animated animate__fadeIn">
@@ -45,4 +90,4 @@
 {% endblock %}
 {% block CSS-JS %}
     <script src="{% static 'js/change_phone_number.js' %}" defer></script>
-{% endblock %}
+{% endblock %} {% endcomment %}
