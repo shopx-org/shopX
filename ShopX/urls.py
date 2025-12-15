@@ -18,6 +18,7 @@ urlpatterns = [
     path("orders/", include("orders.urls")),
     path("search/", include("search.urls", namespace="search")),
     path("faq/", include(("faq.urls", "faq"), namespace="faq")),
+    path("contact/", include("contact.urls")),
     ]
 
 if settings.DEBUG:

@@ -16,6 +16,7 @@ from products.models import Product
 import json
 
 
+
 @login_required
 @require_POST
 def like_dislike_toggle(request):
@@ -319,3 +320,7 @@ def wishlist_page(request):
         "products": products
     })
 
+
+def about_view(request):
+    about = About.objects.prefetch_related("team_members").first()
+    return render(request, "core/about.html", {"about": about})

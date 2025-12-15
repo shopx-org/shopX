@@ -54,7 +54,7 @@
                 </button>
 
                 <a href="{% url 'home:home' %}" class="logo">
-                    <img src="{% static 'images/demos/demo-2/output-onlinepngtools.png' %}" alt="Molla Logo" width="104"
+                    <img src="{{ site_info.logo_site_thumb.url }}" alt="{{ site_info.company_name }}" width="104"
                          height="24">
                 </a>
             </div><!-- End .header-left -->
@@ -77,7 +77,7 @@
                         <div class="icon">
                             <i class="icon-user"></i>
                         </div>
-                        <p>حساب کاربری</p>
+                        {% comment %} <p>حساب کاربری</p> {% endcomment %}
                     </a>
                    {% if user.is_authenticated %}
                     <!-- منوی واحد برای پروفایل و خروج -->
@@ -122,7 +122,7 @@
                             <i class="icon-heart-o"></i>
                             <span class="wishlist-count badge">{{ wishlist_count }}</span>
                         </div>
-                        <p>لیست علاقه مندیها</p>
+                        {% comment %} <p>لیست علاقه مندیها</p> {% endcomment %}
                     </a>
                 </div><!-- End .compare-dropdown -->
 
@@ -134,7 +134,7 @@
                             <i class="icon-shopping-cart"></i>
                             <span class="cart-count">{{ cart_count|default:0 }}</span>
                         </div>
-                        <p>سبد خرید</p>
+                        {% comment %} <p>سبد خرید</p> {% endcomment %}
                     </a>
 
                     <div class="dropdown-menu dropdown-menu-right cart-panel-menu">
@@ -169,8 +169,8 @@
                                             {# بج تخفیف روی عکس #}
                                             {% if item.discount_percent %}
                                                 <span class="cart-discount-badge over-image">
-                                {{ item.discount_percent }}٪
-                            </span>
+                                                    {{ item.discount_percent }}٪
+                                                </span>
                                             {% endif %}
                                         </div>
 

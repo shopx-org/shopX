@@ -90,6 +90,7 @@ INSTALLED_APPS = [
     "orders.apps.OrdersConfig",
     "search.apps.SearchConfig",
     "faq.apps.FaqConfig",
+    "contact.apps.ContactConfig",
 
     # Third-party
     "widget_tweaks",
@@ -100,9 +101,17 @@ INSTALLED_APPS = [
     # apps
     "django_jalali",
     "django_social_share",
+    "ckeditor",
+    'imagekit',
 
 
 ]
+
+# INSTALLED_APPS += [
+#     "csp",
+# ]
+
+
 # ── Apps ───────────────────────────────────────────────────────────────────────
 JALALI_DATE_DEFAULTS = {
     'Strftime': {
@@ -113,6 +122,7 @@ JALALI_DATE_DEFAULTS = {
 # ── Middleware ─────────────────────────────────────────────────────────────────
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    # "csp.middleware.CSPMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -137,6 +147,7 @@ TEMPLATES = [
                 'cart.context_processors.cart_badge',
                 'cart.context_processors.mini_cart',
                 "Core.context_processors.wishlist_context",
+                'Core.context_processors.site_info'
             ],
         },
     },
@@ -266,3 +277,66 @@ OTP_MAX_ATTEMPTS_IN_WINDOW = 100000
 #  ──────────────────────────────────────
 
 LOGIN_URL = '/account/otp-login/'
+
+
+
+
+# ─────────────────────────────────────────────────────────────
+# Content Security Policy (django-csp 4.x | Django 5.2)
+# ─────────────────────────────────────────────────────────────
+
+# CONTENT_SECURITY_POLICY = {
+#     "DIRECTIVES": {
+#         "default-src": ("'self'",),
+
+#         # JS
+#         "script-src": (
+#             "'self'",
+#         ),
+
+#         # CSS (برای Bootstrap + CKEditor)
+#         "style-src": (
+#             "'self'",
+#             "'unsafe-inline'",
+#         ),
+
+#         # Images
+#         "img-src": (
+#             "'self'",
+#             "data:",
+#         ),
+
+#         # Fonts
+#         "font-src": (
+#             "'self'",
+#             "data:",
+#         ),
+
+#         # Ajax / fetch / API
+#         "connect-src": (
+#             "'self'",
+#         ),
+
+#         # جلوگیری از iframe (Clickjacking)
+#         "frame-ancestors": (
+#             "'none'",
+#         ),
+#     }
+# }
+
+
+# ─────────────────────────────────────────────────────────────
+# Security Headers
+# ─────────────────────────────────────────────────────────────
+
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_BROWSER_XSS_FILTER = True
+
+X_FRAME_OPTIONS = "DENY"
+
+CSRF_COOKIE_HTTPONLY = True
+SESSION_COOKIE_HTTPONLY = True
+
+CSRF_COOKIE_SAMESITE = "Lax"
+SESSION_COOKIE_SAMESITE = "Lax"
+

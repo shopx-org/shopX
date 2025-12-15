@@ -78,7 +78,7 @@ class Profile(models.Model):
                                             choices=[(i, str(i)) for i in range(1300, 1405)])
     gender = models.CharField(
         max_length=1,
-        choices=[('M', 'مرد'), ('F', 'زن'), ('O', 'سایر')],
+        choices=[('M', 'مرد'), ('F', 'زن')],
         blank=True,
         null=True,
         verbose_name="جنسیت"

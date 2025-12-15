@@ -89,18 +89,14 @@
             <div class="row">
                 <div class="col-sm-12 col-lg-6">
                     <div class="widget widget-about">
-                        <img src="{% static 'images/demos/demo-2/logo.png' %}" class="footer-logo" alt="Footer Logo"
-                             width="105" height="25">
-                        <p>لورم ایپسوم متن ساختگی با تولید سادگی نامفهوم، لورم ایپسوم متن ساختگی با تولید سادگی
-                            نامفهوم لورم ایپسوم متن ساختگی با تولید سادگی نامفهوم، لورم ایپسوم متن ساختگی با
-                            تولید سادگی نامفهوملورم ایپسوم متن ساختگی با تولید سادگی نامفهوم</p>
-
+                        <img src="{{ site_info.logo_site_thumb.url }}" class="footer-logo" alt="{{ site_info.company_name }}"  width="105" height="25">
+                        <p class="mt-0">{{ site_info.description }}</p>
 
                         <div class="widget-about-info">
                             <div class="row">
                                 <div class="col-sm-6 col-md-4">
-                                    <span class="widget-about-title">سوالی دارید؟ 7روز هفته/24ساعته</span>
-                                    <a href="tel:123456789">02155667788</a>
+                                    <span class="widget-about-title mb-2">سوالی دارید؟ 7روز هفته/24ساعته</span>
+                                    <a href="tel:{{ site_info.phone_number }}">{{ site_info.phone_number }}</a>
                                 </div><!-- End .col-sm-6 -->
                             </div><!-- End .row -->
                         </div>
@@ -113,11 +109,11 @@
                         <h4 class="widget-title">لینک های مفید</h4><!-- End .widget-title -->
 
                         <ul class="widget-list">
-                            <li><a href="#">درباره ما</a></li>
-                            <li><a href="#">خدمات</a></li>
-                            <li><a href="#">نحوه خرید</a></li>
-                            <li><a href="#">سوالات متداول</a></li>
-                            <li><a href="#">تماس با ما</a></li>
+                            <li><a href="{% url 'core:about' %}">درباره ما</a></li>
+                            <li><a href="{% url 'products:product_list' %}">محصولات</a></li>
+                            <li><a href="#">اخبار</a></li>
+                            <li><a href="{% url 'faq:faqs' %}">سوالات متداول</a></li>
+                            <li><a href="{% url 'contact:contact_page' %}">تماس با ما</a></li>
                         </ul><!-- End .widget-list -->
                     </div><!-- End .widget -->
                 </div><!-- End .col-sm-4 col-lg-2 -->
@@ -130,7 +126,7 @@
                             <li><a href="#">شیوه پرداخت</a></li>
                             <li><a href="#">گارانتی بازگشت وجه</a></li>
                             <li><a href="#">شیوه ارسال محصولات</a></li>
-                            <li><a href="#">قوانین و مقررات</a></li>
+                            <li><a href="{% url 'home:terms' %}">قوانین و مقررات</a></li>
                             <li><a href="#">خط مشی</a></li>
                         </ul><!-- End .widget-list -->
                     </div><!-- End .widget -->
@@ -141,11 +137,18 @@
                         <h4 class="widget-title">حساب کاربری</h4><!-- End .widget-title -->
 
                         <ul class="widget-list">
-                            <li><a href="#">ورود</a></li>
-                            <li><a href="#">سبد خرید</a></li>
-                            <li><a href="#">لیست علاقه مندی ها</a></li>
-                            <li><a href="#">پیگیری سفارشات</a></li>
-                            <li><a href="#">راهنما</a></li>
+                            {% if user.is_authenticated %}
+                                <li>
+                                    <a href="{% url 'account:logout' %}">خروج</a>
+                                </li>
+                            {% else %}
+                                <li>
+                                    <a href="{% url 'account:otp_login' %}">ورود / ثبت نام</a>
+                                </li>
+                            {% endif %}
+                            <li><a href="{% url 'cart:cart_detail' %}">سبد خرید</a></li>
+                            <li><a href="{% url 'core:wishlist_page' %}">لیست علاقه مندی ها</a></li>
+                            <li><a href="{% url 'dashboards:user_orders' %}">پیگیری سفارشات</a></li>
                         </ul><!-- End .widget-list -->
                     </div><!-- End .widget -->
                 </div><!-- End .col-sm-4 col-lg-2 -->
@@ -153,24 +156,32 @@
         </div><!-- End .container -->
     </div><!-- End .footer-middle -->
 
+    <!-- Footer Bottom -->
     <div class="footer-bottom">
-        <div class="container">
-            <p class="footer-copyright">کپی رایت © 2019 تمامی حقوق محفوظ است.</p>
-            <!-- End .footer-copyright -->
-
+        <div class="container d-flex justify-content-between align-items-center">
+            <p class="mb-0">© {{ site_info.company_name }} — طراحی و توسعه توسط آساره اسکندرپور و زهرا فرهنگی </p>
             <div class="social-icons social-icons-color">
-                <span class="social-label">شبکه های اجتماعی</span>
-                <a href="#" class="social-icon social-facebook" title="فیسبوک" target="_blank"><i
-                        class="icon-facebook-f"></i></a>
-                <a href="#" class="social-icon social-twitter" title="توییتر" target="_blank"><i
-                        class="icon-twitter"></i></a>
-                <a href="#" class="social-icon social-instagram" title="اینستاگرام" target="_blank"><i
-                        class="icon-instagram"></i></a>
-                <a href="#" class="social-icon social-youtube" title="یوتیوب" target="_blank"><i
-                        class="icon-youtube"></i></a>
-                <a href="#" class="social-icon social-pinterest" title="پینترست" target="_blank"><i
-                        class="icon-pinterest"></i></a>
-            </div><!-- End .soial-icons -->
-        </div><!-- End .container -->
-    </div><!-- End .footer-bottom -->
+                {% if site_info.instagram %}
+                    <a href="{{ site_info.instagram }}" target="_blank" class="social-icon social-instagram">
+                        <i class="icon-instagram"></i>
+                    </a>
+                {% endif %}
+                {% if site_info.telegram %}
+                    <a href="{{ site_info.telegram }}" target="_blank" class="social-icon social-telegram">
+                        <i class="icon-telegram"></i>
+                    </a>
+                {% endif %}
+                {% if site_info.whatsapp %}
+                    <a href="{{ site_info.whatsapp }}" target="_blank" class="social-icon social-whatsapp">
+                        <i class="icon-whatsapp"></i>
+                    </a>
+                {% endif %}
+                {% if site_info.twitter %}
+                    <a href="{{ site_info.twitter }}" target="_blank" class="social-icon social-twitter">
+                        <i class="icon-twitter"></i>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
 </footer><!-- End .footer -->
