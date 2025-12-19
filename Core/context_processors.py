@@ -5,6 +5,7 @@ from products.models import Category
 from .models import Wishlist
 # site info
 from .models import SiteInfo
+from products.models import Category
 
 
 # ───────────────── helpers
@@ -85,3 +86,14 @@ def site_info(request):
     return {
         "site_info": info
     }
+
+
+
+
+def popular_categories(request):
+    qs = (
+        Category.objects.active()
+        .filter(parent__isnull=True)   # فقط دسته‌های ریشه
+        .ordered()                     # مرتب
+    )
+    return {"popular_categories": qs[:6]}

@@ -1,5 +1,6 @@
 from django.db import models
 from ckeditor.fields import RichTextField
+from django.utils import timezone
 
 class TermsAndConditions(models.Model):
     title = models.CharField(max_length=200, default="قوانین و مقررات فروشگاه")
@@ -15,3 +16,6 @@ class TermsAndConditions(models.Model):
     class Meta:
         verbose_name = "قوانین و مقررات"
         verbose_name_plural = " قوانین و مقررات"
+
+
+

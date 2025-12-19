@@ -15981,7 +15981,7 @@ button:focus {
     left: 1rem;
     right: 1rem;
     height: .1rem;
-    top: 0;
+    top: 1;
     background-color: #ebebeb;
 }
 
@@ -19899,6 +19899,7 @@ button:focus {
     }
 }
 
+
 /*--------------------- 5.7.About -------------------- */
 /* About us */
 .about-images {
@@ -20012,7 +20013,7 @@ button:focus {
     padding-top: 2.4rem;
     padding-bottom: 2.4rem;
     overflow: hidden;
-    flex-grow: 1; 
+    flex-grow: 1;
 }
 
 .member-title {
@@ -20185,7 +20186,6 @@ button:focus {
         left: 1.5rem;
     }
 }
-
 
 /*--------------------- 5.8.About 2 -------------------- */
 /* About us 2 */
@@ -30331,5 +30331,297 @@ a .btn-product .btn-compare span :hover{
 .btn-save:hover {
     background: #e34832;
     border-color: #e34832;
-    color: #fff;
+    color: #fff;}
+
+/* ===========================
+   Home Categories Banner Grid
+   (desktop fixed height + mobile natural)
+   =========================== */
+
+/* پایه: همه چیز داخل کارت 100% و عکس cover */
+.categories-grid .banner,
+.categories-grid .banner-link-wrap,
+.categories-grid .banner-media { height: 100%; }
+
+.categories-grid .banner { margin-bottom: 0; } /* توی این سکشن فاصله اضافی نده */
+
+.categories-grid .banner-media { position: relative; overflow: hidden; }
+
+.categories-grid .banner-media img,
+.categories-grid .banner-media picture {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.categories-grid .banner-media img {
+  object-fit: cover;
+  object-position: center;
+}
+
+/* --------- DESKTOP (>= lg) --------- */
+@media (min-width: 992px) {
+  .categories-grid{
+    --catH: clamp(320px, 34vw, 460px);
+    --catGap: 12px;
+    align-items: stretch;
+  }
+
+  .categories-grid .banner-slot-left,
+  .categories-grid .banner-slot-right{
+    height: var(--catH);
+  }
+
+  .categories-grid .categories-mid{ height: var(--catH); }
+
+  .categories-grid .categories-mid .banner-stack{
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: var(--catGap);
+  }
+
+  .categories-grid .categories-mid .banner-stack-item{
+    flex: 1 1 0;
+    min-height: 0;
+  }
+}
+
+@media (min-width: 992px){
+  .categories-grid .banner-content{
+    /* ریستِ override های قبلی اگر جایی مونده */
+    display: block;
+    height: auto;
+  }
+      .categories-grid .banner-content .btn,
+  .categories-grid .banner-content .banner-btn{
+    margin-top: .4rem !important;  /* نزدیک‌تر به تیتر */
+  }
+    .categories-grid .banner-subtitle{
+    width: 100%;
+    text-align: center !important;
+  }
+
+  .categories-grid .banner-title{ margin: 0 0 .25rem 0; }
+  .categories-grid .banner-subtitle{ margin: 0; }
+}
+
+/* --------- TABLET + MOBILE (< lg) --------- */
+@media (max-width: 991.98px) {
+  /* ارتفاع‌ها آزاد (طبیعی) */
+  .categories-grid,
+  .categories-grid .banner-slot-left,
+  .categories-grid .banner-slot-right,
+  .categories-grid .categories-mid,
+  .categories-grid .banner-stack{
+    height: auto !important;
+      gap: 1rem;
+
+  }
+.categories-grid .categories-mid .banner-stack{
+    display: flex;
+    flex-direction: column;
+          /* فاصله بین tile اول و دوم */
+  }
+.categories-grid .banner-subtitle{
+    width: 100%;
+    text-align: center !important;
+  }
+
+ .categories-grid .banner-slot-right{
+     gap: 2rem;
+ }
+  /* وسطی‌ها زیر هم بیفتن و فاصله بگیرن */
+  .categories-grid .banner-stack{
+    display: block;
+  }
+  /*.categories-grid .banner-stack-item{*/
+  /*  margin-bottom: 12px;*/
+  /*}*/
+  /*.categories-grid .banner-stack-item:last-child{*/
+  /*  margin-bottom: 1rem;*/
+  /*}*/
+
+  /* به جای height ثابت، نسبت تصویر بده */
+  .categories-grid .banner-media{
+    height: auto;
+    aspect-ratio: 16 / 9; /* پیش‌فرض خوب برای موبایل */
+  }
+
+  /* اگر خواستی بنر بزرگ‌ها کمی “کوتاه‌تر/خوش‌فرم‌تر” باشن */
+  .categories-grid .banner-slot-left .banner-media,
+  .categories-grid .banner-slot-right .banner-media{
+    aspect-ratio: 16 / 10;
+  }
+
+  /* متن‌ها کوچیک‌تر که تو باکس نره */
+  /* متن‌ها وسطِ بنر (افقی + عمودی) */
+
+  .categories-grid .banner-content{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    gap: .35rem;
+  }
+
+    .categories-grid .banner-title{
+      font-size: 2rem;
+      margin-bottom: .35rem;
+
+    }
+
+    .categories-grid .banner-subtitle{
+      font-size: 1.2rem;
+      margin: 0;
+      opacity: .9;
+
+    }
+
+  .categories-grid .banner-content .btn,
+  .categories-grid .banner-content .banner-btn{
+    margin-top: .35rem !important;
+    padding: .8rem 1.1rem;
+    font-size: .85rem;
+  }
+
+   .categories-grid .banner-content{
+    /* ریستِ override های قبلی اگر جایی مونده */
+    display: block;
+    height: auto;
+  }
+      .categories-grid .banner-content .btn,
+  .categories-grid .banner-content .banner-btn{
+    margin-top: .4rem !important;  /* نزدیک‌تر به تیتر */
+  }
+
+  .categories-grid .banner-title{ margin: 0 0 .25rem 0; }
+  .categories-grid .banner-subtitle{ margin: 0; }
+}
+
+
+/* =========================
+   Popular Categories (cat-blocks)
+   Extracted from demo-4.css
+   ========================= */
+
+.cat-blocks-container {
+  padding-top: .5rem;
+}
+
+/* ستون‌ها خودشون کش بیان تا کارت‌ها هم‌قد بشن */
+.cat-blocks-container [class*="col-"] {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+}
+
+/* خود کارت */
+.cat-block {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 3rem;
+  text-decoration: none;
+}
+
+/* تصویر */
+.cat-block figure {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+  flex: 1;
+  margin: 0;
+}
+
+.cat-block figure span {
+  position: relative;
+}
+
+/* سایه‌ی فیک زیر تصویر */
+.cat-block figure span:after {
+  content: '';
+  display: block;
+  position: absolute;
+  bottom: -.2rem;
+  left: 45%;
+  width: 105%;
+  margin-left: -45%;
+  height: .3rem;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.3);
+  transition: all 0.35s ease;
+  filter: blur(3px);
+  opacity: .5;
+}
+
+.cat-block img {
+  margin-left: auto;
+  margin-right: auto;
+  transition: transform 0.35s ease;
+  display: block;
+}
+
+.cat-block:hover img {
+  transform: translateY(-14px);
+}
+
+.cat-block:hover figure span:after {
+  opacity: 1;
+}
+
+/* عنوان */
+.cat-block-title {
+  color: #333333;
+  font-weight: 500;
+  font-size: 1.6rem;
+  margin-top: 2rem;
+  margin-bottom: 0;
+}
+
+/* پیشنهاد برای موبایل (اختیاری): فاصله کمتر */
+@media (max-width: 575.98px) {
+  .cat-block { margin-bottom: 2rem; }
+  .cat-block-title { margin-top: 1.2rem; font-size: 1.2rem; }
+}
+
+/* پیشنهاد برای دستگاه‌های لمسی (اختیاری): hover خاموش */
+@media (hover: none) {
+  .cat-block:hover img { transform: none; }
+  .cat-block:hover figure span:after { opacity: .5; }
+}
+
+
+/* یک خط شدن سایه‌ها: ناحیه تصویر را ثابت کن */
+.cat-block figure{
+  height: 120px;          /* می‌تونی 110/130 تست کنی */
+  width: 100%;
+  justify-content: center;
+}
+
+.cat-block figure span{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+/* تصویر داخل قاب، هم‌قد و هم‌خط */
+.cat-block img{
+  max-height: 110px;      /* کمی کمتر از height figure */
+  width: auto;
+}
+
+/* سایه دقیقاً روی یک خط ثابت */
+.cat-block figure span:after{
+  bottom: 6px;            /* به جای مقدار منفی */
+}
+@media (max-width: 575.98px){
+  .cat-block figure{ height: 95px; }
+  .cat-block img{ max-height: 85px; }
 }

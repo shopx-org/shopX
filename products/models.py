@@ -224,7 +224,7 @@ class Category(MPTTModel):
 
     def save(self, *args, **kwargs):
         MAX = self._meta.get_field("slug").max_length
-        base = slugify(self.slug or self.name, allow_unicode=True) or "cat"
+        base = slugify(self.slug or self.name, allow_unicode=False) or "cat"
         base = base[: MAX - 5]
         slug = base
         i = 2
