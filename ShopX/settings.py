@@ -147,7 +147,8 @@ TEMPLATES = [
                 'cart.context_processors.cart_badge',
                 'cart.context_processors.mini_cart',
                 "Core.context_processors.wishlist_context",
-                'Core.context_processors.site_info'
+                'Core.context_processors.site_info',
+                "Core.context_processors.popular_categories",
             ],
         },
     },

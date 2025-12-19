@@ -88,6 +88,17 @@ class PromoBanner(models.Model):
         ("hero", "بنر بزرگ بالای صفحه"),
         ("strip", "نوار وسط صفحه"),
         ("sidebar", "بنر سایدبار"),
+        # جدید
+        ("home_grid", "گرید بنرهای صفحه اصلی"),
+        ("daily_deal", "پیشنهاد روزانه"),
+        ("deal_side", "بنر کنار پیشنهاد روزانه"),
+    ]
+    SLOTS = [
+        ("", "—"),
+        ("left", "چپ"),
+        ("right", "راست"),
+        ("top", "بالا"),
+        ("bottom", "پایین"),
     ]
 
     title = models.CharField(max_length=200, verbose_name="عنوان بنر")
@@ -115,7 +126,22 @@ class PromoBanner(models.Model):
     is_active = models.BooleanField(default=True, verbose_name="فعال؟")
     starts_at = models.DateTimeField(null=True, blank=True, verbose_name="شروع نمایش بنر")
     ends_at = models.DateTimeField(null=True, blank=True, verbose_name="پایان نمایش بنر")
+    slot = models.CharField(
+        max_length=30,
+        blank=True,
+        default="",
+        choices=SLOTS,
+        verbose_name="جایگاه داخل گرید",
+    )
+    priority = models.PositiveSmallIntegerField(
+        default=10,
+        verbose_name="اولویت نمایش (کمتر = بالاتر)"
+    )
 
+    product_filter = models.JSONField(default=dict,
+                                      blank=True)  # مثلا {"discount_percent_gte": 30, "category_ids":[...]}
+    limit_products = models.PositiveSmallIntegerField(default=12)
+    payload = models.JSONField(default=dict, blank=True)
     channel = models.CharField(max_length=24, default="web", verbose_name="کانال")
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -124,9 +150,13 @@ class PromoBanner(models.Model):
     class Meta:
         verbose_name = "بنر تبلیغاتی"
         verbose_name_plural = "بنرهای تبلیغاتی"
+        indexes = [
+            models.Index(fields=["position", "channel", "is_active"]),
+            models.Index(fields=["starts_at", "ends_at"]),
+        ]
 
     def __str__(self):
-        return self.title
+        return self.title or f"Banner #{self.pk}"
 
     def is_running(self, now=None):
         """
