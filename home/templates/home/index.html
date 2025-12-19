@@ -986,35 +986,36 @@
             </a>
         </div><!-- End .owl-carousel -->
 
-        <div class="page-content pt-0 pb-0">
-            {% if video_banner %}
-                <section class="home-hero">
+        {% if video_banner %}
+        <section class="home-hero">
 
-                    <!-- تصویر بنر (fallback) -->
-                    <img src="{{ video_banner.banner_image.url }}"
-                        alt="{{ video_banner.title_big }}"
-                        class="hero-image">
+            <!-- fallback image -->
+            <img
+                src="{{ video_banner.banner_image.url }}"
+                alt="{{ video_banner.title_big }}"
+                class="hero-image"
+            >
 
-                    <!-- ویدیو -->
-                    <video class="hero-video"
-                        src="{{ video_banner.video_file.url }}"
-                        autoplay
-                        muted
-                        loop
-                        playsinline>
-                    </video>
+            <!-- video -->
+            <video
+                class="hero-video"
+                src="{{ video_banner.video_file.url }}"
+                autoplay
+                muted
+                loop
+                playsinline
+                poster="{{ video_banner.banner_image.url }}">
+            </video>
 
-                    <!-- متن -->
-                    <div class="hero-content">
-                        <h4>{{ video_banner.title_small }}</h4>
-                        <h3>{{ video_banner.title_big }}</h3>
-                    </div>
+            <!-- content -->
+            <div class="hero-content">
+                <h4>{{ video_banner.title_small }}</h4>
+                <h3>{{ video_banner.title_big }}</h3>
+            </div>
 
-                </section>
-            {% endif %}
-        </div>
+        </section>
+        {% endif %}
 
-        <!-- End .video-banner bg-image -->
 
         <div class="mb-6"></div><!-- End .mb-6 -->
 
