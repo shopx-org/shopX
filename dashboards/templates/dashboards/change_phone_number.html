@@ -4,7 +4,7 @@
 {% block UserDash_content %}
 <div class="tab-pane fade show active">
     <div class="col-lg-10 col-xl-8 mx-auto dashboard-card">
-        <h4 class="fw-bold border-bottom pb-2">📱 تغییر شماره همراه</h4>
+        <h4 class="fw-bold border-bottom pb-2 text-right">📱 تغییر شماره همراه</h4>
 
         <div id="alert-area" class="mb-3" role="alert" aria-live="polite"></div>
 
@@ -34,8 +34,9 @@
 {% endblock %}
 
 {% block CSS-JS %}
-<meta name="csrf-token" content="{{ csrf_token }}">
+<meta name="change-phone-url" content="{% url 'dashboards:change_phone_otp' %}">
 <script src="{% static 'js/change_phone_number.js' %}" defer></script>
+
 {% endblock %}
 
 

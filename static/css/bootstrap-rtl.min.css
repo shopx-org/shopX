@@ -2421,7 +2421,7 @@ select.form-control-lg:not([size]):not([multiple]) {
     width: 100%;
     margin-top: .25rem;
     font-size: 80%;
-    color: #dc3545
+    color: #dc3545;
 }
 
 .invalid-tooltip {

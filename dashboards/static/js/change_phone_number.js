@@ -1,6 +1,11 @@
 'use strict';
 
-const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+const CHANGE_PHONE_OTP_URL =
+    document.querySelector('meta[name="change-phone-url"]').content;
+
+const csrfToken =
+    document.querySelector('[name=csrfmiddlewaretoken]').value;
+
 const alertArea = document.getElementById('alert-area');
 
 function showAlert(message, type = 'success') {
@@ -9,7 +14,7 @@ function showAlert(message, type = 'success') {
 }
 
 async function postData(payload) {
-    const res = await fetch('/dashboards/change-phone-otp/', {
+    const res = await fetch(CHANGE_PHONE_OTP_URL,{
         method: 'POST',
         headers: {
             'X-CSRFToken': csrfToken,

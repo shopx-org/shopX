@@ -104,7 +104,6 @@ INSTALLED_APPS = [
     "ckeditor",
     'imagekit',
 
-
 ]
 
 # INSTALLED_APPS += [

@@ -15510,7 +15510,7 @@ small.form-text {
 }
 
 .alert-danger {
-    color: #fefefe !important;
+    color: #000000 !important;
     background-color: #fbc9c9;
     border: 1px solid #bd2130;
 }
@@ -30459,6 +30459,114 @@ a .btn-product .btn-compare span :hover{
 
   .categories-grid .banner-content{
     width: 100%;
+    color: #fff;
+}
+
+
+/* style page 404 */
+.error-content {
+        background-color: #ffffff;
+        padding: 80px 20px;
+        text-align: center;
+    }
+
+    .error-image {
+        display: block;
+        margin: 0 auto 30px auto;
+        max-width: 400px;
+        width: 100%;
+        height: auto;
+        border-radius: 10px;
+    }
+
+    .error-title {
+        font-size: 3rem;
+        font-weight: bold;
+        margin-bottom: 20px;
+        color: #333;
+    }
+
+    /* متن متاسفانه – کاملاً وسط */
+    .error-text {
+        font-size: 1.25rem;
+        color: #666;
+        margin: 0 auto 45px auto;
+        max-width: 600px;   /* وسط‌چین حرفه‌ای متن */
+        line-height: 1.8;
+        text-align: center;
+    }
+
+    /* دکمه بزرگ‌تر */
+    .btn-home {
+        display: inline-block;
+        padding: 16px 45px;
+        border: 2px solid #FA523C;
+        color: #FA523C;
+        text-decoration: none;
+        border-radius: 8px;
+        font-size: 1.2rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-home:hover {
+        background-color: #FA523C;
+        color: #ffffff;
+    }
+
+    @media (max-width: 768px) {
+        .error-title {
+            font-size: 2.2rem;
+        }
+
+        .error-text {
+            font-size: 1.05rem;
+            max-width: 90%;
+        }
+
+        .error-image {
+            max-width: 280px;
+        }
+
+        .btn-home {
+            padding: 14px 35px;
+            font-size: 1.1rem;
+        }
+    }
+/* End style page 404 */
+
+/* video banner */
+.home-hero {
+    position: relative;
+    width: 100vw;
+    height: 45vh;              /* کنترل ارتفاع */
+    min-height: 280px;
+    max-height: 420px;
+    overflow: hidden;
+}
+
+/* تصویر بک‌گراند */
+.hero-image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* ویدیو */
+.hero-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* متن روی بنر */
+.hero-content {
+    position: relative;
+    z-index: 3;
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -30625,3 +30733,36 @@ a .btn-product .btn-compare span :hover{
   .cat-block figure{ height: 95px; }
   .cat-block img{ max-height: 85px; }
 }
+/* 
+    color: #fff;
+    background: linear-gradient(
+        rgba(0,0,0,.35),
+        rgba(0,0,0,.35)
+    );
+} */
+
+.hero-content h4 {
+    color: #fefefe;
+    font-weight: bold;
+    margin-bottom: 10px;
+    opacity: 0.9;
+}
+
+.hero-content h3 {
+    font-size: 2.9rem;
+    font-weight: bold;
+    color: #fefefe;
+}
+
+@media (max-width: 768px) {
+    .home-hero {
+        height: 38vh;
+    }
+
+    .hero-content h3 {
+        font-size: 2rem;
+    }
+}
+
+/* End video banner */
+

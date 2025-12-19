@@ -50,140 +50,136 @@ class PersonalInfoView(View):
         return render(request, self.template_name, {'form': form})
 
 
-# ==========================
-# 🔹 تغییر شماره موبایل با OTP
-# ==========================
 @method_decorator(login_required, name='dispatch')
 class ChangePhoneOtpView(View):
-    template_name = 'dashboards/change_phone_number.html'
+    template_name = "dashboards/change_phone_number.html"
 
+    # ===============================
+    # GET → نمایش صفحه
+    # ===============================
     def get(self, request):
         form = ChangePhoneNumberForm(user=request.user)
-        return render(request, self.template_name, {'form': form, 'phone': request.user.phone})
+        return render(
+            request,
+            self.template_name,
+            {
+                "form": form,
+                "phone": request.user.phone
+            }
+        )
 
+    # ===============================
+    # POST → منطق OTP
+    # ===============================
     def post(self, request):
-        stage = request.POST.get('stage')       # send_old | verify_old | verify_new
-        code = request.POST.get('code')
-        new_phone = request.POST.get('new_phone', '').strip()
-        token = request.POST.get('token')
+        stage = request.POST.get("stage")
+        code  = request.POST.get("code")
+        new_phone = request.POST.get("new_phone", "").strip()
         sess = request.session
 
         try:
-            # === مرحله ۱: ارسال کد به شماره فعلی ===
-            if stage == 'send_old':
-                # 🔸 اجرای فرم ولیدیشن قبل از ارسال OTP
-                form = ChangePhoneNumberForm({'new_phone': new_phone}, user=request.user)
+            # STEP 1: send OTP to old phone
+            if stage == "send_old":
+                form = ChangePhoneNumberForm(
+                    {"new_phone": new_phone},
+                    user=request.user
+                )
                 if not form.is_valid():
-                    # ارسال خطای فارسی از فرم به JSON
-                    error_msg = next(iter(form.errors.values()))[0]
-                    return JsonResponse({'status': 'error', 'message': error_msg})
+                    msg = next(iter(form.errors.values()))[0]
+                    return JsonResponse({"status": "error", "message": msg})
 
-                # حالا که معتبره، شماره‌ی تمیزشده را بگیریم
-                new_phone = form.cleaned_data['new_phone']
-
-                now = timezone.now()
-                last = sess.get('otp_last_sent')
-
-                # محدودیت ۶۰ ثانیه‌ای برای ارسال مجدد
-                if last and last.get('phone') == request.user.phone:
-                    last_ts = datetime.fromisoformat(last.get('ts'))
-                    if (now - last_ts) < timedelta(seconds=60):
-                        return JsonResponse({
-                            'status': 'ok',
-                            'token': last.get('token'),
-                            'stage': 'verify_old',
-                            'message': 'کد قبلاً ارسال شده است، لطفاً صبر کنید یا کد را وارد کنید.'
-                        })
-
-                # ✅ حالا مجاز است OTP ارسال شود
                 token = otp_services.create_session(request.user.phone)
-                sess['otp_last_sent'] = {'phone': request.user.phone, 'ts': now.isoformat(), 'token': token}
-                sess['otp_pending_new_phone'] = new_phone
+
+                sess["otp_old_token"] = token
+                sess["pending_new_phone"] = form.cleaned_data["new_phone"]
                 sess.modified = True
 
                 return JsonResponse({
-                    'status': 'ok',
-                    'token': token,
-                    'stage': 'verify_old',
-                    'message': 'کد تأیید برای شماره فعلی ارسال شد.'
+                    "status": "ok",
+                    "stage": "verify_old",
+                    "message": "کد تأیید به شماره فعلی ارسال شد."
                 })
 
-            # === مرحله ۲: تأیید شماره فعلی و ارسال کد به شماره جدید ===
-            elif stage == 'verify_old':
-                token_in = token or sess.get('otp_last_sent', {}).get('token')
-                if not token_in:
-                    return JsonResponse({'status': 'error', 'message': 'کد تأیید معتبر یافت نشد.'})
+            # STEP 2: verify old phone
+            elif stage == "verify_old":
+                token = sess.get("otp_old_token")
+                if not token:
+                    return JsonResponse({"status": "error", "message": "توکن یافت نشد."})
 
-                otp_services.verify(token_in, code)
+                otp_services.verify(token, code)
 
-                pending_new = new_phone or sess.get('otp_pending_new_phone')
-                if not pending_new:
-                    return JsonResponse({'status': 'error', 'message': 'شماره جدید مشخص نیست.'})
-                if User.objects.filter(phone=pending_new).exists():
-                    return JsonResponse({'status': 'error', 'message': 'شماره جدید قبلاً ثبت شده است.'})
+                new_phone = sess.get("pending_new_phone")
+                if User.objects.filter(phone=new_phone).exists():
+                    return JsonResponse({
+                        "status": "error",
+                        "message": "شماره جدید قبلاً ثبت شده است."
+                    })
 
-                now = timezone.now()
-                last = sess.get('otp_last_sent_new', {})
-                if last and last.get('phone') == pending_new:
-                    last_ts = datetime.fromisoformat(last.get('ts'))
-                    if (now - last_ts) < timedelta(seconds=60):
-                        return JsonResponse({
-                            'status': 'ok',
-                            'token': last.get('token'),
-                            'stage': 'verify_new',
-                            'message': 'کد برای شماره جدید قبلاً ارسال شده است.'
-                        })
-
-                token_new = otp_services.create_session(pending_new)
-                sess['otp_last_sent_new'] = {'phone': pending_new, 'ts': now.isoformat(), 'token': token_new}
-                sess['otp_pending_new_phone'] = pending_new
+                token_new = otp_services.create_session(new_phone)
+                sess["otp_new_token"] = token_new
                 sess.modified = True
 
                 return JsonResponse({
-                    'status': 'ok',
-                    'token': token_new,
-                    'stage': 'verify_new',
-                    'message': 'کد دوم برای شماره جدید ارسال شد.'
+                    "status": "ok",
+                    "stage": "verify_new",
+                    "message": "کد تأیید به شماره جدید ارسال شد."
                 })
 
-            # === مرحله ۳: تأیید شماره جدید و ثبت تغییر ===
-            elif stage == 'verify_new':
-                token_in = token or sess.get('otp_last_sent_new', {}).get('token')
-                pending_new = new_phone or sess.get('otp_pending_new_phone')
+            # STEP 3: verify new phone
+            elif stage == "verify_new":
+                token = sess.get("otp_new_token")
+                new_phone = sess.get("pending_new_phone")
 
-                if not token_in or not pending_new:
-                    return JsonResponse({'status': 'error', 'message': 'اطلاعات تأیید ناقص است.'})
+                if not token or not new_phone:
+                    return JsonResponse({
+                        "status": "error",
+                        "message": "اطلاعات ناقص است."
+                    })
 
-                otp_services.verify(token_in, code)
+                otp_services.verify(token, code)
 
-                if User.objects.filter(phone=pending_new).exists():
-                    return JsonResponse({'status': 'error', 'message': 'این شماره در حال حاضر ثبت شده است.'})
+                request.user.phone = new_phone
+                request.user.save(update_fields=["phone"])
 
-                request.user.phone = pending_new
-                request.user.save()
+                sess.flush()
 
-                # پاکسازی session پس از موفقیت
-                for key in ['otp_last_sent', 'otp_last_sent_new', 'otp_pending_new_phone']:
-                    sess.pop(key, None)
-                sess.modified = True
+                return JsonResponse({
+                    "status": "done",
+                    "message": "شماره موبایل با موفقیت تغییر یافت."
+                })
 
-                return JsonResponse({'status': 'done', 'message': 'شماره موبایل با موفقیت تغییر یافت.'})
+            return JsonResponse({
+                "status": "error",
+                "message": "مرحله نامعتبر است."
+            })
 
-            # مرحله نامعتبر
-            return JsonResponse({'status': 'error', 'message': 'درخواست نامعتبر است.'})
+        # ===== OTP errors =====
+        except otp_services.OtpBlocked:
+            return JsonResponse({
+                "status": "error",
+                "message": "ارسال کد برای این شماره موقتاً مسدود شده است."
+            })
+        except otp_services.OtpTooSoon:
+            return JsonResponse({
+                "status": "error",
+                "message": "لطفاً کمی صبر کنید."
+            })
+        except otp_services.OtpExpired:
+            return JsonResponse({
+                "status": "error",
+                "message": "کد منقضی شده است."
+            })
+        except otp_services.OtpInvalid:
+            return JsonResponse({
+                "status": "error",
+                "message": "کد وارد شده اشتباه است."
+            })
+        except Exception:
+            return JsonResponse({
+                "status": "error",
+                "message": "خطای داخلی سرور"
+            })
 
-        except otp_services.OtpError as e:
-            error_str = str(e).lower().strip()
-            if 'bad' in error_str or 'invalid' in error_str or 'wrong' in error_str:
-                message = 'کد وارد شده اشتباه است.'
-            elif 'expire' in error_str or 'expiration' in error_str or 'expired' in error_str:
-                message = 'زمان اعتبار کد به پایان رسیده است.'
-            else:
-                message = str(e)
-            return JsonResponse({'status': 'error', 'message': message})
-        except Exception as e:
-            return JsonResponse({'status': 'error', 'message': f'خطای داخلی سرور: {str(e)}'})
-        
 
 @method_decorator(login_required, name='dispatch')
 class UserCommentsView(View):

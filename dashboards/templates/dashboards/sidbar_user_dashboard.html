@@ -8,24 +8,24 @@
                         class="fas fa-tachometer-alt"></i><span class="menu-text">داشبورد</span></a></li>
                 <li>
                     <a href="{% url 'dashboards:user_orders' %}"
-                       class="menu-link {% if request.resolver_match.url_name == 'user_orders' %}active{% endif %}">
+                       class="menu-link {% if request.resolver_match.url_name == 'user_orders' %}active{% endif %}" data-scroll="#user-orders">
                         <i class="fas fa-shopping-bag"></i>
                         <span class="menu-text">سفارشات</span>
                     </a>
                 </li>
-                <li><a href="#tab-wallet" class="tab-trigger-link"><i class="fas fa-wallet"></i><span
-                        class="menu-text">کیف پول</span></a></li>
-                <li><a href="#tab-favorites" class="tab-trigger-link"><i class="fas fa-heart"></i><span
+                {% comment %} <li><a href="#tab-wallet" class="tab-trigger-link"><i class="fas fa-wallet"></i><span
+                        class="menu-text">کیف پول</span></a></li> {% endcomment %}
+                <li><a href="{% url 'core:wishlist_page' %}"><i class="fas fa-heart"></i><span
                         class="menu-text">کالاهای مورد علاقه</span></a></li>
                 <li><a href="{% url 'dashboards:user_comments' %}" data-scroll="#user-comments"><i
                         class="fas fa-comments"></i><span
                         class="menu-text">نظرات</span></a></li>
-                <li><a href="#tab-recent" class="tab-trigger-link"><i class="fas fa-history"></i><span
-                        class="menu-text">بازدیدهای اخیر</span></a></li>
-                <li><a href="#tab-messages" class="tab-trigger-link"><i class="fas fa-envelope"></i><span
-                        class="menu-text">پیام‌ها</span></a></li>
-                <li><a href="#tab-giftcards" class="tab-trigger-link"><i class="fas fa-gift"></i><span
-                        class="menu-text">کارت‌های هدیه</span></a></li>
+                {% comment %} <li><a href="#tab-recent" class="tab-trigger-link"><i class="fas fa-history"></i><span
+                        class="menu-text">بازدیدهای اخیر</span></a></li> {% endcomment %}
+                {% comment %} <li><a href="#tab-messages" class="tab-trigger-link"><i class="fas fa-envelope"></i><span
+                        class="menu-text">پیام‌ها</span></a></li> {% endcomment %}
+                {% comment %} <li><a href="#tab-giftcards" class="tab-trigger-link"><i class="fas fa-gift"></i><span
+                        class="menu-text">کارت‌های هدیه</span></a></li> {% endcomment %}
                 <li><a href="{% url 'dashboards:addresses' %}" data-scroll="#add-addresses"><i
                         class="fas fa-map-marker-alt"></i><span
                         class="menu-text">آدرس</span></a></li>
