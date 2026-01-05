@@ -631,3 +631,364 @@
     font-size: 1.4rem;
     color: #FA523C;
 }
+
+@media print {
+
+  @page { size: A4; margin: 10mm; }
+
+  /* 1) همه چیز مخفی */
+  body * {
+    visibility: hidden !important;
+  }
+
+  /* 2) فقط ناحیه فاکتور قابل دیدن */
+  .print-area,
+  .print-area * {
+    visibility: visible !important;
+  }
+
+  /* 3) فاکتور بیاد بالای صفحه و تمام عرض */
+  .print-area {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* 4) اسکرول/overflow در چاپ فاجعه است */
+  .invoice-popup,
+  .overflow-auto,
+  .table-responsive,
+  .table-responsive-md {
+    overflow: visible !important;
+  }
+
+  /* 5) چیزهای غیر چاپی (دکمه‌ها/لینک برگشت) */
+  .btn,
+  a[href]:after {
+    display: none !important;
+  }
+
+  /* 6) کارت‌ها بدون سایه و حاشیه */
+  .card, .custom-card {
+    box-shadow: none !important;
+    border: 0 !important;
+  }
+
+  /* 7) جمع‌وجور کردن جدول */
+  table { width: 100% !important; border-collapse: collapse !important; }
+  th, td { padding: 6px 4px !important; font-size: 10.5px !important; }
+  tr { page-break-inside: avoid !important; }
+}
+@media print {
+  @page { size: A4; margin: 10mm; }
+
+  html, body {
+    background: #fff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* فقط فاکتور چاپ شود */
+  body * { visibility: hidden !important; }
+
+  .print-area, .print-area * { visibility: visible !important; }
+
+  .print-area {
+    position: fixed !important; /* از absolute بهتره برای print */
+    top: 0 !important;
+    right: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* نابودی کامل اسکرول/overflow در چاپ */
+  .invoice-popup,
+  .overflow-auto,
+  .table-responsive,
+  .table-responsive-md {
+    overflow: visible !important;
+    max-height: none !important;
+  }
+
+  /* همه فاصله‌های اضافی بوتسترپ/کارت */
+  .row, .col-12, .card, .card-body, .invoice1 {
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border: 0 !important;
+  }
+
+  /* فاصله‌های داخل بلوک‌های اطلاعاتی کمتر */
+  .invoice-breadcrumb { margin: 0 0 8px 0 !important; }
+  .iblock { padding: 6px !important; }
+
+  /* پیشنهاد: نوار پیگیری در چاپ حذف شود */
+  .order-status-box { display: none !important; }
+
+  /* جدول جمع‌وجور + جلوگیری از شکستن ردیف‌ها */
+  table { width: 100% !important; border-collapse: collapse !important; }
+  th, td { padding: 5px 4px !important; font-size: 10.5px !important; }
+  tr { page-break-inside: avoid !important; }
+
+  /* دکمه‌ها و لینک برگشت چاپ نشوند */
+  .btn { display: none !important; }
+}
+
+@media print {
+
+  /* فونت و خوانایی */
+  body { font-size: 11px !important; color: #111 !important; }
+  .invoice1 { font-family: system-ui, sans-serif !important; }
+
+  /* ====== HEADER LAYOUT (سازمانی) ====== */
+  .invoice-breadcrumb {
+    margin: 0 0 10px 0 !important;
+  }
+
+  /* بوتسترپ row/col را برای چاپ بی‌اثر می‌کنیم */
+  .invoice-breadcrumb .row.g-3 {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important; /* دو ستون */
+    gap: 8px !important;
+    margin: 0 !important;
+  }
+  .invoice-breadcrumb [class*="col-"] {
+    width: auto !important;
+    max-width: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* باکس‌ها شکیل و سازمانی */
+  .invoice-breadcrumb .iblock {
+    background: #fff !important;
+    border: 1px solid #ddd !important;
+    border-radius: 10px !important;
+    padding: 8px 10px !important;
+  }
+
+  /* لوگو/عنوان */
+  .invoice-breadcrumb img { max-height: 50px !important; }
+  .invoice-breadcrumb h5 { font-size: 13px !important; margin: 0 0 6px 0 !important; }
+
+  /* لیست‌ها مرتب */
+  .invoice-breadcrumb ul { margin: 0 !important; padding: 0 !important; }
+  .invoice-breadcrumb li {
+    display: flex !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+    margin: 2px 0 !important;
+    white-space: normal !important;
+  }
+  .invoice-breadcrumb .label { color: #555 !important; min-width: 88px !important; }
+  .invoice-breadcrumb .value { font-weight: 600 !important; color: #111 !important; }
+
+  /* ====== TRACKING: در چاپ حذف ====== */
+  .order-status-box { display: none !important; }
+
+  /* ====== TABLE: شکیل ====== */
+  table.invoice-table {
+    border-collapse: collapse !important;
+    width: 100% !important;
+    margin-top: 8px !important;
+  }
+  table.invoice-table th,
+  table.invoice-table td {
+    border: 1px solid #cfcfcf !important;
+    padding: 6px 5px !important;
+    font-size: 10.5px !important;
+  }
+  table.invoice-table thead th {
+    background: #f3f4f6 !important;
+    font-weight: 700 !important;
+  }
+
+  /* جلوگیری از نصف شدن ردیف‌ها */
+  tr { page-break-inside: avoid !important; }
+
+  /* جمع‌ها سمت راست/پایین مرتب */
+  table.invoice-table tfoot td {
+    font-weight: 700 !important;
+  }
+}
+
+@media print {
+  @page { size: A4; margin: 12mm; }
+
+  html, body { margin: 0 !important; padding: 0 !important; background: #fff !important; }
+
+  /* فقط فاکتور چاپ شود */
+  body * { display: none !important; }
+  #print-area { display: block !important; }
+
+  /* جلوگیری از تکرار/باگ چاپ */
+  #print-area { position: static !important; }
+
+  /* حذف اسکرول‌ها در چاپ */
+  .invoice-popup, .overflow-auto, .table-responsive, .table-responsive-md {
+    overflow: visible !important;
+    max-height: none !important;
+  }
+
+  /* حذف نوار پیگیری در چاپ (سازمانی‌تر) */
+  .order-status-box { display: none !important; }
+
+  /* کارت و فاصله‌ها */
+  .card, .card-body {
+    border: 1px solid #e5e7eb !important;
+    border-radius: 14px !important;
+    box-shadow: none !important;
+    padding: 10px !important;
+  }
+
+  /* ===== header سازمانی: دو ستون ===== */
+  .invoice-breadcrumb .row.g-3 {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+    margin: 0 !important;
+  }
+  .invoice-breadcrumb [class*="col-"] { padding: 0 !important; margin: 0 !important; max-width: none !important; }
+
+  .iblock {
+    background: #fff !important;
+    border: 1px solid #d1d5db !important;
+    border-radius: 12px !important;
+    padding: 8px 10px !important;
+  }
+
+  img { max-height: 55px !important; }
+
+  /* لیست‌های اطلاعاتی مرتب */
+  .invoice-breadcrumb ul { margin: 0 !important; }
+  .invoice-breadcrumb li {
+    display: flex !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    margin: 2px 0 !important;
+  }
+  .invoice-breadcrumb .label { color: #6b7280 !important; min-width: 95px !important; }
+  .invoice-breadcrumb .value { font-weight: 700 !important; color: #111827 !important; text-align: left !important; }
+
+  /* ===== جدول شیک ===== */
+  table.invoice-table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    margin-top: 10px !important;
+  }
+  table.invoice-table th, table.invoice-table td {
+    border: 1px solid #cfd3d8 !important;
+    padding: 6px 5px !important;
+    font-size: 10.5px !important;
+  }
+  table.invoice-table thead th {
+    background: #f3f4f6 !important;
+    font-weight: 800 !important;
+  }
+  table.invoice-table tfoot td { font-weight: 800 !important; }
+
+  /* جلوگیری از شکستن ردیف‌ها */
+  tr { page-break-inside: avoid !important; }
+
+  /* دکمه‌ها چاپ نشوند */
+  .btn { display: none !important; }
+}
+
+@media print {
+
+  @page { size: A4; margin: 12mm; }
+
+  /* --- فقط هنگام چاپ --- */
+  html, body {
+    background: #fff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* 1) توی چاپ، همه چیز مخفی */
+  body * {
+    visibility: hidden !important;
+  }
+
+  /* 2) فقط فاکتور دیده شود */
+  .print-area,
+  .print-area * {
+    visibility: visible !important;
+  }
+
+  /* 3) جایگذاری فاکتور (برای جلوگیری از تکرار: fixed نذار) */
+  .print-area {
+    position: static !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* 4) اسکرول و ریسپانسیو جدول توی چاپ خراب می‌کنه */
+  .invoice-popup,
+  .overflow-auto,
+  .table-responsive,
+  .table-responsive-md {
+    overflow: visible !important;
+    max-height: none !important;
+  }
+
+  /* 5) دکمه‌ها چاپ نشوند */
+  .btn { display: none !important; }
+
+  /* 6) نوار پیگیری برای فاکتور رسمی بهتره حذف شه */
+  .order-status-box { display: none !important; }
+
+  /* 7) فاکتور سازمانی: هدر چهار کادر → تبدیل به گرید 2 ستونه */
+  .invoice-breadcrumb .row.g-3 {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+    margin: 0 !important;
+  }
+  .invoice-breadcrumb [class*="col-"] {
+    max-width: none !important;
+    width: auto !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .invoice-breadcrumb .iblock {
+    background: #fff !important;
+    border: 1px solid #d1d5db !important;
+    border-radius: 12px !important;
+    padding: 8px 10px !important;
+  }
+
+  /* 8) لیست‌ها مرتب و یکدست */
+  .invoice-breadcrumb ul { margin: 0 !important; }
+  .invoice-breadcrumb li {
+    display: flex !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    margin: 2px 0 !important;
+  }
+  .invoice-breadcrumb .label { color: #6b7280 !important; min-width: 95px !important; }
+  .invoice-breadcrumb .value { font-weight: 700 !important; color: #111827 !important; }
+
+  /* 9) جدول شکیل‌تر و جلوگیری از شکستن ردیف‌ها */
+  table.invoice-table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+  table.invoice-table th,
+  table.invoice-table td {
+    border: 1px solid #cfd3d8 !important;
+    padding: 6px 5px !important;
+    font-size: 10.5px !important;
+  }
+  table.invoice-table thead th {
+    background: #f3f4f6 !important;
+    font-weight: 800 !important;
+  }
+  tr { page-break-inside: avoid !important; }
+}

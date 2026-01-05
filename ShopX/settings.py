@@ -61,7 +61,7 @@ SHOP_ORIGIN_POSTAL_CODE = os.getenv("SHOP_ORIGIN_POSTAL_CODE", "")
 # ── Core ───────────────────────────────────────────────────────────────────────
 
 
-SECRET_KEY = env("SECRET_KEY", default="django-insecure-change-me-in-.env")
+SECRET_KEY = env("SECRET_KEY")
 DEBUG = env.bool("DEBUG", default=True)
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["127.0.0.1", "localhost"])
 
@@ -100,8 +100,8 @@ INSTALLED_APPS = [
 
     # apps
     "django_jalali",
+
     "django_social_share",
-    "ckeditor",
     'imagekit',
 
 ]
@@ -120,6 +120,7 @@ JALALI_DATE_DEFAULTS = {
 }
 # ── Middleware ─────────────────────────────────────────────────────────────────
 MIDDLEWARE = [
+    "Core.middleware.MaintenanceModeMiddleware",
     "django.middleware.security.SecurityMiddleware",
     # "csp.middleware.CSPMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -128,6 +129,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+
+
 ]
 
 ROOT_URLCONF = "ShopX.urls"
@@ -148,6 +151,8 @@ TEMPLATES = [
                 "Core.context_processors.wishlist_context",
                 'Core.context_processors.site_info',
                 "Core.context_processors.popular_categories",
+                'Core.context_processors.header_brands',
+
             ],
         },
     },
@@ -250,29 +255,39 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 GHASEDAK_API_KEY = env("GHASEDAK_API_KEY", default="")
 OTP_TEMPLATE_NAME = env("OTP_TEMPLATE_NAME", default="verifyphone")
 
-# پنجره شمارش کل ارسال‌ها
+# تنظیمات OTP (همیشه فعال)
+OTP_TTL_SECONDS = 60          # مدت اعتبار کد (ثانیه)
+
+OTP_RESEND_GAP_SEC = 60      # فاصله بین ارسال دوباره (برای تست راحت)
+OTP_MAX_RESENDS = 3           # برای تست؛ در پروداکشن محدود کن
+OTP_BLOCK_DURATION = 3600        # بلاک کوتاه تستی (واحد طبق پیاده‌سازی‌ات)
+
 OTP_WINDOW_SECONDS = 3600
 OTP_MAX_ATTEMPTS_IN_WINDOW = 3
 
-# مقادیر مناسب DEV (برای تست سریع). ✱ دقت: کامنت فارسی را با # بنویس؛
-# هر متن غیرکامنت در انتهای خطوط باعث SyntaxError می‌شود.
-if DEBUG:
-    OTP_TTL_SECONDS = 60
-OTP_RESEND_GAP_SEC = 1       # فاصله بین ارسال دوباره (برای تست راحت)
-OTP_MAX_RESENDS = 999        # برای تست؛ در پروداکشن محدود کن
-OTP_BLOCK_DURATION = 2       # بلاک کوتاه تستی (دقیقه/ثانیه بسته به پیاده‌سازی‌ات)
-
-OTP_WINDOW_SECONDS = 3600
-OTP_MAX_ATTEMPTS_IN_WINDOW = 100000
-
 
 # ── Security (نمونه‌هایی که در پروداکشن فعال می‌کنی) ─────────────────────────
-# CSRF_COOKIE_SECURE = True
-# SESSION_COOKIE_SECURE = True
-# SECURE_HSTS_SECONDS = 31536000
-# SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-# SECURE_HSTS_PRELOAD = True
-# SECURE_SSL_REDIRECT = True
+# ── Security ────────────────────────────────────────────────
+CSRF_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_SECURE = not DEBUG
+
+CSRF_COOKIE_HTTPONLY = True
+SESSION_COOKIE_HTTPONLY = True
+
+CSRF_COOKIE_SAMESITE = "Lax"
+SESSION_COOKIE_SAMESITE = "Lax"
+
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = "DENY"
+SECURE_BROWSER_XSS_FILTER = True
+
+# فقط در prod
+SECURE_SSL_REDIRECT = not DEBUG  # یا از env بخون
+
+SECURE_HSTS_SECONDS = 86400 if not DEBUG else 0
+# روی cPanel بهتره فعلاً false باشه
+SECURE_HSTS_INCLUDE_SUBDOMAINS = False if DEBUG else env.bool("SECURE_HSTS_INCLUDE_SUBDOMAINS", default=False)
+SECURE_HSTS_PRELOAD = False if DEBUG else env.bool("SECURE_HSTS_PRELOAD", default=False)
 
 #  ──────────────────────────────────────
 
@@ -340,3 +355,7 @@ SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_SAMESITE = "Lax"
 SESSION_COOKIE_SAMESITE = "Lax"
 
+# ─────────────────────────────────────────────────────────────
+# handel 503
+# ─────────────────────────────────────────────────────────────
+MAINTENANCE_MODE = False

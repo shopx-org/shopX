@@ -7,6 +7,25 @@
 
 {% block content %}
     <main class="main" dir="rtl">
+
+
+        {#        {% if active_brand or active_category %}#}
+        {#            <div class="mb-3">#}
+        {#                <div class="d-flex flex-wrap align-items-center gap-2">#}
+        {#                    <strong>#}
+        {#                        {% if active_category and active_brand %} محصولات#}
+        {#                            {{ active_brand.name }} در {{ active_category.name }}#}
+        {#                        {% elif active_brand %} محصولات برند#}
+        {#                            {{ active_brand.name }}#}
+        {#                        {% elif active_category %} محصولات دسته#}
+        {#                            {{ active_category.name }}#}
+        {#                        {% endif %}#}
+        {#                    </strong>#}
+        {#                    <a class="btn btn-sm btn-outline-secondary" href="{% url 'products:product_list' %}"> حذف فیلتر </a>#}
+        {#                </div>#}
+        {#            </div>#}
+        {#        {% endif %}#}
+
         <!-- Breadcrumb -->
         <nav aria-label="breadcrumb" class="breadcrumb-nav mb-3">
             <div class="container">
@@ -30,16 +49,59 @@
         </nav>
 
         <div class="page-content">
+
             <div class="container">
                 <div class="row">
                     <!-- محتوای اصلی -->
                     <div class="col-lg-10 col-xl-4-5col" style="padding-right: 50px;">
+
+
                         <div class="mb-2"></div>
 
                         <h2 class="title title-border">
                             {% if category %}{{ category.name }}{% else %}محصولات {% endif %}
                         </h2>
 
+                        {# --- Active filters bar (Campaign / Brand / Category) --- #}
+                        {% if campaign or active_brand or active_category %}
+                            <div class="dk-active-filters-wrap">
+                                <div class="dk-active-filters">
+                                    <div class="dk-filters-row">
+
+                                        {% if campaign %}
+                                            <div class="dk-chip dk-chip-campaign">
+                                                <span class="dk-chip-label">کمپین:</span>
+                                                <span class="dk-chip-value">{{ campaign.name }}</span>
+                                                <a class="dk-chip-x"
+                                                   href="?{% querystring campaign_id='' page='' %}"
+                                                   aria-label="حذف کمپین">×</a>
+                                            </div>
+                                        {% endif %}
+
+                                        {% if active_brand %}
+                                            <div class="dk-chip dk-chip-brand">
+                                                <span class="dk-chip-label">برند:</span>
+                                                <span class="dk-chip-value">{{ active_brand.name }}</span>
+                                                <a class="dk-chip-x"
+                                                   href="?{% querystring brand='' page='' %}"
+                                                   aria-label="حذف برند">×</a>
+                                            </div>
+                                        {% endif %}
+
+                                        {% if active_category %}
+                                            <div class="dk-chip dk-chip-category">
+                                                <span class="dk-chip-label">دسته:</span>
+                                                <span class="dk-chip-value">{{ active_category.name }}</span>
+                                                <a class="dk-chip-x"
+                                                   href="?{% querystring cat='' category='' page='' %}"
+                                                   aria-label="حذف دسته">×</a>
+                                            </div>
+                                        {% endif %}
+
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
                         <div class="mb-4"></div>
 
                         <!-- نوار ابزار بالای گرید -->
@@ -50,7 +112,7 @@
                                 </div>
                             </div>
 
-                            <div class="toolbox-right">
+                            <div class="toolbox-right mb-2">
                                 <div class="toolbox-sort">
                                     <label for="sortby">مرتب سازی بر اساس : </label>
                                     <div class="select-custom">
@@ -85,13 +147,14 @@
                                     </div>
                                 </div>
                             </div>
+
                         </div>
 
                         {# --- گرید محصولات: DROP-IN --- #}
                         <div class="products mb-3">
                             <div class="row" id="product-list">
                                 {% for p in products %}
-                                    <div class="col-6 col-md-4 col-xl-3">
+                                    <div class="col-6 col-md-4 col-xl-3 mb-1">
                                         <div class="product product-7 dk-product-card">
 
                                             <figure class="product-media">
@@ -107,25 +170,41 @@
                                                     </span>
                                                 {% endif %}
 
+                                                {# فقط وقتی in_stock واقعاً مقدار دارد تصمیم بگیر #}
+                                                {% if p.in_stock is not None and not p.in_stock %}
+                                                    <span class="product-label label-out">ناموجود</span>
+                                                {% elif p.low_stock %}
+                                                    <p class="low-stock mt-1">تنها {{ p.stock_total }} عدد باقی
+                                                        مانده</p>
+                                                {% endif %}
+
+
+                                                {# بج ناموجود – کنار بج تخفیف #}
+                                                {#                                                {% if not p.in_stock %}#}
+                                                {#                                                    <span class="product-label label-out">ناموجود</span>#}
+                                                {#                                                {% elif p.low_stock %}#}
+                                                {#                                                    <p class="low-stock mt-1">تنها {{ p.stock_total }} عدد باقی#}
+                                                {#                                                        مانده</p>#}
+                                                {#                                                {% endif %}#}
+
                                                 <a href="{{ p.get_absolute_url }}">
                                                     {% if p.cover_image %}
-                                                        <img src="{{ p.cover_image.image.url }}" class="product-image"
-                                                             alt="{{ p.name }}">
+                                                        <img src="{{ p.cover_image.image.url }}" alt="{{ p.name }}">
                                                     {% else %}
                                                         <img src="{% static 'images/placeholder-600x600.png' %}"
-                                                             class="product-image" alt="{{ p.name }}">
+                                                             alt="{{ p.name }}">
                                                     {% endif %}
                                                 </a>
 
-                                                <div class="product-action-vertical">
-                                                    <a href="#"
-                                                       class="btn-product-icon btn-wishlist btn-expandable"><span>علاقه‌مندی</span></a>
-                                                    <a href="{{ p.get_absolute_url }}"
-                                                       class="btn-product-icon btn-quickview" title="مشاهده سریع">
-                                                        <span>مشاهده</span>
-                                                    </a>
-                                                    <a href="#" class="btn-product-icon btn-compare"><span>مقایسه</span></a>
-                                                </div>
+                                                {#                                                <div class="product-action-vertical">#}
+                                                {#                                                    <a href="#"#}
+                                                {#                                                       class="btn-product-icon btn-wishlist btn-expandable"><span>علاقه‌مندی</span></a>#}
+                                                {#                                                    <a href="{{ p.get_absolute_url }}"#}
+                                                {#                                                       class="btn-product-icon btn-quickview" title="مشاهده سریع">#}
+                                                {#                                                        <span>مشاهده</span>#}
+                                                {#                                                    </a>#}
+                                                {#                                                    <a href="#" class="btn-product-icon btn-compare"><span>مقایسه</span></a>#}
+                                                {#                                                </div>#}
 
 
                                             </figure>
@@ -189,13 +268,13 @@
                                                 <h3 class="product-title text-right">
                                                     <a href="{{ p.get_absolute_url }}">{{ p.name }}</a>
                                                 </h3>
-{# بج ناموجود – کنار بج تخفیف #}
-                                                {% if p.stock <= 0 %}
-                                                    <span class="product-label label-out">ناموجود</span>
-                                                {% endif %}
-                                                {% if p.stock and p.stock < 5 %}
-                                                    <p class="low-stock mt-1">تنها {{ p.stock }} عدد باقی مانده</p>
-                                                {% endif %}
+                                                {# بج ناموجود – کنار بج تخفیف #}
+                                                {#                                                {% if p.stock <= 0 %}#}
+                                                {#                                                    <span class="product-label label-out">ناموجود</span>#}
+                                                {#                                                {% endif %}#}
+                                                {#                                                {% if p.stock and p.stock < 5 %}#}
+                                                {#                                                    <p class="low-stock mt-1">تنها {{ p.stock }} عدد باقی مانده</p>#}
+                                                {#                                                {% endif %}#}
 
                                                 <div class="product-price text-right">
                                                     {% if p.has_discount %}
@@ -445,7 +524,6 @@
                                         </div>
 
 
-
                                     </div>
                                     {# دکمه پاک کردن همه #}
                                     <div class="filters-divider mt-3 mb-2"></div>
@@ -463,32 +541,6 @@
                         </div>
                     </aside>
 
-                </div>
-            </div>
-        </div>
-
-        <!-- CTA خبرنامه -->
-        <div class="cta cta-horizontal cta-horizontal-box bg-primary">
-            <div class="container">
-                <div class="row align-items-center">
-                    <div class="col-lg-5">
-                        <h3 class="cta-title text-white text-right">عضویت در خبرنامه</h3>
-                        <p class="cta-desc text-white">با عضویت در خبرنامه از جدیدترین محصولات و تخفیف ها با خبر
-                            شوید</p>
-                    </div>
-                    <div class="col-lg-7">
-                        <form action="#">
-                            <div class="input-group">
-                                <input type="email" class="form-control form-control-white"
-                                       placeholder="ایمیل خود را وارد کنید" aria-label="Email Adress" required>
-                                <div class="input-group-append">
-                                    <button class="btn btn-outline-white-2" type="submit">
-                                        <span>عضویت</span><i class="icon-long-arrow-left"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
                 </div>
             </div>
         </div>

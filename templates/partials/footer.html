@@ -55,31 +55,31 @@
         </div><!-- End .container -->
     </div><!-- End .icon-boxes-container -->
 
-    <div class="footer-newsletter bg-image" style="background-image: url({% static 'images/backgrounds/bg-2.jpg' %})">
-        <div class="container">
-            <div class="heading text-center">
-                <h3 class="title text-center">اطلاع از آخرین تخفیف ها</h3><!-- End .title -->
-                <p class="title-desc text-center">و دریافت <span>تخفیف 20هزار تومانی</span> برای اولین خرید</p>
-                <!-- End .title-desc -->
-            </div><!-- End .heading -->
-
-            <div class="row">
-                <div class="col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-6 offset-lg-3">
-                    <form action="#">
-                        <div class="input-group">
-                            <input type="email" class="form-control" placeholder="آدرس ایمیل خود را وارد کنید"
-                                   aria-label="Email Adress" aria-describedby="newsletter-btn" required>
-                            <div class="input-group-append">
-                                <button class="btn btn-primary" type="submit"
-                                        id="newsletter-btn"><span>عضویت</span><i
-                                        class="icon-long-arrow-left"></i></button>
-                            </div><!-- .End .input-group-append -->
-                        </div><!-- .End .input-group -->
-                    </form>
-                </div><!-- End .col-sm-10 offset-sm-1 col-lg-6 offset-lg-3 -->
-            </div><!-- End .row -->
-        </div><!-- End .container -->
-    </div><!-- End .footer-newsletter bg-image -->
+{#    <div class="footer-newsletter bg-image" style="background-image: url({% static 'images/backgrounds/bg-2.jpg' %})">#}
+{#        <div class="container">#}
+{#            <div class="heading text-center">#}
+{#                <h3 class="title text-center">اطلاع از آخرین تخفیف ها</h3><!-- End .title -->#}
+{#                <p class="title-desc text-center">و دریافت <span>تخفیف 20هزار تومانی</span> برای اولین خرید</p>#}
+{#                <!-- End .title-desc -->#}
+{#            </div><!-- End .heading -->#}
+{##}
+{#            <div class="row">#}
+{#                <div class="col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-6 offset-lg-3">#}
+{#                    <form action="#">#}
+{#                        <div class="input-group">#}
+{#                            <input type="email" class="form-control" placeholder="آدرس ایمیل خود را وارد کنید"#}
+{#                                   aria-label="Email Adress" aria-describedby="newsletter-btn" required>#}
+{#                            <div class="input-group-append">#}
+{#                                <button class="btn btn-primary" type="submit"#}
+{#                                        id="newsletter-btn"><span>عضویت</span><i#}
+{#                                        class="icon-long-arrow-left"></i></button>#}
+{#                            </div><!-- .End .input-group-append -->#}
+{#                        </div><!-- .End .input-group -->#}
+{#                    </form>#}
+{#                </div><!-- End .col-sm-10 offset-sm-1 col-lg-6 offset-lg-3 -->#}
+{#            </div><!-- End .row -->#}
+{#        </div><!-- End .container -->#}
+{#    </div><!-- End .footer-newsletter bg-image -->#}
 
     <div class="footer-middle">
         <div class="container">
@@ -108,7 +108,7 @@
                         <ul class="widget-list">
                             <li><a href="{% url 'core:about' %}">درباره ما</a></li>
                             <li><a href="{% url 'products:product_list' %}">محصولات</a></li>
-                            <li><a href="#">اخبار</a></li>
+{#                            <li><a href="#">اخبار</a></li>#}
                             <li><a href="{% url 'faq:faqs' %}">سوالات متداول</a></li>
                             <li><a href="{% url 'contact:contact_page' %}">تماس با ما</a></li>
                         </ul><!-- End .widget-list -->
@@ -120,11 +120,11 @@
                         <h4 class="widget-title">خدمات مشتری</h4><!-- End .widget-title -->
 
                         <ul class="widget-list">
-                            <li><a href="#">شیوه پرداخت</a></li>
-                            <li><a href="#">گارانتی بازگشت وجه</a></li>
-                            <li><a href="#">شیوه ارسال محصولات</a></li>
+{#                            <li><a href="#">شیوه پرداخت</a></li>#}
+{#                            <li><a href="#">گارانتی بازگشت وجه</a></li>#}
+{#                            <li><a href="#">شیوه ارسال محصولات</a></li>#}
+                            <li><a href="{% url 'home:privacy' %}">حریم خصوصی</a></li>
                             <li><a href="{% url 'home:terms' %}">قوانین و مقررات</a></li>
-                            <li><a href="#">خط مشی</a></li>
                         </ul><!-- End .widget-list -->
                     </div><!-- End .widget -->
                 </div><!-- End .col-sm-4 col-lg-2 -->

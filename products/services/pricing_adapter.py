@@ -1,6 +1,6 @@
 # products/services/pricing_adapter.py
 from __future__ import annotations
-
+from decimal import Decimal
 from decimal import Decimal, InvalidOperation
 from types import SimpleNamespace
 from typing import Optional, List
@@ -8,8 +8,8 @@ from django.utils import timezone
 
 from products.models import Service
 # موتور پرایسینگ را فقط وقتی لازم شد import می‌کنیم تا چرخه‌ی import نشود
-# from promos.services.pricing import PricingLine, PricingEngine
-
+from promos.services.pricing import PricingLine, PricingEngine
+#
 # -----------------------------
 # Money / parsing helpers
 # -----------------------------
@@ -21,6 +21,26 @@ def _is_within_window(starts_at, ends_at) -> bool:
     if ends_at and now > ends_at:
         return False
     return True
+#
+# def _is_within_window(starts_at, ends_at) -> bool:
+#     now = timezone.now()
+#
+#     def _aware(dt):
+#         if not dt:
+#             return None
+#         # اگر naive بود، aware کن
+#         if timezone.is_naive(dt):
+#             return timezone.make_aware(dt, timezone.get_current_timezone())
+#         return dt
+#
+#     starts_at = _aware(starts_at)
+#     ends_at = _aware(ends_at)
+#
+#     if starts_at and now < starts_at:
+#         return False
+#     if ends_at and now > ends_at:
+#         return False
+#     return True
 
 
 _PERSIAN_DIGITS = str.maketrans("۰۱۲۳۴۵۶۷۸۹٬, ", "0123456789,, ")
@@ -50,100 +70,130 @@ def _is_variant(item) -> bool:
 def _build_pricing_line(item, qty: int = 1):
     """
     Returns promos.services.pricing.PricingLine for a product OR variant.
-    Fills helper fields used in rules (variant_id, brand_id, extra_category_ids)
-    and *_sale_* flags used to generate ephemeral campaigns.
+    This MUST match PricingLine dataclass in promos/services/pricing.py
     """
-    from promos.services.pricing import PricingLine  # lazy import
 
+    # ------------------------
+    # Variant branch
+    # ------------------------
     if _is_variant(item):
         variant = item
         product = variant.product
 
-        # unit price: variant price if set, otherwise product price
-        raw_unit = getattr(variant, "price", None)
-        if raw_unit in ("", None):
-            raw_unit = getattr(product, "price", None)
-        unit_price = _to_money(raw_unit, fallback=(getattr(product, "price", 0) or 0))
+        unit_price = _to_money(
+            getattr(variant, "price", None) or getattr(product, "price", 0),
+            fallback=0
+        )
 
+        # helpers for rules (safe)
         try:
             extra_cids = list(product.additional_categories.values_list("id", flat=True))
         except Exception:
             extra_cids = []
+
+        # ✅ در پروژه‌ی تو اسم درست برند اینه:
         brand_id = getattr(product, "brand_fk_id", None)
 
-        line = PricingLine(
+        # ✅ PricingLine را فقط یکبار و استاندارد بساز
+        line = _new_pricing_line(
             product_id=product.id,
-            category_id=product.category_id,
+            category_id=getattr(product, "category_id", None) or 0,
             unit_price=unit_price,
-            quantity=int(qty),
+            quantity=int(qty or 1),
+            variant_id=variant.id,
+            brand_id=brand_id,
+            extra_category_ids=extra_cids,
         )
-        # enrich
-        for name, val in (
-            ("variant_id", variant.id),
-            ("brand_id", brand_id),
-            ("extra_category_ids", extra_cids),
-        ):
-            try:
-                setattr(line, name, val)
-            except Exception:
-                pass
 
-        # variant-level sale flags
-        v_active  = bool(getattr(variant, "sale_active_variant", False))
-        v_percent = getattr(variant, "sale_percent_variant", None)
-        v_amount  = getattr(variant, "sale_amount_variant", None)
-        for name, val in (
+        # --- Variant-level sale flags (✅ مطابق مدل تو) ---
+        v_active = bool(getattr(variant, "sale_active_variant", False))
+        v_percent_raw = getattr(variant, "sale_percent_variant", None)
+        v_amount_raw  = getattr(variant, "sale_amount_variant", None)
+
+        v_percent = Decimal(str(v_percent_raw)) if v_percent_raw not in (None, "") else None
+        v_amount  = Decimal(str(v_amount_raw))  if v_amount_raw  not in (None, "") else None
+
+        # اگر فیلد تاریخ برای variant نداری، همین None بمونه
+        v_starts = getattr(variant, "sale_starts_at_variant", None)
+        v_ends   = getattr(variant, "sale_ends_at_variant", None)
+
+        for k, v in (
             ("_variant_sale_active", v_active),
-            ("_variant_sale_percent", Decimal(str(v_percent)) if v_percent not in (None, "") else None),
-            ("_variant_sale_amount",  Decimal(str(v_amount))  if v_amount  not in (None, "") else None),
+            ("_variant_sale_percent", v_percent),
+            ("_variant_sale_amount", v_amount),
+            ("_variant_sale_starts_at", v_starts),
+            ("_variant_sale_ends_at", v_ends),
         ):
             try:
-                setattr(line, name, val)
+                setattr(line, k, v)
             except Exception:
                 pass
 
-        return line
+        # --- Product-level sale flags (✅ لازم برای fallback وقتی واریانت تخفیف ندارد) ---
+        p_active = bool(getattr(product, "sale_active", False))
+        p_percent_raw = getattr(product, "sale_percent", None)
+        p_amount_raw  = getattr(product, "sale_amount", None)
 
-    # product-level
-    product = item
+        p_percent = Decimal(str(p_percent_raw)) if p_percent_raw not in (None, "") else None
+        p_amount  = Decimal(str(p_amount_raw))  if p_amount_raw  not in (None, "") else None
 
-    unit_price = _to_money(getattr(product, "price", None), fallback=0)
+        p_starts = getattr(product, "sale_starts_at", None)
+        p_ends   = getattr(product, "sale_ends_at", None)
 
-    # helpers for rules (safe)
-    try:
-        extra_cids = list(product.additional_categories.values_list("id", flat=True))
-    except Exception:
-        extra_cids = []
-    brand_id = getattr(product, "brand_fk_id", None)
-
-    # build pricing line (attach helpers)
-    line = _new_pricing_line(
-        product_id=product.id,
-        category_id=product.category_id,
-        unit_price=unit_price,
-        quantity=int(qty),
-        brand_id=brand_id,
-        extra_category_ids=extra_cids,
-    )
-
-    # sale fields
-    p_active = bool(getattr(product, "sale_active", False))
-
-    p_percent_raw = getattr(product, "sale_percent", None)
-    p_amount_raw = getattr(product, "sale_amount", None)
-
-    p_percent = Decimal(str(p_percent_raw)) if p_percent_raw not in (None, "") else None
-    p_amount = Decimal(str(p_amount_raw)) if p_amount_raw not in (None, "") else None
-
-    p_starts = getattr(product, "sale_starts_at", None)
-    p_ends = getattr(product, "sale_ends_at", None)
-
-    for k, v in (
+        for k, v in (
             ("_product_sale_active", p_active),
             ("_product_sale_percent", p_percent),
             ("_product_sale_amount", p_amount),
             ("_product_sale_starts_at", p_starts),
             ("_product_sale_ends_at", p_ends),
+        ):
+            try:
+                setattr(line, k, v)
+            except Exception:
+                pass
+
+        return line
+
+    # ------------------------
+    # Product branch
+    # ------------------------
+    product = item
+
+    unit_price = _to_money(getattr(product, "price", None), fallback=0)
+
+    try:
+        extra_cids = list(product.additional_categories.values_list("id", flat=True))
+    except Exception:
+        extra_cids = []
+
+    brand_id = getattr(product, "brand_fk_id", None)
+
+    line = _new_pricing_line(
+        product_id=product.id,
+        category_id=getattr(product, "category_id", None) or 0,
+        unit_price=unit_price,
+        quantity=int(qty or 1),
+        brand_id=brand_id,
+        extra_category_ids=extra_cids,
+    )
+
+    # Product-level sale flags
+    p_active = bool(getattr(product, "sale_active", False))
+    p_percent_raw = getattr(product, "sale_percent", None)
+    p_amount_raw  = getattr(product, "sale_amount", None)
+
+    p_percent = Decimal(str(p_percent_raw)) if p_percent_raw not in (None, "") else None
+    p_amount  = Decimal(str(p_amount_raw))  if p_amount_raw  not in (None, "") else None
+
+    p_starts = getattr(product, "sale_starts_at", None)
+    p_ends   = getattr(product, "sale_ends_at", None)
+
+    for k, v in (
+        ("_product_sale_active", p_active),
+        ("_product_sale_percent", p_percent),
+        ("_product_sale_amount", p_amount),
+        ("_product_sale_starts_at", p_starts),
+        ("_product_sale_ends_at", p_ends),
     ):
         try:
             setattr(line, k, v)
@@ -151,38 +201,55 @@ def _build_pricing_line(item, qty: int = 1):
             pass
 
     return line
-    # product-level sale flags
-    p_active  = bool(getattr(product, "sale_active", False))
-    p_percent = getattr(product, "sale_percent", None)
-    p_amount  = getattr(product, "sale_amount", None)
-    for name, val in (
-        ("_product_sale_active", p_active),
-        ("_product_sale_percent", Decimal(str(p_percent)) if p_percent not in (None, "") else None),
-        ("_product_sale_amount",  Decimal(str(p_amount))  if p_amount  not in (None, "") else None),
-    ):
-        try:
-            setattr(line, name, val)
-        except Exception:
-            pass
 
-    return line
+def _new_pricing_line(
+    *,
+    product_id: int,
+    category_id: int | None,
+    unit_price: Decimal,
+    quantity: int,
+    variant_id: int | None = None,
+    brand_id: int | None = None,
+    extra_category_ids: list[int] | None = None,
+    **extras,
+):
+    """
+    Instantiate promos.services.pricing.PricingLine (dataclass) in a safe/consistent way.
+    """
 
-def _new_pricing_line(*, product_id: int, category_id: int, unit_price: Decimal, quantity: int, **extras):
-    """Small helper to instantiate PricingLine with lazy import."""
     from promos.services.pricing import PricingLine  # lazy import
+
+    # normalize
+    q = int(quantity or 1)
+    if q < 1:
+        q = 1
+
+    cid = int(category_id or 0)
+
+    # unit_price must be Decimal
+    if not isinstance(unit_price, Decimal):
+        unit_price = Decimal(str(unit_price or "0"))
+
+    ecids = list(extra_category_ids or [])
+
     line = PricingLine(
-        product_id=product_id,
-        category_id=category_id,
+        product_id=int(product_id),
+        category_id=cid,
         unit_price=unit_price,
-        quantity=int(quantity),
+        quantity=q,
+        variant_id=int(variant_id) if variant_id else None,
+        brand_id=int(brand_id) if brand_id else None,
+        extra_category_ids=ecids,
     )
+
+    # allow attaching any extra runtime fields safely (e.g. sale flags timestamps)
     for k, v in (extras or {}).items():
         try:
             setattr(line, k, v)
         except Exception:
             pass
-    return line
 
+    return line
 # -----------------------------
 # Ephemeral campaign builders
 # -----------------------------
@@ -222,11 +289,14 @@ def _ephemeral_from_variant_line(ln, channel: str) -> Optional[SimpleNamespace]:
         starts_at=None,
         ends_at=None,
         channel=channel,
+        _is_ephemeral=True,
     )
 def _ephemeral_from_product_line(ln, channel: str) -> Optional[SimpleNamespace]:
     if not getattr(ln, "_product_sale_active", False):
         return None
 
+    if getattr(ln, "_variant_sale_active", False):
+        return None
     starts_at = getattr(ln, "_product_sale_starts_at", None)
     ends_at   = getattr(ln, "_product_sale_ends_at", None)
 
@@ -256,7 +326,7 @@ def _ephemeral_from_product_line(ln, channel: str) -> Optional[SimpleNamespace]:
         starts_at=starts_at,
         ends_at=ends_at,
         channel=channel,
-
+        _is_ephemeral=True,
     )
 
 def build_ephemeral_campaigns_for_lines(lines, channel: str = "web") -> List[SimpleNamespace]:

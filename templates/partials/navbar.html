@@ -38,7 +38,7 @@
                                                     {% if c1_list and c1_list|length %}
                                                         <div class="megamenu">
                                                             <div class="row no-gutters">
-                                                                <div class="col-md-8">
+                                                                <div class="col-md-12">
                                                                     <div class="menu-col">
                                                                         <div class="row">
                                                                             {% for c1 in c1_list %}
@@ -63,14 +63,14 @@
                                                                     </div>
                                                                 </div>
 
-                                                                <div class="col-md-4">
-                                                                    <div class="banner banner-overlay">
-                                                                        <a href="#" class="banner banner-menu">
-                                                                            <img src="{% static 'images/demos/demo-13/menu/banner-1.jpg' %}"
-                                                                                 alt="بنر">
-                                                                        </a>
-                                                                    </div>
-                                                                </div>
+{#                                                                <div class="col-md-4">#}
+{#                                                                    <div class="banner banner-overlay">#}
+{#                                                                        <a href="#" class="banner banner-menu">#}
+{#                                                                            <img src="{% static 'images/demos/demo-13/menu/banner-1.jpg' %}"#}
+{#                                                                                 alt="بنر">#}
+{#                                                                        </a>#}
+{#                                                                    </div>#}
+{#                                                                </div>#}
                                                             </div>
                                                         </div>
                                                     {% endif %}
@@ -80,68 +80,68 @@
 
                                     {% else %}
                                         {# ——— Fallback استاتیک وقتی هیچ دیتایی نیست ——— #}
-                                        <li class="megamenu-container">
-                                            <a class="sf-with-ul" href="#">لوازم الکترونیکی</a>
-                                            <div class="megamenu">
-                                                <div class="row no-gutters">
-                                                    <div class="col-md-8">
-                                                        <div class="menu-col">
-                                                            <div class="row">
-                                                                <div class="col-md-6">
-                                                                    <div class="menu-title">کامپیوتر و لپ تاپ</div>
-                                                                    <ul>
-                                                                        <li><a href="#">دسکتاپ</a></li>
-                                                                        <li><a href="#">مانیتور</a></li>
-                                                                        <li><a href="#">لپ تاپ</a></li>
-                                                                        <li><a href="#">آی پد و تب لت</a></li>
-                                                                        <li><a href="#">هارد و فضای ذخیره سازی</a></li>
-                                                                        <li><a href="#">پرینتر و دستگاه کپی</a></li>
-                                                                        <li><a href="#">لوازم جانبی</a></li>
-                                                                    </ul>
+{#                                        <li class="megamenu-container">#}
+{#                                            <a class="sf-with-ul" href="#">لوازم الکترونیکی</a>#}
+{#                                            <div class="megamenu">#}
+{#                                                <div class="row no-gutters">#}
+{#                                                    <div class="col-md-8">#}
+{#                                                        <div class="menu-col">#}
+{#                                                            <div class="row">#}
+{#                                                                <div class="col-md-6">#}
+{#                                                                    <div class="menu-title">کامپیوتر و لپ تاپ</div>#}
+{#                                                                    <ul>#}
+{#                                                                        <li><a href="#">دسکتاپ</a></li>#}
+{#                                                                        <li><a href="#">مانیتور</a></li>#}
+{#                                                                        <li><a href="#">لپ تاپ</a></li>#}
+{#                                                                        <li><a href="#">آی پد و تب لت</a></li>#}
+{#                                                                        <li><a href="#">هارد و فضای ذخیره سازی</a></li>#}
+{#                                                                        <li><a href="#">پرینتر و دستگاه کپی</a></li>#}
+{#                                                                        <li><a href="#">لوازم جانبی</a></li>#}
+{#                                                                    </ul>#}
+{##}
+{#                                                                    <div class="menu-title">تلویزیون و ویدیو پلیر</div>#}
+{#                                                                    <ul>#}
+{#                                                                        <li><a href="#">تلویزیون ها</a></li>#}
+{#                                                                        <li><a href="#">لوازم صوتی</a></li>#}
+{#                                                                        <li><a href="#">پرژکتور</a></li>#}
+{#                                                                        <li><a href="#">دستگاه های پخش ویدیو</a></li>#}
+{#                                                                    </ul>#}
+{#                                                                </div>#}
+{##}
+{#                                                                <div class="col-md-6">#}
+{#                                                                    <div class="menu-title">موبایل</div>#}
+{#                                                                    <ul>#}
+{#                                                                        <li><a href="#">تلفن هوشمند</a></li>#}
+{#                                                                        <li><a href="#">هدفون و هندزفری</a></li>#}
+{#                                                                        <li><a href="#">قاب و کاور</a></li>#}
+{#                                                                        <li><a href="#">شارژر</a></li>#}
+{#                                                                    </ul>#}
+{##}
+{#                                                                    <div class="menu-title">دوربین دیجیتال</div>#}
+{#                                                                </div>#}
+{#                                                            </div>#}
+{#                                                        </div>#}
+{#                                                    </div>#}
+{##}
+{#                                                    <div class="col-md-4">#}
+{#                                                        <div class="banner banner-overlay">#}
+{#                                                            <a href="#" class="banner banner-menu">#}
+{#                                                                <img src="{% static 'images/demos/demo-13/menu/banner-1.jpg' %}"#}
+{#                                                                     alt="بنر">#}
+{#                                                            </a>#}
+{#                                                        </div>#}
+{#                                                    </div>#}
+{#                                                </div>#}
+{#                                            </div>#}
+{#                                        </li>#}
 
-                                                                    <div class="menu-title">تلویزیون و ویدیو پلیر</div>
-                                                                    <ul>
-                                                                        <li><a href="#">تلویزیون ها</a></li>
-                                                                        <li><a href="#">لوازم صوتی</a></li>
-                                                                        <li><a href="#">پرژکتور</a></li>
-                                                                        <li><a href="#">دستگاه های پخش ویدیو</a></li>
-                                                                    </ul>
-                                                                </div>
-
-                                                                <div class="col-md-6">
-                                                                    <div class="menu-title">موبایل</div>
-                                                                    <ul>
-                                                                        <li><a href="#">تلفن هوشمند</a></li>
-                                                                        <li><a href="#">هدفون و هندزفری</a></li>
-                                                                        <li><a href="#">قاب و کاور</a></li>
-                                                                        <li><a href="#">شارژر</a></li>
-                                                                    </ul>
-
-                                                                    <div class="menu-title">دوربین دیجیتال</div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="col-md-4">
-                                                        <div class="banner banner-overlay">
-                                                            <a href="#" class="banner banner-menu">
-                                                                <img src="{% static 'images/demos/demo-13/menu/banner-1.jpg' %}"
-                                                                     alt="بنر">
-                                                            </a>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </li>
-
-                                        <li><a href="#">لوازم خانگی</a></li>
-                                        <li><a href="#">زیبایی و سلامت</a></li>
-                                        <li><a href="#">کفش و پوتین</a></li>
-                                        <li><a href="#">مسافرت</a></li>
-                                        <li><a href="#">تلفن هوشمند</a></li>
-                                        <li><a href="#">تلویزیون و لوازم صوتی</a></li>
-                                        <li><a href="#">هدیه</a></li>
+{#                                        <li><a href="#">لوازم خانگی</a></li>#}
+{#                                        <li><a href="#">زیبایی و سلامت</a></li>#}
+{#                                        <li><a href="#">کفش و پوتین</a></li>#}
+{#                                        <li><a href="#">مسافرت</a></li>#}
+{#                                        <li><a href="#">تلفن هوشمند</a></li>#}
+{#                                        <li><a href="#">تلویزیون و لوازم صوتی</a></li>#}
+{#                                        <li><a href="#">هدیه</a></li>#}
                                     {% endif %}
                                 {% endwith %}
                             </ul>
@@ -155,7 +155,7 @@
                 <nav class="main-nav">
                     <ul class="menu sf-arrows">
                         <li class="active">
-                            <a href="#" class="sf-with-ul pl-5">خانه</a>
+                            <a href="{% url 'home:home' %}" class="sf-with-ul pl-5">خانه</a>
                         </li>
                         <li>
                             <a href="{% url 'products:product_list' %}" class="sf-with-ul pl-5">محصولات</a>

@@ -1,10 +1,76 @@
+/* =========================
+   Comments / Replies spacing
+   (NO HTML changes)
+   ========================= */
+
 /* رنگ آیکون پر شده لایک/دیس‌لایک */
-.vote-filled {
-    color: #FA523C;
+.vote-filled { color: #FA523C; }
+
+.vote-icon{
+  cursor: pointer;
+  font-size: 1.2rem;
+  margin-right: 4px;
 }
 
-.vote-icon {
-    cursor: pointer;
-    font-size: 1.2rem; /* fs-5 */
-    margin-right: 4px; /* فاصله بین آیکون و عدد */
+/* هر کامنت (همون div.border-bottom) */
+.card .card-body > .border-bottom{
+  padding-bottom: 14px !important;
+  margin-bottom: 18px !important;
+}
+
+/* --- فاصله بین کامنت و اولین ریپلای --- */
+/* اولین ریپلای داخل هر کامنت */
+.card .card-body > .border-bottom > .ms-4.border-start:first-of-type{
+  margin-top: 14px !important;         /* فاصله از متن کامنت */
+  padding-top: 14px !important;        /* فاصله داخلی */
+  position: relative;
+}
+
+/* یک خط جداکننده ظریف بالای اولین ریپلای */
+.card .card-body > .border-bottom > .ms-4.border-start:first-of-type::before{
+  content: "";
+  position: absolute;
+  right: -16px;                        /* هم‌راستا با شروع کامنت در RTL */
+  left: 0;
+  top: 0;
+  height: 1px;
+  background: rgba(0,0,0,.08);
+}
+
+/* --- استایل خود ریپلای‌ها --- */
+.card .card-body > .border-bottom > .ms-4.border-start{
+  /* تو رفتگی در RTL */
+  margin-right: 18px;                  /* به جای اینکه فقط ms-4 باشه */
+  margin-left: 0;
+
+  /* کارت ملایم */
+  background: rgba(0,0,0,.02);
+  border-radius: 10px;
+
+  /* خط کنار ریپلای (border-start در RTL می‌ره سمت چپ؛
+     ما با border-right حس ریپلای فارسی می‌دیم) */
+  border-left: none !important;
+  border-right: 3px solid rgba(250,82,60,.35) !important;
+
+  /* فاصله‌ها */
+  padding: 10px 12px !important;
+  margin-top: 10px !important;
+}
+
+/* متن ریپلای‌ها مرتب‌تر */
+.card .card-body > .border-bottom > .ms-4.border-start p{
+  margin-bottom: 0;
+}
+
+/* لینک پاسخ کمی خوشگل‌تر (اختیاری) */
+.reply-btn{
+  display: inline-block;
+  margin-top: 6px;
+  font-weight: 700;
+  text-decoration: none;
+  color: #FA523C;
+}
+
+.reply-btn:hover{
+  text-decoration: underline;
 }

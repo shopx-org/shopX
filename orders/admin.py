@@ -2,9 +2,14 @@
 from django.contrib import admin
 from django.utils.html import format_html
 from django.db.models import Sum
+from django.utils import timezone
+
+import jdatetime
 
 from .models import Order, OrderItem
 
+
+# ---------------- Inlines ----------------
 
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
@@ -15,6 +20,8 @@ class OrderItemInline(admin.TabularInline):
     fields = ("product", "variant", "product_name", "qty", "unit_price", "discount", "total")
     show_change_link = True
 
+
+# ---------------- Order Admin ----------------
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
@@ -32,14 +39,20 @@ class OrderAdmin(admin.ModelAdmin):
         "subtotal_display",
         "discount_display",
         "total_display",
-        "created_at",
+        "created_at_jalali",   # ✅ نمایش جلالی در لیست
     )
+
+    # ⚠️ list_filter فقط باید Field واقعی یا Filter کلاس باشد
     list_filter = ("payment_status", "fulfillment_status", "created_at")
+
     search_fields = ("id", "user__phone", "user__email", "payment_ref")
 
+    # این‌ها readonly هستند (فیلد اصلی + نمایش جلالی)
     readonly_fields = (
         "created_at",
+        "created_at_jalali",
         "paid_at",
+        "paid_at_jalali",
         "subtotal",
         "total_discount",
         "total",
@@ -48,14 +61,38 @@ class OrderAdmin(admin.ModelAdmin):
     )
 
     fieldsets = (
-        ("اطلاعات اصلی", {"fields": ("user", "address", "created_at")}),
+        ("اطلاعات اصلی", {"fields": ("user", "address", "created_at_jalali")}),
         ("مبالغ", {"fields": ("subtotal", "total_discount", "total")}),
-        ("پرداخت", {"fields": ("payment_gateway", "payment_ref", "paid_at")}),
+        ("پرداخت", {"fields": ("payment_gateway", "payment_ref", "paid_at_jalali")}),
         ("وضعیت‌ها", {"fields": ("payment_status", "fulfillment_status")}),
         ("خلاصه آیتم‌ها", {"fields": ("items_count", "items_preview")}),
     )
 
-    actions = ("make_paid", "make_failed", "make_processing", "make_shipped", "make_delivered", "make_canceled","make_send_canceled",)
+    actions = (
+        "make_paid",
+        "make_failed",
+        "make_processing",
+        "make_shipped",
+        "make_delivered",
+        "make_canceled",
+        "make_send_canceled",
+    )
+
+    # ---------- Jalali displays ----------
+
+    @admin.display(description="تاریخ ثبت", ordering="created_at")
+    def created_at_jalali(self, obj: Order):
+        if not obj.created_at:
+            return "—"
+        dt = timezone.localtime(obj.created_at)
+        return jdatetime.datetime.fromgregorian(datetime=dt).strftime("%Y/%m/%d %H:%M")
+
+    @admin.display(description="زمان پرداخت", ordering="paid_at")
+    def paid_at_jalali(self, obj: Order):
+        if not obj.paid_at:
+            return "—"
+        dt = timezone.localtime(obj.paid_at)
+        return jdatetime.datetime.fromgregorian(datetime=dt).strftime("%Y/%m/%d %H:%M")
 
     # ---------- Pretty displays ----------
 
@@ -63,7 +100,6 @@ class OrderAdmin(admin.ModelAdmin):
     def user_display(self, obj: Order):
         if not obj.user:
             return "—"
-        # چون User.username نداریم (USERNAME_FIELD=phone)
         full = obj.user.get_full_name()
         return full or obj.user.phone or obj.user.email or "—"
 
@@ -73,16 +109,17 @@ class OrderAdmin(admin.ModelAdmin):
         label = obj.get_payment_status_display()
 
         color_map = {
-            Order.PaymentStatus.PENDING:  "#f0ad4e",
-            Order.PaymentStatus.PAID:     "#5cb85c",
-            Order.PaymentStatus.FAILED:   "#d9534f",
-            Order.PaymentStatus.CANCELED:"#777777",
-            Order.PaymentStatus.REFUNDED:"#5bc0de",
+            Order.PaymentStatus.PENDING: "#f0ad4e",
+            Order.PaymentStatus.PAID: "#5cb85c",
+            Order.PaymentStatus.FAILED: "#d9534f",
+            Order.PaymentStatus.CANCELED: "#777777",
+            Order.PaymentStatus.REFUNDED: "#5bc0de",
         }
         color = color_map.get(status, "#999")
 
         return format_html(
-            '<span style="padding:4px 8px;border-radius:999px;background:{};color:#fff;font-weight:700;font-size:12px;">{}</span>',
+            '<span style="padding:4px 8px;border-radius:999px;background:{};'
+            'color:#fff;font-weight:700;font-size:12px;">{}</span>',
             color, label
         )
 
@@ -92,18 +129,18 @@ class OrderAdmin(admin.ModelAdmin):
         label = obj.get_fulfillment_status_display()
 
         color_map = {
-            Order.FulfillmentStatus.NEW: "#6c757d",  # خاکستری
-            Order.FulfillmentStatus.PROCESSING: "#0d6efd",  # آبی
-            Order.FulfillmentStatus.SHIPPED: "#6610f2",  # بنفش
-            Order.FulfillmentStatus.DELIVERED: "#198754",  # سبز
-            Order.FulfillmentStatus.RETURNED: "#dc3545",  # قرمز
-            Order.FulfillmentStatus.SEND_CANCELED: "#fd7e14",  # نارنجی برای لغو ارسال
+            Order.FulfillmentStatus.NEW: "#6c757d",
+            Order.FulfillmentStatus.PROCESSING: "#0d6efd",
+            Order.FulfillmentStatus.SHIPPED: "#6610f2",
+            Order.FulfillmentStatus.DELIVERED: "#198754",
+            Order.FulfillmentStatus.RETURNED: "#dc3545",
+            Order.FulfillmentStatus.SEND_CANCELED: "#fd7e14",
         }
         color = color_map.get(status, "#999")
 
         return format_html(
-            '<span style="padding:4px 8px;border-radius:999px;'
-            'background:{};color:#fff;font-weight:700;font-size:12px;">{}</span>',
+            '<span style="padding:4px 8px;border-radius:999px;background:{};'
+            'color:#fff;font-weight:700;font-size:12px;">{}</span>',
             color, label
         )
 
@@ -161,6 +198,9 @@ class OrderAdmin(admin.ModelAdmin):
     @admin.action(description="تغییر به لغو ارسال")
     def make_send_canceled(self, _request, queryset):
         queryset.update(fulfillment_status=Order.FulfillmentStatus.SEND_CANCELED)
+
+
+# ---------------- OrderItem Admin ----------------
 
 @admin.register(OrderItem)
 class OrderItemAdmin(admin.ModelAdmin):

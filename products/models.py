@@ -15,8 +15,8 @@ from decimal import Decimal
 from django.contrib.contenttypes.models import ContentType
 from Core.models import Rating
 from django.utils import timezone
-
-
+from Core.slug import slug_en
+from Core.slug import slug_fa
 # ---------- 1) گروه سرویس ها بیمه / نصب /گارانتی  ----------
 
 class Service(models.Model):
@@ -224,15 +224,30 @@ class Category(MPTTModel):
 
     def save(self, *args, **kwargs):
         MAX = self._meta.get_field("slug").max_length
-        base = slugify(self.slug or self.name, allow_unicode=False) or "cat"
-        base = base[: MAX - 5]
+
+        # مهم: همیشه از name بساز (نه از self.slug) تا اگر ادمین فارسی زد، خالی نشه
+        base = slug_en(self.name, fallback="cat", max_length=MAX - 5)
+
         slug = base
         i = 2
         while self.__class__.objects.filter(parent=self.parent, slug=slug).exclude(pk=self.pk).exists():
             slug = f"{base}-{i}"
             i += 1
+
         self.slug = slug
         super().save(*args, **kwargs)
+
+    # def save(self, *args, **kwargs):
+    #     MAX = self._meta.get_field("slug").max_length
+    #     base = slugify(self.slug or self.name, allow_unicode=False) or "cat"
+    #     base = base[: MAX - 5]
+    #     slug = base
+    #     i = 2
+    #     while self.__class__.objects.filter(parent=self.parent, slug=slug).exclude(pk=self.pk).exists():
+    #         slug = f"{base}-{i}"
+    #         i += 1
+    #     self.slug = slug
+    #     super().save(*args, **kwargs)
 
     # @property
     # def slug_path(self) -> str:
@@ -347,7 +362,13 @@ class Product(models.Model):
     )
 
     name = models.CharField(max_length=220, verbose_name="نام محصول")
-    slug = models.SlugField(max_length=230, unique=True, blank=True, verbose_name="اسلاگ")
+    slug = models.SlugField(
+        max_length=230,
+        unique=True,
+        blank=True,
+        allow_unicode=True,
+        verbose_name="اسلاگ",
+    )
 
     # دسته اصلی (برای قوانین Spec)
     category = models.ForeignKey(
@@ -570,8 +591,7 @@ class Product(models.Model):
         # ---- 1) ساخت اسلاگ مثل قبل ----
         MAX = self._meta.get_field("slug").max_length
         if not self.slug:
-            base = slugify(self.name, allow_unicode=True) or "product"
-            base = base[: MAX - 5]
+            base = slug_fa(self.name, fallback="product", max_length=MAX - 5)
             slug = base
             i = 2
             while Product.objects.filter(slug=slug).exclude(pk=self.pk).exists():

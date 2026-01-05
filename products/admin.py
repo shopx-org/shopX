@@ -17,6 +17,7 @@ from .models import (
     Attribute, AttributeChoice, CategoryAttribute, ProductAttributeValue, SizeGroup,
     Size,Service, ServicePrice, CategoryService, ProductService
 )
+from Core.admin_mixins import JalaliAdminMixin
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from mptt.admin import DraggableMPTTAdmin
 from django.contrib.humanize.templatetags.humanize import intcomma
@@ -24,6 +25,8 @@ from mptt.exceptions import InvalidMove
 # products/admin.py
 from django.db.models import OuterRef, Subquery, Sum, Count, IntegerField, Q
 from django.db.models.functions import Coalesce
+
+
 
 # helpers: pass parent_obj (Product یا Product موقتی) به فرم‌های Inline
 class ParentAwareInlineMixin:
@@ -466,7 +469,7 @@ class CategoryAdmin(DraggableMPTTAdmin):
 # =============== Color ===============
 
 @admin.register(Color)
-class ColorAdmin(admin.ModelAdmin):
+class ColorAdmin(JalaliAdminMixin):
     list_display = ("swatch", "name", "hex_code", "is_active", "updated_at")
     list_editable = ("is_active",)
     search_fields = ("name", "hex_code")
@@ -535,7 +538,7 @@ class SizeAdmin(admin.ModelAdmin):
 
 
 @admin.register(ProductVariant)
-class ProductVariantAdmin(admin.ModelAdmin):
+class ProductVariantAdmin(JalaliAdminMixin):
     list_display = ("product", "color",  "size", "sku", "price", "stock","weight_grams", "is_active", "updated_at")
     list_filter = ("is_active", "color", "size")
     search_fields = ("product__name", "sku", "barcode")
@@ -728,30 +731,28 @@ class ProductAdminForm(forms.ModelForm):
     class Meta:
         model = Product
         fields = "__all__"
+        widgets = {
+            "description": forms.Textarea(attrs={"rows": 10, "style": "width: 100%;"}),
+        }
 
     def clean(self):
         cleaned = super().clean()
         sp = cleaned.get("sale_percent")
         sa = cleaned.get("sale_amount")
         if sp and sa:
-            # انتخاب کن: اجازه نده هردو همزمان پر باشد، یا در صورت وجود هر دو اولویت بده
             self.add_error("sale_amount", _("لطفاً یا درصد یا مبلغ را انتخاب کنید (نه هردو)."))
 
-        # انتشار ⇒ باید فعال باشد
         if cleaned.get("status") == "pub" and not cleaned.get("is_active", True):
             raise forms.ValidationError(_("محصول منتشرشده باید فعال باشد."))
 
-        # قیمت پایه
         price = cleaned.get("price")
         if price is None or price < 0:
             raise forms.ValidationError(_("قیمت پایهٔ محصول نامعتبر است."))
 
-        # compare_at_price باید > price باشد (اگر داده شد)
         cap = cleaned.get("compare_at_price")
         if cap is not None and cap <= price:
             self.add_error("compare_at_price", _("«قیمت قبلی» باید از قیمت فعلی بیشتر باشد."))
 
-        # نرمال‌سازی اعشار
         cleaned["price"] = price.quantize(Decimal("0.01"))
         if cap is not None:
             cleaned["compare_at_price"] = cap.quantize(Decimal("0.01"))
@@ -761,7 +762,7 @@ class ProductAdminForm(forms.ModelForm):
 # =============== Product Admin ===============
 
 @admin.register(Product)
-class ProductAdmin(admin.ModelAdmin):
+class ProductAdmin(JalaliAdminMixin, admin.ModelAdmin):
     exclude = ("attributes",)
     form = ProductAdminForm
 
@@ -787,7 +788,7 @@ class ProductAdmin(admin.ModelAdmin):
 
     list_per_page = 50
     list_select_related = ("category", "brand_fk")
-    prepopulated_fields = {"slug": ("name",)}
+    # prepopulated_fields = {"slug": ("name",)}
 
     fieldsets = (
         (None, {"fields": ("name", "slug", "category", "additional_categories", "brand_fk", "status", "is_active")}),
@@ -994,7 +995,7 @@ class ProductAdmin(admin.ModelAdmin):
 
 
 @admin.register(ProductImage)
-class ProductImageAdmin(admin.ModelAdmin):
+class ProductImageAdmin(JalaliAdminMixin):
     list_display = ("thumb", "product", "color", "is_primary", "position", "updated_at")
     list_filter = ("is_primary", "color")
     search_fields = ("product__name", "alt")
@@ -1018,7 +1019,7 @@ class ProductImageAdmin(admin.ModelAdmin):
 
 # =============== BRAND Admin ===============
 @admin.register(Brand)
-class BrandAdmin(admin.ModelAdmin):
+class BrandAdmin(JalaliAdminMixin):
     list_display = ("logo_thumb", "name", "is_active", "position", "updated_at")
     list_editable = ("is_active", "position")
     search_fields = ("name", "slug")

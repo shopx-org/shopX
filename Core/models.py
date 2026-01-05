@@ -4,7 +4,6 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.conf import settings
 from django_jalali.db import models as jmodels
-from ckeditor.fields import RichTextField
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFit, Adjust, Transpose, ResizeToFill
 
@@ -188,14 +187,14 @@ class About(models.Model):
     )
 
     vision_title = models.CharField(max_length=200, default="دید ما", verbose_name="عنوان دید ما")
-    vision_text = RichTextField(null=True, blank=True, verbose_name="متن دید ما")
+    vision_text = models.TextField(null=True, blank=True, verbose_name="متن دید ما")
 
     mission_title = models.CharField(max_length=200, default="ماموریت ما", verbose_name="عنوان ماموریت ما")
-    mission_text = RichTextField(null=True, blank=True, verbose_name="متن ماموریت ما")
+    mission_text = models.TextField(null=True, blank=True, verbose_name="متن ماموریت ما")
 
     who_title = models.CharField(max_length=200, default="ما که هستیم", verbose_name="عنوان ما که هستیم")
     who_lead = models.CharField(max_length=255, null=True, blank=True, verbose_name="متن پیش‌رو درباره ما")
-    who_text = RichTextField(null=True, blank=True, verbose_name="متن ما که هستیم")
+    who_text = models.TextField(null=True, blank=True, verbose_name="متن ما که هستیم")
     who_image_front = models.ImageField(upload_to="about/", blank=True, null=True, verbose_name="تصویر جلو درباره ما")
     who_image_front_optimized = ImageSpecField(
         source='who_image_front',
@@ -212,7 +211,7 @@ class About(models.Model):
             options={'quality': 75},
     )
 
-    brands_text = RichTextField(null=True, blank=True, verbose_name="متن برندها")
+    brands_text = models.TextField(null=True, blank=True, verbose_name="متن برندها")
 
     class Meta:
         verbose_name = "درباره ما"
@@ -249,7 +248,7 @@ class TeamMember(models.Model):
     about = models.ForeignKey(About, on_delete=models.CASCADE, related_name="team_members")
     name = models.CharField(max_length=200, verbose_name="نام عضو تیم")
     role = models.CharField(max_length=200, verbose_name="سمت")
-    bio = RichTextField(null=True, blank=True, verbose_name="بیوگرافی کوتاه")
+    bio = models.TextField(null=True, blank=True, verbose_name="بیوگرافی کوتاه")
     image = models.ImageField(upload_to="team/", blank=True, null=True, verbose_name="تصویر")
     image_thumb = ImageSpecField(
         source='image',

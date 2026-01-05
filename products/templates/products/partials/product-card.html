@@ -1,0 +1,256 @@
+{% load static humanize persian_digits %}
+<div class="product dk-product-card {% if not p.in_stock %}is-oos{% endif %}">
+
+    <figure class="product-media">
+
+        {# فقط درصد تخفیف #}
+        {% if p.has_discount %}
+            <span class="product-label label-sale">
+         ٪{{ p.discount_percent|floatformat:0 }} تخفیف
+      </span>
+        {% endif %}
+
+        فقط ناموجود (فقط اگر ناموجود بود)
+        {% if not p.in_stock %}
+            <span class="dk-chip dk-chip--off dk-chip--oos">ناموجود</span>
+        {% endif %}
+
+
+
+        <a href="{{ p.get_absolute_url }}">
+            {% if p.cover_image %}
+                <img src="{{ p.cover_image.image.url }}" alt="{{ p.name }}">
+            {% else %}
+                <img src="{% static 'images/placeholder-600x600.png' %}" alt="{{ p.name }}">
+            {% endif %}
+        </a>
+
+    </figure>
+
+    <div class="product-body">
+
+        <div class="product-top">
+            {% if p.category %}
+                <div class="product-cat">
+                    <a href="{{ p.category.get_absolute_url }}">{{ p.category.name }}</a>
+
+                </div>
+            {% endif %}
+
+            <h3 class="product-title">
+                <a href="{{ p.get_absolute_url }}">{{ p.name }}</a>
+            </h3>
+            <div class="product-middle">
+                {% if p.colors_list %}
+                    <div class="product-colors">
+                        {% for c in p.colors_list|slice:":6" %}
+                            <span class="color-dot" style="background: {{ c.hex }};" title="{{ c.name }}"></span>
+                        {% endfor %}
+                        {% if p.colors_list|length > 6 %}
+                            <span class="color-more">+{{ p.colors_list|length|add:"-6" }}</span>
+                        {% endif %}
+                    </div>
+                {% endif %}
+
+            </div>
+
+            <div class="dk-meta">
+                <div class="dk-mini-rating">
+                    <i class="icon-star dk-mini-star"></i>
+                    <span class="ratings-text">
+                      {{ p.rating_count|default:0|fa_digits }} رأی
+                    </span>
+                </div>
+
+                <span class="dk-reviews">{{ p.reviews_count|default:"0" }} نظر</span>
+            </div>
+        </div>
+
+
+        <div class="product-bottom">
+            <div class="product-price">
+                {% if p.has_discount %}
+                    <span class="new-price">{{ p.price_final|fa_price }} <small>تومان</small></span>
+                    <span class="old-price">{{ p.price_base|fa_price }} <small>تومان</small></span>
+                {% else %}
+                    <span class="new-price">{{ p.price_final|default:p.price|fa_price }} <small>تومان</small></span>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+</div>
+{#<div class="product dk-product-card">#}
+{##}
+{#  <figure class="product-media">#}
+{##}
+{#    <!-- Top left icon (wishlist مثلا) -->#}
+{#    <button class="dk-ic dk-ic--tl" type="button" aria-label="علاقه‌مندی">#}
+{#      <i class="far fa-heart"></i>#}
+{#    </button>#}
+{##}
+{#    <!-- Top right chips (مثلا ویژگی‌ها/تگ‌ها) -->#}
+{#    <div class="dk-chips">#}
+{#      {% if p.is_new %}<span class="dk-chip">جدید</span>{% endif %}#}
+{#      {% if p.has_discount %}<span class="dk-chip dk-chip--hot">تخفیف</span>{% endif %}#}
+{#      {% if p.in_stock %}<span class="dk-chip dk-chip--ok">موجود</span>{% else %}<span class="dk-chip dk-chip--off">ناموجود</span>{% endif %}#}
+{#    </div>#}
+{##}
+{#    <!-- Labels (همون قبلی) -->#}
+{#    {% if p.has_discount %}#}
+{#      <span class="product-label label-sale">٪{{ p.discount_percent|floatformat:0 }}</span>#}
+{#    {% endif %}#}
+{#    {% if p.is_new %}#}
+{#      <span class="product-label label-new">جدید</span>#}
+{#    {% endif %}#}
+{##}
+{#    <a href="{{ p.get_absolute_url }}">#}
+{#      {% if p.cover_image %}#}
+{#        <img src="{{ p.cover_image.image.url }}" alt="{{ p.name }}">#}
+{#      {% else %}#}
+{#        <img src="{% static 'images/placeholder-600x600.png' %}" alt="{{ p.name }}">#}
+{#      {% endif %}#}
+{#    </a>#}
+{##}
+{#    <!-- Bottom right actions -->#}
+{#    <div class="dk-actions">#}
+{#      <button class="dk-btn-icon" type="button" title="افزودن به سبد">#}
+{#        <i class="fas fa-shopping-bag"></i>#}
+{#      </button>#}
+{#      <button class="dk-btn-icon" type="button" title="نمایش سریع">#}
+{#        <i class="fas fa-eye"></i>#}
+{#      </button>#}
+{#    </div>#}
+{##}
+{#  </figure>#}
+{##}
+{#  <div class="product-body">#}
+{##}
+{#    <div class="product-top">#}
+{#      {% if p.category %}#}
+{#        <div class="product-cat"><a href="{{ p.category.get_absolute_url }}">{{ p.category.name }}</a></div>#}
+{#      {% endif %}#}
+{##}
+{#      <h3 class="product-title">#}
+{#        <a href="{{ p.get_absolute_url }}">{{ p.name }}</a>#}
+{#      </h3>#}
+{##}
+{#      <!-- rating / meta -->#}
+{#      <div class="dk-meta">#}
+{#        <span class="dk-rating">#}
+{#          <i class="dk-mini-star fas fa-star"></i>#}
+{#          <span class="dk-rating-num">{{ p.rating_avg|default:"0.0" }}</span>#}
+{#        </span>#}
+{#        <span class="dk-sep">•</span>#}
+{#        <span class="dk-reviews">{{ p.reviews_count|default:"0" }} نظر</span>#}
+{#      </div>#}
+{#    </div>#}
+{##}
+{#    <div class="product-middle">#}
+{#      {% if p.colors_list %}#}
+{#        <div class="product-colors">#}
+{#          {% for c in p.colors_list|slice:":6" %}#}
+{#            <span class="color-dot" style="background: {{ c.hex }};" title="{{ c.name }}"></span>#}
+{#          {% endfor %}#}
+{#          {% if p.colors_list|length > 6 %}#}
+{#            <span class="color-more">+{{ p.colors_list|length|add:"-6" }}</span>#}
+{#          {% endif %}#}
+{#        </div>#}
+{#      {% else %}#}
+{#        <span class="no-colors">بدون تنوع رنگ</span>#}
+{#      {% endif %}#}
+{#    </div>#}
+{##}
+{#    <div class="product-bottom">#}
+{#      <div class="product-price">#}
+{#        {% if p.has_discount %}#}
+{#          <span class="new-price">{{ p.price_final|fa_price }} <small>تومان</small></span>#}
+{#          <span class="old-price">{{ p.price_base|fa_price }} <small>تومان</small></span>#}
+{#        {% else %}#}
+{#          <span class="new-price">{{ p.price_final|default:p.price|fa_price }} <small>تومان</small></span>#}
+{#        {% endif %}#}
+{#      </div>#}
+{#    </div>#}
+{##}
+{#  </div>#}
+{#</div>#}
+{#ـــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــ#}
+{##}
+{#<div class="product dk-product-card">#}
+{##}
+{#    <!-- IMAGE -->#}
+{#    <figure class="product-media">#}
+{##}
+{#        {% if p.has_discount %}#}
+{#            <span class="product-label label-sale">#}
+{#                ٪{{ p.discount_percent|floatformat:0 }}#}
+{#            </span>#}
+{#        {% endif %}#}
+{##}
+{#        {% if p.is_new %}#}
+{#            <span class="product-label label-new">جدید</span>#}
+{#        {% endif %}#}
+{##}
+{#        <a href="{{ p.get_absolute_url }}">#}
+{#            {% if p.cover_image %}#}
+{#                <img src="{{ p.cover_image.image.url }}" alt="{{ p.name }}">#}
+{#            {% else %}#}
+{#                <img src="{% static 'images/placeholder-600x600.png' %}" alt="{{ p.name }}">#}
+{#            {% endif %}#}
+{#        </a>#}
+{##}
+{#    </figure>#}
+{##}
+{#    <!-- BODY -->#}
+{#    <div class="product-body">#}
+{##}
+{#        <!-- TOP -->#}
+{#        <div class="product-top">#}
+{#            {% if p.category %}#}
+{#                <div class="product-cat">#}
+{#                    <a href="{{ p.category.get_absolute_url }}">#}
+{#                        {{ p.category.name }}#}
+{#                    </a>#}
+{#                </div>#}
+{#            {% endif %}#}
+{##}
+{#            <h3 class="product-title">#}
+{#                <a href="{{ p.get_absolute_url }}">{{ p.name }}</a>#}
+{#            </h3>#}
+{#        </div>#}
+{##}
+{#        <!-- MIDDLE (COLORS) -->#}
+{#        <div class="product-middle">#}
+{#            {% if p.colors_list %}#}
+{#                <div class="product-colors">#}
+{#                    {% for c in p.colors_list|slice:":6" %}#}
+{#                        <span class="color-dot"#}
+{#                              style="background: {{ c.hex }};"#}
+{#                              title="{{ c.name }}"></span>#}
+{#                    {% endfor %}#}
+{#                </div>#}
+{#            {% else %}#}
+{#                <span class="no-colors">بدون تنوع رنگ</span>#}
+{#            {% endif %}#}
+{#        </div>#}
+{##}
+{#        <!-- BOTTOM (PRICE) -->#}
+{#        <div class="product-bottom">#}
+{#            <div class="product-price">#}
+{#                {% if p.has_discount %}#}
+{#                    <span class="new-price">#}
+{#                        {{ p.price_final|fa_price }} <small>تومان</small>#}
+{#                    </span>#}
+{#                    <span class="old-price">#}
+{#                        {{ p.price_base|fa_price }} <small>تومان</small>#}
+{#                    </span>#}
+{#                {% else %}#}
+{#                    <span class="new-price">#}
+{#                        {{ p.price_final|default:p.price|fa_price }} <small>تومان</small>#}
+{#                    </span>#}
+{#                {% endif %}#}
+{#            </div>#}
+{#        </div>#}
+{##}
+{#    </div>#}
+{#</div>#}

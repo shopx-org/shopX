@@ -19,7 +19,9 @@ from products.services.pricing_adapter import (
 )
 from shipping.models import Address
 from shipping.forms import AddressForm
+from checkout.forms import ReceiverForm
 from orders.models import Order
+
 # from shipping.services import get_shipping_quotes_for_cart
 
 # =========================
@@ -30,21 +32,23 @@ SESSION_KEY_SHIPPING = "checkout.shipping_method"
 SESSION_KEY_RECEIVER = "checkout.receiver"
 SESSION_KEY_PENDING_ORDER = "checkout.pending_order_id"
 
-# =========================
-# forms
-# =========================
-class ReceiverForm(forms.Form):
-    first_name = forms.CharField(label="نام", max_length=50)
-    last_name = forms.CharField(label="نام خانوادگی", max_length=50)
-    email = forms.EmailField(label="ایمیل", required=False)
-    national_id = forms.CharField(label="کد ملی", max_length=10, required=False)
-    gender = forms.ChoiceField(
-        label="جنسیت",
-        required=False,
-        choices=[("female", "خانم"), ("male", "آقا")],
-        widget=forms.RadioSelect,
-    )
 
+#
+# # =========================
+# # forms
+# # =========================
+# class ReceiverForm(forms.Form):
+#     first_name = forms.CharField(label="نام", max_length=50)
+#     last_name = forms.CharField(label="نام خانوادگی", max_length=50)
+#     email = forms.EmailField(label="ایمیل", required=False)
+#     national_id = forms.CharField(label="کد ملی", max_length=10, required=False)
+#     gender = forms.ChoiceField(
+#         label="جنسیت",
+#         required=False,
+#         choices=[("female", "خانم"), ("male", "آقا")],
+#         widget=forms.RadioSelect,
+#     )
+#
 
 # =========================
 # helpers (messages)
@@ -80,6 +84,7 @@ def _require_nonempty_cart(cart: Cart) -> bool:
     except Exception:
         return False
 
+
 def _cart_shipping_flat_fee(cart: Cart) -> Decimal:
     """
     جمع هزینه بسته‌بندی/ارسال بر اساس فیلد shipping_flat_fee
@@ -108,6 +113,7 @@ def _cart_shipping_flat_fee(cart: Cart) -> Decimal:
 
     return total
 
+
 def _build_lines_with_gids(cart: Cart) -> Tuple[List[Any], List[Tuple[str, SimpleNamespace]]]:
     """
     خطوط پرایسینگ را از آیتم‌های سبد بساز + برای هر ردیف gid بده.
@@ -123,7 +129,6 @@ def _build_lines_with_gids(cart: Cart) -> Tuple[List[Any], List[Tuple[str, Simpl
         if getattr(it, "unit_price", None) is not None:
             base.unit_price = Decimal(str(it.unit_price))
             base.line_subtotal = base.unit_price * base.quantity
-
 
         setattr(base, "_cart_gid", gid)
         lines.append(base)
@@ -223,10 +228,10 @@ def _cart_summary_ctx(cart: Cart, channel: str = "web") -> Dict[str, Any]:
 
 def _get_user_phone(user) -> str:
     return (
-        getattr(user, "phone_number", None)
-        or getattr(user, "mobile", None)
-        or getattr(user, "phone", None)
-        or ""
+            getattr(user, "phone_number", None)
+            or getattr(user, "mobile", None)
+            or getattr(user, "phone", None)
+            or ""
     )
 
 
@@ -311,6 +316,19 @@ def checkout_address(request: HttpRequest) -> HttpResponse:
                 request.session[SESSION_KEY_ADDR] = addr.id
                 return redirect("checkout:address")
 
+            # ✅ این دو تا را اضافه کن تا کاربر بفهمد چرا ذخیره نشده
+            messages.error(request, "لطفاً خطاهای فرم آدرس را اصلاح کنید.", extra_tags="addr")
+            for field, errors in address_form.errors.items():
+                for e in errors:
+                    if field in address_form.fields:
+                        messages.error(
+                            request,
+                            f"{address_form.fields[field].label}: {e}",
+                            extra_tags="addr"
+                        )
+                    else:
+                        messages.error(request, str(e), extra_tags="addr")
+
             return _render(address_form, receiver_form)
 
         # ---------- delete address ----------
@@ -348,11 +366,13 @@ def checkout_address(request: HttpRequest) -> HttpResponse:
         # ---------- receiver form ----------
         if action == "receiver":
             address_form = AddressForm()
-            receiver_form = ReceiverForm(request.POST)
+            # receiver_form = ReceiverForm(request.POST)
+            receiver_form = ReceiverForm(request.POST, user=request.user)
 
             if receiver_form.is_valid():
                 request.session[SESSION_KEY_RECEIVER] = receiver_form.cleaned_data
-                ship_method = request.POST.get("shipping_method") or "tipax"
+
+                ship_method = (request.POST.get("shipping_method") or "tipax").strip()
                 request.session[SESSION_KEY_SHIPPING] = ship_method
 
                 # مطمئن شو آدرس انتخاب شده
@@ -369,6 +389,8 @@ def checkout_address(request: HttpRequest) -> HttpResponse:
 
                 return redirect("checkout:review")
 
+            # ❗ فرم نامعتبر → پیام بده + همان صفحه را با خطاها رندر کن
+            # messages.error(request, "لطفاً خطاهای فرم گیرنده را اصلاح کنید.", extra_tags="receiver")
             return _render(address_form, receiver_form)
 
         # action ناشناخته
@@ -376,7 +398,8 @@ def checkout_address(request: HttpRequest) -> HttpResponse:
 
     # ---------- GET ----------
     address_form = AddressForm()
-    receiver_form = ReceiverForm(initial=receiver_initial)
+    # receiver_form = ReceiverForm(initial=receiver_initial)
+    receiver_form = ReceiverForm(initial=receiver_initial, user=request.user)
     return _render(address_form, receiver_form)
 
 
@@ -444,7 +467,8 @@ def checkout_review(request: HttpRequest) -> HttpResponse:
 
     review_rows: List[Dict[str, Any]] = []
     for gid, it in groups:
-        pricing = per_gid.get(gid, {"items_subtotal": D0, "services_total": D0, "discount": D0, "total": D0, "services": []})
+        pricing = per_gid.get(gid,
+                              {"items_subtotal": D0, "services_total": D0, "discount": D0, "total": D0, "services": []})
 
         product_obj = it.variant or it.product
         review_rows.append({
@@ -503,14 +527,24 @@ def checkout_confirm(request: HttpRequest) -> HttpResponse:
 
     # 3) idempotency: اگر سفارش pending قبلی داریم و مبلغ هنوز همونه → reuse
     pending_id = request.session.get(SESSION_KEY_PENDING_ORDER)
+
     if pending_id:
         prev = Order.objects.filter(id=pending_id, user=request.user).first()
-        if prev and prev.payment_status == Order.PaymentStatus.PENDING:
-            if prev.total == current_total:
-                return redirect("orders:payment_start", order_id=prev.id)
-            # اگر مبلغ عوض شده، این pending دیگه معتبر نیست
-        request.session.pop(SESSION_KEY_PENDING_ORDER, None)
 
+        # اگر سفارش قبلی وجود دارد و هنوز در وضعیت pending است
+        if prev and prev.payment_status == Order.PaymentStatus.PENDING:
+            # اگر مبلغ تغییری نکرده → همان سفارش را ادامه بده
+            if prev.total == current_total:
+                request.session[SESSION_KEY_PENDING_ORDER] = prev.id
+                request.session.modified = True
+                return redirect("orders:payment_start", order_id=prev.id)
+
+            # مبلغ عوض شده → سفارش قبلی دیگر معتبر نیست (پس سشن را پاک می‌کنیم)
+            request.session.pop(SESSION_KEY_PENDING_ORDER, None)
+
+        else:
+            # سفارش پیدا نشد یا دیگر pending نیست → سشن را پاک می‌کنیم
+            request.session.pop(SESSION_KEY_PENDING_ORDER, None)
     # 4) ساخت Order و OrderItem ها به صورت اتمیک
     with transaction.atomic():
         order = Order.objects.create(

@@ -1,23 +1,22 @@
-{% extends 'base.html' %}
-{% load static %}
-{% load social_share %}
-{% load humanize %}
-{% load promos_tags %}
-{% load core_extras %}
+{% extends "base.html" %}
+{% load static social_share humanize promos_tags core_extras persian_digits %}
+
 {% block meta %}
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-
 {% endblock %}
-{% block CSS-JS %}
 
-    <script src="{% static 'js/wishlist.js' %}"></script>
+{% block CSS-JS %}
+    {# JS عمومی #}
+    <script src="{% static 'js/wishlist.js' %}" defer></script>
 
     {# JSON برای JS #}
-    <script id="variant-matrix" type="application/json">{{ variant_matrix_json|default:'{}'|safe }}</script>
-    <script id="price-chart-data" type="application/json">{{ price_chart_json|default:'{}'|safe }}</script>
-
+    <script id="variant-matrix" type="application/json">{{ variant_matrix_json|default:"{}"|safe }}</script>
+    <script id="price-chart-data" type="application/json">{{ price_chart_json|default:"{}"|safe }}</script>
+    <script id="variant-prices" type="application/json">
+      {{ variant_prices_json|default:"{}"|safe }}
+    </script>
     {# Chart.js فقط یک‌بار #}
     <script src="{% static 'products/js/chart.umd.min.js' %}" defer></script>
 
@@ -30,76 +29,146 @@
     <script src="{% static 'products/js/product.js' %}" defer></script>
 
     <style>
+        /* ==== Rating Stars ==== */
         .stars {
             display: inline-flex;
             gap: 4px;
-            cursor: pointer;
+            cursor: pointer
         }
 
         .stars i {
             font-size: 1.5rem;
             color: #ccc;
-            transition: color 0.2s ease, transform 0.2s ease;
+            transition: color .2s ease, transform .2s ease
         }
 
         .stars i.bi-star-fill {
-            color: #f5c518; /* طلایی */
+            color: #f5c518
         }
 
         .stars i.hovered {
-            color: #f8d24a !important;
+            color: #f8d24a !important
         }
 
         .stars i:hover {
             transform: scale(1.2);
-            color: #f8d24a;
+            color: #f8d24a
         }
 
         .rating-average {
             margin-left: 6px;
             font-weight: 600;
-            color: #333;
+            color: #333
         }
 
         .rating-count {
             margin-left: 4px;
             color: #777;
-            font-size: 1.2rem;
+            font-size: 1.2rem
+        }
+
+        /* ==== Related carousel equal cards ==== */
+        .product-detail-related .owl-carousel .owl-stage {
+            display: flex
+        }
+
+        .product-detail-related .owl-carousel .owl-item {
+            display: flex;
+            height: auto
+        }
+
+        .product-detail-related .owl-carousel .item {
+            display: flex;
+            width: 100%;
+            height: 100%
+        }
+
+        .product-detail-related .dk-product-card {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column
+        }
+
+        .product-detail-related .dk-product-card .product-media {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1/1;
+            overflow: hidden
+        }
+
+        .product-detail-related .dk-product-card .product-media > a {
+            position: absolute;
+            inset: 0;
+            display: block
+        }
+
+        .product-detail-related .dk-product-card .product-media img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            object-position: center;
+            display: block
+        }
+
+        /* ==== CKEditor content guard ==== */
+        .product-desc img {
+            max-width: 100%;
+            height: auto
+        }
+
+        .product-desc ul, .product-desc ol {
+            padding-right: 1.25rem
+        }
+
+        .product-desc p {
+            margin-bottom: .75rem;
+            line-height: 1.9
+        }
+
+        .product-desc a {
+            text-decoration: underline
+        }
+
+        .product-desc table {
+            max-width: 100%
         }
     </style>
 
-
-    <script>
+    <script defer>
         document.addEventListener('DOMContentLoaded', function () {
-            const starsContainers = document.querySelectorAll('.stars');
+            const containers = document.querySelectorAll('.stars');
 
-            starsContainers.forEach(container => {
+            containers.forEach(container => {
                 const stars = container.querySelectorAll('i');
                 const objectId = container.dataset.objectId;
                 const contentTypeId = container.dataset.contentTypeId;
+                const addUrl = container.dataset.addUrl;
+                const userUrl = container.dataset.userUrl;
 
-                let userHasRated = false;  // آیا کاربر قبلاً رأی داده؟
+                let userHasRated = false;
 
-                // ⭐ Hover پیش‌نمایش فقط وقتی کاربر رأی نداده
+                // Hover preview (only if user hasn't rated)
                 stars.forEach((star, index) => {
-                    star.addEventListener('mouseenter', function () {
+                    star.addEventListener('mouseenter', () => {
                         if (userHasRated) return;
                         stars.forEach((s, i) => s.classList.toggle('hovered', i <= index));
                     });
-                    star.addEventListener('mouseleave', function () {
+                    star.addEventListener('mouseleave', () => {
                         if (userHasRated) return;
                         stars.forEach(s => s.classList.remove('hovered'));
                     });
                 });
 
-                // 🌟 ثبت امتیاز با کلیک
+                // Submit rating
                 stars.forEach(star => {
                     star.addEventListener('click', function () {
-                        if (userHasRated) return; // جلوگیری از رأی دوباره
+                        if (userHasRated) return;
 
-                        const score = parseInt(this.dataset.score);
+                        const score = parseInt(this.dataset.score || "0", 10);
+                        if (!score) return;
 
-                        fetch("{% url 'core:add_rating' %}", {
+                        fetch(addUrl, {
                             method: 'POST',
                             headers: {
                                 'X-CSRFToken': '{{ csrf_token }}',
@@ -111,68 +180,70 @@
                             .then(res => res.json())
                             .then(data => {
                                 if (data.status === 'success') {
-                                    userHasRated = true; // علامت‌گذاری برای جلوگیری از کلیک دوباره
+                                    userHasRated = true;
 
-                                    // پر کردن ستاره‌ها با امتیاز کاربر
                                     stars.forEach(s => s.classList.remove('bi-star-fill', 'hovered'));
-                                    for (let i = 0; i < data.user_score; i++) {
-                                        stars[i].classList.add('bi-star-fill');
+                                    for (let i = 0; i < (data.user_score || 0); i++) {
+                                        if (stars[i]) stars[i].classList.add('bi-star-fill');
                                     }
 
-                                    // به‌روزرسانی عدد میانگین و تعداد رأی
-                                    container.parentElement.querySelector('.rating-average').textContent = data.average;
-                                    container.parentElement.querySelector('.rating-count').textContent = `(${data.count} رأی)`;
+                                    const root = container.closest('.product-rating') || container.parentElement;
+                                    const avgEl = root.querySelector('.rating-average');
+                                    const cntEl = root.querySelector('.rating-count');
+                                    if (avgEl) avgEl.textContent = data.average;
+                                    if (cntEl) cntEl.textContent = `(${data.count} رأی)`;
 
-                                    // غیرفعال کردن کلیک‌ها
                                     stars.forEach(s => s.style.pointerEvents = 'none');
                                 } else {
                                     alert(data.message || 'خطایی رخ داد.');
                                 }
-                            });
+                            })
+                            .catch(() => alert('خطای ارتباط با سرور'));
                     });
                 });
 
-                // 🔹 گرفتن امتیاز کاربر بعد از رفرش و غیرقابل تغییر کردن ستاره‌ها
-                fetch("{% url 'core:get_user_rating' %}?object_id=" + objectId + "&content_type_id=" + contentTypeId)
+                // Load user rating on refresh
+                fetch(`${userUrl}?object_id=${objectId}&content_type_id=${contentTypeId}`)
                     .then(res => res.json())
                     .then(data => {
                         stars.forEach(s => s.classList.remove('bi-star-fill', 'hovered'));
                         if (data.user_score) {
                             userHasRated = true;
                             for (let i = 0; i < data.user_score; i++) {
-                                stars[i].classList.add('bi-star-fill');
+                                if (stars[i]) stars[i].classList.add('bi-star-fill');
                             }
-                            stars.forEach(s => s.style.pointerEvents = 'none'); // غیرقابل تغییر
+                            stars.forEach(s => s.style.pointerEvents = 'none');
                         }
+                    })
+                    .catch(() => {
                     });
             });
         });
     </script>
-
-
-
-
 {% endblock %}
 
 {% block content %}
-    {# فال‌بک‌ها (اگر از ویوو نیامد) #}
-    {% static 'images/broken-image.png' as FALLBACK_IMG %}
-    {% static 'images/link.png' as FALLBACK_THUMB %}
+    {% static "images/broken-image.png" as FALLBACK_IMG %}
+    {% static "images/link.png" as FALLBACK_THUMB %}
 
     <main class="main tlp-product">
-        <!-- Breadcrumb -->
+
+        {# Breadcrumb #}
         <nav aria-label="breadcrumb" class="breadcrumb-nav border-0 mb-0">
             <div class="container d-flex align-items-center">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="{% url 'home:home' %}">خانه</a></li>
+
                     {% if breadcrumbs %}
                         {% for bc in breadcrumbs %}
                             <li class="breadcrumb-item"><a href="{{ bc.url }}">{{ bc.name }}</a></li>
                         {% endfor %}
                     {% elif product.category %}
-                        <li class="breadcrumb-item"><a
-                                href="{{ product.category.get_absolute_url }}">{{ product.category.name }}</a></li>
+                        <li class="breadcrumb-item">
+                            <a href="{{ product.category.get_absolute_url }}">{{ product.category.name }}</a>
+                        </li>
                     {% endif %}
+
                     <li class="breadcrumb-item active" aria-current="page">{{ product.name }}</li>
                 </ol>
             </div>
@@ -180,20 +251,22 @@
 
         <div class="page-content" style="margin-bottom:2rem;">
             <div class="container">
+
                 <section class="tlp-hero ui-compact" dir="rtl">
-                    {# ——— ردیف اصلی: باکس محصول (گالری+جزئیات) + ستون قیمت/خرید ——— #}
+
                     <form id="add-to-cart-form" method="post" action="{% url 'cart:cart_add' product.id %}">
                         {% csrf_token %}
                         <input type="hidden" name="product_id" value="{{ product.id }}">
-                        <input type="hidden" name="variant_id" id="variant_id" value="">
+                        <input type="hidden" name="variant_id" id="variant_id" value="{{ initial_variant_id }}">
 
                         <div class="row g-3 align-items-start">
 
-                            <!-- باکس محصول: گالری + جزئیات -->
+                            {# Main box: gallery + details #}
                             <div class="col-xl-9 col-lg-8 order-lg-2">
                                 <div class="card-like wm-main">
                                     <div class="row g-3">
-                                        <!-- گالری (راست) -->
+
+                                        {# Gallery #}
                                         <div class="col-lg-6 order-lg-2">
                                             <section class="tlp-gallery gallery-rtl-right" aria-label="گالری محصول"
                                                      dir="rtl">
@@ -204,7 +277,6 @@
                                                          data-zoom-src="{{ gallery_images.0.zoom_url|default:gallery_images.0.url|default:FALLBACK_IMG }}"
                                                          alt="{{ gallery_images.0.alt|default:product.name }}"
                                                          loading="eager" decoding="async">
-
                                                     <div class="zoom-lens" aria-hidden="true"></div>
                                                 </div>
 
@@ -229,12 +301,11 @@
                                                                          alt="{{ img.alt|default:product.name }}"
                                                                          loading="lazy" decoding="async">
 
-                                                                    {# روی تامب 5 اگر بیشتر از 5 تا بود: اوورلی +X #}
                                                                     {% if forloop.counter == 5 and gallery_images|length > 5 %}
                                                                         <span class="thumb-more" role="button"
                                                                               aria-label="نمایش همه تصاویر">
-                                                                          +{{ gallery_images|length|add:"-5" }}
-                                                                        </span>
+                                      +{{ gallery_images|length|add:"-5" }}
+                                    </span>
                                                                     {% endif %}
                                                                 </button>
                                                             {% endif %}
@@ -253,22 +324,24 @@
                                                         </button>
                                                     {% endif %}
                                                 </div>
+
                                                 <script id="tlp-gallery-data" type="application/json">
                                                     {
                                                       "images": [
                                                     {% for img in gallery_images %}
                                                         {
-                                                           "full": "{{ img.url|escapejs }}",
-                                                           "zoom": "{{ img.zoom_url|default:img.url|escapejs }}",
-                                                           "thumb": "{{ img.url|escapejs }}",
-                                                           "alt": "{{ img.alt|default:product.name|escapejs }}",
-                                                           "color_id": "{{ img.color_id|default:''|escapejs }}"
-                                                          }{% if not forloop.last %},{% endif %}
-                                                        {% endfor %}
+                                                          "full": "{{ img.url|escapejs }}",
+                                "zoom": "{{ img.zoom_url|default:img.url|escapejs }}",
+                                "thumb": "{{ img.url|escapejs }}",
+                                "alt": "{{ img.alt|default:product.name|escapejs }}",
+                                "color_id": "{{ img.color_id|default:''|escapejs }}"
+                              }{% if not forloop.last %},{% endif %}
+                            {% endfor %}
                                                     ]
                                                   }
                                                 </script>
-                                                {# مودال گالری #}
+
+                                                {# Modal gallery #}
                                                 <div class="tlp-modal" id="tlp-gallery-modal" aria-hidden="true">
                                                     <div class="tlp-modal-backdrop" data-close="1"></div>
 
@@ -277,9 +350,11 @@
                                                         <button class="tlp-modal-close" type="button" aria-label="بستن"
                                                                 data-close="1">×
                                                         </button>
-                                                            <div class="tlp-modal-header">
-                                                              <div class="tlp-modal-title">تصاویر رسمی این محصول</div>
-                                                            </div>
+
+                                                        <div class="tlp-modal-header">
+                                                            <div class="tlp-modal-title">تصاویر رسمی این محصول</div>
+                                                        </div>
+
                                                         <div class="tlp-modal-body">
                                                             <div class="tlp-modal-main">
                                                                 <img id="tlp-modal-main-img" src="" alt="">
@@ -298,65 +373,19 @@
 
                                             </section>
                                         </div>
-                                        {#                                        <div class="col-lg-6 order-lg-2">#}
-                                        {#                                            <section class="tlp-gallery gallery-rtl-right" aria-label="گالری محصول"#}
-                                        {#                                                     dir="rtl">#}
-                                        {#                                                <div class="stage card-like">#}
-                                        {#                                                    <img id="tlp-main"#}
-                                        {#                                                         src="{{ gallery_images.0.url|default:FALLBACK_IMG }}"#}
-                                        {#                                                         alt="{{ gallery_images.0.alt|default:product.name }}"#}
-                                        {#                                                         loading="eager" decoding="async">#}
-                                        {#                                                     <div class="zoom-lens" aria-hidden="true"></div>#}
-                                        {#                                                </div>#}
-                                        {#                                                <div class="zoom-box" id="tlp-zoom-box" aria-hidden="true">#}
-                                        {#                                                    <div class="zoom-img" id="tlp-zoom-img"></div>#}
-                                        {#                                                </div>#}
-                                        {#                                                <div class="thumbs" role="list">#}
-                                        {#                                                    {% if gallery_images %}#}
-                                        {#                                                        {% for img in gallery_images %}#}
-                                        {#                                                            <button class="thumb{% if img.is_primary or forloop.first %} is-active{% endif %}"#}
-                                        {#                                                                    type="button" role="listitem"#}
-                                        {#                                                                    aria-pressed="{% if img.is_primary or forloop.first %}true{% else %}false{% endif %}"#}
-                                        {#                                                                    title="{{ product.name }} - {{ forloop.counter }}"#}
-                                        {#                                                                    data-full="{{ img.url }}"#}
-                                        {#                                                                    data-color-id="{{ img.color_id|default:'' }}">#}
-                                        {#                                                                <img src="{{ img.url }}"#}
-                                        {#                                                                     alt="{{ img.alt|default:product.name }}"#}
-                                        {#                                                                     loading="lazy" decoding="async">#}
-                                        {#                                                            </button>#}
-                                        {#                                                        {% endfor %}#}
-                                        {#                                                    {% else %}#}
-                                        {#                                                        <button class="thumb is-active" type="button" role="listitem"#}
-                                        {#                                                                aria-pressed="true" title="{{ product.name }}"#}
-                                        {#                                                                data-full="{{ FALLBACK_IMG }}">#}
-                                        {#                                                            <img src="{{ FALLBACK_THUMB }}" alt="{{ product.name }}"#}
-                                        {#                                                                 loading="lazy" decoding="async">#}
-                                        {#                                                        </button>#}
-                                        {#                                                    {% endif %}#}
-                                        {#                                                </div>#}
-                                        {#                                            </section>#}
-                                        {#                                        </div>#}
 
-                                        <!-- جزئیات/رنگ/سایز (چپ) -->
+                                        {# Details #}
                                         <div class="col-lg-6 order-lg-1">
                                             <div class="product-details">
 
                                                 <h1 class="product-title border-bottom pb-1 mb-2 mt-1">{{ product.name }}</h1>
 
-                                                {% comment %} <div class="ratings-container mt-1">
-                                                    <div class="ratings">
-                                                        <div class="ratings-val" style="width:80%;"></div>
-                                                    </div>
-                                                    <a class="ratings-text" href="#comments" id="review-link">
-                                                        ( {{ product.review_count|default:0 }} نظر )
-                                                    </a>
-                                                </div> {% endcomment %}
-
-
                                                 <div class="product-rating mt-2">
                                                     <div class="stars"
                                                          data-object-id="{{ product.id }}"
-                                                         data-content-type-id="{{ product|content_type_id }}">
+                                                         data-content-type-id="{{ product|content_type_id }}"
+                                                         data-add-url="{% url 'core:add_rating' %}"
+                                                         data-user-url="{% url 'core:get_user_rating' %}">
                                                         {% for i in "12345" %}
                                                             <i class="bi bi-star"
                                                                data-score="{{ forloop.counter }}"></i>
@@ -365,7 +394,6 @@
                                                     <span class="rating-average">{{ product.average_rating|default:"0" }}</span>
                                                     <span class="rating-count">({{ product.rating_count|default:"0" }} رأی)</span>
                                                 </div>
-
 
                                                 <div class="product-content pt-2 mb-2">
                                                     {% if product.short_description %}
@@ -391,8 +419,6 @@
                                                                        role="button">
                                                                         <span class="sr-only">{{ c.name }}</span>
                                                                     </a>
-
-
                                                                 {% endfor %}
                                                             {% else %}
                                                                 <span class="text-muted">بدون تنوع رنگ</span>
@@ -415,8 +441,9 @@
                                                             </select>
                                                         </div>
                                                         {% if ui.show_size_guide %}
-                                                            <a href="#" class="size-guide"><i class="icon-th-list"></i>راهنمای
-                                                                اندازه</a>
+                                                            <a href="#" class="size-guide">
+                                                                <i class="icon-th-list"></i>راهنمای اندازه
+                                                            </a>
                                                         {% endif %}
                                                     </div>
                                                 {% endif %}
@@ -438,24 +465,36 @@
                                                         {% endif %}
                                                     </div>
                                                 {% endif %}
-                                                {#                                                <details class="dk-acc card-like">#}
-                                                {#                                                    <summary><span>خدمات نصب و راه‌اندازی</span> <label#}
-                                                {#                                                            class="switch"><input#}
-                                                {#                                                            type="checkbox"#}
-                                                {#                                                            id="svc-toggle"><span#}
-                                                {#                                                            class="slider"></span></label></summary>#}
-                                                {#                                                    <div class="dk-acc-body"><label class="opt"> <input type="checkbox"#}
-                                                {#                                                                                                        id="install-chk">#}
-                                                {#                                                        <span#}
-                                                {#                                                                class="ttl">نصب در محل</span> <span#}
-                                                {#                                                                class="price muted">هزینه پس از خرید مشخص می‌شود</span>#}
-                                                {#                                                    </label>#}
-                                                {#                                                        <div class="dk-acc-foot"><a href="#" class="lnk">جزئیات</a>#}
-                                                {#                                                        </div>#}
-                                                {#                                                    </div>#}
-                                                {#                                                </details>#}
 
-                                                {% if show_insurance %}
+
+                                                {# نصب و راه‌اندازی: اگر شرط داری از ویوو بفرست (مثلاً ui.show_install) #}
+                                                {% if ui.show_install %}
+                                                    <details class="dk-acc card-like">
+                                                        <summary>
+                                                            <span>خدمات نصب و راه‌اندازی</span>
+                                                            <label class="switch">
+                                                                <input type="checkbox" id="svc-toggle">
+                                                                <span class="slider"></span>
+                                                            </label>
+                                                        </summary>
+
+                                                        <div class="dk-acc-body">
+                                                            <label class="opt">
+                                                                <input type="checkbox" id="install-chk"
+                                                                       name="services[]" value="install">
+                                                                <span class="ttl">نصب در محل</span>
+                                                                <span class="price muted">هزینه پس از خرید مشخص می‌شود</span>
+                                                            </label>
+
+                                                            <div class="dk-acc-foot">
+                                                                <a href="#" class="lnk">جزئیات</a>
+                                                            </div>
+                                                        </div>
+                                                    </details>
+                                                {% endif %}
+
+                                                {# بیمه: دقیقاً مثل قبل شرطی بماند #}
+                                                {% if show_insurance and services_insurance %}
                                                     <details class="dk-acc card-like" open>
                                                         <summary>
                                                             <span class="t">بیمه</span>
@@ -469,30 +508,31 @@
                                                             {% for si in services_insurance %}
                                                                 <label class="opt">
                                                                     <input
-                                                                            type="radio"   {# یا checkbox #}
+                                                                            type="radio"
                                                                             name="services[]"
                                                                             value="{{ si.id }}"
                                                                             {% if si.is_default_on %}checked{% endif %}
                                                                     >
                                                                     <span class="ttl">{{ si.name }}</span>
 
-                                                                    {# اگر پلن درصدی داری، می‌تونی یک badge نشان دهی؛ اینجا فقط قیمت نهایی نشان داده می‌شود #}
-                                                                    {# <span class="off">٪۵</span>  ← اگر لازم شد بعداً از متادیتا اضافه می‌کنیم #}
-
                                                                     <span class="price">
-          {{ si.unit_price|floatformat:0|intcomma }}
-          <small>تومان</small>
+                                                                        {{ si.unit_price|floatformat:0|intcomma }}
+                                                                    <small>تومان</small>
                                                                         {% if si.per_item %}
-                                                                            <small class="text-muted">(به‌ازای هر واحد)</small>{% endif %}
-        </span>
+                                                                            <small class="text-muted">(به‌ازای هر واحد)</small>
+                                                                        {% endif %}
+                                                                    </span>
                                                                 </label>
                                                             {% endfor %}
-                                                            <div class="dk-acc-foot"><a href="#" class="lnک">جزئیات</a>
+
+                                                            <div class="dk-acc-foot">
+                                                                <a href="#" class="lnk">جزئیات</a>
                                                             </div>
                                                         </div>
                                                     </details>
-
                                                 {% endif %}
+
+
                                                 <div class="product-details-footer">
                                                     <div class="product-cat text-center">
                                                         <span>دسته‌بندی : </span>
@@ -502,32 +542,25 @@
                                                             <span class="text-muted">نامشخص</span>
                                                         {% endif %}
                                                     </div>
+
                                                     <div class="social-icons social-icons-sm">
                                                         {% post_to_facebook product '<i class="icon-facebook-f"></i>' 'social-icon' %}
-                                                        <!-- لینک جزئیات رو share می‌کنه -->
                                                         {% post_to_twitter "این محصول عالی رو چک کن: {{ product.name }} - {{ request.build_absolute_uri }}{{ product.get_absolute_url }}" product '<i class="icon-twitter"></i>' 'social-icon' %}
-                                                        <!-- متن با نام و لینک -->
                                                         {% post_to_whatsapp product '<i class="icon-whatsapp"></i>' 'social-icon' %}
-                                                        <!-- مشابه برای واتس‌اپ -->
                                                         {% copy_to_clipboard product '<i class="icon-google"></i>' 'social-icon' %}
-
                                                     </div>
                                                 </div>
 
                                             </div>
                                         </div>
+
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- ستون قیمت/خرید (سایدبار) -->
+                            {# Buy box #}
                             <aside class="col-xl-3 col-lg-4 order-lg-1">
                                 <div class="dk-buybox card-like sticky-col">
-
-                                    <div class="dk-seller">
-                                        <a href="#" class="lnk">عملکرد این محصول</a>
-                                        <span class="badge dk-badge-ok">عملکرد خوب</span>
-                                    </div>
 
                                     <div class="dk-price">
                                         <div class="num">
@@ -543,15 +576,23 @@
                                                     {{ price_base|floatformat:0|intcomma }}
                                                 {% endif %}
                                             </del>
+
                                             <span class="badge dk-badge-off" id="off-badge">
-                {% if discount_percent %}{{ discount_percent|floatformat:0 }}٪ تخفیف{% endif %}
-              </span>
+                                                {% if discount_percent %}{{ discount_percent|floatformat:0 }}٪
+                                                    تخفیف{% endif %}
+                                              </span>
+
                                             <small class="text-muted d-block" id="off-amount">
                                                 {% if discount_amount %}مبلغ کسرشده:
                                                     {{ discount_amount|floatformat:0|intcomma }} تومان{% endif %}
                                             </small>
                                         </div>
                                     </div>
+                                    <span id="out-badge"
+                                          class="product-label label-out mt-3 mr-4"
+                                          style="{% if in_stock %}display:none{% endif %}">
+                                      ناموجود
+                                    </span>
 
                                     <div id="price-api"
                                          data-url="{% url 'products:variant-price' slug=product.slug %}"></div>
@@ -561,8 +602,7 @@
                                             <label for="qty">تعداد :</label>
                                             <div class="product-details-quantity">
                                                 <input type="number" id="qty" name="quantity" class="form-control"
-                                                       value="1"
-                                                       min="1" max="10" step="1" data-decimals="0" required>
+                                                       value="1" min="1" max="10" step="1" data-decimals="0" required>
                                             </div>
                                         </div>
                                     </div>
@@ -581,296 +621,313 @@
                                     </div>
 
                                     <div class="dk-mini-actions" role="group" aria-label="لینک‌های ثانویه محصول">
-                                        {% comment %} <a href="#" class="btn-product btn-wishlist" title="لیست علاقه‌مندی"><span>افزودن به لیست علاقه‌مندی</span></a> {% endcomment %}
-                                        {% comment %} <a href="#" class="btn-product"
-                                    data-product-id="{{ product.id }}"
-                                    data-toggle-url="{% url 'core:toggle_wishlist' %}"
-                                    data-csrf-token="{{ csrf_token }}"
-                                    onclick="toggleWishlist(this); return false;">
-
-                                        {% if product.id in wishlist_product_ids %}
-                                            <i class="bi bi-heart-fill"></i>
-                                            <span>حذف از علاقه‌مندی‌ها</span>
-                                        {% else %}
-                                            <i class="bi bi-heart"></i>
-                                            <span>افزودن به لیست علاقه‌مندی</span>
-                                        {% endif %}
-                                    </a> {% endcomment %}
-
                                         <a href="#" class="wishlist-toggle"
                                            data-product-id="{{ product.id }}"
                                            data-toggle-url="{% url 'core:toggle_wishlist' %}"
                                            data-status-url="{% url 'core:wishlist_status' %}"
                                            data-csrf-token="{{ csrf_token }}"
                                            onclick="toggleWishlist(this); return false;">
-
                                             <i class="bi {% if product.id in user_wishlist %}bi-heart-fill{% else %}bi-heart{% endif %}"></i>
-
                                             <span>
-                                            {% if product.id in user_wishlist %}
-                                                حذف از علاقه‌مندی‌ها
-                                            {% else %}
-                                                افزودن به لیست علاقه‌مندی
-                                            {% endif %}
-                                        </span>
+                        {% if product.id in user_wishlist %}حذف از علاقه‌مندی‌ها{% else %}افزودن به لیست
+                            علاقه‌مندی{% endif %}
+                      </span>
                                         </a>
 
-
-                                        {% comment %} <a href="#" class="btn-product btn-compare" title="مقایسه"><span>افزودن به لیست مقایسه</span></a> {% endcomment %}
                                         <a href="{% url 'products:add_to_compare' product.id %}"
                                            class="btn-product btn-compare" title="مقایسه">
                                             <span>افزودن به لیست مقایسه</span>
                                         </a>
-
-
                                     </div>
 
                                     <hr>
 
-                                    <div class="dk-row"><label><i class="icon-truck"></i> روش و هزینه ارسال</label>
+                                    <div class="dk-row">
+                                        <label><i class="icon-truck"></i> روش و هزینه ارسال</label>
                                         <div class="v">{{ product.shipping_text|default:"ارسال سریع • تامین از ۱ روز کاری دیگر" }}</div>
                                     </div>
-                                    <div class="dk-row"><label><i class="icon-check"></i> اصالت و سلامت کالا</label>
+
+                                    <div class="dk-row">
+                                        <label><i class="icon-check"></i> اصالت و سلامت کالا</label>
                                         <div class="v">ضمانت اصالت و سلامت فیزیکی</div>
                                     </div>
-                                    <div class="dk-row"><label><i class="icon-rotate-left"></i> بازگشت</label>
+
+                                    <div class="dk-row">
+                                        <label><i class="icon-rotate-left"></i> بازگشت</label>
                                         <div class="v">۷ روز مهلت بازگشت</div>
                                     </div>
-                                    <div class="dk-row"><label><i class="icon-superpowers"></i> گارانتی</label>
+
+                                    <div class="dk-row">
+                                        <label><i class="icon-superpowers"></i> گارانتی</label>
                                         <div class="v">{{ product.warranty_text|default:"—" }}</div>
                                     </div>
-
 
                                 </div>
                             </aside>
 
                         </div>
-                        {# /row #}
-                        <!-- اکاردئون خدمات -->
-
                     </form>
 
-                    {# ——— ردیف جدا برای نمودار قیمت (بعد از ردیف اصلی) ——— #}
+                    {# Chart row #}
                     <div class="row g-9 align-items-start mt-3">
                         <div class="col-12">
                             <div class="card-like wm-main">
-                                <div class="row g-3">
-                                    <div class="col-12">
-                                        <div class="card custom-card">
-                                            <div class="card-header">
-                                                <div class="card-title">نمودار تغییرات قیمت این محصول</div>
-                                            </div>
-                                            <div id="line-chart">
-                                                <canvas id="priceLineChart" aria-label="نمودار روند قیمت"
-                                                        role="img"></canvas>
-                                            </div>
-                                        </div>
+                                <div class="card custom-card">
+                                    <div class="card-header">
+                                        <div class="card-title">نمودار تغییرات قیمت این محصول</div>
+                                    </div>
+                                    <div id="line-chart">
+                                        <canvas id="priceLineChart" aria-label="نمودار روند قیمت" role="img"></canvas>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </section>
 
+                </section>
 
                 <hr>
 
-                <!-- محصولات مرتبط -->
+                {# Related products #}
                 <div class="container">
                     <h2 class="title text-center mb-4">محصولاتی که شاید بپسندید</h2>
-                    <div class="owl-carousel owl-simple carousel-equal-height carousel-with-shadow"
-                         data-toggle="owl"
-                         data-owl-options='{"nav":false,"dots":true,"margin":20,"loop":false,"rtl":true,
-                 "responsive":{"0":{"items":1},"480":{"items":2},"768":{"items":3},"992":{"items":4},"1200":{"items":4,"nav":true,"dots":false}}}'>
-                        {% for r in related_products %}
-                            <div class="product product-7 text-center">
-                                <figure class="product-media">
-                                    <a href="{{ r.get_absolute_url }}">
-                                        {% with img=r.images.all|first %}
-                                            {% if img %}
-                                                <img src="{{ img.image.url }}" alt="{{ img.alt|default:r.name }}"
-                                                     class="product-image">
-                                            {% else %}
-                                                <img src="{% static 'images/products/product-4.jpg' %}"
-                                                     alt="{{ r.name }}" class="product-image">
+
+                    <div class="product-detail-related">
+                        <div class="owl-carousel owl-simple carousel-equal-height carousel-with-shadow"
+                             data-toggle="owl"
+                             data-owl-options='{"nav":false,"dots":true,"margin":20,"loop":false,"rtl":true,
+                  "responsive":{"0":{"items":1},"480":{"items":2},"768":{"items":3},"992":{"items":4},"1200":{"items":4,"nav":true,"dots":false}}}'>
+
+                            {% for r in related_products %}
+                                <div class="item">
+                                    <div class="product dk-product-card">
+
+                                        <figure class="product-media">
+                                            {% if r.has_discount %}
+                                                <span class="product-label label-sale">٪{{ r.discount_percent|floatformat:0 }} تخفیف</span>
                                             {% endif %}
-                                        {% endwith %}
-                                    </a>
-                                </figure>
-                                <div class="product-body">
-                                    <div class="product-cat text-center">
-                                        {% if r.category %}
-                                            <a href="{{ r.category.get_absolute_url }}">{{ r.category.name }}</a>{% else %}
-                                            <span class="text-muted">—</span>{% endif %}
+
+                                            {% if r.stock_total is not None and r.stock_total|add:0 <= 0 %}
+                                                <span class="dk-chip dk-chip--off dk-chip--oos">ناموجود</span>
+                                            {% elif r.stock is not None and r.stock|add:0 <= 0 %}
+                                                <span class="dk-chip dk-chip--off dk-chip--oos">ناموجود</span>
+                                            {% endif %}
+
+                                            <a href="{{ r.get_absolute_url }}">
+                                                {% with img=r.images.all|first %}
+                                                    {% if img %}
+                                                        <img src="{{ img.image.url }}"
+                                                             alt="{{ img.alt|default:r.name }}">
+                                                    {% else %}
+                                                        <img src="{% static 'images/placeholder-600x600.png' %}"
+                                                             alt="{{ r.name }}">
+                                                    {% endif %}
+                                                {% endwith %}
+                                            </a>
+                                        </figure>
+
+                                        <div class="product-body">
+                                            <div class="product-top">
+                                                {% if r.category %}
+                                                    <div class="product-cat">
+                                                        <a href="{{ r.category.get_absolute_url }}">{{ r.category.name }}</a>
+                                                    </div>
+                                                {% endif %}
+
+                                                <h3 class="product-title">
+                                                    <a href="{{ r.get_absolute_url }}">{{ r.name }}</a>
+                                                </h3>
+
+                                                <div class="dk-meta">
+                                                    <div class="dk-mini-rating">
+                                                        <i class="icon-star dk-mini-star"></i>
+                                                        <span class="ratings-text">{{ r.rating_count|default:0|fa_digits }} رأی</span>
+                                                    </div>
+                                                    <span class="dk-reviews">{{ r.reviews_count|default:"0" }} نظر</span>
+                                                </div>
+                                            </div>
+
+                                            <div class="product-bottom">
+                                                <div class="product-price">
+                                                    {% if r.has_discount %}
+                                                        <span class="new-price">{{ r.price_final|fa_price }} <small>تومان</small></span>
+                                                        <span class="old-price">{{ r.price_base|fa_price }} <small>تومان</small></span>
+                                                    {% else %}
+                                                        <span class="new-price">{{ r.price_final|default:r.price|fa_price }} <small>تومان</small></span>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+
                                     </div>
-                                    <h3 class="product-title text-center"><a
-                                            href="{{ r.get_absolute_url }}">{{ r.name }}</a></h3>
-                                    <div class="product-price">{{ r.price|floatformat:0|intcomma }} تومان</div>
+                                </div>
+                            {% empty %}
+                                <div class="text-center text-muted p-3">محصول مرتبطی پیدا نشد.</div>
+                            {% endfor %}
+
+                        </div>
+                    </div>
+                </div>
+
+                {# Tabs / accordion #}
+                <div class="product-details-tab product-details-extended mt-5">
+                    <div class="product-tab-new">
+                        <div class="page-content">
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col-md-11">
+                                        <div class="accordion" id="accordion-1">
+
+                                            {# Description (CKEditor safe render) #}
+                                            <div class="card">
+                                                <div class="card-header" id="heading-1">
+                                                    <h2 class="card-title">
+                                                        <a role="button" data-toggle="collapse" href="#collapse-1"
+                                                           aria-expanded="true" aria-controls="collapse-1">توضیحات</a>
+                                                    </h2>
+                                                </div>
+
+                                                <div id="collapse-1" class="collapse show" aria-labelledby="heading-1"
+                                                     data-parent="#accordion-1">
+                                                    <div class="card-body">
+                                                        {% if product.description %}
+                                                            <div class="product-desc">
+                                                                {{ product.description|safe }}
+                                                            </div>
+                                                        {% else %}
+                                                            <span class="text-muted">توضیحی ثبت نشده است.</span>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {# Specs #}
+                                            <div class="card" id="section-specs">
+                                                <div class="card-header" id="heading-2">
+                                                    <h2 class="card-title">
+                                                        <a class="collapsed" role="button" data-toggle="collapse"
+                                                           href="#collapse-2" aria-expanded="false"
+                                                           aria-controls="collapse-2">مشخصات فنی</a>
+                                                    </h2>
+                                                </div>
+
+                                                <div id="collapse-2" class="collapse" aria-labelledby="heading-2"
+                                                     data-parent="#accordion-1">
+                                                    <div class="card-body">
+                                                        {% if product.attr_values.all %}
+                                                            <div class="dk-specs-wrap" dir="rtl">
+                                                                <table class="dk-specs-table">
+                                                                    <tbody>
+                                                                    {% for av in product.attr_values.all %}
+                                                                        {% if av.attribute.kind == "choice" and av.value_choice %}
+                                                                            <tr>
+                                                                                <th>{{ av.attribute.name }}</th>
+                                                                                <td>{{ av.value_choice.label }}</td>
+                                                                            </tr>
+
+                                                                        {% elif av.attribute.kind == "multi" and av.values_multi.all|length %}
+                                                                            <tr>
+                                                                                <th>{{ av.attribute.name }}</th>
+                                                                                <td>
+                                                                                    {% for ch in av.values_multi.all %}
+                                                                                        {{ ch.label }}
+                                                                                        {% if not forloop.last %}
+                                                                                            ، {% endif %}
+                                                                                    {% endfor %}
+                                                                                </td>
+                                                                            </tr>
+
+                                                                        {% elif av.attribute.kind == "decimal" and av.value_decimal is not None %}
+                                                                            <tr>
+                                                                                <th>{{ av.attribute.name }}</th>
+                                                                                <td>
+                                                                                    {{ av.value_decimal|floatformat:"-2" }}
+                                                                                    {% if av.attribute.unit %}
+                                                                                        <span class="unit">{{ av.attribute.unit }}</span>{% endif %}
+                                                                                </td>
+                                                                            </tr>
+
+                                                                        {% elif av.attribute.kind == "int" and av.value_int is not None %}
+                                                                            <tr>
+                                                                                <th>{{ av.attribute.name }}</th>
+                                                                                <td>
+                                                                                    {{ av.value_int|intcomma }}
+                                                                                    {% if av.attribute.unit %}
+                                                                                        <span class="unit">{{ av.attribute.unit }}</span>{% endif %}
+                                                                                </td>
+                                                                            </tr>
+
+                                                                        {% elif av.attribute.kind == "bool" and av.value_bool is not None %}
+                                                                            <tr>
+                                                                                <th>{{ av.attribute.name }}</th>
+                                                                                <td>{{ av.value_bool|yesno:"بله,خیر" }}</td>
+                                                                            </tr>
+
+                                                                        {% elif av.attribute.kind == "text" and av.value_text %}
+                                                                            <tr>
+                                                                                <th>{{ av.attribute.name }}</th>
+                                                                                <td>{{ av.value_text }}</td>
+                                                                            </tr>
+                                                                        {% endif %}
+                                                                    {% endfor %}
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        {% else %}
+                                                            <span class="text-muted">ویژگی‌ای ثبت نشده است.</span>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {# Comments #}
+                                            <div class="card">
+                                                <div class="card-header" id="heading-3">
+                                                    <h2 class="card-title">
+                                                        <a class="collapsed" role="button" data-toggle="collapse"
+                                                           href="#collapse-3" aria-expanded="false"
+                                                           aria-controls="collapse-3">نظرات</a>
+                                                    </h2>
+                                                </div>
+
+                                                <div id="collapse-3" class="collapse" aria-labelledby="heading-3"
+                                                     data-parent="#accordion-1">
+                                                    <div class="card-body">
+                                                        {% include "core/comments_section.html" with comments=comments form=comment_form %}
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        {% empty %}
-                            <div class="text-center text-muted p-3">محصول مرتبطی پیدا نشد.</div>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-
-            <!-- تب‌ها -->
-            <div class="product-details-tab product-details-extended mt-5">
-                <div class="product-tab-new">
-                    <div class="page-content">
-                        <div class="container">
-                            <div class="row">
-                                <div class="col-md-11">
-                                    <div class="accordion" id="accordion-1">
-                                        <!-- مشخصات -->
-                                        <div class="card">
-                                            <div class="card-header" id="heading-1">
-                                                <h2 class="card-title">
-                                                    <a role="button" data-toggle="collapse" href="#collapse-1"
-                                                       aria-expanded="true" aria-controls="collapse-1">مشخصات</a>
-                                                </h2>
-                                            </div>
-                                            <div id="collapse-1" class="collapse show" aria-labelledby="heading-1"
-                                                 data-parent="#accordion-1">
-                                                <div class="card-body">
-                                                    {% if product.description %}
-                                                        <p>{{ product.description|linebreaks }}</p>
-                                                    {% else %}
-                                                        <span class="text-muted">توضیحی ثبت نشده است.</span>
-                                                    {% endif %}
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- مشخصات فنی -->
-                                        <div class="card" id="section-specs">
-                                            <div class="card-header" id="heading-2">
-                                                <h2 class="card-title">
-                                                    <a class="collapsed" role="button" data-toggle="collapse"
-                                                       href="#collapse-2" aria-expanded="false"
-                                                       aria-controls="collapse-2">مشخصات فنی</a>
-                                                </h2>
-                                            </div>
-
-                                            <div id="collapse-2" class="collapse" aria-labelledby="heading-2"
-                                                 data-parent="#accordion-1">
-                                                <div class="card-body">
-                                                    {% if product.attr_values.all %}
-                                                        <div class="dk-specs-wrap" dir="rtl">
-                                                            <table class="dk-specs-table">
-                                                                <tbody>
-                                                                {% for av in product.attr_values.all %}
-                                                                    {# choice - گزینه تکی #}
-                                                                    {% if av.attribute.kind == "choice" and av.value_choice %}
-                                                                        <tr>
-                                                                            <th>{{ av.attribute.name }}</th>
-                                                                            <td>{{ av.value_choice.label }}</td>
-                                                                        </tr>
-
-                                                                        {# multi - چندگزینه‌ای #}
-                                                                    {% elif av.attribute.kind == "multi" and av.values_multi.all|length %}
-                                                                        <tr>
-                                                                            <th>{{ av.attribute.name }}</th>
-                                                                            <td>
-                                                                                {% for ch in av.values_multi.all %}
-                                                                                    {{ ch.label }}
-                                                                                    {% if not forloop.last %}
-                                                                                        ، {% endif %}
-                                                                                {% endfor %}
-                                                                            </td>
-                                                                        </tr>
-
-                                                                        {# decimal - عدد اعشاری #}
-                                                                    {% elif av.attribute.kind == "decimal" and av.value_decimal is not None %}
-                                                                        <tr>
-                                                                            <th>{{ av.attribute.name }}</th>
-                                                                            <td>
-                                                                                {{ av.value_decimal|floatformat:"-2" }}
-                                                                                {% if av.attribute.unit %}
-                                                                                    <span class="unit">{{ av.attribute.unit }}</span>{% endif %}
-                                                                            </td>
-                                                                        </tr>
-
-                                                                        {# int - عدد صحیح #}
-                                                                    {% elif av.attribute.kind == "int" and av.value_int is not None %}
-                                                                        <tr>
-                                                                            <th>{{ av.attribute.name }}</th>
-                                                                            <td>
-                                                                                {{ av.value_int|intcomma }}
-                                                                                {% if av.attribute.unit %}
-                                                                                    <span class="unit">{{ av.attribute.unit }}</span>{% endif %}
-                                                                            </td>
-                                                                        </tr>
-
-                                                                        {# bool - بلی/خیر #}
-                                                                    {% elif av.attribute.kind == "bool" and av.value_bool is not None %}
-                                                                        <tr>
-                                                                            <th>{{ av.attribute.name }}</th>
-                                                                            <td>{{ av.value_bool|yesno:"بله,خیر" }}</td>
-                                                                        </tr>
-
-                                                                        {# text - متن #}
-                                                                    {% elif av.attribute.kind == "text" and av.value_text %}
-                                                                        <tr>
-                                                                            <th>{{ av.attribute.name }}</th>
-                                                                            <td>{{ av.value_text }}</td>
-                                                                        </tr>
-                                                                    {% endif %}
-                                                                {% endfor %}
-                                                                </tbody>
-                                                            </table>
-                                                        </div>
-                                                    {% else %}
-                                                        <span class="text-muted">ویژگی‌ای ثبت نشده است.</span>
-                                                    {% endif %}
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <!-- نظرات -->
-                                        <div class="card">
-                                            <div class="card-header" id="heading-3">
-                                                <h2 class="card-title">
-                                                    <a class="collapsed" role="button" data-toggle="collapse"
-                                                       href="#collapse-3" aria-expanded="false"
-                                                       aria-controls="collapse-3">نظرات</a>
-                                                </h2>
-                                            </div>
-
-                                            <div id="collapse-3" class="collapse" aria-labelledby="heading-3"
-                                                 data-parent="#accordion-1">
-                                                <div class="card-body">
-
-                                                    {% include "core/comments_section.html" with comments=comments form=comment_form %}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div><!-- /accordion -->
-                                </div>
-                            </div><!-- /row -->
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Sticky Bar -->
-            <div class="tlp-sticky">
-                <div class="container d-flex align-items-center justify-content-between">
-                    <div class="sum">
-                        {% with img=gallery_images.0 %}
-                            {% if img %}
-                                <img id="sticky-img" src="{{ img.url }}" alt="{{ img.alt|default:product.name }}">
-                            {% else %}
-                                <img id="sticky-img" src="{{ FALLBACK_THUMB }}" alt="{{ product.name }}">
-                            {% endif %}
-                        {% endwith %}
-                        <div class="txt">
-                            <div class="t1">{{ product.name }}</div>
-                            <div class="t2">{{ product.price|floatformat:0|intcomma }} تومان</div>
+                {# Sticky Bar #}
+                <div class="tlp-sticky">
+                    <div class="container d-flex align-items-center justify-content-between">
+                        <div class="sum">
+                            {% with img=gallery_images.0 %}
+                                {% if img %}
+                                    <img id="sticky-img" src="{{ img.url }}" alt="{{ img.alt|default:product.name }}">
+                                {% else %}
+                                    <img id="sticky-img" src="{{ FALLBACK_THUMB }}" alt="{{ product.name }}">
+                                {% endif %}
+                            {% endwith %}
+
+                            <div class="txt">
+                                <div class="t1">{{ product.name }}</div>
+                                <div class="t2">{{ product.price|floatformat:0|intcomma }} تومان</div>
+                            </div>
                         </div>
+
+                        <button class="btn bb-add"><i class="icon-shopping-cart"></i><span>افزودن به سبد</span></button>
                     </div>
-                    <button class="btn bb-add"><i class="icon-shopping-cart"></i><span>افزودن به سبد</span></button>
                 </div>
+
             </div>
         </div>
 
@@ -878,3 +935,892 @@
 {% endblock %}
 
 
+
+{#{% extends 'base.html' %}#}
+{#{% load static %}#}
+{#{% load social_share %}#}
+{#{% load humanize %}#}
+{#{% load promos_tags %}#}
+{#{% load core_extras %}#}
+{#{% load persian_digits %}#}
+{#{% block meta %}#}
+{#    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">#}
+{#    <meta http-equiv="Pragma" content="no-cache">#}
+{#    <meta http-equiv="Expires" content="0">#}
+{##}
+{#{% endblock %}#}
+{#{% block CSS-JS %}#}
+{##}
+{#    <script src="{% static 'js/wishlist.js' %}"></script>#}
+{##}
+{# JSON برای JS#}
+{#    <script id="variant-matrix" type="application/json">{{ variant_matrix_json|default:'{}'|safe }}</script>#}
+{#    <script id="price-chart-data" type="application/json">{{ price_chart_json|default:'{}'|safe }}</script>#}
+{##}
+{# Chart.js فقط یک‌بار#}
+{#    <script src="{% static 'products/js/chart.umd.min.js' %}" defer></script>#}
+{##}
+{# JSON-LD سئو#}
+{#    {% if product_jsonld %}#}
+{#        <script type="application/ld+json">{{ product_jsonld|safe }}</script>#}
+{#    {% endif %}#}
+{##}
+{# اسکریپت صفحه#}
+{#    <script src="{% static 'products/js/product.js' %}" defer></script>#}
+{#    <script>#}
+{#        document.addEventListener('DOMContentLoaded', function () {#}
+{#            const starsContainers = document.querySelectorAll('.stars');#}
+{##}
+{#            starsContainers.forEach(container => {#}
+{#                const stars = container.querySelectorAll('i');#}
+{#                const objectId = container.dataset.objectId;#}
+{#                const contentTypeId = container.dataset.contentTypeId;#}
+{##}
+{#                let userHasRated = false;  // آیا کاربر قبلاً رأی داده؟#}
+{##}
+{#                // ⭐ Hover پیش‌نمایش فقط وقتی کاربر رأی نداده#}
+{#                stars.forEach((star, index) => {#}
+{#                    star.addEventListener('mouseenter', function () {#}
+{#                        if (userHasRated) return;#}
+{#                        stars.forEach((s, i) => s.classList.toggle('hovered', i <= index));#}
+{#                    });#}
+{#                    star.addEventListener('mouseleave', function () {#}
+{#                        if (userHasRated) return;#}
+{#                        stars.forEach(s => s.classList.remove('hovered'));#}
+{#                    });#}
+{#                });#}
+{##}
+{#                // 🌟 ثبت امتیاز با کلیک#}
+{#                stars.forEach(star => {#}
+{#                    star.addEventListener('click', function () {#}
+{#                        if (userHasRated) return; // جلوگیری از رأی دوباره#}
+{##}
+{#                        const score = parseInt(this.dataset.score);#}
+{##}
+{#                        fetch("{% url 'core:add_rating' %}", {#}
+{#                            method: 'POST',#}
+{#                            headers: {#}
+{#                                'X-CSRFToken': '{{ csrf_token }}',#}
+{#                                'X-Requested-With': 'XMLHttpRequest',#}
+{#                                'Content-Type': 'application/x-www-form-urlencoded'#}
+{#                            },#}
+{#                            body: `object_id=${objectId}&content_type_id=${contentTypeId}&score=${score}`#}
+{#                        })#}
+{#                            .then(res => res.json())#}
+{#                            .then(data => {#}
+{#                                if (data.status === 'success') {#}
+{#                                    userHasRated = true; // علامت‌گذاری برای جلوگیری از کلیک دوباره#}
+{##}
+{#                                    // پر کردن ستاره‌ها با امتیاز کاربر#}
+{#                                    stars.forEach(s => s.classList.remove('bi-star-fill', 'hovered'));#}
+{#                                    for (let i = 0; i < data.user_score; i++) {#}
+{#                                        stars[i].classList.add('bi-star-fill');#}
+{#                                    }#}
+{##}
+{#                                    // به‌روزرسانی عدد میانگین و تعداد رأی#}
+{#                                    container.parentElement.querySelector('.rating-average').textContent = data.average;#}
+{#                                    container.parentElement.querySelector('.rating-count').textContent = `(${data.count} رأی)`;#}
+{##}
+{#                                    // غیرفعال کردن کلیک‌ها#}
+{#                                    stars.forEach(s => s.style.pointerEvents = 'none');#}
+{#                                } else {#}
+{#                                    alert(data.message || 'خطایی رخ داد.');#}
+{#                                }#}
+{#                            });#}
+{#                    });#}
+{#                });#}
+{##}
+{#                // 🔹 گرفتن امتیاز کاربر بعد از رفرش و غیرقابل تغییر کردن ستاره‌ها#}
+{#                fetch("{% url 'core:get_user_rating' %}?object_id=" + objectId + "&content_type_id=" + contentTypeId)#}
+{#                    .then(res => res.json())#}
+{#                    .then(data => {#}
+{#                        stars.forEach(s => s.classList.remove('bi-star-fill', 'hovered'));#}
+{#                        if (data.user_score) {#}
+{#                            userHasRated = true;#}
+{#                            for (let i = 0; i < data.user_score; i++) {#}
+{#                                stars[i].classList.add('bi-star-fill');#}
+{#                            }#}
+{#                            stars.forEach(s => s.style.pointerEvents = 'none'); // غیرقابل تغییر#}
+{#                        }#}
+{#                    });#}
+{#            });#}
+{#        });#}
+{#    </script>#}
+{##}
+{#{% endblock %}#}
+{##}
+{#{% block content %}#}
+{# فال‌بک‌ها (اگر از ویوو نیامد)#}
+{#    {% static 'images/broken-image.png' as FALLBACK_IMG %}#}
+{#    {% static 'images/link.png' as FALLBACK_THUMB %}#}
+{##}
+{#    <main class="main tlp-product">#}
+{#        <!-- Breadcrumb -->#}
+{#        <nav aria-label="breadcrumb" class="breadcrumb-nav border-0 mb-0">#}
+{#            <div class="container d-flex align-items-center">#}
+{#                <ol class="breadcrumb">#}
+{#                    <li class="breadcrumb-item"><a href="{% url 'home:home' %}">خانه</a></li>#}
+{#                    {% if breadcrumbs %}#}
+{#                        {% for bc in breadcrumbs %}#}
+{#                            <li class="breadcrumb-item"><a href="{{ bc.url }}">{{ bc.name }}</a></li>#}
+{#                        {% endfor %}#}
+{#                    {% elif product.category %}#}
+{#                        <li class="breadcrumb-item"><a#}
+{#                                href="{{ product.category.get_absolute_url }}">{{ product.category.name }}</a></li>#}
+{#                    {% endif %}#}
+{#                    <li class="breadcrumb-item active" aria-current="page">{{ product.name }}</li>#}
+{#                </ol>#}
+{#            </div>#}
+{#        </nav>#}
+{##}
+{#        <div class="page-content" style="margin-bottom:2rem;">#}
+{#            <div class="container">#}
+{#                <section class="tlp-hero ui-compact" dir="rtl">#}
+{# ——— ردیف اصلی: باکس محصول (گالری+جزئیات) + ستون قیمت/خرید ———#}
+{#                    <form id="add-to-cart-form" method="post" action="{% url 'cart:cart_add' product.id %}">#}
+{#                        {% csrf_token %}#}
+{#                        <input type="hidden" name="product_id" value="{{ product.id }}">#}
+{#                        <input type="hidden" name="variant_id" id="variant_id" value="{{ initial_variant_id }}">#}
+{##}
+{##}
+{#                        <div class="row g-3 align-items-start">#}
+{##}
+{#                            <!-- باکس محصول: گالری + جزئیات -->#}
+{#                            <div class="col-xl-9 col-lg-8 order-lg-2">#}
+{#                                <div class="card-like wm-main">#}
+{#                                    <div class="row g-3">#}
+{#                                        <!-- گالری (راست) -->#}
+{#                                        <div class="col-lg-6 order-lg-2">#}
+{#                                            <section class="tlp-gallery gallery-rtl-right" aria-label="گالری محصول"#}
+{#                                                     dir="rtl">#}
+{##}
+{#                                                <div class="stage card-like" id="tlp-stage">#}
+{#                                                    <img id="tlp-main"#}
+{#                                                         src="{{ gallery_images.0.url|default:FALLBACK_IMG }}"#}
+{#                                                         data-zoom-src="{{ gallery_images.0.zoom_url|default:gallery_images.0.url|default:FALLBACK_IMG }}"#}
+{#                                                         alt="{{ gallery_images.0.alt|default:product.name }}"#}
+{#                                                         loading="eager" decoding="async">#}
+{##}
+{#                                                    <div class="zoom-lens" aria-hidden="true"></div>#}
+{#                                                </div>#}
+{##}
+{#                                                <div class="zoom-box" id="tlp-zoom-box" aria-hidden="true">#}
+{#                                                    <div class="zoom-img" id="tlp-zoom-img"></div>#}
+{#                                                </div>#}
+{##}
+{#                                                <div class="thumbs" role="list">#}
+{#                                                    {% if gallery_images %}#}
+{#                                                        {% for img in gallery_images %}#}
+{#                                                            {% if forloop.counter <= 5 %}#}
+{#                                                                <button class="thumb{% if img.is_primary or forloop.first %} is-active{% endif %}"#}
+{#                                                                        type="button"#}
+{#                                                                        role="listitem"#}
+{#                                                                        aria-pressed="{% if img.is_primary or forloop.first %}true{% else %}false{% endif %}"#}
+{#                                                                        title="{{ product.name }} - {{ forloop.counter }}"#}
+{#                                                                        data-full="{{ img.url }}"#}
+{#                                                                        data-zoom="{{ img.zoom_url|default:img.url }}"#}
+{#                                                                        data-color-id="{{ img.color_id|default:'' }}"#}
+{#                                                                        data-index="{{ forloop.counter0 }}">#}
+{#                                                                    <img src="{{ img.url }}"#}
+{#                                                                         alt="{{ img.alt|default:product.name }}"#}
+{#                                                                         loading="lazy" decoding="async">#}
+{##}
+{# روی تامب 5 اگر بیشتر از 5 تا بود: اوورلی +X#}
+{#                                                                    {% if forloop.counter == 5 and gallery_images|length > 5 %}#}
+{#                                                                        <span class="thumb-more" role="button"#}
+{#                                                                              aria-label="نمایش همه تصاویر">#}
+{#                                                                          +{{ gallery_images|length|add:"-5" }}#}
+{#                                                                        </span>#}
+{#                                                                    {% endif %}#}
+{#                                                                </button>#}
+{#                                                            {% endif %}#}
+{#                                                        {% endfor %}#}
+{#                                                    {% else %}#}
+{#                                                        <button class="thumb is-active"#}
+{#                                                                type="button"#}
+{#                                                                role="listitem"#}
+{#                                                                aria-pressed="true"#}
+{#                                                                title="{{ product.name }}"#}
+{#                                                                data-full="{{ FALLBACK_IMG }}"#}
+{#                                                                data-zoom="{{ FALLBACK_IMG }}"#}
+{#                                                                data-index="0">#}
+{#                                                            <img src="{{ FALLBACK_THUMB }}" alt="{{ product.name }}"#}
+{#                                                                 loading="lazy" decoding="async">#}
+{#                                                        </button>#}
+{#                                                    {% endif %}#}
+{#                                                </div>#}
+{#                                                <script id="tlp-gallery-data" type="application/json">#}
+{#                                                    {#}
+{#                                                      "images": [#}
+{#                                                    {% for img in gallery_images %}#}
+{#                                                        {#}
+{#                                                           "full": "{{ img.url|escapejs }}",#}
+{#                                                           "zoom": "{{ img.zoom_url|default:img.url|escapejs }}",#}
+{#                                                           "thumb": "{{ img.url|escapejs }}",#}
+{#                                                           "alt": "{{ img.alt|default:product.name|escapejs }}",#}
+{#                                                           "color_id": "{{ img.color_id|default:''|escapejs }}"#}
+{#                                                          }{% if not forloop.last %},{% endif %}#}
+{#                                                        {% endfor %}#}
+{#                                                    ]#}
+{#                                                  }#}
+{#                                                </script>#}
+{# مودال گالری#}
+{#                                                <div class="tlp-modal" id="tlp-gallery-modal" aria-hidden="true">#}
+{#                                                    <div class="tlp-modal-backdrop" data-close="1"></div>#}
+{##}
+{#                                                    <div class="tlp-modal-dialog" role="dialog" aria-modal="true"#}
+{#                                                         aria-label="گالری تصاویر محصول">#}
+{#                                                        <button class="tlp-modal-close" type="button" aria-label="بستن"#}
+{#                                                                data-close="1">×#}
+{#                                                        </button>#}
+{#                                                        <div class="tlp-modal-header">#}
+{#                                                            <div class="tlp-modal-title">تصاویر رسمی این محصول</div>#}
+{#                                                        </div>#}
+{#                                                        <div class="tlp-modal-body">#}
+{#                                                            <div class="tlp-modal-main">#}
+{#                                                                <img id="tlp-modal-main-img" src="" alt="">#}
+{#                                                                <button class="tlp-modal-nav prev" type="button"#}
+{#                                                                        aria-label="قبلی">‹#}
+{#                                                                </button>#}
+{#                                                                <button class="tlp-modal-nav next" type="button"#}
+{#                                                                        aria-label="بعدی">›#}
+{#                                                                </button>#}
+{#                                                            </div>#}
+{##}
+{#                                                            <div class="tlp-modal-thumbs" id="tlp-modal-thumbs"></div>#}
+{#                                                        </div>#}
+{#                                                    </div>#}
+{#                                                </div>#}
+{##}
+{#                                            </section>#}
+{#                                        </div>#}
+{##}
+{#                                        <!-- جزئیات/رنگ/سایز (چپ) -->#}
+{#                                        <div class="col-lg-6 order-lg-1">#}
+{#                                            <div class="product-details">#}
+{##}
+{#                                                <h1 class="product-title border-bottom pb-1 mb-2 mt-1">{{ product.name }}</h1>#}
+{##}
+{#                                                {% comment %} <div class="ratings-container mt-1">#}
+{#                                                    <div class="ratings">#}
+{#                                                        <div class="ratings-val" style="width:80%;"></div>#}
+{#                                                    </div>#}
+{#                                                    <a class="ratings-text" href="#comments" id="review-link">#}
+{#                                                        ( {{ product.review_count|default:0 }} نظر )#}
+{#                                                    </a>#}
+{#                                                </div> {% endcomment %}#}
+{##}
+{##}
+{#                                                <div class="product-rating mt-2">#}
+{#                                                    <div class="stars"#}
+{#                                                         data-object-id="{{ product.id }}"#}
+{#                                                         data-content-type-id="{{ product|content_type_id }}">#}
+{#                                                        {% for i in "12345" %}#}
+{#                                                            <i class="bi bi-star"#}
+{#                                                               data-score="{{ forloop.counter }}"></i>#}
+{#                                                        {% endfor %}#}
+{#                                                    </div>#}
+{#                                                    <span class="rating-average">{{ product.average_rating|default:"0" }}</span>#}
+{#                                                    <span class="rating-count">({{ product.rating_count|default:"0" }} رأی)</span>#}
+{#                                                </div>#}
+{##}
+{##}
+{#                                                <div class="product-content pt-2 mb-2">#}
+{#                                                    {% if product.short_description %}#}
+{#                                                        <p>{{ product.short_description }}</p>#}
+{#                                                    {% elif product.meta_description %}#}
+{#                                                        <p>{{ product.meta_description }}</p>#}
+{#                                                    {% else %}#}
+{#                                                        <p>{{ product.description|default_if_none:""|truncatechars:220 }}</p>#}
+{#                                                    {% endif %}#}
+{#                                                </div>#}
+{##}
+{#                                                {% if ui.show_color %}#}
+{#                                                    <div class="details-filter-row details-row-size">#}
+{#                                                        <label class="form-label mb-2">رنگ :</label>#}
+{#                                                        <div class="product-nav product-nav-dots" id="color-swatches">#}
+{#                                                            {% if colors %}#}
+{#                                                                {% for c in colors %}#}
+{#                                                                    <a href="javascript:;"#}
+{#                                                                       class="swatch {% if forloop.first %}active{% endif %}"#}
+{#                                                                       data-color-id="{{ c.id }}"#}
+{#                                                                       style="background: {{ c.hex_code }};"#}
+{#                                                                       aria-label="انتخاب رنگ {{ c.name }}"#}
+{#                                                                       role="button">#}
+{#                                                                        <span class="sr-only">{{ c.name }}</span>#}
+{#                                                                    </a>#}
+{##}
+{##}
+{#                                                                {% endfor %}#}
+{#                                                            {% else %}#}
+{#                                                                <span class="text-muted">بدون تنوع رنگ</span>#}
+{#                                                            {% endif %}#}
+{#                                                        </div>#}
+{#                                                    </div>#}
+{#                                                {% endif %}#}
+{##}
+{#                                                {% if ui.show_size %}#}
+{#                                                    <div class="details-filter-row details-row-size">#}
+{#                                                        <label for="size" class="form-label">سایز :</label>#}
+{#                                                        <div class="select-custom">#}
+{#                                                            <select name="size" id="size" class="form-control"#}
+{#                                                                    aria-label="انتخاب سایز">#}
+{#                                                                <option value="" selected disabled>سایز را انتخاب کنید#}
+{#                                                                </option>#}
+{#                                                                {% for s in sizes %}#}
+{#                                                                    <option value="{{ s.id|default:s }}">{{ s }}</option>#}
+{#                                                                {% endfor %}#}
+{#                                                            </select>#}
+{#                                                        </div>#}
+{#                                                        {% if ui.show_size_guide %}#}
+{#                                                            <a href="#" class="size-guide"><i class="icon-th-list"></i>راهنمای#}
+{#                                                                اندازه</a>#}
+{#                                                        {% endif %}#}
+{#                                                    </div>#}
+{#                                                {% endif %}#}
+{##}
+{#                                                {% if spec_summary and spec_summary|length %}#}
+{#                                                    <div class="product-specs-card">#}
+{#                                                        <h5 class="title">ویژگی‌های کلیدی محصول</h5>#}
+{#                                                        <div class="specs-grid">#}
+{#                                                            {% for it in spec_summary %}#}
+{#                                                                <div class="spec-box">#}
+{#                                                                    <span class="label">{{ it.label }}</span>#}
+{#                                                                    <span class="value">{{ it.value }}</span>#}
+{#                                                                </div>#}
+{#                                                            {% endfor %}#}
+{#                                                        </div>#}
+{#                                                        {% if spec_total > spec_summary|length %}#}
+{#                                                            <a href="#section-specs" class="see-all">مشاهدهٔ همهٔ#}
+{#                                                                ویژگی‌ها</a>#}
+{#                                                        {% endif %}#}
+{#                                                    </div>#}
+{#                                                {% endif %}#}
+{#                                                <details class="dk-acc card-like">#}
+{#                                                    <summary><span>خدمات نصب و راه‌اندازی</span> <label#}
+{#                                                            class="switch"><input#}
+{#                                                            type="checkbox"#}
+{#                                                            id="svc-toggle"><span#}
+{#                                                            class="slider"></span></label></summary>#}
+{#                                                    <div class="dk-acc-body"><label class="opt"> <input type="checkbox"#}
+{#                                                                                                        id="install-chk">#}
+{#                                                        <span#}
+{#                                                                class="ttl">نصب در محل</span> <span#}
+{#                                                                class="price muted">هزینه پس از خرید مشخص می‌شود</span>#}
+{#                                                    </label>#}
+{#                                                        <div class="dk-acc-foot"><a href="#" class="lnk">جزئیات</a>#}
+{#                                                        </div>#}
+{#                                                    </div>#}
+{#                                                </details>#}
+{##}
+{#                                                {% if show_insurance %}#}
+{#                                                    <details class="dk-acc card-like" open>#}
+{#                                                        <summary>#}
+{#                                                            <span class="t">بیمه</span>#}
+{#                                                            <label class="switch">#}
+{#                                                                <input type="checkbox" id="ins-toggle" checked>#}
+{#                                                                <span class="slider"></span>#}
+{#                                                            </label>#}
+{#                                                        </summary>#}
+{##}
+{#                                                        <div class="dk-acc-body">#}
+{#                                                            {% for si in services_insurance %}#}
+{#                                                                <label class="opt">#}
+{#                                                                    <input#}
+{#                                                                            type="radio"   {# یا checkbox#}
+{#                                                                            name="services[]"#}
+{#                                                                            value="{{ si.id }}"#}
+{#                                                                            {% if si.is_default_on %}checked{% endif %}#}
+{#                                                                    >#}
+{#                                                                    <span class="ttl">{{ si.name }}</span>#}
+{##}
+{# اگر پلن درصدی داری، می‌تونی یک badge نشان دهی؛ اینجا فقط قیمت نهایی نشان داده می‌شود#}
+{# <span class="off">٪۵</span>  ← اگر لازم شد بعداً از متادیتا اضافه می‌کنیم#}
+{##}
+{#                                                                    <span class="price">#}
+{#          {{ si.unit_price|floatformat:0|intcomma }}#}
+{#          <small>تومان</small>#}
+{#                                                                        {% if si.per_item %}#}
+{#                                                                            <small class="text-muted">(به‌ازای هر واحد)</small>{% endif %}#}
+{#        </span>#}
+{#                                                                </label>#}
+{#                                                            {% endfor %}#}
+{#                                                            <div class="dk-acc-foot"><a href="#" class="lnک">جزئیات</a>#}
+{#                                                            </div>#}
+{#                                                        </div>#}
+{#                                                    </details>#}
+{##}
+{#                                                {% endif %}#}
+{#                                                <div class="product-details-footer">#}
+{#                                                    <div class="product-cat text-center">#}
+{#                                                        <span>دسته‌بندی : </span>#}
+{#                                                        {% if product.category %}#}
+{#                                                            <a href="{{ product.category.get_absolute_url }}">{{ product.category.name }}</a>#}
+{#                                                        {% else %}#}
+{#                                                            <span class="text-muted">نامشخص</span>#}
+{#                                                        {% endif %}#}
+{#                                                    </div>#}
+{#                                                    <div class="social-icons social-icons-sm">#}
+{#                                                        {% post_to_facebook product '<i class="icon-facebook-f"></i>' 'social-icon' %}#}
+{#                                                        <!-- لینک جزئیات رو share می‌کنه -->#}
+{#                                                        {% post_to_twitter "این محصول عالی رو چک کن: {{ product.name }} - {{ request.build_absolute_uri }}{{ product.get_absolute_url }}" product '<i class="icon-twitter"></i>' 'social-icon' %}#}
+{#                                                        <!-- متن با نام و لینک -->#}
+{#                                                        {% post_to_whatsapp product '<i class="icon-whatsapp"></i>' 'social-icon' %}#}
+{#                                                        <!-- مشابه برای واتس‌اپ -->#}
+{#                                                        {% copy_to_clipboard product '<i class="icon-google"></i>' 'social-icon' %}#}
+{##}
+{#                                                    </div>#}
+{#                                                </div>#}
+{##}
+{#                                            </div>#}
+{#                                        </div>#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                            </div>#}
+{##}
+{#                            <!-- ستون قیمت/خرید (سایدبار) -->#}
+{#                            <aside class="col-xl-3 col-lg-4 order-lg-1">#}
+{#                                <div class="dk-buybox card-like sticky-col">#}
+{##}
+{#                                    <div class="dk-seller">#}
+{#                                        <a href="#" class="lnk">عملکرد این محصول</a>#}
+{#                                        <span class="badge dk-badge-ok">عملکرد خوب</span>#}
+{#                                    </div>#}
+{##}
+{#                                    <div class="dk-price">#}
+{#                                        <div class="num">#}
+{#                                            <span id="price-num">{{ price_final|floatformat:0|intcomma }}</span>#}
+{#                                            <small>تومان</small>#}
+{#                                        </div>#}
+{##}
+{#                                        <div class="save" id="price-save"#}
+{#                                             style="#}
+{#                                                     {% if price_base and price_final and price_final < price_base %}{% else %}display:none{% endif %}">#}
+{#                                            <del id="compare-num">#}
+{#                                                {% if price_base and price_final and price_final < price_base %}#}
+{#                                                    {{ price_base|floatformat:0|intcomma }}#}
+{#                                                {% endif %}#}
+{#                                            </del>#}
+{#                                            <span class="badge dk-badge-off" id="off-badge">#}
+{#                {% if discount_percent %}{{ discount_percent|floatformat:0 }}٪ تخفیف{% endif %}#}
+{#              </span>#}
+{#                                            <small class="text-muted d-block" id="off-amount">#}
+{#                                                {% if discount_amount %}مبلغ کسرشده:#}
+{#                                                    {{ discount_amount|floatformat:0|intcomma }} تومان{% endif %}#}
+{#                                            </small>#}
+{#                                        </div>#}
+{#                                    </div>#}
+{##}
+{#                                    <div id="price-api"#}
+{#                                         data-url="{% url 'products:variant-price' slug=product.slug %}"></div>#}
+{##}
+{#                                    <div class="dk-rows">#}
+{#                                        <div class="details-filter-row details-row-size">#}
+{#                                            <label for="qty">تعداد :</label>#}
+{#                                            <div class="product-details-quantity">#}
+{#                                                <input type="number" id="qty" name="quantity" class="form-control"#}
+{#                                                       value="1"#}
+{#                                                       min="1" max="10" step="1" data-decimals="0" required>#}
+{#                                            </div>#}
+{#                                        </div>#}
+{#                                    </div>#}
+{##}
+{#                                    {% if stock_info and stock_info.is_low %}#}
+{#                                        <p class="mt-2 low-stock" style="font-weight:700;color:red;">#}
+{#                                            تنها {{ stock_info.min_stock|default:stock_info.total_stock }} عدد در انبار#}
+{#                                            باقی مانده#}
+{#                                        </p>#}
+{#                                    {% endif %}#}
+{##}
+{#                                    <div class="dk-cta">#}
+{#                                        <button class="btn dk-add" id="btn-add" type="submit" disabled>#}
+{#                                            <i class="icon-shopping-cart"></i><span>افزودن به سبد خرید</span>#}
+{#                                        </button>#}
+{#                                    </div>#}
+{##}
+{#                                    <div class="dk-mini-actions" role="group" aria-label="لینک‌های ثانویه محصول">#}
+{#                                        {% comment %} <a href="#" class="btn-product btn-wishlist" title="لیست علاقه‌مندی"><span>افزودن به لیست علاقه‌مندی</span></a> {% endcomment %}#}
+{#                                        {% comment %} <a href="#" class="btn-product"#}
+{#                                    data-product-id="{{ product.id }}"#}
+{#                                    data-toggle-url="{% url 'core:toggle_wishlist' %}"#}
+{#                                    data-csrf-token="{{ csrf_token }}"#}
+{#                                    onclick="toggleWishlist(this); return false;">#}
+{##}
+{#                                        {% if product.id in wishlist_product_ids %}#}
+{#                                            <i class="bi bi-heart-fill"></i>#}
+{#                                            <span>حذف از علاقه‌مندی‌ها</span>#}
+{#                                        {% else %}#}
+{#                                            <i class="bi bi-heart"></i>#}
+{#                                            <span>افزودن به لیست علاقه‌مندی</span>#}
+{#                                        {% endif %}#}
+{#                                    </a> {% endcomment %}#}
+{##}
+{#                                        <a href="#" class="wishlist-toggle"#}
+{#                                           data-product-id="{{ product.id }}"#}
+{#                                           data-toggle-url="{% url 'core:toggle_wishlist' %}"#}
+{#                                           data-status-url="{% url 'core:wishlist_status' %}"#}
+{#                                           data-csrf-token="{{ csrf_token }}"#}
+{#                                           onclick="toggleWishlist(this); return false;">#}
+{##}
+{#                                            <i class="bi {% if product.id in user_wishlist %}bi-heart-fill{% else %}bi-heart{% endif %}"></i>#}
+{##}
+{#                                            <span>#}
+{#                                            {% if product.id in user_wishlist %}#}
+{#                                                حذف از علاقه‌مندی‌ها#}
+{#                                            {% else %}#}
+{#                                                افزودن به لیست علاقه‌مندی#}
+{#                                            {% endif %}#}
+{#                                        </span>#}
+{#                                        </a>#}
+{##}
+{##}
+{#                                        {% comment %} <a href="#" class="btn-product btn-compare" title="مقایسه"><span>افزودن به لیست مقایسه</span></a> {% endcomment %}#}
+{#                                        <a href="{% url 'products:add_to_compare' product.id %}"#}
+{#                                           class="btn-product btn-compare" title="مقایسه">#}
+{#                                            <span>افزودن به لیست مقایسه</span>#}
+{#                                        </a>#}
+{##}
+{##}
+{#                                    </div>#}
+{##}
+{#                                    <hr>#}
+{##}
+{#                                    <div class="dk-row"><label><i class="icon-truck"></i> روش و هزینه ارسال</label>#}
+{#                                        <div class="v">{{ product.shipping_text|default:"ارسال سریع • تامین از ۱ روز کاری دیگر" }}</div>#}
+{#                                    </div>#}
+{#                                    <div class="dk-row"><label><i class="icon-check"></i> اصالت و سلامت کالا</label>#}
+{#                                        <div class="v">ضمانت اصالت و سلامت فیزیکی</div>#}
+{#                                    </div>#}
+{#                                    <div class="dk-row"><label><i class="icon-rotate-left"></i> بازگشت</label>#}
+{#                                        <div class="v">۷ روز مهلت بازگشت</div>#}
+{#                                    </div>#}
+{#                                    <div class="dk-row"><label><i class="icon-superpowers"></i> گارانتی</label>#}
+{#                                        <div class="v">{{ product.warranty_text|default:"—" }}</div>#}
+{#                                    </div>#}
+{##}
+{##}
+{#                                </div>#}
+{#                            </aside>#}
+{##}
+{#                        </div>#}
+{# /row#}
+{#                        <!-- اکاردئون خدمات -->#}
+{##}
+{#                    </form>#}
+{##}
+{# ——— ردیف جدا برای نمودار قیمت (بعد از ردیف اصلی) ———#}
+{#                    <div class="row g-9 align-items-start mt-3">#}
+{#                        <div class="col-12">#}
+{#                            <div class="card-like wm-main">#}
+{#                                <div class="row g-3">#}
+{#                                    <div class="col-12">#}
+{#                                        <div class="card custom-card">#}
+{#                                            <div class="card-header">#}
+{#                                                <div class="card-title">نمودار تغییرات قیمت این محصول</div>#}
+{#                                            </div>#}
+{#                                            <div id="line-chart">#}
+{#                                                <canvas id="priceLineChart" aria-label="نمودار روند قیمت"#}
+{#                                                        role="img"></canvas>#}
+{#                                            </div>#}
+{#                                        </div>#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </section>#}
+{##}
+{##}
+{#                <hr>#}
+{##}
+{#                <!-- محصولات مرتبط -->#}
+{#                <div class="container">#}
+{#                    <h2 class="title text-center mb-4">محصولاتی که شاید بپسندید</h2>#}
+{#                    <div class="product-detail-related">#}
+{#                        <div class="owl-carousel owl-simple carousel-equal-height carousel-with-shadow"#}
+{#                             data-toggle="owl"#}
+{#                             data-owl-options='{"nav":false,"dots":true,"margin":20,"loop":false,"rtl":true,#}
+{#       "responsive":{"0":{"items":1},"480":{"items":2},"768":{"items":3},"992":{"items":4},"1200":{"items":4,"nav":true,"dots":false}}}'>#}
+{##}
+{#                            {% for r in related_products %}#}
+{#                                <div class="item">#}
+{#                                    <div class="product dk-product-card">#}
+{##}
+{#                                        <figure class="product-media">#}
+{##}
+{#                                            {% if r.has_discount %}#}
+{#                                                <span class="product-label label-sale">#}
+{#                                                    ٪{{ r.discount_percent|floatformat:0 }} تخفیف#}
+{#                                                </span>#}
+{#                                            {% endif %}#}
+{##}
+{#                                            {% if r.stock_total is not None %}#}
+{#                                                {% if r.stock_total|add:0 <= 0 %}#}
+{#                                                    <span class="dk-chip dk-chip--off dk-chip--oos">ناموجود</span>#}
+{#                                                {% endif %}#}
+{#                                            {% elif r.stock is not None %}#}
+{#                                                {% if r.stock|add:0 <= 0 %}#}
+{#                                                    <span class="dk-chip dk-chip--off dk-chip--oos">ناموجود</span>#}
+{#                                                {% endif %}#}
+{#                                            {% endif %}#}
+{##}
+{##}
+{#                                            <a href="{{ r.get_absolute_url }}">#}
+{#                                                {% with img=r.images.all|first %}#}
+{#                                                    {% if img %}#}
+{#                                                        <img src="{{ img.image.url }}"#}
+{#                                                             alt="{{ img.alt|default:r.name }}">#}
+{#                                                    {% else %}#}
+{#                                                        <img src="{% static 'images/placeholder-600x600.png' %}"#}
+{#                                                             alt="{{ r.name }}">#}
+{#                                                    {% endif %}#}
+{#                                                {% endwith %}#}
+{#                                            </a>#}
+{##}
+{#                                        </figure>#}
+{##}
+{#                                        <div class="product-body">#}
+{#                                            <div class="product-top">#}
+{#                                                {% if r.category %}#}
+{#                                                    <div class="product-cat">#}
+{#                                                        <a href="{{ r.category.get_absolute_url }}">{{ r.category.name }}</a>#}
+{#                                                    </div>#}
+{#                                                {% endif %}#}
+{##}
+{#                                                <h3 class="product-title">#}
+{#                                                    <a href="{{ r.get_absolute_url }}">{{ r.name }}</a>#}
+{#                                                </h3>#}
+{##}
+{#                                                <div class="dk-meta">#}
+{#                                                    <div class="dk-mini-rating">#}
+{#                                                        <i class="icon-star dk-mini-star"></i>#}
+{#                                                        <span class="ratings-text">{{ r.rating_count|default:0|fa_digits }} رأی</span>#}
+{#                                                    </div>#}
+{#                                                    <span class="dk-reviews">{{ r.reviews_count|default:"0" }} نظر</span>#}
+{#                                                </div>#}
+{#                                            </div>#}
+{##}
+{#                                            <div class="product-bottom">#}
+{#                                                <div class="product-price">#}
+{#                                                    {% if r.has_discount %}#}
+{#                                                        <span class="new-price">{{ r.price_final|fa_price }} <small>تومان</small></span>#}
+{#                                                        <span class="old-price">{{ r.price_base|fa_price }} <small>تومان</small></span>#}
+{#                                                    {% else %}#}
+{#                                                        <span class="new-price">{{ r.price_final|default:r.price|fa_price }} <small>تومان</small></span>#}
+{#                                                    {% endif %}#}
+{#                                                </div>#}
+{#                                            </div>#}
+{#                                        </div>#}
+{##}
+{#                                    </div>#}
+{#                                </div>#}
+{#                            {% empty %}#}
+{#                                <div class="text-center text-muted p-3">محصول مرتبطی پیدا نشد.</div>#}
+{#                            {% endfor %}#}
+{##}
+{#                        </div>#}
+{#                    </div>#}
+{##}
+{#                </div>#}
+{##}
+{##}
+{#                    <div class="owl-carousel owl-simple carousel-equal-height carousel-with-shadow"#}
+{#                         data-toggle="owl"#}
+{#                         data-owl-options='{"nav":false,"dots":true,"margin":20,"loop":false,"rtl":true,#}
+{#                 "responsive":{"0":{"items":1},"480":{"items":2},"768":{"items":3},"992":{"items":4},"1200":{"items":4,"nav":true,"dots":false}}}'>#}
+{#                        {% for r in related_products %}#}
+{#                            <div class="product product-7 text-center">#}
+{#                                <figure class="product-media">#}
+{#                                    <a href="{{ r.get_absolute_url }}">#}
+{#                                        {% with img=r.images.all|first %}#}
+{#                                            {% if img %}#}
+{#                                                <img src="{{ img.image.url }}" alt="{{ img.alt|default:r.name }}"#}
+{#                                                     class="product-image">#}
+{#                                            {% else %}#}
+{#                                                <img src="{% static 'images/products/product-4.jpg' %}"#}
+{#                                                     alt="{{ r.name }}" class="product-image">#}
+{#                                            {% endif %}#}
+{#                                        {% endwith %}#}
+{#                                    </a>#}
+{#                                </figure>#}
+{#                                <div class="product-body">#}
+{#                                    <div class="product-cat text-center">#}
+{#                                        {% if r.category %}#}
+{#                                            <a href="{{ r.category.get_absolute_url }}">{{ r.category.name }}</a>{% else %}#}
+{#                                            <span class="text-muted">—</span>{% endif %}#}
+{#                                    </div>#}
+{#                                    <h3 class="product-title text-center"><a#}
+{#                                            href="{{ r.get_absolute_url }}">{{ r.name }}</a></h3>#}
+{#                                    <div class="product-price">{{ r.price|floatformat:0|intcomma }} تومان</div>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                        {% empty %}#}
+{#                            <div class="text-center text-muted p-3">محصول مرتبطی پیدا نشد.</div>#}
+{#                        {% endfor %}#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+{##}
+{#            <!-- تب‌ها -->#}
+{#            <div class="product-details-tab product-details-extended mt-5">#}
+{#                <div class="product-tab-new">#}
+{#                    <div class="page-content">#}
+{#                        <div class="container">#}
+{#                            <div class="row">#}
+{#                                <div class="col-md-11">#}
+{#                                    <div class="accordion" id="accordion-1">#}
+{#                                        <!-- مشخصات -->#}
+{#                                        <div class="card">#}
+{#                                            <div class="card-header" id="heading-1">#}
+{#                                                <h2 class="card-title">#}
+{#                                                    <a role="button" data-toggle="collapse" href="#collapse-1"#}
+{#                                                       aria-expanded="true" aria-controls="collapse-1">مشخصات</a>#}
+{#                                                </h2>#}
+{#                                            </div>#}
+{#                                            <div id="collapse-1" class="collapse show" aria-labelledby="heading-1"#}
+{#                                                 data-parent="#accordion-1">#}
+{#                                                <div class="card-body">#}
+{#                                                    {% if product.description %}#}
+{#                                                        <p>{{ product.description|linebreaks }}</p>#}
+{#                                                    {% else %}#}
+{#                                                        <span class="text-muted">توضیحی ثبت نشده است.</span>#}
+{#                                                    {% endif %}#}
+{#                                                </div>#}
+{#                                            </div>#}
+{#                                        </div>#}
+{##}
+{#                                        <!-- مشخصات فنی -->#}
+{#                                        <div class="card" id="section-specs">#}
+{#                                            <div class="card-header" id="heading-2">#}
+{#                                                <h2 class="card-title">#}
+{#                                                    <a class="collapsed" role="button" data-toggle="collapse"#}
+{#                                                       href="#collapse-2" aria-expanded="false"#}
+{#                                                       aria-controls="collapse-2">مشخصات فنی</a>#}
+{#                                                </h2>#}
+{#                                            </div>#}
+{##}
+{#                                            <div id="collapse-2" class="collapse" aria-labelledby="heading-2"#}
+{#                                                 data-parent="#accordion-1">#}
+{#                                                <div class="card-body">#}
+{#                                                    {% if product.attr_values.all %}#}
+{#                                                        <div class="dk-specs-wrap" dir="rtl">#}
+{#                                                            <table class="dk-specs-table">#}
+{#                                                                <tbody>#}
+{#                                                                {% for av in product.attr_values.all %}#}
+{# choice - گزینه تکی#}
+{#                                                                    {% if av.attribute.kind == "choice" and av.value_choice %}#}
+{#                                                                        <tr>#}
+{#                                                                            <th>{{ av.attribute.name }}</th>#}
+{#                                                                            <td>{{ av.value_choice.label }}</td>#}
+{#                                                                        </tr>#}
+{##}
+{# multi - چندگزینه‌ای#}
+{#                                                                    {% elif av.attribute.kind == "multi" and av.values_multi.all|length %}#}
+{#                                                                        <tr>#}
+{#                                                                            <th>{{ av.attribute.name }}</th>#}
+{#                                                                            <td>#}
+{#                                                                                {% for ch in av.values_multi.all %}#}
+{#                                                                                    {{ ch.label }}#}
+{#                                                                                    {% if not forloop.last %}#}
+{#                                                                                        ، {% endif %}#}
+{#                                                                                {% endfor %}#}
+{#                                                                            </td>#}
+{#                                                                        </tr>#}
+{##}
+{# decimal - عدد اعشاری#}
+{#                                                                    {% elif av.attribute.kind == "decimal" and av.value_decimal is not None %}#}
+{#                                                                        <tr>#}
+{#                                                                            <th>{{ av.attribute.name }}</th>#}
+{#                                                                            <td>#}
+{#                                                                                {{ av.value_decimal|floatformat:"-2" }}#}
+{#                                                                                {% if av.attribute.unit %}#}
+{#                                                                                    <span class="unit">{{ av.attribute.unit }}</span>{% endif %}#}
+{#                                                                            </td>#}
+{#                                                                        </tr>#}
+{##}
+{# int - عدد صحیح#}
+{#                                                                    {% elif av.attribute.kind == "int" and av.value_int is not None %}#}
+{#                                                                        <tr>#}
+{#                                                                            <th>{{ av.attribute.name }}</th>#}
+{#                                                                            <td>#}
+{#                                                                                {{ av.value_int|intcomma }}#}
+{#                                                                                {% if av.attribute.unit %}#}
+{#                                                                                    <span class="unit">{{ av.attribute.unit }}</span>{% endif %}#}
+{#                                                                            </td>#}
+{#                                                                        </tr>#}
+{##}
+{# bool - بلی/خیر#}
+{#                                                                    {% elif av.attribute.kind == "bool" and av.value_bool is not None %}#}
+{#                                                                        <tr>#}
+{#                                                                            <th>{{ av.attribute.name }}</th>#}
+{#                                                                            <td>{{ av.value_bool|yesno:"بله,خیر" }}</td>#}
+{#                                                                        </tr>#}
+{##}
+{# text - متن#}
+{#                                                                    {% elif av.attribute.kind == "text" and av.value_text %}#}
+{#                                                                        <tr>#}
+{#                                                                            <th>{{ av.attribute.name }}</th>#}
+{#                                                                            <td>{{ av.value_text }}</td>#}
+{#                                                                        </tr>#}
+{#                                                                    {% endif %}#}
+{#                                                                {% endfor %}#}
+{#                                                                </tbody>#}
+{#                                                            </table>#}
+{#                                                        </div>#}
+{#                                                    {% else %}#}
+{#                                                        <span class="text-muted">ویژگی‌ای ثبت نشده است.</span>#}
+{#                                                    {% endif %}#}
+{#                                                </div>#}
+{#                                            </div>#}
+{#                                        </div>#}
+{#                                        <!-- نظرات -->#}
+{#                                        <div class="card">#}
+{#                                            <div class="card-header" id="heading-3">#}
+{#                                                <h2 class="card-title">#}
+{#                                                    <a class="collapsed" role="button" data-toggle="collapse"#}
+{#                                                       href="#collapse-3" aria-expanded="false"#}
+{#                                                       aria-controls="collapse-3">نظرات</a>#}
+{#                                                </h2>#}
+{#                                            </div>#}
+{##}
+{#                                            <div id="collapse-3" class="collapse" aria-labelledby="heading-3"#}
+{#                                                 data-parent="#accordion-1">#}
+{#                                                <div class="card-body">#}
+{##}
+{#                                                    {% include "core/comments_section.html" with comments=comments form=comment_form %}#}
+{#                                                </div>#}
+{#                                            </div>#}
+{#                                        </div>#}
+{#                                    </div><!-- /accordion -->#}
+{#                                </div>#}
+{#                            </div><!-- /row -->#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+{##}
+{#            <!-- Sticky Bar -->#}
+{#            <div class="tlp-sticky">#}
+{#                <div class="container d-flex align-items-center justify-content-between">#}
+{#                    <div class="sum">#}
+{#                        {% with img=gallery_images.0 %}#}
+{#                            {% if img %}#}
+{#                                <img id="sticky-img" src="{{ img.url }}" alt="{{ img.alt|default:product.name }}">#}
+{#                            {% else %}#}
+{#                                <img id="sticky-img" src="{{ FALLBACK_THUMB }}" alt="{{ product.name }}">#}
+{#                            {% endif %}#}
+{#                        {% endwith %}#}
+{#                        <div class="txt">#}
+{#                            <div class="t1">{{ product.name }}</div>#}
+{#                            <div class="t2">{{ product.price|floatformat:0|intcomma }} تومان</div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                    <button class="btn bb-add"><i class="icon-shopping-cart"></i><span>افزودن به سبد</span></button>#}
+{#                </div>#}
+{#            </div>#}
+{#        </div>#}
+{##}
+{#    </main>#}
+{#{% endblock %}#}
+{##}
+{##}

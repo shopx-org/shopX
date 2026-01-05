@@ -1,0 +1,103 @@
+{#/home/atusa92/PycharmProjects/ShopX/home/templates/home/home_mini_product_lists.html#}
+{% load static %}
+{% load humanize %}
+{% load persian_digits %}
+
+<div class="container product-group mb-lg-7 mt-5 mb-0">
+  <div class="row g-3">
+
+    {% for block in home_mini_lists %}
+      <div class="{{ block.col_class }}">
+
+        <div class="dk-mini-block">  {# ✅ wrapper اضافه شد #}
+
+          <!-- Header -->
+          <div class="heading heading-flex align-items-center dk-mini-heading mt-4">
+            <div class="heading-left">
+              <h2 class="title mb-0 font-weight-bold">{{ block.title }}</h2>
+            </div>
+
+            {% if block.more_url %}
+              <div class="heading-right mt-0">
+                <a href="{{ block.more_url }}" class="title-link shadow-none dk-mini-more">
+                  مشاهده بیشتر <i class="icon-long-arrow-left"></i>
+                </a>
+              </div>
+            {% endif %}
+          </div>
+
+          <!-- List -->
+          <div class="dk-mini-products bg-white mt-2 mt-xl-0">
+
+            {% for p in block.products %}
+              <div class="dk-mini-product d-flex flex-row overflow-hidden shadow-none">
+
+                <!-- Image -->
+                <figure class="dk-mini-media mb-0 d-flex justify-content-center align-items-center">
+                  <a href="{{ p.get_absolute_url }}" class="dk-mini-img-link">
+                    {% if p.cover_image %}
+                      <img src="{{ p.cover_image.image.url }}" alt="{{ p.name }}" class="dk-mini-img" loading="lazy">
+                    {% elif p.image_list and p.image_list.0 %}
+                      <img src="{{ p.image_list.0.image.url }}" alt="{{ p.name }}" class="dk-mini-img" loading="lazy">
+                    {% else %}
+                      <img src="{% static 'images/placeholder-600x600.png' %}" alt="{{ p.name }}" class="dk-mini-img" loading="lazy">
+                    {% endif %}
+                  </a>
+                </figure>
+
+                <!-- Body -->
+                <div class="dk-mini-body flex-grow-1">
+
+                  <!-- Top row: info (right) + price (left) -->
+                  <div class="dk-mini-top">
+
+                    <div class="dk-mini-info">
+                      <h3 class="dk-mini-title text-right mb-0">
+                        <a href="{{ p.get_absolute_url }}">{{ p.name }}</a>
+                      </h3>
+
+                      <div class="dk-mini-cat text-right">
+                        {% if p.category %}
+                          <a href="{{ p.category.get_absolute_url }}">{{ p.category.name }}</a>
+                        {% endif %}
+                      </div>
+                    </div>
+
+                    <div class="dk-mini-price-wrap">
+                      <div class="dk-mini-price text-dark">
+                        {% if p.has_discount %}
+                          <span class="new-price">{{ p.price_final|fa_price }} تومان</span>
+                          <span class="old-price">{{ p.price_base|fa_price }} تومان</span>
+                        {% else %}
+                          <span class="new-price">{{ p.price_final|fa_price }} تومان</span>
+                        {% endif %}
+                      </div>
+                    </div>
+
+                  </div>
+
+                  <!-- Rating -->
+                  <div class="dk-mini-rating">
+                    <i class="icon-star dk-mini-star"></i>
+                    <span class="ratings-text">
+                      {{ p.rating_count|default:0|fa_digits }} رأی
+                    </span>
+                  </div>
+
+                </div>
+              </div>
+
+              {% if not forloop.last %}<hr class="dk-mini-sep">{% endif %}
+
+            {% empty %}
+              <div class="p-3 text-center text-muted">محصولی برای نمایش نیست.</div>
+            {% endfor %}
+
+          </div>
+        </div>  {# ✅ wrapper بسته شد #}
+
+      </div>
+    {% endfor %}
+
+  </div>
+</div>

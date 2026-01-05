@@ -1057,7 +1057,7 @@ body.no-scroll {
 }
 
 .switch input:checked + .slider {
-    background:  #FA523C;
+    background: #FA523C;
 }
 
 .switch input:checked + .slider::before {
@@ -1323,7 +1323,7 @@ body.no-scroll {
 .dk-cta .dk-add {
     width: 100%;
     background: #FFFFFF;
-    border:1px solid  #FA523C;
+    border: 1px solid #FA523C;
     border-radius: 10px;
     font-weight: 800;
     font-size: 1.6rem;
@@ -1333,7 +1333,7 @@ body.no-scroll {
 }
 
 .dk-cta .dk-add:hover {
-    background:  linear-gradient( #FA523C , #bd4040);
+    background: linear-gradient(#FA523C, #bd4040);
     color: #FFFFFF;
 }
 
@@ -2726,232 +2726,268 @@ body.no-scroll {
 }
 
 .product-specs-card {
-  background: #fff;
-  border: 1px solid var(--soft, #eee);
-  border-radius: 16px;
-  padding: 1.5rem;
-  margin-top: 1.5rem;
-  margin-bottom: 1.5rem;
-  direction: rtl;
-  text-align: right;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    background: #fff;
+    border: 1px solid var(--soft, #eee);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+    direction: rtl;
+    text-align: right;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .product-specs-card .title {
-  font-size: 1.6rem;
-  font-weight: 600;
-  color: #111;
-  margin-bottom: 1.75rem;
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: #111;
+    margin-bottom: 1.75rem;
 }
 
 .specs-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 0.75rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 0.75rem;
 }
 
 .spec-box {
-  background: rgba(0,0,0,0.02);
-  border-radius: 12px;
+    background: rgba(0, 0, 0, 0.02);
+    border-radius: 12px;
 
-  padding: 0.8rem 1rem;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
-  transition: 0.2s ease;
+    padding: 0.8rem 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    transition: 0.2s ease;
 }
 
 .spec-box:hover {
-  background: #ffffff;
-    border: 0.3px solid  #FA523C;
+    background: #ffffff;
+    border: 0.3px solid #FA523C;
 
 }
 
 .spec-box .label {
-  font-size: 0.99rem;
-  color: #111;
+    font-size: 0.99rem;
+    color: #111;
 }
 
 .spec-box .value {
-  font-weight: 600;
-  color: #222;
-  margin-top: 0.2rem;
+    font-weight: 600;
+    color: #222;
+    margin-top: 0.2rem;
 }
+
 /* نوار لینک‌های ثانویه زیر دکمهٔ خرید */
-.dk-buybox .dk-mini-actions{
-  direction: rtl;
-  text-align: right;
-  margin-top: .5rem;
-  padding-top: .6rem;
-  border-top: 1px dashed var(--soft, #ececec);  /* مطابق رنگ‌های خود کارت */
-  display: flex;
-  flex-direction: column;       /* یکی زیر دیگری مثل اسکرین‌شات */
-  gap: .25rem;
+.dk-buybox .dk-mini-actions {
+    direction: rtl;
+    text-align: right;
+    margin-top: .5rem;
+    padding-top: .6rem;
+    border-top: 1px dashed var(--soft, #ececec); /* مطابق رنگ‌های خود کارت */
+    display: flex;
+    flex-direction: column; /* یکی زیر دیگری مثل اسکرین‌شات */
+    gap: .25rem;
 }
 
 /* خود لینک‌ها: ساده، خوانا و هم‌رنگ با متن‌های فرعی کارت */
-.dk-buybox .dk-mini-actions .btn-product{
-  display: inline-flex;
-  align-items: center;
-  justify-content: flex-start;  /* راست‌چین */
-  gap: .4rem;
-  padding: .35rem .2rem;
-  font-size: 1.9rem;
-  font-weight: 450;
-  color: #111;               /* خاکستری ملایم؛ «رنگ و لعاب» کارت حفظ شود */
-  text-decoration: none;
-  border-radius: 8px;
-  line-height:2;
-  transition: background .15s ease, color .15s ease;
+.dk-buybox .dk-mini-actions .btn-product {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start; /* راست‌چین */
+    gap: .4rem;
+    padding: .35rem .2rem;
+    font-size: 1.9rem;
+    font-weight: 450;
+    color: #111; /* خاکستری ملایم؛ «رنگ و لعاب» کارت حفظ شود */
+    text-decoration: none;
+    border-radius: 8px;
+    line-height: 2;
+    transition: background .15s ease, color .15s ease;
 }
 
 /* هاور خیلی ملایم، بدون تغییر هویت بصری */
-.dk-buybox .dk-mini-actions .btn-product:hover{
-  background: rgba(0,0,0,.03);
-  color: #FA523C;
-  
+.dk-buybox .dk-mini-actions .btn-product:hover {
+    background: rgba(0, 0, 0, .03);
+    color: #FA523C;
+
 }
 
 /* اگر تم شما برای wishlist/compare آیکن :before دارد، کمی فاصله‌گذاری‌اش را تنظیم می‌کنیم */
-.dk-buybox .dk-mini-actions .btn-product::before{
-  margin-left: .35rem; /* در RTL آیکن سمت راست می‌افتد */
+.dk-buybox .dk-mini-actions .btn-product::before {
+    margin-left: .35rem; /* در RTL آیکن سمت راست می‌افتد */
 }
 
 /* موبایل: فاصله‌ها برای لمس بهتر */
-@media (max-width: 576px){
-  .dk-buybox .dk-mini-actions{
-    gap: .35rem;
-  }
-  .dk-buybox .dk-mini-actions .btn-product{
-    padding: .45rem .25rem;
-  }
+@media (max-width: 576px) {
+    .dk-buybox .dk-mini-actions {
+        gap: .35rem;
+    }
+
+    .dk-buybox .dk-mini-actions .btn-product {
+        padding: .45rem .25rem;
+    }
 }
+
 /* ===== قیمتِ باکس خرید: استایلِ تخفیف ===== */
 
 /* جعبهٔ تخفیف */
-#price-save{
-  margin-top: .35rem;
+#price-save {
+    margin-top: .35rem;
 }
 
 /* قیمتِ قبل (خط‌خورده) کمی کوچک‌تر و کم‌رنگ‌تر */
-#price-save #compare-num{
-  font-size: 1.15rem;
-  opacity: .75;
-  margin-inline-end: .5rem;
+#price-save #compare-num {
+    font-size: 1.15rem;
+    opacity: .75;
+    margin-inline-end: .5rem;
 }
 
 /* خودِ بجِ درصد تخفیف → درشت‌تر و برجسته‌تر */
-#off-badge{
-  font-size: 1.25rem;         /* ← سایزِ بزرگ‌تر */
-  font-weight: 800;
-  line-height: 1.15;
-  padding: .28rem .8rem;
-  border-radius: 9px;
-  background: #fff0ec;
-  color: var(--accent, #FA523C);
-  border: 1px solid #f6562c;
-  vertical-align: middle;     /* هم‌ترازی با اعداد */
-  display: inline-flex;
-  align-items: center;
-  gap: .25rem;
+#off-badge {
+    font-size: 1.25rem; /* ← سایزِ بزرگ‌تر */
+    font-weight: 800;
+    line-height: 1.15;
+    padding: .28rem .8rem;
+    border-radius: 9px;
+    background: #fff0ec;
+    color: var(--accent, #FA523C);
+    border: 1px solid #f6562c;
+    vertical-align: middle; /* هم‌ترازی با اعداد */
+    display: inline-flex;
+    align-items: center;
+    gap: .25rem;
 }
 
 /* متن مبلغ کسرشده: کمی کوچک‌تر و زیرِ بج */
-#off-amount{
-  font-size: 1.59rem;
-  margin-top: .35rem;
-  color: #104d03 !important;
+#off-amount {
+    font-size: 1.59rem;
+    margin-top: .35rem;
+    color: #104d03 !important;
 }
 
 /* ریسپانسیو: روی موبایل کمی جمع‌وجورتر */
-@media (max-width: 576px){
-  #off-badge{ font-size: 1.1rem; padding: .2rem .55rem; }
-  #price-save #compare-num{ font-size: 1.05rem; }
-  #off-amount{ font-size: .92rem; }
+@media (max-width: 576px) {
+    #off-badge {
+        font-size: 1.1rem;
+        padding: .2rem .55rem;
+    }
+
+    #price-save #compare-num {
+        font-size: 1.05rem;
+    }
+
+    #off-amount {
+        font-size: .92rem;
+    }
 }
+
 /* ===== قیمت قبل از تخفیف (del) ===== */
-#compare-num{
-  font-size: 3.9rem;               /* ← بزرگ‌تر از قبل */
-  font-weight: 700;                  /* کمی بولدتر */
-  opacity: 5%;                       /* خواناتر از 0.75 */
-  margin-inline-end: .5rem;          /* فاصله از بج/متن کنار */
-  line-height: 1.6;
-  /* خطِ خط‌خوردگی ضخیم‌تر و ملایم‌تر */
-  text-decoration: line-through;
-  text-decoration-thickness: 0.9px;
-  text-decoration-color: #c9cfd6;    /* خاکستری نرم */
-  text-underline-offset: .1em;
+#compare-num {
+    font-size: 3.9rem; /* ← بزرگ‌تر از قبل */
+    font-weight: 700; /* کمی بولدتر */
+    opacity: 5%; /* خواناتر از 0.75 */
+    margin-inline-end: .5rem; /* فاصله از بج/متن کنار */
+    line-height: 1.6;
+    /* خطِ خط‌خوردگی ضخیم‌تر و ملایم‌تر */
+    text-decoration: line-through;
+    text-decoration-thickness: 0.9px;
+    text-decoration-color: #c9cfd6; /* خاکستری نرم */
+    text-underline-offset: .1em;
 }
 
 /* اگر خواستی اندازه‌اش نسبت به قیمت اصلی کمتر باشد، این را باز کن: */
 /* .dk-price .num #price-num{ font-size: 1.6rem; } */
 
 /* موبایل کمی جمع‌وجورتر */
-@media (max-width: 576px){
-  #compare-num{ font-size: 1.15rem; text-decoration-thickness: 1.75px; }
+@media (max-width: 576px) {
+    #compare-num {
+        font-size: 1.15rem;
+        text-decoration-thickness: 1.75px;
+    }
 }
 
 /* قیمت قبل از تخفیف (del) را بزرگ و خوانا کن */
-.dk-buybox .dk-price .save del#compare-num{
-  font-size: 1.85rem !important;   /* اندازه بزرگ‌تر */
-  font-weight: 700;
-  line-height: 1.2;
-  color: #5b626b;                   /* خاکستری خواناتر */
-  text-decoration: line-through;
-  text-decoration-thickness: 2px;
-  text-decoration-color: #c9cfd6;
-  text-underline-offset: .2em;
-  margin-inline-end: .5rem;
+.dk-buybox .dk-price .save del#compare-num {
+    font-size: 1.85rem !important; /* اندازه بزرگ‌تر */
+    font-weight: 700;
+    line-height: 1.2;
+    color: #5b626b; /* خاکستری خواناتر */
+    text-decoration: line-through;
+    text-decoration-thickness: 2px;
+    text-decoration-color: #c9cfd6;
+    text-underline-offset: .2em;
+    margin-inline-end: .5rem;
 }
 
 /* اگر کل باکس save کوچک شده، پایه‌اش را هم نرمال کن */
-.dk-buybox .dk-price .save{
-  font-size: 1rem !important;
+.dk-buybox .dk-price .save {
+    font-size: 1rem !important;
 }
 
 /* موبایل کمی جمع‌وجورتر */
-@media (max-width:576px){
-  .dk-buybox .dk-price .save del#compare-num{
-    font-size: 1.15rem !important;
-    text-decoration-thickness: 1.75px;
-  }
+@media (max-width: 576px) {
+    .dk-buybox .dk-price .save del#compare-num {
+        font-size: 1.15rem !important;
+        text-decoration-thickness: 1.75px;
+    }
 }
+
 /* ستون قیمت را ستونی کن تا اکشن‌ها پایینش بچسبند */
-.cart-price{
-  min-width:220px;          /* می‌تونی کمتر/بیشترش کنی */
-  text-align:left;          /* چون RTL است، سمت چپ ستون */
-  display:flex;
-  flex-direction:column;
-  align-items:flex-start;   /* متن‌ها چپ ستون */
+.cart-price {
+    min-width: 220px; /* می‌تونی کمتر/بیشترش کنی */
+    text-align: left; /* چون RTL است، سمت چپ ستون */
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* متن‌ها چپ ستون */
 }
 
 /* خود نوار اکشن‌ها نزدیک لبه پایین ستون قیمت */
-.action-bar{
-  margin-top:auto;          /* بچسب به پایین .cart-price */
-  padding-top:8px;
-  display:flex; gap:16px; flex-wrap:wrap;
-  justify-content:flex-start;
+.action-bar {
+    margin-top: auto; /* بچسب به پایین .cart-price */
+    padding-top: 8px;
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: flex-start;
 }
 
 /* اگر قبلاً اکشن‌ها را پایین بدنه می‌چسباندی، دیگر لازم نیست: */
-.cart-body{ display:flex; flex-direction:column; }
-.cart-actions{ margin-top:8px; } /* یا اگر می‌خواهی بالا بماند، همینی خوب است */
+.cart-body {
+    display: flex;
+    flex-direction: column;
+}
+
+.cart-actions {
+    margin-top: 8px;
+}
+
+/* یا اگر می‌خواهی بالا بماند، همینی خوب است */
 
 /* واکنش‌گرا: در موبایل، اکشن‌ها را دوباره زیر بدنه بیاور که جا کم است */
-@media (max-width: 768px){
-  .cart-item{ flex-wrap:wrap; }
-  .cart-price{ order:3; width:100%; }
-  .action-bar{ width:100%; justify-content:flex-start; }
+@media (max-width: 768px) {
+    .cart-item {
+        flex-wrap: wrap;
+    }
+
+    .cart-price {
+        order: 3;
+        width: 100%;
+    }
+
+    .action-bar {
+        width: 100%;
+        justify-content: flex-start;
+    }
 }
 
 
 /* compare product */
 .btn-danger {
-    border-radius: 8px !important; 
-    color: #fff; 
+    border-radius: 8px !important;
+    color: #fff;
 }
-
 
 
 /* Flash messages */
@@ -2965,12 +3001,11 @@ body.no-scroll {
     max-width: 500px;
     width: 100%;
     text-align: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     opacity: 1;
     transition: opacity 0.8s ease;
     margin-bottom: 8px;
 }
-
 
 
 /* end compare product */
@@ -2995,7 +3030,7 @@ body.no-scroll {
 
 /* ناموجود */
 .sold-out-badge {
-    background: rgba(0,0,0,0.7);
+    background: rgba(0, 0, 0, 0.7);
     color: #fff;
     padding: 6px 12px;
     font-size: 0.9rem;
@@ -3003,7 +3038,7 @@ body.no-scroll {
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%,-50%);
+    transform: translate(-50%, -50%);
 }
 
 /* رنگ‌ها */
@@ -3039,6 +3074,7 @@ body.no-scroll {
     color: #888;
     margin-right: 5px;
 }
+
 /* end product list style */
 
 /* استایل کلی بج‌ها روی کارت محصول */
@@ -3092,7 +3128,6 @@ body.no-scroll {
 }
 
 
-
 /* مطمئن شو کانتینر تصویر position: relative داره */
 .product .product-media,
 .product-media {
@@ -3100,25 +3135,23 @@ body.no-scroll {
 }
 
 
-
-
 /* استایل بج ناموجود */
 .label-out {
     position: absolute;
     top: 10px;
-    right: 10px;        /* برای RTL گوشه راست */
+    right: 10px; /* برای RTL گوشه راست */
     z-index: 5;
 
     padding: 5px 12px;
     border-radius: 999px;
 
-    background: #1f2937;   /* تیره؛ می‌تونی با رنگ برندت عوضش کنی */
+    background: #1f2937; /* تیره؛ می‌تونی با رنگ برندت عوضش کنی */
     color: #fff;
     font-size: 0.75rem;
     line-height: 1;
     white-space: nowrap;
 
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 /* اگر از قبل استایل عجیب داشت، خنثی‌ش کن */
@@ -3127,7 +3160,7 @@ body.no-scroll {
     content: none !important;
 }
 
-.zoom-box{
+.zoom-box {
     position: fixed;
     width: min(560px, 42vw);
     height: min(560px, 42vw);
@@ -3135,356 +3168,669 @@ body.no-scroll {
     max-height: 620px;
     display: none;
     background: #fff;
-    border: 1px solid rgba(0,0,0,.08);
+    border: 1px solid rgba(0, 0, 0, .08);
     border-radius: 14px;
     overflow: hidden;
-    box-shadow: 0 18px 60px rgba(0,0,0,.12);
+    box-shadow: 0 18px 60px rgba(0, 0, 0, .12);
     z-index: 1300;
 }
 
 /* --- thumb +X overlay --- */
-.thumbs .thumb { position: relative; }
-.thumbs .thumb .thumb-more{
-  position:absolute;
-  inset:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:800;
-  font-size:14px;
-  border-radius:12px;
-  color:#111;
-  background: rgba(255,255,255,.72);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  cursor:pointer;
+.thumbs .thumb {
+    position: relative;
 }
-.thumbs .thumb:has(.thumb-more) img{
-  filter: blur(2px) saturate(.9);
-  transform: scale(1.02);
+
+.thumbs .thumb .thumb-more {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 14px;
+    border-radius: 12px;
+    color: #111;
+    background: rgba(255, 255, 255, .72);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    cursor: pointer;
+}
+
+.thumbs .thumb:has(.thumb-more) img {
+    filter: blur(2px) saturate(.9);
+    transform: scale(1.02);
 }
 
 /* --- modal gallery --- */
-.tlp-modal{
-  position:fixed;
-  inset:0;
-  display:none;
-  z-index: 2000;
-}
-.tlp-modal.show{ display:block; }
-
-.tlp-modal-backdrop{
-  position:absolute;
-  inset:0;
-  background: rgba(0,0,0,.55);
+.tlp-modal {
+    position: fixed;
+    inset: 0;
+    display: none;
+    z-index: 2000;
 }
 
-.tlp-modal-dialog{
-  position:relative;
-  width: min(1040px, 92vw);     /* کمی بزرگتر */
-  height: min(680px, 88vh);
-  margin: 6vh auto 0;
-  background:#fff;
-  border-radius: 18px;
-  box-shadow: 0 20px 80px rgba(0,0,0,.25);
-  overflow:hidden;
+.tlp-modal.show {
+    display: block;
 }
 
-.tlp-modal-close{
-  position:absolute;
-  top: 10px;
-  left: 12px; /* RTL-friendly */
-  width: 38px;
-  height: 38px;
-  border-radius: 12px;
-  border: 1px solid rgba(0,0,0,.08);
-  background:#fff;
-  font-size: 22px;
-  line-height: 1;
-  cursor:pointer;
-  z-index: 3;
+.tlp-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, .55);
 }
 
-.tlp-modal-body{
-  display:grid;
-  grid-template-columns: 1fr 260px;
-  height:100%;
+.tlp-modal-dialog {
+    position: relative;
+    width: min(1040px, 92vw); /* کمی بزرگتر */
+    height: min(680px, 88vh);
+    margin: 6vh auto 0;
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 20px 80px rgba(0, 0, 0, .25);
+    overflow: hidden;
 }
 
-.tlp-modal-main{
-  position:relative;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:#fafafa;
+.tlp-modal-close {
+    position: absolute;
+    top: 10px;
+    left: 12px; /* RTL-friendly */
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, .08);
+    background: #fff;
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+    z-index: 3;
 }
 
-.tlp-modal-main img{
-  max-width: 94%;
-  max-height: 92%;
-  object-fit: contain;
+.tlp-modal-body {
+    display: grid;
+    grid-template-columns: 1fr 260px;
+    height: 100%;
 }
 
-.tlp-modal-nav{
-  position:absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 44px;
-  height: 44px;
-  border-radius: 14px;
-  border: 1px solid rgba(0,0,0,.08);
-  background: rgba(255,255,255,.9);
-  cursor:pointer;
-  font-size: 28px;
-  line-height: 1;
-}
-.tlp-modal-nav.prev{ right: 14px; } /* RTL: قبلی سمت راست */
-.tlp-modal-nav.next{ left: 14px; }
-
-.tlp-modal-thumbs{
-  padding: 16px 14px;
-  overflow:auto;
-  border-right: 1px solid rgba(0,0,0,.06);
-  background:#fff;
-  display:grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-  align-content:start;
+.tlp-modal-main {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fafafa;
 }
 
-.tlp-modal-thumbs button{
-  border: 2px solid transparent;
-  border-radius: 12px;
-  padding: 0;
-  background: transparent;
-  cursor:pointer;
-}
-.tlp-modal-thumbs button.is-active{
-  border-color: rgba(250,106,53,.75);
-}
-.tlp-modal-thumbs img{
-  width:100%;
-  aspect-ratio: 1/1;
-  object-fit: cover;
-  border-radius: 10px;
-  display:block;
+.tlp-modal-main img {
+    max-width: 94%;
+    max-height: 92%;
+    object-fit: contain;
 }
 
-@media (max-width: 992px){
-  .tlp-modal-dialog{ width: 94vw; height: 88vh; }
-  .tlp-modal-body{ grid-template-columns: 1fr; }
-  .tlp-modal-thumbs{
-    grid-template-columns: repeat(5, 1fr);
-    border-right: 0;
-    border-top: 1px solid rgba(0,0,0,.06);
-    height: 120px;
-    overflow:auto;
-  }
+.tlp-modal-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    border: 1px solid rgba(0, 0, 0, .08);
+    background: rgba(255, 255, 255, .9);
+    cursor: pointer;
+    font-size: 28px;
+    line-height: 1;
+}
+
+.tlp-modal-nav.prev {
+    right: 14px;
+}
+
+/* RTL: قبلی سمت راست */
+.tlp-modal-nav.next {
+    left: 14px;
+}
+
+.tlp-modal-thumbs {
+    padding: 16px 14px;
+    overflow: auto;
+    border-right: 1px solid rgba(0, 0, 0, .06);
+    background: #fff;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    align-content: start;
+}
+
+.tlp-modal-thumbs button {
+    border: 2px solid transparent;
+    border-radius: 12px;
+    padding: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+.tlp-modal-thumbs button.is-active {
+    border-color: rgba(250, 106, 53, .75);
+}
+
+.tlp-modal-thumbs img {
+    width: 100%;
+    aspect-ratio: 1/1;
+    object-fit: cover;
+    border-radius: 10px;
+    display: block;
+}
+
+@media (max-width: 992px) {
+    .tlp-modal-dialog {
+        width: 94vw;
+        height: 88vh;
+    }
+
+    .tlp-modal-body {
+        grid-template-columns: 1fr;
+    }
+
+    .tlp-modal-thumbs {
+        grid-template-columns: repeat(5, 1fr);
+        border-right: 0;
+        border-top: 1px solid rgba(0, 0, 0, .06);
+        height: 120px;
+        overflow: auto;
+    }
 }
 
 /* سایز ثابت و یکسان برای تامب‌های مودال */
-.tlp-modal-thumbs button{
-  width: 100%;
-  height: 92px;            /* اندازه ثابت */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  background: #fff;
+.tlp-modal-thumbs button {
+    width: 100%;
+    height: 92px; /* اندازه ثابت */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: #fff;
 }
 
-.tlp-modal-thumbs img{
-  width: 100%;
-  height: 100%;
-  object-fit: cover;       /* همه یک اندازه و کراپ مرتب */
-  border-radius: 10px;
-  display: block;
-}
-.tlp-modal-header{
-  padding: 14px 18px;
-  border-bottom: 1px solid rgba(0,0,0,.08); /* مثل hr */
-  background: #fff;
+.tlp-modal-thumbs img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* همه یک اندازه و کراپ مرتب */
+    border-radius: 10px;
+    display: block;
 }
 
-.tlp-modal-title{
-  font-size: 1.8rem;
-  font-weight: 800;
-  color: #111;
-  padding-bottom: 16px;
-  padding-top: 14px;
-  text-align: start;
-  direction: rtl;
+.tlp-modal-header {
+    padding: 14px 18px;
+    border-bottom: 1px solid rgba(0, 0, 0, .08); /* مثل hr */
+    background: #fff;
+}
+
+.tlp-modal-title {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #111;
+    padding-bottom: 16px;
+    padding-top: 14px;
+    text-align: start;
+    direction: rtl;
 
 }
-.tlp-modal-dialog{
-  display: flex;
-  flex-direction: column;
+
+.tlp-modal-dialog {
+    display: flex;
+    flex-direction: column;
 }
+
 /* ناحیه تصویر بزرگ مودال: ارتفاع ثابت + مرکزچین */
-.tlp-modal-main{
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #fafafa;
-  padding: 16px;
-  overflow: hidden;
-  height: 100%;          /* کل ارتفاع ستون */
-  min-height: 0;         /* مهم داخل grid/flex */
+.tlp-modal-main {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fafafa;
+    padding: 16px;
+    overflow: hidden;
+    height: 100%; /* کل ارتفاع ستون */
+    min-height: 0; /* مهم داخل grid/flex */
 }
 
 /* خود تصویر بزرگ: دقیقاً داخل باکس فیت شود */
-.tlp-modal-main img{
-  width: 100%;
-  height: 100%;
-  object-fit: contain;   /* متناسب، بدون کراپ */
-  display: block;
+.tlp-modal-main img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* متناسب، بدون کراپ */
+    display: block;
 }
 
 /* اگر هنوز body/grid درست قد نمی‌گیرد */
-.tlp-modal-body{
-  flex: 1;
-  min-height: 0;
+.tlp-modal-body {
+    flex: 1;
+    min-height: 0;
 }
 
 /* اگر grid داری */
-.tlp-modal-body{
-  display: grid;
-  grid-template-columns: 1fr 260px;
-  height: 100%;
+.tlp-modal-body {
+    display: grid;
+    grid-template-columns: 1fr 260px;
+    height: 100%;
 }
 
-.tlp-modal-dialog{ height: min(680px, 88vh); }
-
-
-@media (max-width: 992px){
-  .tlp-modal-dialog{
-    width: 94vw;
-    height: 90vh;
-    margin: 3vh auto 0;
-    border-radius: 18px;
-  }
-
-  .tlp-modal-body{
-    grid-template-columns: 1fr;       /* یک ستون */
-    grid-template-rows: 1fr auto;     /* بالا عکس، پایین تامب */
-  }
-
-  .tlp-modal-main{
-    padding: 10px;
-  }
-
-  /* تامب‌ها پایین: اسکرول افقی */
-  .tlp-modal-thumbs{
-    border-right: 0;
-    border-top: 1px solid rgba(0,0,0,.06);
-    padding: 10px 12px;
-    display: flex;
-    gap: 10px;
-    overflow-x: auto;
-    overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    align-items: center;
-    height: 112px;
-  }
-
-  .tlp-modal-thumbs button{
-    flex: 0 0 auto;
-    width: 76px;
-    height: 76px;
-    border-radius: 14px;
-  }
-
-  .tlp-modal-thumbs img{
-    border-radius: 12px;
-  }
+.tlp-modal-dialog {
+    height: min(680px, 88vh);
 }
-.tlp-modal-close{
-  top: 10px;
-  left: 10px;
-  z-index: 5;
+
+
+@media (max-width: 992px) {
+    .tlp-modal-dialog {
+        width: 94vw;
+        height: 90vh;
+        margin: 3vh auto 0;
+        border-radius: 18px;
+    }
+
+    .tlp-modal-body {
+        grid-template-columns: 1fr; /* یک ستون */
+        grid-template-rows: 1fr auto; /* بالا عکس، پایین تامب */
+    }
+
+    .tlp-modal-main {
+        padding: 10px;
+    }
+
+    /* تامب‌ها پایین: اسکرول افقی */
+    .tlp-modal-thumbs {
+        border-right: 0;
+        border-top: 1px solid rgba(0, 0, 0, .06);
+        padding: 10px 12px;
+        display: flex;
+        gap: 10px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        align-items: center;
+        height: 112px;
+    }
+
+    .tlp-modal-thumbs button {
+        flex: 0 0 auto;
+        width: 76px;
+        height: 76px;
+        border-radius: 14px;
+    }
+
+    .tlp-modal-thumbs img {
+        border-radius: 12px;
+    }
+}
+
+.tlp-modal-close {
+    top: 10px;
+    left: 10px;
+    z-index: 5;
 }
 
 /* وقتی مودال بازه */
-body.modal-open{
-  overflow: hidden;
-  touch-action: none;
+body.modal-open {
+    overflow: hidden;
+    touch-action: none;
 }
 
 /* برای iOS بهتره */
 @supports (-webkit-touch-callout: none) {
-  body.modal-open{
-    position: fixed;
-    width: 100%;
-  }
+    body.modal-open {
+        position: fixed;
+        width: 100%;
+    }
 }
-/*کنترل روی مودال پاپ اپ گالری عکس محصولات*/
-.tlp-modal{ z-index: 99999; }
-.tlp-modal-backdrop{ z-index: 0; }
-.tlp-modal-dialog{ z-index: 1; }
 
-.tlp-modal{
-  position: fixed;
-  inset: 0;
+/*کنترل روی مودال پاپ اپ گالری عکس محصولات*/
+.tlp-modal {
+    z-index: 99999;
+}
+
+.tlp-modal-backdrop {
+    z-index: 0;
+}
+
+.tlp-modal-dialog {
+    z-index: 1;
+}
+
+.tlp-modal {
+    position: fixed;
+    inset: 0;
 }
 
 
 /* ========== موبایل: مطمئن شو محتوا داخل خود مودال جا می‌گیرد ========== */
-@media (max-width: 992px){
-  .tlp-modal-dialog{
-    height: min(92vh, 760px) !important;
-    margin: 2vh auto 0 !important;
-  }
+@media (max-width: 992px) {
+    .tlp-modal-dialog {
+        height: min(92vh, 760px) !important;
+        margin: 2vh auto 0 !important;
+    }
 
-  .tlp-modal-body{
-    flex: 1;
-    min-height: 0;
-  }
+    .tlp-modal-body {
+        flex: 1;
+        min-height: 0;
+    }
 
-  .tlp-modal-main{
-    flex: 1;
-    min-height: 0;
-  }
+    .tlp-modal-main {
+        flex: 1;
+        min-height: 0;
+    }
 
-  /* ردیف تامب‌ها پایین، جدا و تمیز */
-  .tlp-modal-thumbs{
-    flex: 0 0 auto;
-    background: #fff;
-    padding-bottom: calc(10px + env(safe-area-inset-bottom));
-  }
+    /* ردیف تامب‌ها پایین، جدا و تمیز */
+    .tlp-modal-thumbs {
+        flex: 0 0 auto;
+        background: #fff;
+        padding-bottom: calc(10px + env(safe-area-inset-bottom));
+    }
 }
+
 /* مودال تمام صفحه و خودش اسکرول‌گیر باشد */
-.tlp-modal{
-  position: fixed !important;
-  inset: 0 !important;
-  width: 100vw !important;
-  height: 100vh !important;
-  z-index: 2147483647 !important;
+.tlp-modal {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 2147483647 !important;
 }
 
 /* جلوگیری از انتقال اسکرول به پشت (scroll chaining) */
 .tlp-modal,
 .tlp-modal-dialog,
-.tlp-modal-thumbs{
-  overscroll-behavior: contain;
+.tlp-modal-thumbs {
+    overscroll-behavior: contain;
 }
 
 /* روی موبایل: دیالوگ را داخل مودال اسکرول‌پذیر کن */
-@media (max-width: 992px){
-  .tlp-modal{
-    overflow: auto;                 /* اسکرول فقط داخل مودال */
-    -webkit-overflow-scrolling: touch;
-    background: rgba(0,0,0,.55);    /* بک‌دراپ واقعی */
-  }
+@media (max-width: 992px) {
+    .tlp-modal {
+        overflow: auto; /* اسکرول فقط داخل مودال */
+        -webkit-overflow-scrolling: touch;
+        background: rgba(0, 0, 0, .55); /* بک‌دراپ واقعی */
+    }
 
-  .tlp-modal-dialog{
-    margin: 2.5vh auto !important;
-    height: auto !important;        /* اجازه بده با محتوا تنظیم شود */
-    max-height: 95vh !important;
-  }
+    .tlp-modal-dialog {
+        margin: 2.5vh auto !important;
+        height: auto !important; /* اجازه بده با محتوا تنظیم شود */
+        max-height: 95vh !important;
+    }
 
-  .tlp-modal-body{
-    height: auto !important;
-    min-height: 0 !important;
-  }
+    .tlp-modal-body {
+        height: auto !important;
+        min-height: 0 !important;
+    }
 }
+
+/* ===============================
+   PRODUCT CARD – FINAL VERSION
+   =============================== */
+
+.dk-product-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: #fff;
+    border-radius: 16px;
+    border: 1px solid rgba(0, 0, 0, .06);
+    overflow: hidden;
+    transition: box-shadow .2s ease;
+}
+
+.dk-product-card:hover {
+    box-shadow: 0 8px 22px rgba(0, 0, 0, .08);
+}
+
+/* ---------- IMAGE ---------- */
+.dk-product-card .product-media {
+    position: relative;
+    width: 100%;
+    height: 240px;
+    background: #f4f4f4;
+    overflow: hidden;
+}
+
+.dk-product-card .product-media a {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.dk-product-card .product-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+/* ---------- BADGES ---------- */
+.product-label {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 4px 10px;
+    font-size: 11px;
+    border-radius: 12px;
+    color: #fff;
+    z-index: 2;
+}
+
+.label-sale {
+    background: #ef4444;
+}
+
+.label-new {
+    background: #22c55e;
+}
+
+/* ---------- BODY ---------- */
+.dk-product-card .product-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 12px 14px 14px;
+}
+
+/* ---------- TOP ---------- */
+.dk-product-card .product-top {
+    min-height: 74px;
+}
+
+.product-cat a {
+    font-size: 12px;
+    color: #888;
+}
+
+.product-title {
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 6px 0 0;
+    max-height: 3em;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.product-title a {
+    color: #222;
+    text-decoration: none;
+}
+
+/* ---------- MIDDLE ---------- */
+.dk-product-card .product-middle {
+    min-height: 36px;
+    margin-top: 6px;
+}
+
+.product-colors {
+    display: flex;
+    gap: 6px;
+}
+
+.color-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, .15);
+}
+
+.no-colors {
+    font-size: 12px;
+    color: #aaa;
+}
+
+/* ---------- BOTTOM ---------- */
+.dk-product-card .product-bottom {
+    margin-top: auto;
+}
+
+.product-price {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.new-price {
+    font-weight: 800;
+    font-size: 15px;
+}
+
+.old-price {
+    font-size: 12px;
+    text-decoration: line-through;
+    color: #999;
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 768px) {
+    .dk-product-card .product-media {
+        height: 190px;
+    }
+
+    .product-title {
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 576px) {
+    .dk-product-card .product-media {
+        height: 160px;
+    }
+}
+
+
+.stars {
+    display: inline-flex;
+    gap: 4px;
+    cursor: pointer;
+}
+
+.stars i {
+    font-size: 1.5rem;
+    color: #ccc;
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.stars i.bi-star-fill {
+    color: #f5c518; /* طلایی */
+}
+
+.stars i.hovered {
+    color: #f8d24a !important;
+}
+
+.stars i:hover {
+    transform: scale(1.2);
+    color: #f8d24a;
+}
+
+.rating-average {
+    margin-left: 6px;
+    font-weight: 600;
+    color: #333;
+}
+
+.rating-count {
+    margin-left: 4px;
+    color: #777;
+    font-size: 1.2rem;
+}
+
+/* ====== Product detail: related carousel equal cards ====== */
+
+/* stage flex => آیتم‌ها هم‌قد */
+.product-detail-related .owl-carousel .owl-stage {
+    display: flex;
+}
+
+/* هر owl-item هم flex */
+.product-detail-related .owl-carousel .owl-item {
+    display: flex;
+    height: auto;
+}
+
+/* wrapper هر اسلاید */
+.product-detail-related .owl-carousel .item {
+    display: flex;
+    width: 100%;
+    height: 100%;
+}
+
+/* کارت تمام ارتفاع آیتم را بگیرد */
+.product-detail-related .dk-product-card {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* تصویر مثل صفحه اول: مربع و فیت */
+.product-detail-related .dk-product-card .product-media {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+}
+
+.product-detail-related .dk-product-card .product-media > a {
+    position: absolute;
+    inset: 0;
+    display: block;
+}
+
+.product-detail-related .dk-product-card .product-media img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: center;
+    display: block;
+}
+
+.dk-campaign-bar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; /* RTL */
+    gap: 8px;
+    padding: 8px 12px;
+    margin-bottom: 16px;
+
+    background: #f8fafc;
+    border: 1px dashed #e5e7eb;
+    border-radius: 10px;
+
+    font-size: 13px;
+}
+
+.dk-campaign-label {
+    color: #6b7280;
+}
+
+.dk-campaign-name {
+    color: #111827;
+    font-weight: 600;
+    background: #fff;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid #e5e7eb;
+}
+

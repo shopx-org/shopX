@@ -1,11 +1,10 @@
 # products/context_processors.py
 from django.db.models import Prefetch
-from products.models import Category
 # core/context_processors.py
 from .models import Wishlist
 # site info
 from .models import SiteInfo
-from products.models import Category
+from products.models import Category , Brand
 
 
 # ───────────────── helpers
@@ -65,15 +64,14 @@ def header_categories(request):
 # ───────────────── wish list
 
 def wishlist_context(request):
-    if request.user.is_authenticated:
-        qs = Wishlist.objects.filter(user=request.user)
+    user = getattr(request, "user", None)
+    if getattr(user, "is_authenticated", False):
+        qs = Wishlist.objects.filter(user=user)
         return {
             "wishlist_count": qs.count(),
-            "user_wishlist": set(qs.values_list("product_id", flat=True))
+            "user_wishlist": set(qs.values_list("product_id", flat=True)),
         }
-
     return {"wishlist_count": 0, "user_wishlist": set()}
-
 
 # ───────────────── site info
 
@@ -97,3 +95,18 @@ def popular_categories(request):
         .ordered()                     # مرتب
     )
     return {"popular_categories": qs[:6]}
+
+
+def header_brands(request):
+    """
+    برندهای فعال برای اسلایدر لوگو در صفحه‌ی اصلی/هدر
+    """
+    qs = (
+        Brand.objects
+        .filter(is_active=True)
+        .order_by("position", "name")
+        .only("id", "name", "slug", "logo", "position")
+    )
+    return {"header_brands": qs[:20]}  # عدد رو هرچقدر خواستی
+
+

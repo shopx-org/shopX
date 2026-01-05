@@ -10,6 +10,17 @@ D100 = Decimal("100")
 D0 = Decimal("0")
 D001 = Decimal("0.01")
 
+_PERSIAN_DIGITS = str.maketrans("۰۱۲۳۴۵۶۷۸۹٬, ", "0123456789,, ")
+
+def _to_decimal(v, default="0"):
+    if v is None or v == "":
+        return None if default is None else Decimal(str(default))
+    s = str(v).strip().translate(_PERSIAN_DIGITS).replace(",", "")
+    try:
+        return Decimal(s)
+    except Exception:
+        return None if default is None else Decimal(str(default))
+
 @dataclass
 class PricingLine:
     product_id: int
@@ -69,22 +80,19 @@ class _ActiveProvider:
             cache.set(key, data, 60)
         return data
 
-
 class _Resolver:
     """
-    Exclusive فقط روی کمپین‌های عادی اعمال می‌شود.
-    کوپن‌ها همیشه در خروجی باقی می‌مانند.
+    Resolver نباید exclusive را global enforce کند.
+    exclusive باید per-line داخل PricingEngine.evaluate اعمال شود.
+    اینجا فقط ترتیب و گروه‌بندی را مدیریت می‌کنیم.
     """
     def pick(self, camps):
         coupons = [c for c in camps if getattr(c, "_is_coupon_campaign", False)]
         normals = [c for c in camps if not getattr(c, "_is_coupon_campaign", False)]
 
-        # اگر یک کمپین عادی exclusive باشد
-        ex = [c for c in normals if getattr(c, "exclusive", False)]
-        picked_normals = [ex[0]] if ex else normals
-
-        return coupons + picked_normals
-
+        # فقط مرتب‌سازی / ترتیب (اگر خواستی priority را هم لحاظ کن)
+        # (اگر قبلاً در provider با order_by("-priority") مرتب کردی، همین کافی است)
+        return coupons + normals
 
 # --- FIXED rules_match_line ---
 def _rules_match_line(campaign, line, all_lines):
@@ -138,100 +146,71 @@ class PricingEngine:
         self.provider = provider or _ActiveProvider()
         self.resolver = resolver or _Resolver()
 
-
-
-
     def evaluate(self, lines, ctx: dict) -> PricingResult:
         now = timezone.now()
         camps = self.provider.get(ctx.get("channel", "web"), now)
 
-        def _rules_match_line(campaign, line, all_lines):
-            def _iter_rules(c):
-                rules = getattr(c, "rules", None)
-                if rules is None: return []
-                if hasattr(rules, "all") and callable(rules.all):
-                    return rules.all()
-                return rules
+        def _iter_rules(c):
+            rules = getattr(c, "rules", None)
+            if rules is None:
+                return []
+            if hasattr(rules, "all") and callable(rules.all):
+                return rules.all()
+            return rules
 
+        def _rules_match_line(campaign, line, all_lines):
+            """
+            Returns True if this specific `line` matches all line-level rules of `campaign`.
+            cart_min_total is ignored here (checked at campaign level in _ok_local).
+            """
             for r in _iter_rules(campaign):
                 kind = getattr(r, "kind", None)
                 p = getattr(r, "payload", {}) or {}
 
                 if kind == "variant_in":
-                    ids = set(p.get("variant_ids", []))
+                    ids = set(p.get("variant_ids", []) or [])
                     if getattr(line, "variant_id", None) not in ids:
                         return False
 
                 elif kind == "product_in":
-                    ids = set(p.get("product_ids", []))
-                    if line.product_id not in ids:
+                    ids = set(p.get("product_ids", []) or [])
+                    if getattr(line, "product_id", None) not in ids:
                         return False
 
                 elif kind == "category_in":
-                    ids = set(p.get("category_ids", []))
-                    ec = getattr(line, "extra_category_ids", []) or []
-                    if line.category_id not in ids and not any(cid in ids for cid in ec):
+                    ids = set(p.get("category_ids", []) or [])
+                    ec = getattr(line, "extra_category_ids", None) or []
+                    if (getattr(line, "category_id", None) not in ids) and not any(cid in ids for cid in ec):
                         return False
 
                 elif kind == "brand_in":
-                    ids = set(p.get("brand_ids", []))
+                    ids = set(p.get("brand_ids", []) or [])
                     if getattr(line, "brand_id", None) not in ids:
                         return False
 
                 elif kind == "qty_at_least":
-                    if line.quantity < int(p.get("qty", 1)):
+                    if getattr(line, "quantity", 0) < int(p.get("qty", 1) or 1):
                         return False
 
                 elif kind == "cart_min_total":
+                    # این rule را اینجا enforce نمی‌کنیم (در _ok_local انجام می‌شود)
                     continue
-            return True
 
-        def _rules_match_line(campaign, line, all_lines):
-            def _iter_rules(c):
-                rules = getattr(c, "rules", None)
-                if rules is None: return []
-                if hasattr(rules, "all") and callable(rules.all):
-                    return rules.all()
-                return rules
-
-            for r in _iter_rules(campaign):
-                kind = getattr(r, "kind", None)
-                p = getattr(r, "payload", {}) or {}
-
-                if kind == "variant_in":
-                    ids = set(p.get("variant_ids", []))
-                    if getattr(line, "variant_id", None) not in ids:
-                        return False
-
-                elif kind == "product_in":
-                    ids = set(p.get("product_ids", []))
-                    if line.product_id not in ids:
-                        return False
-
-                elif kind == "category_in":
-                    ids = set(p.get("category_ids", []))
-                    ec = getattr(line, "extra_category_ids", []) or []
-                    if line.category_id not in ids and not any(cid in ids for cid in ec):
-                        return False
-
-                elif kind == "brand_in":
-                    ids = set(p.get("brand_ids", []))
-                    if getattr(line, "brand_id", None) not in ids:
-                        return False
-
-                elif kind == "qty_at_least":
-                    if line.quantity < int(p.get("qty", 1)):
-                        return False
-
-                elif kind == "cart_min_total":
-                    continue
+                else:
+                    # rule ناشناخته → سخت‌گیرانه Fail کنیم که بی‌سروصدا تخفیف اشتباه اعمال نشود
+                    return False
 
             return True
 
-        # 1) کمپین‌های موقتی (مثلاً برای SALE مستقیمِ محصول/واریانت)
+        # --- Ephemeral campaigns (sales) ---
         ephemeral = ctx.get("ephemeral_campaigns") or []
         if ephemeral:
-            camps = list(ephemeral) + list(camps)
+            camps = list(camps) + list(ephemeral)  # ephemerals آخر
+
+        # # 1) کمپین‌های موقتی (مثلاً برای SALE مستقیمِ محصول/واریانت)
+        # ephemeral = ctx.get("ephemeral_campaigns") or []
+        # if ephemeral:
+        #     camps = list(ephemeral) + list(camps)
 
         # helperهای امن برای ORM/ephemeral
         def _iter_actions(c):
@@ -276,10 +255,19 @@ class PricingEngine:
                         return False
 
                 elif kind == "cart_min_total":
+                    # در لیست محصول / preview کمپین، این rule را enforce نکن
+                    if ctx.get("preview"):
+                        continue
+
                     thr = Decimal(str(p.get("threshold", "0")))
                     sub = sum((l.line_subtotal for l in ls), D0)
                     if sub < thr:
                         return False
+                # elif kind == "cart_min_total":
+                #     thr = Decimal(str(p.get("threshold", "0")))
+                #     sub = sum((l.line_subtotal for l in ls), D0)
+                #     if sub < thr:
+                #         return False
 
                 elif kind == "qty_at_least":
                     q = int(p.get("qty", 1))
@@ -317,6 +305,7 @@ class PricingEngine:
         for c in picked:
             # 🔹 تشخیص نوع کمپین
             is_coupon_camp = getattr(c, "_is_coupon_campaign", False)
+            is_ephemeral = bool(getattr(c, "_is_ephemeral", False))  # ✅
             stack_with_sales = getattr(c, "stack_with_sales", False)
             # اگر کوپن است و اجازه‌ی جمع‌شدن با تخفیف‌های قبلی را ندارد:
             exclude_discounted = is_coupon_camp and not stack_with_sales
@@ -324,15 +313,33 @@ class PricingEngine:
             for a in _iter_actions(c):
                 kind = getattr(a, "kind", "")
                 scope = getattr(a, "scope", "")
-                val = getattr(a, "value", None)
-                cap = getattr(a, "cap", None)
+                val = _to_decimal(getattr(a, "value", None), default="0")
+                cap = _to_decimal(getattr(a, "cap", None), default=None) if getattr(a, "cap", None) not in (None,
+                                                                                                            "") else None
                 tag = f"{getattr(c, 'name', 'camp')}:{kind}:{scope}"
                 if scope == "line":
                     eligible = [
                         l for l in lines
                         if not getattr(l, "_exclude_from_discounts", False)
                            and _rules_match_line(c, l, lines)
+                           and (
+                                   not getattr(l, "_exclusive_locked", False)
+                                   or getattr(c, "exclusive", False)  # خود exclusive اجازه دارد اعمال شود
+                                   or getattr(c, "_is_coupon_campaign", False)  # کوپن‌ها را جدا تصمیم می‌گیری
+                           )
                     ]
+
+                    if getattr(c, "exclusive", False) and not getattr(c, "_is_coupon_campaign", False):
+                        for l in eligible:
+                            setattr(l, "_exclusive_locked", True)
+
+                    # ✅ ephemerals (تخفیف‌های محصول/واریانت) فقط وقتی مجازند که
+                    # هنوز هیچ تخفیفی از کمپین‌های واقعی روی آن line ننشسته باشد.
+                    if is_ephemeral:
+                        eligible = [
+                            l for l in eligible
+                            if getattr(l, "line_discount", D0) <= 0
+                        ]
 
                     # اگر این کمپین/کوپن اجازه‌ی تجمیع با دیگر تخفیف‌ها را نمی‌دهد،
                     # خطوطی که از قبل سیل/تخفیف دارند را حذف کن.
@@ -357,9 +364,14 @@ class PricingEngine:
                         continue
 
                     if kind == "percent_off" and val is not None:
-                        amt = base * (Decimal(val) / D100)
+                        # 👇 همین‌جا Debug بذار
+                        print("DEBUG_PERCENT_OFF", tag, "VAL_RAW=", repr(val), "BASE=", base)
+
+                        # 👇 این تبدیل هم مهمه (val ممکنه str باشه)
+                        pct = Decimal(str(val)) / D100
+                        amt = base * pct
                     elif kind == "amount_off" and val is not None:
-                        amt = Decimal(val)
+                        amt = Decimal(str(val))
                     else:
                         amt = D0
 

@@ -1,6 +1,6 @@
 # products/services/inventory.py
 from __future__ import annotations
-
+from django.db.models import Sum
 from django.db import transaction
 from django.db.models import F
 
@@ -43,3 +43,22 @@ def consume_stock_for_cart(cart: Cart) -> None:
             )
             if updated == 0:
                 raise ValueError(f"Not enough stock for product id={product.pk}")
+
+
+
+
+def is_product_in_stock(product: Product) -> bool:
+    """
+    True اگر:
+    - محصول واریانت دارد و مجموع stock واریانت‌ها > 0 باشد
+    - یا محصول ساده است و Product.stock > 0 باشد
+    """
+    # اگر واریانت دارد
+    if hasattr(product, "variants"):
+        total = product.variants.aggregate(s=Sum("stock"))["s"] or 0
+        return total > 0
+
+    # محصول ساده
+    if hasattr(product, "stock"):
+        return (product.stock or 0) > 0
+    return True

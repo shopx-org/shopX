@@ -422,11 +422,11 @@ User = get_user_model()
 
 # نرخ‌ها بر اساس محیط
 if settings.DEBUG:
-    RATE_IP = "100/m"      # dev
-    RATE_PHONE = "100/m"
+    RATE_IP = "5/m"      # dev
+    RATE_PHONE = "5/m"
 else:
-    RATE_IP = "100/m"       # production
-    RATE_PHONE = "100/m"
+    RATE_IP = "5/m"       # production
+    RATE_PHONE = "10/m"
 
 # --- ریت‌لیمیت سبکِ بدون پکیج (برای چند نقطه) ---
 def rate_limited(key: str, limit: int, window_seconds: int) -> bool:

@@ -19,9 +19,15 @@ urlpatterns = [
     path("search/", include("search.urls", namespace="search")),
     path("faq/", include(("faq.urls", "faq"), namespace="faq")),
     path("contact/", include("contact.urls")),
+    # path("jalali_date/", include("jalali_date.urls")),
     ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
+
+handler404 = "home.views.page404"
+handler500 = "home.views.page500"
+handler403 = "home.views.page403"
+handler400 = "home.views.page400"

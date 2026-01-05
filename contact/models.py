@@ -1,5 +1,4 @@
 from django.db import models
-from ckeditor.fields import RichTextField
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFit, Adjust, Transpose, ResizeToFill
 from django.utils.translation import gettext_lazy as _

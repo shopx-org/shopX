@@ -1,6 +1,8 @@
 # promos/views.py
 from __future__ import annotations
-
+from django.shortcuts import get_object_or_404
+from promos.models import Campaign
+from products.views import ProductListView
 import json
 from decimal import Decimal, InvalidOperation
 from typing import Any, Dict, List
@@ -182,3 +184,67 @@ def quote_pricing(request: HttpRequest) -> JsonResponse:
         "channel": channel,
     }
     return JsonResponse({"ok": True, "result": data})
+
+
+def apply_campaign_scope(qs, campaign: Campaign):
+    """
+    دامنه محصولات را بر اساس ruleهای کمپین محدود می‌کند.
+    اولویت: variant > product > brand > category
+    """
+    rules = list(campaign.rules.all())
+
+    variant_ids = set()
+    product_ids = set()
+    brand_ids = set()
+    category_ids = set()
+
+    for r in rules:
+        p = r.payload or {}
+        if r.kind == "variant_in":
+            variant_ids.update(p.get("variant_ids", []))
+        elif r.kind == "product_in":
+            product_ids.update(p.get("product_ids", []))
+        elif r.kind == "brand_in":
+            brand_ids.update(p.get("brand_ids", []))
+        elif r.kind == "category_in":
+            category_ids.update(p.get("category_ids", []))
+
+    if variant_ids:
+        return qs.filter(variants__id__in=variant_ids).distinct()
+    if product_ids:
+        return qs.filter(id__in=product_ids)
+    if brand_ids:
+        return qs.filter(brand_id__in=brand_ids)
+    if category_ids:
+        return qs.filter(category_id__in=category_ids)
+
+    return qs
+
+
+class CampaignLandingView(ProductListView):
+    """
+    لندینگ کمپین با همان UI لیست کالاها.
+    فقط base_queryset را محدود می‌کند.
+    URL مثال: /c/123/
+    """
+    def get_campaign(self):
+        return get_object_or_404(Campaign, pk=self.kwargs["pk"], is_active=True)
+
+    def base_queryset(self):
+        camp = self.get_campaign()
+        now = timezone.now()
+
+        # اگر می‌خوای فقط وقتی کمپین در حال اجراست دیده بشه:
+        # اگر پیش‌جشنواره هم می‌خوای، می‌تونی این شرط رو منعطف‌تر کنی
+        if not camp.is_running(now):
+            return super().base_queryset().none()
+
+        qs = super().base_queryset()
+        return apply_campaign_scope(qs, camp)
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        camp = self.get_campaign()
+        ctx["campaign"] = camp
+        ctx["page_title"] = camp.name
+        return ctx

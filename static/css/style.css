@@ -30535,89 +30535,6 @@ a .btn-product .btn-compare span :hover{
     }
 /* End style page 404 */
 
-/* ======================
-   Video Hero Banner
-====================== */
-
-.home-hero {
-    position: relative;
-    width: 100%;
-    height: 100vh;           /* فول اسکرین واقعی */
-    min-height: 420px;
-    overflow: hidden;
-}
-
-/* fallback image */
-.hero-image {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    z-index: 0;
-}
-
-/* video */
-.hero-video {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    z-index: 1;
-}
-
-/* overlay برای خوانایی متن */
-.home-hero::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-        rgba(0, 0, 0, 0.45),
-        rgba(0, 0, 0, 0.45)
-    );
-    z-index: 2;
-}
-
-/* content */
-.hero-content {
-    position: relative;
-    z-index: 3;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    padding: 1rem;
-}
-
-.hero-content h4 {
-    color: #fff;
-    font-size: 1.1rem;
-    opacity: 0.9;
-    margin-bottom: .5rem;
-}
-
-.hero-content h3 {
-    color: #fff;
-    font-size: 3rem;
-    font-weight: 700;
-    margin: 0;
-}
-
-/* mobile */
-@media (max-width: 768px) {
-    .home-hero {
-        height: 70vh;
-    }
-
-    .hero-content h3 {
-        font-size: 2rem;
-    }
-}
-
-
 /* =========================
    Popular Categories (cat-blocks)
    Extracted from demo-4.css
@@ -30745,7 +30662,7 @@ a .btn-product .btn-compare span :hover{
 * ===========================
    Home Categories Banner Grid
    (desktop fixed height + mobile natural)
-   =========================== */ */
+   =========================== */
 
 /* پایه: همه چیز داخل کارت 100% و عکس cover */
 .categories-grid .banner,
@@ -30880,6 +30797,7 @@ a .btn-product .btn-compare span :hover{
     .categories-grid .banner-title{
       font-size: 2rem;
       margin-bottom: .35rem;
+      margin-right: 2rem;
 
     }
 
@@ -30887,6 +30805,7 @@ a .btn-product .btn-compare span :hover{
       font-size: 1.2rem;
       margin: 0;
       opacity: .9;
+      margin-right: 2rem;
 
     }
 
@@ -30895,6 +30814,7 @@ a .btn-product .btn-compare span :hover{
     margin-top: .35rem !important;
     padding: .8rem 1.1rem;
     font-size: .85rem;
+    margin-right: 2rem;
   }
 
    .categories-grid .banner-content{
@@ -31032,4 +30952,1743 @@ a .btn-product .btn-compare span :hover{
 @media (max-width: 575.98px){
   .cat-block figure{ height: 95px; }
   .cat-block img{ max-height: 85px; }
+}
+}
+
+/* =========================
+   Home product tabs carousel
+   Scope: فقط همین سکشن
+   ========================= */
+
+.home-product-tabs {
+  --card-radius: 16px;
+  --card-border: rgba(0,0,0,.06);
+  --card-shadow: 0 10px 28px rgba(0,0,0,.06);
+  --card-shadow-hover: 0 14px 34px rgba(0,0,0,.10);
+}
+
+/* فاصله و ظاهر تب‌ها */
+.home-product-tabs .nav.nav-pills .nav-link {
+  border-radius: 999px;
+  padding: .55rem 1.1rem;
+  font-weight: 600;
+}
+.home-product-tabs .nav.nav-pills .nav-link.active {
+  box-shadow: 0 10px 20px rgba(0,0,0,.06);
+}
+
+/*!* خود آیتم داخل اسلایدر *!*/
+/*.home-product-tabs .owl-carousel .item {*/
+/*  height: 100%;*/
+/*  padding: 2px; !* برای اینکه سایه قطع نشه *!*/
+/*}*/
+
+/*!* کارت محصول داخل اسلایدر: هم‌قد و تمیز *!*/
+/*.home-product-tabs .owl-carousel .product.dk-product-card {*/
+/*  height: 100%;*/
+/*  display: flex;*/
+/*  flex-direction: column;*/
+/*  background: #fff;*/
+/*  border: 1px solid var(--card-border);*/
+/*  border-radius: var(--card-radius);*/
+/*  box-shadow: var(--card-shadow);*/
+/*  overflow: hidden; !* تصویر و لیبل‌ها بیرون نزنه *!*/
+/*  transition: transform .18s ease, box-shadow .18s ease;*/
+/*}*/
+
+/*.home-product-tabs .owl-carousel .product.dk-product-card:hover {*/
+/*  transform: translateY(-2px);*/
+/*  box-shadow: var(--card-shadow-hover);*/
+/*}*/
+
+/*!* تصویر: ثابت و شبیه لیست *!*/
+/*.home-product-tabs .owl-carousel .product-media {*/
+/*  margin: 0;*/
+/*  background: #fff;*/
+/*  display: flex;*/
+/*  align-items: center;*/
+/*  justify-content: center;*/
+/*  padding: 14px;*/
+/*  min-height: 210px;  !* ارتفاع یکدست *!*/
+/*  position: relative;*/
+/*}*/
+
+/*.home-product-tabs .owl-carousel .product-image {*/
+/*  width: 100%;*/
+/*  height: 190px;*/
+/*  object-fit: contain;*/
+/*}*/
+
+/*!* بدنه کارت *!*/
+/*.home-product-tabs .owl-carousel .product-body {*/
+/*  flex: 1;*/
+/*  display: flex;*/
+/*  flex-direction: column;*/
+/*  padding: 12px 14px 14px;*/
+/*}*/
+
+/*!* تیتر محصول: ۲ خط ثابت *!*/
+/*.home-product-tabs .owl-carousel .product-title {*/
+/*  margin: 8px 0 10px;*/
+/*  font-size: .95rem;*/
+/*  line-height: 1.7;*/
+/*  height: calc(1.7em * 2); !* 2 lines *!*/
+/*  overflow: hidden;*/
+/*}*/
+
+/*!* قیمت‌ها *!*/
+/*.home-product-tabs .owl-carousel .product-price {*/
+/*  margin-top: auto; !* قیمت همیشه ته کارت *!*/
+/*  display: flex;*/
+/*  gap: 10px;*/
+/*  align-items: baseline;*/
+/*}*/
+
+/*.home-product-tabs .owl-carousel .product-price .new-price {*/
+/*  font-weight: 800;*/
+/*  font-size: 1rem;*/
+/*}*/
+/*.home-product-tabs .owl-carousel .product-price .old-price {*/
+/*  opacity: .6;*/
+/*  text-decoration: line-through;*/
+/*  font-size: .9rem;*/
+/*}*/
+
+/*!* لیبل‌ها (جدید/تخفیف/ناموجود) اگر تو partial هست *!*/
+/*.home-product-tabs .owl-carousel .product-label {*/
+/*  border-radius: 999px;*/
+/*  padding: 6px 10px;*/
+/*  font-size: .78rem;*/
+/*  font-weight: 700;*/
+/*}*/
+
+/*!* dots رنگ‌ها: کمی کوچیک‌تر تو اسلایدر *!*/
+/*.home-product-tabs .owl-carousel .product-nav-dots a {*/
+/*  width: 10px;*/
+/*  height: 10px;*/
+/*}*/
+
+/*!* جلوگیری از بریدن سایه داخل stage *!*/
+/*.home-product-tabs .owl-carousel .owl-stage-outer {*/
+/*  padding: 18px 0; !* فضا برای سایه بالا/پایین *!*/
+/*}*/
+
+/*!* کنترل دکمه‌های ناوبری (اگر در 1600 فعال می‌کنی) *!*/
+/*.home-product-tabs .owl-carousel .owl-nav button {*/
+/*  width: 40px;*/
+/*  height: 40px;*/
+/*  border-radius: 999px;*/
+/*  background: #fff;*/
+/*  box-shadow: 0 10px 24px rgba(0,0,0,.08);*/
+/*}*/
+/*!* کوتاه‌تر شدن کارت‌ها در سکشن هوم *!*/
+/*.home-product-tabs .owl-carousel .product-media{*/
+/*  min-height: 150px;*/
+/*  padding: 10px;*/
+/*}*/
+
+/*.home-product-tabs .owl-carousel .product-image{*/
+/*  height: 150px;*/
+/*}*/
+
+/*.home-product-tabs .owl-carousel .product-body{*/
+/*  padding: 10px 12px 12px;*/
+/*}*/
+
+/*!* تیتر 1 خطه (کوتاه‌تر) *!*/
+/*.home-product-tabs .owl-carousel .product-title{*/
+/*  margin: 6px 0 8px;*/
+/*  line-height: 1.7;*/
+/*  height: calc(1.7em * 1);     !* 1 line *!*/
+/*  overflow: hidden;*/
+/*  display: -webkit-box;*/
+/*  -webkit-line-clamp: 1;*/
+/*  -webkit-box-orient: vertical;*/
+/*}*/
+
+/*!* ردیف رنگ‌ها و لیبل رنگ رو جمع‌وجورتر کن *!*/
+/*.home-product-tabs .owl-carousel .details-filter-row{*/
+/*  margin: 4px 0 6px;*/
+/*}*/
+/*.home-product-tabs .owl-carousel .details-filter-row label{*/
+/*  font-size: .85rem;*/
+/*}*/
+/*.home-product-tabs .owl-carousel .product-nav-dots a{*/
+/*  width: 9px;*/
+/*  height: 9px;*/
+/*}*/
+
+/*!* کمی پهن‌تر دیده شدن کارت: فاصله‌ی بین آیتم‌ها کمتر *!*/
+/*.home-product-tabs .owl-carousel .owl-stage-outer{*/
+/*  padding: 14px 0;*/
+/*}*/
+/*.home-product-tabs .owl-carousel{*/
+/*  margin: 0 -6px; !* فضا بده تا کارت ها کمی پهن‌تر حس بشن *!*/
+/*}*/
+/*.home-product-tabs .owl-carousel .item{*/
+/*  padding: 0 6px;*/
+/*}*/
+
+
+/* =========================
+   Popular Categories (cat-blocks)
+   Extracted from demo-4.css
+   ========================= */
+
+.cat-blocks-container {
+  padding-top: .5rem;
+}
+
+/* ستون‌ها خودشون کش بیان تا کارت‌ها هم‌قد بشن */
+.cat-blocks-container [class*="col-"] {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+}
+
+/* خود کارت */
+.cat-block {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 3rem;
+  text-decoration: none;
+}
+
+/* تصویر */
+.cat-block figure {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+  flex: 1;
+  margin: 0;
+}
+
+.cat-block figure span {
+  position: relative;
+}
+
+/* سایه‌ی فیک زیر تصویر */
+.cat-block figure span:after {
+  content: '';
+  display: block;
+  position: absolute;
+  bottom: -.2rem;
+  left: 45%;
+  width: 105%;
+  margin-left: -45%;
+  height: .3rem;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.3);
+  transition: all 0.35s ease;
+  filter: blur(3px);
+  opacity: .5;
+}
+
+.cat-block img {
+  margin-left: auto;
+  margin-right: auto;
+  transition: transform 0.35s ease;
+  display: block;
+}
+
+.cat-block:hover img {
+  transform: translateY(-14px);
+}
+
+.cat-block:hover figure span:after {
+  opacity: 1;
+}
+
+/* عنوان */
+.cat-block-title {
+  color: #333333;
+  font-weight: 500;
+  font-size: 1.6rem;
+  margin-top: 2rem;
+  margin-bottom: 0;
+}
+
+/* پیشنهاد برای موبایل (اختیاری): فاصله کمتر */
+@media (max-width: 575.98px) {
+  .cat-block { margin-bottom: 2rem; }
+  .cat-block-title { margin-top: 1.2rem; font-size: 1.2rem; }
+}
+
+/* پیشنهاد برای دستگاه‌های لمسی (اختیاری): hover خاموش */
+@media (hover: none) {
+  .cat-block:hover img { transform: none; }
+  .cat-block:hover figure span:after { opacity: .5; }
+}
+
+
+/* یک خط شدن سایه‌ها: ناحیه تصویر را ثابت کن */
+.cat-block figure{
+  height: 120px;          /* می‌تونی 110/130 تست کنی */
+  width: 100%;
+  justify-content: center;
+}
+
+.cat-block figure span{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+/* تصویر داخل قاب، هم‌قد و هم‌خط */
+.cat-block img{
+  max-height: 110px;      /* کمی کمتر از height figure */
+  width: auto;
+}
+
+/* سایه دقیقاً روی یک خط ثابت */
+.cat-block figure span:after{
+  bottom: 6px;            /* به جای مقدار منفی */
+}
+@media (max-width: 575.98px){
+  .cat-block figure{ height: 95px; }
+  .cat-block img{ max-height: 85px; }
+}
+/* =====================================
+   FIX CARD & IMAGE SIZE – FINAL SOLUTION
+   ===================================== */
+
+/*!* owl item باید کش بیاد *!*/
+/*.owl-carousel .item {*/
+/*    height: 100%;*/
+/*    display: flex;*/
+/*}*/
+
+/*!* کارت *!*/
+/*.dk-product-card {*/
+/*    display: flex;*/
+/*    flex-direction: column;*/
+/*    height: 100%;*/
+/*    width: 100%;*/
+/*    background: #fff;*/
+/*    border-radius: 16px;*/
+/*    border: 1px solid rgba(0,0,0,.06);*/
+/*    overflow: hidden;*/
+/*}*/
+
+/* ================= IMAGE ================= */
+
+/*!* باکس تصویر با نسبت ثابت *!*/
+/*.dk-product-card .product-media {*/
+/*    position: relative;*/
+/*    width: 100%;*/
+/*    aspect-ratio: 1 / 1;   !* 🔒 قفل نهایی *!*/
+/*    background: #f4f4f4;*/
+/*    overflow: hidden;*/
+/*}*/
+
+/*!* لینک تمام فضا *!*/
+/*.dk-product-card .product-media a {*/
+/*    position: absolute;*/
+/*    inset: 0;*/
+/*    display: block;*/
+/*}*/
+
+/*!* خود تصویر *!*/
+/*.dk-product-card .product-media img {*/
+/*    width: 100%;*/
+/*    height: 100%;*/
+/*    object-fit: cover;     !* ⬅️ مهم‌ترین خط *!*/
+/*    object-position: center;*/
+/*    display: block;*/
+/*}*/
+
+/* ================= BODY ================= */
+
+.dk-product-card .product-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 12px 14px 14px;
+}
+
+/* بالای کارت */
+.product-top {
+    min-height: 72px;
+}
+
+/* عنوان دو خط */
+.product-title {
+    font-size: 2rem;
+    line-height: 1.5;
+    max-height: 3em;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+/* رنگ‌ها – حتی اگر نباشه فضا حفظ می‌شه */
+.product-middle {
+    min-height: 32px;
+    margin-top: 6px;
+}
+
+/* پایین کارت همیشه ته */
+.product-bottom {
+    margin-top: auto;
+}
+
+/* قیمت */
+.product-price {
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+}
+
+/* ================= LABELS ================= */
+
+.product-label {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 2;
+    padding: 4px 10px;
+    font-size: 11px;
+    border-radius: 12px;
+    color: #fff;
+}
+
+.label-sale { background: #ef4444; }
+.label-new  { background: #22c55e; }
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 768px) {
+    .product-title { font-size: 13px; }
+}
+
+
+/* بنرهای برند صفحه اول */
+.dk-home-brand-banner {
+  height: 210px;              /* مثل دمو، یکدست */
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+/* لینکِ عکس تمام قد */
+.dk-home-brand-banner .dk-banner-link {
+  display: block;
+  height: 100%;
+}
+
+/* عکس داخل بنر: مثل عکس محصول، نه کشیده و نه زشت */
+.dk-home-brand-banner .dk-banner-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;        /* مهم: شبیه دمو */
+  object-position: left center;
+  padding: 18px 18px 18px 6px; /* فضای متن سمت راست */
+  background: transparent;
+}
+
+/* اگر لوگو بود، بهتره کوچیک‌تر و تمیزتر نمایش داده شه */
+.dk-home-brand-banner .dk-banner-img--logo {
+  object-fit: contain;
+  max-width: 75%;
+  margin-left: 0;
+}
+
+/* متن‌ها کمی منظم‌تر */
+.dk-home-brand-banner .banner-content {
+  right: 24px;
+  left: auto;
+  max-width: 55%;
+}
+
+@media (max-width: 991px) {
+  .dk-home-brand-banner { height: 190px; }
+  .dk-home-brand-banner .banner-content { max-width: 60%; }
+}
+
+/* پس‌زمینه رنگی برای 3 بنر */
+.dk-home-brand-banner { background: #f7f7f7; }
+.home-brand-col:nth-child(1) .dk-home-brand-banner { background: #fbf5e9; }
+.home-brand-col:nth-child(2) .dk-home-brand-banner { background: #eef3ff; }
+.home-brand-col:nth-child(3) .dk-home-brand-banner { background: #fdeff2; }
+
+
+
+/*=========================================================*/
+                    /* بتر تایم داون */
+/*=========================================================*/
+
+
+/* پایه‌ی بنر رادیوس دار */
+.banner.banner-rad .bg-image{
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border-radius: 10px;
+  overflow: hidden;
+  min-height: 350px;
+  position: relative;
+}
+
+/* جایگیری محتوا مثل demo-26 (transform خاموش) */
+.banner-rad .banner-content{
+  transform: none; /* demo-26 */
+}
+
+/* متن بزرگِ وسط (demo-26 اندازه بزرگ داده) */
+.banner-rad .banner-text{
+  margin-bottom: 1.9rem;
+  margin-top: 1.5rem;
+  font-size: 4rem; /* demo-26 */
+  color: #98a5c3;
+
+}
+
+/* این هم از demo-26: بنرها محتوا راست‌چین/RTL */
+.banner .banner-content{
+  right: 0; /* demo-26 */
+}
+.banner.banner-rad .bg-image::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background: rgba(0,0,0,.25); /* می‌تونی کمتر/بیشتر کنی */
+}
+.banner.banner-rad .banner-content{
+  position: relative;
+  z-index: 1;
+}
+
+
+
+
+/* ===== Demo 26: Product Group (3 ستون لیستی) ===== */
+
+.product-group {
+  margin-top: 4.5rem;
+}
+
+.product-group .heading.heading-flex {
+  margin-bottom: 2.3rem;
+}
+
+.product-group .products {
+  padding: 1.6rem 0 .2rem 2rem;
+  height: calc(100% - 5rem);
+  border: .1rem solid #eee;
+}
+
+.product-group .product {
+  border: none;
+}
+
+.product-group .product-label {
+  top: 1.5rem;
+  right: 3rem;
+}
+
+.product-group .product-media {
+  min-width: 160px;
+}
+
+.product-group .product-body {
+  padding: 1.1rem 0 2.8rem 0;
+}
+
+.product-group .product-cat,
+.product-group .product-title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.product-group .product-cat {
+  margin-bottom: 1px;
+  -webkit-line-clamp: 1;
+}
+
+.product-group .product-title {
+  -webkit-line-clamp: 2;
+}
+
+.product-group .ratings,
+.product-group .ratings-val {
+  letter-spacing: .15em;
+}
+
+/* ریسپانسیو (دمو 26) */
+@media screen and (max-width: 991px) {
+  .product-group .heading.heading-flex {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 1199px) and (min-width: 992px) {
+  .product-group .heading {
+    flex-direction: column;
+  }
+  .product-group .heading .heading-right {
+    margin-right: auto;
+  }
+  .products .product-media {
+    min-width: 130px;
+  }
+}
+
+@media screen and (max-width: 479px) {
+  .product-group .title {
+    font-size: 1.7rem;
+  }
+  .title-link {
+    font-size: 1rem;
+  }
+}
+.title-link {
+  color: #999;
+}
+.title-link:hover {
+  color: #FA523C;
+}
+
+/*.product-media > a img {*/
+/*  padding: 2rem;*/
+/*}*/
+
+/* ===== Festival Countdown ===== */
+.banner-countdown{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-top: 18px;
+  direction: rtl;
+}
+
+.banner-countdown .cd-box{
+  width: 68px;
+  height: 68px;
+  border-radius: 8px;
+  background: #FA523C;
+  backdrop-filter: blur(6px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255,255,255,.25);
+}
+
+.banner-countdown .cd-num{
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1;
+  color: #fff;
+}
+
+.banner-countdown .cd-label{
+  font-size: 12px;
+  margin-top: 6px;
+  color: rgba(255,255,255,.85);
+}
+
+/* ✅ بنر: وسط‌چین کامل (افقی + عمودی) */
+.banner.banner-rad .bg-image{
+  /* همون background-image رو نگه می‌داری */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  border-radius: 16px;
+  overflow: hidden;
+  min-height: 420px;
+  position: relative;
+
+  display: flex;
+  align-items: center;      /* وسط عمودی */
+  justify-content: center;  /* وسط افقی */
+  text-align: center;
+}
+
+/* اگر overlay داری اینا رو نگه دار */
+.banner.banner-rad .bg-image::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background: rgba(0,0,0,.25);
+}
+
+.banner.banner-rad .banner-content{
+  position: relative;
+  z-index: 1;
+
+  max-width: 720px;
+  width: 100%;
+  margin: 0 auto;
+  text-align: center;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;      /* وسط افقی آیتم‌ها */
+  justify-content: center;  /* وسط عمودی داخل content */
+  gap: 10px;
+}
+
+/* ✅ ترتیب نمایش باکس‌ها برعکس (روز -> ... -> ثانیه) */
+#festival-countdown{
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: center;
+  gap: 10px;
+}
+
+
+/* index brand */
+.brand img{
+  max-height: 40px;
+  width: auto;
+  margin: 0 auto;
+  opacity: .8;
+}
+.brand:hover img{ opacity: 1; }
+.brand-text{ font-size: 12px; color: #999; }
+
+
+/* video */
+/* سکشن هرو */
+.home-hero{
+  position: relative;
+  overflow: hidden;
+
+  /* تمام عرض مثل عکس */
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+
+  /* ارتفاع مثل بنر اسکرین‌شات (کم و کشیده) */
+  height: 520px;
+}
+
+/* ویدیو تمام کادر */
+.hero-video{
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+}
+
+/* اوورلی برای خوانایی متن */
+.home-hero::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background: rgba(0,0,0,.35);
+  z-index:2;
+}
+
+/* متن‌ها روی ویدیو، وسط چین */
+.hero-content{
+  position: relative;
+  z-index: 3;
+  height: 100%;
+
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+
+  text-align:center;
+  padding: 1rem;
+}
+
+/* دقیقا شبیه عکس */
+.hero-content h4{
+  color:#fff;
+  font-size: 2rem;
+  opacity:.9;
+  margin: 0 0 .6rem 0;
+}
+
+.hero-content h3{
+  color:#fff;
+  font-size: 3rem;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.2;
+}
+
+/* موبایل */
+@media (max-width: 768px){
+  .home-hero{ height: 320px; }
+  .hero-content h3{ font-size: 2rem; }
+}
+
+.dk-meta{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.dk-mini-rating{
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.dk-reviews{
+  margin-right: auto;  /* RTL → می‌رود سمت چپ */
+  white-space: nowrap;
+  font-size: 1.4rem;
+  color: #43474e;
+}
+
+
+/*.product-group .row{*/
+/*  align-items: stretch;*/
+/*  row-gap: 16px;*/
+/*}*/
+
+/*.product-group .row > [class*="col-"]{*/
+/*  display: flex;*/
+/*}*/
+
+/*.dk-mini-products{*/
+/*  width: 100%;*/
+/*  height: 100%;*/
+/*}*/
+/*.dk-mini-products{*/
+/*  border:1px solid #eee;*/
+/*  border-radius:10px;*/
+/*  padding:6px 12px;*/
+/*}*/
+
+/*.dk-mini-product{ padding:10px 0; }*/
+/*.dk-mini-sep{ margin:0; border-top:1px solid #f2f2f2; }*/
+
+/*.dk-mini-media{*/
+/*  width:110px; flex:0 0 110px;*/
+/*  padding:6px;*/
+/*}*/
+
+/*.dk-mini-img{*/
+/*  width:100px; height:100px;*/
+/*  object-fit:contain;*/
+/*  display:block;*/
+/*}*/
+
+/*.dk-mini-title a{*/
+/*  display:-webkit-box;*/
+/*  -webkit-line-clamp:2;*/
+/*  -webkit-box-orient:vertical;*/
+/*  overflow:hidden;*/
+/*  line-height:1.6;*/
+/*}*/
+
+/*.dk-mini-price .old-price{*/
+/*  text-decoration:line-through;*/
+/*  color:#999;*/
+/*  font-size:.85em;*/
+/*  margin-right:8px;*/
+/*}*/
+
+/*!* فاصله ستون‌ها کمتر و مرتب‌تر *!*/
+/*.product-group .row{ row-gap:16px; }*/
+
+/* --- mini list layout polish --- */
+/*.dk-mini-products{*/
+/*  border: 1px solid #eee;*/
+/*  border-radius: 1px;*/
+/*  padding: 8px 12px;*/
+/*  height: 100%;*/
+/*}*/
+
+/*.dk-mini-product{*/
+/*  padding: 12px 0;*/
+/*  align-items: center;         !* همه چیز هم‌راستا *!*/
+/*  gap: 10px;*/
+/*  width: 100%;            !* فاصله تصویر و متن *!*/
+/*}*/
+
+/*.dk-mini-media{*/
+/*  width: 110px;*/
+/*  flex: 0 0 110px;*/
+/*  padding: 6px;*/
+/*}*/
+
+/*.dk-mini-img{*/
+/*  width: 100px;*/
+/*  height: 100px;*/
+/*  object-fit: contain;*/
+/*  display: block;*/
+/*}*/
+
+/*!* title: مشکی + بولد *!*/
+/*.dk-mini-title a{*/
+/*  color: #111 !important;*/
+/*  font-weight: 700 !important;*/
+/*  font-size: 16px;*/
+/*  line-height: 1.7;*/
+/*  display: -webkit-box;*/
+/*  -webkit-line-clamp: 2;*/
+/*  -webkit-box-orient: vertical;*/
+/*  overflow: hidden;*/
+/*  text-decoration: none;*/
+/*}*/
+
+/*.dk-mini-title a:hover{*/
+/*  color: #000 !important;*/
+/*  text-decoration: none;*/
+/*}*/
+
+/*!* category smaller + muted *!*/
+/*.dk-mini-cat a{*/
+/*  color: #777;*/
+/*  font-size: 12px;*/
+/*  text-decoration: none;*/
+/*}*/
+
+/*!* price spacing *!*/
+/*.dk-mini-price{*/
+/*  display: flex;*/
+/*  align-items: baseline;*/
+/*  gap: 8px;*/
+/*  margin-top: 4px;*/
+/*}*/
+
+/*.dk-mini-price .new-price{*/
+/*  font-weight: 700;*/
+/*}*/
+
+/*.dk-mini-price .old-price{*/
+/*  text-decoration: line-through;*/
+/*  color: #999;*/
+/*  font-size: 12px;*/
+/*}*/
+
+/*!* rating tidy *!*/
+/*.dk-mini-rating{*/
+/*  margin-top: 4px;*/
+/*  color: #666;*/
+/*  font-size: 12px;*/
+/*}*/
+
+/*.dk-mini-sep{*/
+/*  margin: 0;*/
+/*  border-top: 1px solid #f2f2f2;*/
+/*}*/
+
+/*!* ستون‌ها هم قد و مرتب *!*/
+/*.product-group .row{*/
+/*  row-gap: 16px;*/
+/*  align-items: stretch;*/
+/*}*/
+/*.product-group .row > [class*="col-"]{*/
+/*  display: flex;*/
+/*}*/
+
+/*!* هدر بالای ستون مرتب *!*/
+/*.product-group .heading{*/
+/*  width: 100%;*/
+/*  display: flex;*/
+/*  align-items: center;*/
+/*  justify-content: space-between;*/
+/*  margin-bottom: 8px;*/
+/*}*/
+/*.product-group .heading .title{*/
+/*  font-size: 18px;*/
+/*}*/
+
+/*!* ستون‌ها: کارت و تیتر روی هم (نه کنار هم) *!*/
+/*.product-group .row{*/
+/*  row-gap: 16px;*/
+/*  align-items: stretch;*/
+/*  justify-content: space-between; !* به جای center *!*/
+/*}*/
+
+/*.product-group .row > [class*="col-"]{*/
+/*  display: flex;*/
+/*  flex-direction: column;   !* <<< این مهمه *!*/
+/*  align-items: stretch;*/
+/*}*/
+
+/*.dk-mini-rating{*/
+/*  display: flex;*/
+/*  align-items: center;*/
+/*  gap: 6px;*/
+/*  font-size: 12px;*/
+/*  color: #fdf554;*/
+/*}*/
+
+/*.dk-mini-star{*/
+/*  color:#f5c518;*/
+/*  font-size: 13px;*/
+/*  line-height: 1;*/
+/*}*/
+
+.dk-mini-heading{ justify-content: space-between; }
+
+.dk-mini-products{
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 6px 12px;
+  height: 100%;
+}
+
+.dk-mini-product{
+  padding: 12px 0;
+  align-items: center;
+  gap: 10px;
+}
+
+.dk-mini-media{ width: 110px; flex: 0 0 110px; padding: 6px; }
+.dk-mini-img{ width: 100px; height: 100px; object-fit: contain; display: block; }
+
+.dk-mini-top{
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.dk-mini-info{ flex: 1 1 auto; min-width: 0; }
+
+.dk-mini-title a{
+  color: #111;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.7;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-decoration: none;
+}
+
+.dk-mini-cat a{ color:#777; font-size:13px; text-decoration:none; }
+
+.dk-mini-price-wrap{ flex: 0 0 auto; text-align: left; direction: rtl; }
+.dk-mini-price{
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  white-space: nowrap;
+}
+.dk-mini-price .new-price{ font-weight: 800; color:#111; font-size:18px}
+.dk-mini-price .old-price{ text-decoration: line-through; color:#2a3342; font-size:13px; }
+
+.dk-mini-rating{
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  font-size: 12px;
+  color: #666;
+}
+.dk-mini-star{
+  color:#f5c518;
+  font-size:13px;
+  line-height:1;
+  display:inline-block;
+  transition: color .18s ease, transform .18s ease, filter .18s ease;
+  transform-origin: center;
+  filter: drop-shadow(0 0 0 rgba(245, 197, 24, 0));
+  cursor: pointer;
+}
+
+.dk-mini-star:hover{
+  color:#FFD41D;
+  transform: translateY(-1px) scale(1.12);
+  filter: drop-shadow(0 3px 10px rgba(245, 197, 24, .35));
+}
+
+/* برای کیبورد/دسترسی‌پذیری (اگه ستاره لینک/دکمه باشه) */
+.dk-mini-star:focus-visible{
+  outline: none;
+  transform: translateY(-1px) scale(1.12);
+  filter: drop-shadow(0 3px 10px rgba(245, 197, 24, .45));
+}
+
+.dk-mini-sep{ margin:0; border-top:1px solid #f2f2f2; }
+
+
+.dk-mini-product{
+  position: relative;
+  border-radius: 10px;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+  will-change: transform;
+}
+
+@media (hover: hover) {
+  .dk-mini-product:hover{
+    transform: translateY(-2px);                 /* پرش خیلی نرم */
+    box-shadow: 0 6px 18px rgba(0,0,0,.06);      /* سایه خیلی ملایم */
+  }
+}
+
+/* برای اینکه وقتی هاور میشه، hr به هم نریزه */
+.dk-mini-sep{
+  transition: opacity 180ms ease;
+}
+
+@media (hover: hover) {
+  .dk-mini-product:hover + .dk-mini-sep{
+    opacity: .55;
+  }
+}
+
+/* برای موبایل هاور رو خاموش کن که عجیب نشه */
+@media (hover: none) {
+    .dk-mini-product {
+        transition: none;
+    }
+}
+
+
+.dk-home-brand-banner .banner-content{
+  padding-right: 24px;  /* فاصله از راست */
+  padding-left: 18px;   /* یه کم از چپ هم */
+}
+[dir="rtl"] .dk-home-brand-banner .banner-content{
+  padding-right: 24px;
+  padding-left: 18px;
+}
+
+.dk-home-brand-banner{
+  position: relative;
+}
+.dk-home-brand-banner .banner-link{
+  position: absolute;
+  right: 24px;     /* همون padding-right */
+  bottom: 18px;
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.dk-home-brand-banner .banner-content{
+  padding-bottom: 46px;  /* جا برای لینک */
+}
+
+.dk-home-brand-banner .banner-title{
+  margin-bottom: 8px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;     /* حداکثر 2 خط */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.dk-home-brand-banner .banner-subtitle{
+  margin-bottom: 6px;
+}
+@media (max-width: 991.98px){
+  .dk-mini-block{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 18px;
+  }
+  .product-group .row > [class*="col-"]:first-child .dk-mini-block{
+    margin-top: 0;
+  }
+
+  .dk-mini-heading{
+    margin: 0 !important;
+    padding: 0 4px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .dk-mini-products{
+    margin-top: 0 !important; /* فاصله با gap کنترل میشه */
+    position: relative;
+    z-index: 1;
+  }
+}
+.dk-product-card .product-media a{
+  padding: 0 !important;
+}
+
+.dk-product-card img{
+  border-radius: 0 !important; /* اگر گردیِ داخلی قاب ساخته */
+}
+
+/* =========================
+   Home carousel: equal card sizes
+   ========================= */
+
+/* owl: stage رو flex کن تا آیتم‌ها هم‌قد بشن */
+.tab-content-carousel .owl-carousel .owl-stage {
+  display: flex;
+}
+
+/* هر owl-item خودش flex بشه و ارتفاع بگیره */
+.tab-content-carousel .owl-carousel .owl-item {
+  display: flex;
+  height: auto;
+}
+
+/* wrapper داخلی شما */
+.tab-content-carousel .owl-carousel .item {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+/* کارت 100% آیتم را پر کند */
+.tab-content-carousel .dk-product-card {
+  width: 100%;
+  height: 100%;
+  display: flex;
+}
+
+/* ============== IMAGE FIX ============== */
+/* باکس تصویر یک‌دست و تمیز */
+.tab-content-carousel .dk-product-card .product-media{
+  width: 100%;
+  aspect-ratio: 1 / 1;   /* مربع یکدست */
+  background: #f5f6f8;   /* اگر نمی‌خوای طوسی باشه اینو transparent کن */
+  border-radius: 14px;
+  overflow: hidden;
+  margin: 10px;          /* مثل نمونه خارجی فاصله از لبه کارت */
+  position: relative;
+}
+
+/* لینک تمام فضا */
+.tab-content-carousel .dk-product-card .product-media > a{
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+/* خود عکس: مهم‌ترین قسمت برای اینکه کوچیک نشه */
+.tab-content-carousel .dk-product-card .product-media img{
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;     /* جلوی کوچیک شدن */
+  max-height: none !important;
+  /*object-fit: cover;               !* پر کن *!*/
+  /*object-position: center;*/
+  display: block;
+}
+
+/* بعضی استایل‌ها باعث میشن عکس وسط بماند و کوچک شود */
+.tab-content-carousel .owl-carousel .owl-item img{
+  transform: none;
+}
+
+
+/* 1) figure پیش‌فرض margin دارد؛ حذفش */
+.dk-product-card .product-media{
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important; /* قاب طوسی هم حذف */
+  overflow: hidden;
+  position: relative;
+
+  /* همون نسبت ثابت که داری */
+  aspect-ratio: 1 / 1;
+}
+
+/* 2) لینک تمام فضا */
+.dk-product-card .product-media > a{
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+/* 3) خود عکس دقیقاً فیتِ باکس */
+.dk-product-card .product-media img{
+  width: 100% !important;
+  height: 100% !important;
+
+  /*object-fit: cover !important;      !* کلید اصلی *!*/
+  /*object-position: center;*/
+
+  max-width: none !important;        /* جلوی کوچیک شدن */
+  max-height: none !important;
+  display: block;
+}
+/* =========================
+   FORCE FIT image in product card (carousel + normal)
+   ========================= */
+
+.tab-content-carousel .dk-product-card .product-media,
+.dk-product-card .product-media{
+  margin: 0 !important;         /* ← قاب از اینجا میومد */
+  padding: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 1 / 1;
+  border-radius: 14px;          /* اگر میخوای گوشه‌ها گرد باشه */
+}
+
+/* لینک نباید padding داشته باشه */
+.tab-content-carousel .dk-product-card .product-media > a,
+.dk-product-card .product-media > a{
+  position: absolute;
+  inset: 0;
+  display: block;
+  padding: 0 !important;        /* ← مهم */
+  margin: 0 !important;
+}
+
+/* خود عکس رو مطلق کن که هیچ چیز روش اثر نذاره */
+.tab-content-carousel .dk-product-card .product-media img,
+.dk-product-card .product-media img{
+  position: absolute !important;
+  inset: 0 !important;
+
+  width: 100% !important;
+  height: 100% !important;
+
+  /*object-fit: cover !important;*/
+  /*object-position: center !important;*/
+
+  max-width: none !important;
+  max-height: none !important;
+
+  display: block !important;
+}
+.dk-product-card .product-media{
+  padding: 10px;              /* فاصله داخل قاب */
+  background: #f5f6f8;
+  border-radius: 14px;
+}
+
+.dk-product-card .product-media img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 10px;        /* گوشه‌ی خود عکس */
+}
+
+
+.dk-product-card .dk-chip--oos{
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 3;
+  padding: 4px 10px;
+  font-size: 11px;
+  line-height: 1;
+  border-radius: 999px;
+  background: rgba(255,255,255,.88);
+  border: 1px solid rgba(0,0,0,.10);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.dk-product-card.is-oos .product-media img{
+  filter: grayscale(.25) brightness(.92);
+}
+/* =========================
+  END  Product carousel: equal card sizes
+   ========================= */
+
+/* =========================
+   Error Pages (400/403/404/500/504)
+   ========================= */
+
+.error-content {
+  min-height: calc(80vh - 90px); /* اگر هدر/فوتر داری، این عدد رو تنظیم کن */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 0;
+}
+
+.error-content .container {
+  max-width: 720px;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* ===== Error Page: image بدون کادر/کارت ===== */
+.error-image{
+  width: min(420px, 100%);
+  height: auto;
+  display: block;
+  margin: 0 auto 0.75rem;
+  border-radius: 0 !important;   /* کادر گرد حذف */
+  box-shadow: none !important;   /* سایه حذف */
+  background: transparent !important;
+}
+
+/* اگر تصویر داخل یک wrapper/کارت قرار گرفته (مثل .error-image-wrap یا figure) */
+.error-image-wrap,
+.error-media,
+.error-thumb,
+figure.error-image-wrap{
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 0 !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+}
+
+
+/* تیتر */
+.error-title {
+  margin: 0;
+  font-weight: 800;
+  line-height: 1.2;
+  font-size: clamp(26px, 4vw, 44px);
+  letter-spacing: -0.2px;
+}
+
+/* متن */
+.error-text {
+  margin: 0;
+  max-width: 55ch;
+  line-height: 1.9;
+  font-size: clamp(14px, 1.6vw, 18px);
+  opacity: 0.85;
+}
+
+/* دکمه */
+.btn-home{
+  background: #ff6a00;
+  color: #fff !important;
+  border: 1px solid rgba(0,0,0,0.08);
+  box-shadow: 0 10px 22px rgba(0,0,0,0.10);
+  border-radius: 14px;
+  padding: 0.85rem 1.25rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform 180ms ease, box-shadow 180ms ease, filter 180ms ease;
+}
+
+/* هاور */
+.btn-home:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 16px 28px rgba(0,0,0,0.14);
+  filter: brightness(0.95);
+}
+
+/* فوکوس برای دسترسی‌پذیری */
+.btn-home:focus {
+  outline: none;
+}
+
+.btn-home:focus-visible{
+  outline: 3px solid rgba(255,106,0,0.35);
+  outline-offset: 3px;
+}
+
+/* موبایل: فاصله‌ها کمتر، تصویر جمع‌وجورتر */
+@media (max-width: 576px) {
+  .error-content {
+    min-height: calc(100vh - 90px);
+    padding: 1.25rem 0;
+  }
+
+  .error-image {
+    border-radius: 14px;
+  }
+
+  .btn-home {
+    width: 100%;
+    max-width: 320px;
+  }
+}
+
+.dk-field-invalid input,
+.dk-field-invalid select,
+.dk-field-invalid textarea,
+.dk-field-invalid .form-control {
+  border-color: #dc3545;
+}
+
+.dk-field-invalid input:focus,
+.dk-field-invalid select:focus,
+.dk-field-invalid textarea:focus,
+.dk-field-invalid .form-control:focus {
+  box-shadow: 0 0 0 .2rem rgba(220, 53, 69, .25);
+}
+
+/* فرم گیرنده - ظاهر کلی */
+.dk-form {
+  direction: rtl;
+  text-align: right;
+}
+
+.dk-label {
+  margin-top: 1rem;
+  margin-right: 2rem;
+  font-weight: 700;
+  font-size: 15px;
+  color: #222;
+}
+
+/* باکس پیام‌های بالای فرم */
+.dk-form-alerts {
+  margin-bottom: 14px;
+}
+
+.dk-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: #fff;
+  box-shadow: 0 6px 18px rgba(0,0,0,.04);
+  margin-bottom: 10px;
+}
+
+.dk-alert-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  line-height: 1;
+  font-size: 16px;
+  margin-top: 2px;
+}
+
+.dk-alert-title {
+  font-weight: 800;
+  font-size: 14px;
+  margin-bottom: 2px;
+}
+
+.dk-alert-text {
+  font-size: 14px;
+  line-height: 1.9;
+}
+
+/* رنگ‌بندی بر اساس level_tag های messages */
+.dk-alert-error,
+.dk-alert-danger {
+  border-color: rgba(220,53,69,.28);
+  background: rgba(220,53,69,.08);
+}
+.dk-alert-error .dk-alert-icon,
+.dk-alert-danger .dk-alert-icon {
+  background: rgba(220,53,69,.15);
+  color: #dc3545;
+}
+
+.dk-alert-warning {
+  border-color: rgba(255,193,7,.35);
+  background: rgba(255,193,7,.12);
+}
+.dk-alert-warning .dk-alert-icon {
+  background: rgba(255,193,7,.22);
+  color: #b58100;
+}
+
+.dk-alert-success {
+  border-color: rgba(25,135,84,.25);
+  background: rgba(25,135,84,.10);
+}
+.dk-alert-success .dk-alert-icon {
+  background: rgba(25,135,84,.18);
+  color: #198754;
+}
+
+.dk-alert-info {
+  border-color: rgba(13,110,253,.22);
+  background: rgba(13,110,253,.10);
+}
+.dk-alert-info .dk-alert-icon {
+  background: rgba(13,110,253,.16);
+  color: #0d6efd;
+}
+
+/* فیلد و ارور زیر فیلد */
+.dk-field input,
+.dk-field select,
+.dk-field textarea,
+.dk-field .form-control {
+  font-size: 15px;
+  padding: 10px 12px;
+  border-radius: 12px;
+}
+
+.dk-field-error {
+  margin-top: 6px;
+  margin-right: 2rem;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #dc3545;
+  line-height: 1.8;
+}
+
+/* هایلایت فیلد خطادار (شیک‌تر از border ساده) */
+.dk-field-invalid input,
+.dk-field-invalid select,
+.dk-field-invalid textarea,
+.dk-field-invalid .form-control {
+  border-color: rgba(220,53,69,.75) !important;
+  box-shadow: 0 0 0 .18rem rgba(220,53,69,.12);
+}
+
+/* نمایش شماره موبایل به شکل Readonly */
+.dk-readonly {
+  margin-right: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f8f9fa;
+  border: 1px solid rgba(0,0,0,.06);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+
+.dk-readonly-text {
+  font-weight: 800;
+  letter-spacing: .5px;
+  font-size: 15px;
+  color: #222;
+}
+
+.dk-readonly-badge {
+  font-size: 12px;
+  font-weight: 800;
+  color: #198754;
+  background: rgba(25,135,84,.12);
+  border: 1px solid rgba(25,135,84,.18);
+  padding: 4px 8px;
+  border-radius: 999px;
+}
+/* موبایل مثل input هم‌قد شود */
+.dk-readonly-field .dk-readonly {
+  height: 44px;              /* اگر inputهای تو 44px هستند */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  background: #f8f9fa;
+  border: 1px solid rgba(0,0,0,.10);
+  border-radius: 12px;
+}
+
+.dk-readonly-text {
+  font-weight: 800;
+  font-size: 15px;
+  color: #222;
+}
+
+.dk-readonly-badge {
+  font-size: 12px;
+  font-weight: 800;
+  color: #198754;
+  background: rgba(25,135,84,.12);
+  border: 1px solid rgba(25,135,84,.18);
+  padding: 4px 8px;
+  border-radius: 999px;
+}
+/* اینو با input های خودت ست می‌کنیم */
+.dk-phone-like-input{
+  height: 44px;                 /* اگر input هایت 44px نیست، پایین توضیح دادم */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  border-radius: 12px;
+  background: #fff;
+  border: 1px solid rgba(0,0,0,.12);
+  box-sizing: border-box;
+}
+
+/* ارزش/شماره */
+.dk-phone-value{
+  font-weight: 800;
+  font-size: 15px;
+  color: #222;
+  letter-spacing: .5px;
+}
+
+/* badge */
+.dk-phone-badge{
+  font-size: 12px;
+  font-weight: 800;
+  color: #198754;
+  background: rgba(25,135,84,.12);
+  border: 1px solid rgba(25,135,84,.18);
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.dk-active-filters{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+.dk-filters-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.dk-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:6px 10px;
+  border-radius:999px;
+  border:1px solid #e6eaf2;
+  background:#f8fafc;
+  font-size:12.5px;
+  line-height:1;
+}
+
+.dk-chip-label{ color:#6b7280; }
+.dk-chip-value{ color:#111827; font-weight:600; }
+
+.dk-chip-x{
+  display:inline-flex;
+  width:20px;
+  height:20px;
+  align-items:center;
+  justify-content:center;
+  border-radius:999px;
+  border:1px solid #d7dde8;
+  color:#6b7280;
+  text-decoration:none;
+  font-weight:700;
+  line-height:1;
+}
+.dk-chip-x:hover{
+  background:#fff;
+  border-color:#bfc8d8;
+  color:#111827;
+}
+
+.dk-clear-all{
+  font-size:12.5px;
+  color:#6b7280;
+  text-decoration:none;
+  padding:6px 10px;
+  border-radius:10px;
+  border:1px solid transparent;
+}
+.dk-clear-all:hover{
+  color:#111827;
+  border-color:#e6eaf2;
+  background:#fff;
 }

@@ -46,10 +46,17 @@ class UserAdmin(BaseUserAdmin):
     add_fieldsets = (
         (None, {
             "classes": ("wide",),
-            "fields": ("phone", "password1", "password2", "first_name", "last_name", "email", "is_active", "is_staff",
-                       "is_superuser"),
+            "fields": ("phone", "password1", "password2", "first_name", "last_name", "email",
+                       "is_active", "is_staff", "is_superuser"),
         }),
     )
+
+    def get_readonly_fields(self, request, obj=None):
+        # فقط در edit قفل کن، در add آزاد باشه
+        if obj:  # یعنی کاربر وجود دارد و در حال ویرایش است
+            return ("phone",)
+        return ()
+
 
 
 @admin.register(Profile)

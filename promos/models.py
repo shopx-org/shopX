@@ -2,6 +2,9 @@
 from django.db import models
 from django.utils import timezone
 from django.conf import settings
+from django.urls import reverse
+from django.utils.http import urlencode
+
 
 class Campaign(models.Model):
     name = models.CharField(max_length=120)
@@ -92,6 +95,7 @@ class PromoBanner(models.Model):
         ("home_grid", "گرید بنرهای صفحه اصلی"),
         ("daily_deal", "پیشنهاد روزانه"),
         ("deal_side", "بنر کنار پیشنهاد روزانه"),
+        ("home_festival_hero", "بنر جشنواره (کانت‌داون/دیفالت)"),
     ]
     SLOTS = [
         ("", "—"),
@@ -122,6 +126,7 @@ class PromoBanner(models.Model):
     link_url = models.URLField(max_length=500, blank=True, verbose_name="لینک مقصد (لندینگ جشنواره)")
     button_text = models.CharField(max_length=50, blank=True, verbose_name="متن دکمه")
 
+
     # کنترل زمان و فعال بودن
     is_active = models.BooleanField(default=True, verbose_name="فعال؟")
     starts_at = models.DateTimeField(null=True, blank=True, verbose_name="شروع نمایش بنر")
@@ -140,7 +145,7 @@ class PromoBanner(models.Model):
 
     product_filter = models.JSONField(default=dict,
                                       blank=True)  # مثلا {"discount_percent_gte": 30, "category_ids":[...]}
-    limit_products = models.PositiveSmallIntegerField(default=12)
+    limit_products = models.PositiveSmallIntegerField(default=0)
     payload = models.JSONField(default=dict, blank=True)
     channel = models.CharField(max_length=24, default="web", verbose_name="کانال")
 
@@ -155,17 +160,20 @@ class PromoBanner(models.Model):
             models.Index(fields=["starts_at", "ends_at"]),
         ]
 
+    @property
+    def destination_url(self):
+        if self.campaign_id:
+            base = reverse("products:product_list")  # نام واقعی لیست محصولات
+            return f"{base}?{urlencode({'campaign_id': self.campaign_id})}"
+        return self.link_url or "#"
+
     def __str__(self):
         return self.title or f"Banner #{self.pk}"
 
     def is_running(self, now=None):
-        """
-        هم خود بنر، هم کمپین (اگر وصل باشد) باید در بازه زمانی و فعال باشد.
-        """
         from django.utils import timezone
         now = now or timezone.now()
 
-        # چک خود بنر
         if not self.is_active:
             return False
         if self.starts_at and self.starts_at > now:
@@ -173,8 +181,17 @@ class PromoBanner(models.Model):
         if self.ends_at and self.ends_at < now:
             return False
 
-        # اگر کمپین وصل است، وضعیت خودش هم باید OK باشد
+
         if self.campaign:
+            show_before = bool((self.payload or {}).get("show_before_campaign"))
+            if show_before:
+                return self.campaign.is_active and self.campaign.channel == self.channel
             return self.campaign.is_running(now)
 
+
         return True
+
+    def save(self, *args, **kwargs):
+        if self.limit_products is None:
+            self.limit_products = 0
+        super().save(*args, **kwargs)

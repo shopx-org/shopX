@@ -1,91 +1,302 @@
+# from django import forms
+# from django.contrib.auth import password_validation
+# from django.core.validators import RegexValidator
+# from django.utils.html import strip_tags
+# from jdatetime import date as jdate
+#
+# from account.models import User, Profile
+#
+#
+# # =========================
+# # پیام امنیتی مشترک
+# # =========================
+# FORBIDDEN_CONTENT_MESSAGE = (
+#     'ورودی شامل محتوای غیرمجاز است و امکان ثبت آن وجود ندارد.'
+# )
+#
+#
+# class DashboardAccountForm(forms.ModelForm):
+#
+#     # =========================
+#     # User fields
+#     # =========================
+#     first_name = forms.CharField(
+#         label="نام",
+#         min_length=3,
+#         widget=forms.TextInput(attrs={
+#             'class': 'form-control',
+#             'placeholder': 'نام خود را وارد کنید',
+#         }),
+#         error_messages={
+#             'required': 'لطفاً نام خود را وارد کنید.',
+#             'min_length': 'نام باید حداقل ۳ کاراکتر باشد.',
+#         }
+#     )
+#
+#     last_name = forms.CharField(
+#         label="نام خانوادگی",
+#         min_length=3,
+#         widget=forms.TextInput(attrs={
+#             'class': 'form-control',
+#             'placeholder': 'نام خانوادگی خود را وارد کنید',
+#         }),
+#         error_messages={
+#             'required': 'لطفاً نام خانوادگی خود را وارد کنید.',
+#             'min_length': 'نام خانوادگی باید حداقل ۳ کاراکتر باشد.',
+#         }
+#     )
+#
+#     email = forms.EmailField(
+#         label="ایمیل",
+#         required=False,
+#         widget=forms.EmailInput(attrs={
+#             'class': 'form-control',
+#             'placeholder': 'ایمیل شما',
+#         }),
+#         error_messages={
+#             'invalid': 'لطفاً یک ایمیل معتبر وارد کنید.',
+#         }
+#     )
+#
+#     # =========================
+#     # Profile fields
+#     # =========================
+#     display_name = forms.CharField(
+#         label="نام نمایشی",
+#         required=False,
+#         max_length=50,
+#         widget=forms.TextInput(attrs={
+#             'class': 'form-control',
+#             'placeholder': 'نام نمایشی',
+#         })
+#     )
+#
+#     national_id = forms.CharField(
+#         label="کد ملی",
+#         required=False,
+#         max_length=10,
+#         widget=forms.TextInput(attrs={
+#             'class': 'form-control',
+#             'placeholder': 'کد ملی ۱۰ رقمی',
+#             'inputmode': 'numeric',
+#         }),
+#         validators=[
+#             RegexValidator(
+#                 regex=r'^\d{10}$',
+#                 message='کد ملی باید دقیقاً ۱۰ رقم عددی باشد.'
+#             )
+#         ]
+#     )
+#
+#     day = forms.ChoiceField(
+#         label="روز",
+#         required=False,
+#         choices=[('', '---')] + [(f'{i:02}', f'{i:02}') for i in range(1, 32)],
+#         widget=forms.Select(attrs={'class': 'form-control'})
+#     )
+#
+#     month = forms.ChoiceField(
+#         label="ماه",
+#         required=False,
+#         choices=[
+#             ('', '---'),
+#             ('01', 'فروردین'), ('02', 'اردیبهشت'), ('03', 'خرداد'),
+#             ('04', 'تیر'), ('05', 'مرداد'), ('06', 'شهریور'),
+#             ('07', 'مهر'), ('08', 'آبان'), ('09', 'آذر'),
+#             ('10', 'دی'), ('11', 'بهمن'), ('12', 'اسفند'),
+#         ],
+#         widget=forms.Select(attrs={'class': 'form-control'})
+#     )
+#
+#     year = forms.ChoiceField(
+#         label="سال",
+#         required=False,
+#         choices=[('', '---')] + [
+#             (str(y), str(y))
+#             for y in range(1300, jdate.today().year - 6)
+#         ],
+#         widget=forms.Select(attrs={'class': 'form-control'})
+#     )
+#
+#     gender = forms.ChoiceField(
+#         label="جنسیت",
+#         required=False,
+#         choices=[
+#             ('', 'انتخاب کنید'),
+#             ('M', 'مرد'),
+#             ('F', 'زن'),
+#         ],
+#         widget=forms.Select(attrs={'class': 'form-control'})
+#     )
+#
+#     # =========================
+#     # Password change
+#     # =========================
+#     new_password = forms.CharField(
+#         label="رمز جدید",
+#         required=False,
+#         widget=forms.PasswordInput(attrs={
+#             'class': 'form-control',
+#             'placeholder': 'رمز جدید',
+#         })
+#     )
+#
+#     confirm_password = forms.CharField(
+#         label="تکرار رمز جدید",
+#         required=False,
+#         widget=forms.PasswordInput(attrs={
+#             'class': 'form-control',
+#             'placeholder': 'تکرار رمز جدید',
+#         })
+#     )
+#
+#     class Meta:
+#         model = User
+#         fields = ('first_name', 'last_name', 'email')
+#
+#     # =========================
+#     # Init
+#     # =========================
+#     def __init__(self, *args, **kwargs):
+#         self.user = kwargs.pop('user')
+#         super().__init__(*args, **kwargs)
+#
+#         if hasattr(self.instance, 'profile'):
+#             p = self.instance.profile
+#             self.initial.update({
+#                 'display_name': p.display_name,
+#                 'national_id': p.national_id,
+#                 'day': f'{p.day:02}' if p.day else '',
+#                 'month': f'{p.month:02}' if p.month else '',
+#                 'year': str(p.year) if p.year else '',
+#                 'gender': p.gender,
+#             })
+#
+#     # =========================
+#     # Anti-XSS cleaners
+#     # =========================
+#     def _clean_text(self, value):
+#         cleaned = strip_tags(value or '').strip()
+#         if cleaned != (value or ''):
+#             raise forms.ValidationError(FORBIDDEN_CONTENT_MESSAGE)
+#         return cleaned
+#
+#     def clean_first_name(self):
+#         return self._clean_text(self.cleaned_data.get('first_name'))
+#
+#     def clean_last_name(self):
+#         return self._clean_text(self.cleaned_data.get('last_name'))
+#
+#     def clean_display_name(self):
+#         return self._clean_text(self.cleaned_data.get('display_name'))
+#
+#     # =========================
+#     # Validation
+#     # =========================
+#     def clean_email(self):
+#         email = self.cleaned_data.get('email')
+#         if email and User.objects.filter(email=email).exclude(pk=self.user.pk).exists():
+#             raise forms.ValidationError('این ایمیل قبلاً استفاده شده است.')
+#         return email
+#
+#     def clean(self):
+#         cleaned = super().clean()
+#
+#         # Password validation
+#         pw1 = cleaned.get('new_password')
+#         pw2 = cleaned.get('confirm_password')
+#
+#         if pw1 or pw2:
+#             if pw1 != pw2:
+#                 self.add_error('confirm_password', 'رمزها یکسان نیستند.')
+#             if pw1:
+#                 password_validation.validate_password(pw1, self.user)
+#
+#         # Birth date validation
+#         d, m, y = cleaned.get('day'), cleaned.get('month'), cleaned.get('year')
+#         if any([d, m, y]):
+#             try:
+#                 d, m, y = int(d), int(m), int(y)
+#                 if not (1 <= d <= 31 and 1 <= m <= 12 and 1300 <= y <= jdate.today().year - 6):
+#                     raise ValueError
+#             except Exception:
+#                 raise forms.ValidationError('تاریخ تولد معتبر نیست.')
+#
+#         return cleaned
+#
+#     # =========================
+#     # Save
+#     # =========================
+#     def save(self, commit=True):
+#         user = super().save(commit=False)
+#
+#         if commit:
+#             user.save()
+#             profile, _ = Profile.objects.get_or_create(user=user)
+#
+#             profile.display_name = self.cleaned_data.get('display_name') or None
+#             profile.national_id = self.cleaned_data.get('national_id') or None
+#             profile.day = self.cleaned_data.get('day') or None
+#             profile.month = self.cleaned_data.get('month') or None
+#             profile.year = self.cleaned_data.get('year') or None
+#             profile.gender = self.cleaned_data.get('gender') or None
+#             profile.save()
+#
+#             if self.cleaned_data.get('new_password'):
+#                 user.set_password(self.cleaned_data['new_password'])
+#                 user.save()
+#
+#         return user
+
+
 from django import forms
 from django.contrib.auth import password_validation
 from django.core.validators import RegexValidator
 from django.utils.html import strip_tags
 from jdatetime import date as jdate
+from django.core.exceptions import ValidationError
 
 from account.models import User, Profile
 
-
-# =========================
-# پیام امنیتی مشترک
-# =========================
-FORBIDDEN_CONTENT_MESSAGE = (
-    'ورودی شامل محتوای غیرمجاز است و امکان ثبت آن وجود ندارد.'
-)
+FORBIDDEN_CONTENT_MESSAGE = 'ورودی شامل محتوای غیرمجاز است و امکان ثبت آن وجود ندارد.'
 
 
 class DashboardAccountForm(forms.ModelForm):
-
-    # =========================
-    # User fields
-    # =========================
+    # --- User fields ---
     first_name = forms.CharField(
         label="نام",
         min_length=3,
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'نام خود را وارد کنید',
-        }),
-        error_messages={
-            'required': 'لطفاً نام خود را وارد کنید.',
-            'min_length': 'نام باید حداقل ۳ کاراکتر باشد.',
-        }
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'نام خود را وارد کنید'}),
+        error_messages={'required': 'لطفاً نام خود را وارد کنید.', 'min_length': 'نام باید حداقل ۳ کاراکتر باشد.'}
     )
-
     last_name = forms.CharField(
         label="نام خانوادگی",
         min_length=3,
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'نام خانوادگی خود را وارد کنید',
-        }),
-        error_messages={
-            'required': 'لطفاً نام خانوادگی خود را وارد کنید.',
-            'min_length': 'نام خانوادگی باید حداقل ۳ کاراکتر باشد.',
-        }
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'نام خانوادگی خود را وارد کنید'}),
+        error_messages={'required': 'لطفاً نام خانوادگی خود را وارد کنید.',
+                        'min_length': 'نام خانوادگی باید حداقل ۳ کاراکتر باشد.'}
     )
-
     email = forms.EmailField(
         label="ایمیل",
         required=False,
-        widget=forms.EmailInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'ایمیل شما',
-        }),
-        error_messages={
-            'invalid': 'لطفاً یک ایمیل معتبر وارد کنید.',
-        }
+        widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'ایمیل شما'}),
+        error_messages={'invalid': 'لطفاً یک ایمیل معتبر وارد کنید.'}
     )
 
-    # =========================
-    # Profile fields
-    # =========================
+    # --- Profile fields ---
     display_name = forms.CharField(
         label="نام نمایشی",
         required=False,
         max_length=50,
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'نام نمایشی',
-        })
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'نام نمایشی'})
     )
-
     national_id = forms.CharField(
         label="کد ملی",
         required=False,
         max_length=10,
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'کد ملی ۱۰ رقمی',
-            'inputmode': 'numeric',
-        }),
-        validators=[
-            RegexValidator(
-                regex=r'^\d{10}$',
-                message='کد ملی باید دقیقاً ۱۰ رقم عددی باشد.'
-            )
-        ]
+        widget=forms.TextInput(
+            attrs={'class': 'form-control', 'placeholder': 'کد ملی ۱۰ رقمی', 'inputmode': 'numeric'}),
+        validators=[RegexValidator(regex=r'^\d{10}$', message='کد ملی باید دقیقاً ۱۰ رقم عددی باشد.')]
     )
 
     day = forms.ChoiceField(
@@ -94,7 +305,6 @@ class DashboardAccountForm(forms.ModelForm):
         choices=[('', '---')] + [(f'{i:02}', f'{i:02}') for i in range(1, 32)],
         widget=forms.Select(attrs={'class': 'form-control'})
     )
-
     month = forms.ChoiceField(
         label="ماه",
         required=False,
@@ -107,56 +317,36 @@ class DashboardAccountForm(forms.ModelForm):
         ],
         widget=forms.Select(attrs={'class': 'form-control'})
     )
-
     year = forms.ChoiceField(
         label="سال",
         required=False,
-        choices=[('', '---')] + [
-            (str(y), str(y))
-            for y in range(1300, jdate.today().year - 6)
-        ],
+        choices=[('', '---')] + [(str(y), str(y)) for y in range(1300, jdate.today().year - 6)],
         widget=forms.Select(attrs={'class': 'form-control'})
     )
 
     gender = forms.ChoiceField(
         label="جنسیت",
         required=False,
-        choices=[
-            ('', 'انتخاب کنید'),
-            ('M', 'مرد'),
-            ('F', 'زن'),
-        ],
+        choices=[('', 'انتخاب کنید'), ('M', 'مرد'), ('F', 'زن')],
         widget=forms.Select(attrs={'class': 'form-control'})
     )
 
-    # =========================
-    # Password change
-    # =========================
+    # --- Password change ---
     new_password = forms.CharField(
         label="رمز جدید",
         required=False,
-        widget=forms.PasswordInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'رمز جدید',
-        })
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'رمز جدید'})
     )
-
     confirm_password = forms.CharField(
         label="تکرار رمز جدید",
         required=False,
-        widget=forms.PasswordInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'تکرار رمز جدید',
-        })
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'تکرار رمز جدید'})
     )
 
     class Meta:
         model = User
         fields = ('first_name', 'last_name', 'email')
 
-    # =========================
-    # Init
-    # =========================
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user')
         super().__init__(*args, **kwargs)
@@ -172,9 +362,7 @@ class DashboardAccountForm(forms.ModelForm):
                 'gender': p.gender,
             })
 
-    # =========================
-    # Anti-XSS cleaners
-    # =========================
+    # --- Anti-XSS ---
     def _clean_text(self, value):
         cleaned = strip_tags(value or '').strip()
         if cleaned != (value or ''):
@@ -190,61 +378,83 @@ class DashboardAccountForm(forms.ModelForm):
     def clean_display_name(self):
         return self._clean_text(self.cleaned_data.get('display_name'))
 
-    # =========================
-    # Validation
-    # =========================
     def clean_email(self):
         email = self.cleaned_data.get('email')
         if email and User.objects.filter(email=email).exclude(pk=self.user.pk).exists():
             raise forms.ValidationError('این ایمیل قبلاً استفاده شده است.')
         return email
 
+    def clean_national_id(self):
+        national_id = (self.cleaned_data.get("national_id") or "").strip()
+
+        # خالی بود => نال ذخیره می‌کنیم
+        if not national_id:
+            return None
+
+        # یکتایی: به جز کاربر فعلی
+        if Profile.objects.filter(national_id=national_id).exclude(user=self.user).exists():
+            raise ValidationError("این کد ملی قبلاً برای حساب کاربری دیگری ثبت شده است.")
+
+        return national_id
+
+
+    def _to_int_or_none(self, v):
+        return int(v) if v not in (None, '') else None
+
     def clean(self):
         cleaned = super().clean()
 
-        # Password validation
         pw1 = cleaned.get('new_password')
         pw2 = cleaned.get('confirm_password')
 
         if pw1 or pw2:
             if pw1 != pw2:
                 self.add_error('confirm_password', 'رمزها یکسان نیستند.')
-            if pw1:
-                password_validation.validate_password(pw1, self.user)
 
-        # Birth date validation
+            if pw1:
+                try:
+                    password_validation.validate_password(pw1, self.user)
+                except forms.ValidationError as e:
+                    # فقط همین پیام کوتاهی را سفارشی کن
+                    msgs = []
+                    for msg in e.messages:
+                        if "too short" in msg and "at least 10" in msg:
+                            msgs.append("رمز عبور خیلی کوتاه است. حداقل باید ۱۰ کاراکتر باشد.")
+                        else:
+                            msgs.append(msg)
+                    self.add_error('new_password', forms.ValidationError(msgs))
+
+        # --- Birth date validation ---
         d, m, y = cleaned.get('day'), cleaned.get('month'), cleaned.get('year')
         if any([d, m, y]):
             try:
-                d, m, y = int(d), int(m), int(y)
-                if not (1 <= d <= 31 and 1 <= m <= 12 and 1300 <= y <= jdate.today().year - 6):
+                di, mi, yi = int(d), int(m), int(y)
+                if not (1 <= di <= 31 and 1 <= mi <= 12 and 1300 <= yi <= jdate.today().year - 6):
                     raise ValueError
             except Exception:
-                raise forms.ValidationError('تاریخ تولد معتبر نیست.')
+                self.add_error(None, 'تاریخ تولد معتبر نیست.')
 
         return cleaned
 
-    # =========================
-    # Save
-    # =========================
+
     def save(self, commit=True):
         user = super().save(commit=False)
 
         if commit:
             user.save()
-            profile, _ = Profile.objects.get_or_create(user=user)
 
+            profile, _ = Profile.objects.get_or_create(user=user)
             profile.display_name = self.cleaned_data.get('display_name') or None
             profile.national_id = self.cleaned_data.get('national_id') or None
-            profile.day = self.cleaned_data.get('day') or None
-            profile.month = self.cleaned_data.get('month') or None
-            profile.year = self.cleaned_data.get('year') or None
+            profile.day = self._to_int_or_none(self.cleaned_data.get('day'))
+            profile.month = self._to_int_or_none(self.cleaned_data.get('month'))
+            profile.year = self._to_int_or_none(self.cleaned_data.get('year'))
             profile.gender = self.cleaned_data.get('gender') or None
             profile.save()
 
             if self.cleaned_data.get('new_password'):
                 user.set_password(self.cleaned_data['new_password'])
-                user.save()
+                user.save(update_fields=['password'])
 
         return user
 
@@ -253,7 +463,6 @@ class DashboardAccountForm(forms.ModelForm):
 # Change phone number form (secure)
 # ==================================================
 class ChangePhoneNumberForm(forms.Form):
-
     new_phone = forms.CharField(
         label="شماره جدید",
         max_length=11,
@@ -284,10 +493,6 @@ class ChangePhoneNumberForm(forms.Form):
             raise forms.ValidationError('این شماره قبلاً ثبت شده است.')
 
         return phone
-
-
-
-
 
 # from django import forms
 # from django.contrib.auth import password_validation
@@ -526,7 +731,6 @@ class ChangePhoneNumberForm(forms.Form):
 #         return user
 
 
-
 # class ChangePhoneNumberForm(forms.Form):
 
 #     new_phone = forms.CharField(
@@ -558,16 +762,6 @@ class ChangePhoneNumberForm(forms.Form):
 #         return phone
 
 
-
-
-
-
-
-
-
-
-
-
 # from django import forms
 # from django.contrib.auth import password_validation
 # from django.core.validators import RegexValidator
@@ -577,7 +771,7 @@ class ChangePhoneNumberForm(forms.Form):
 
 
 # class DashboardAccountForm(forms.ModelForm):
-   
+
 #     first_name = forms.CharField(
 #         label="نام",
 #         required=True,
@@ -806,13 +1000,3 @@ class ChangePhoneNumberForm(forms.Form):
 #             raise forms.ValidationError('این شماره تلفن قبلاً توسط کاربر دیگری استفاده شده است.')
 
 #         return phone
-
-
-
-
-
-
-
-
-
-

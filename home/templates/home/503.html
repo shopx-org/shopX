@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load static %}
+{% load imagekit %}
+
+{% block title %}
+    خطای 503
+{% endblock %}
+
+{% block meta_description %}
+    <meta name="description" content="خطای 503 - سرویس موقتاً در دسترس نیست">
+{% endblock %}
+
+{% block content %}
+<main class="main">
+    <div class="error-content">
+        <div class="container">
+
+            <!-- تصویر -->
+            <img src="{% static 'images/error.png' %}"
+                 alt="خطای 503 - سرویس موقتاً در دسترس نیست"
+                 class="error-image">
+
+            <h1 class="error-title">خطای 503</h1>
+
+            <p class="error-text">
+                سرویس به‌طور موقت در دسترس نیست.
+                <br>
+                لطفاً چند دقیقه بعد دوباره تلاش کنید.
+            </p>
+
+            <a href="{% url 'home:home' %}" class="btn-home">
+                بازگشت به صفحه اصلی
+            </a>
+
+        </div>
+    </div>
+</main>
+{% endblock %}

@@ -2,55 +2,68 @@
 {% load humanize %}
 {% block content %}
 
-<main class="d-flex align-items-center justify-content-center py-5" style="min-height: 75vh;">
-  <div class="container">
-    <div class="row justify-content-center">
-      <div class="col-md-8 col-lg-6">
-        <div class="card shadow-sm text-center">
-          <div class="card-body p-4 p-md-5">
+    <main class="d-flex align-items-center justify-content-center py-5" style="min-height: 75vh;">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-8 col-lg-6">
+                    <div class="card shadow-sm text-center">
+                        <div class="card-body p-4 p-md-5">
 
-            {# icon of failed payment #}
-            <div class="display-3 mb-3 text-danger">❌</div>
+                            {# icon of failed payment #}
+                            <div class="display-3 mb-3 text-danger">❌</div>
 
-            <h2 class="h4 mb-3 text-danger">پرداخت ناموفق بود</h2>
-            <p class="mb-1">متأسفانه پرداخت سفارش شما تکمیل نشد.</p>
-            <p class="mb-4 text-muted small">
-              در صورت کسر وجه، حداکثر تا ۷۲ ساعت آینده به حساب شما بازگردانده می‌شود.
-            </p>
+                            <h2 class="h4 mb-3 text-danger">پرداخت ناموفق بود</h2>
+                            <p class="mb-1">متأسفانه پرداخت سفارش شما تکمیل نشد.</p>
+                            <p class="mb-4 text-muted small">
+                                در صورت کسر وجه، حداکثر تا ۷۲ ساعت آینده به حساب شما بازگردانده می‌شود.
+                            </p>
 
-            {# order info box #}
-            <div class="border rounded-3 p-3 text-start bg-light mb-4">
-              <div class="d-flex justify-content-between mb-2">
-                <span class="text-muted">شماره سفارش</span>
-                <span class="fw-bold">#{{ order.id }}</span>
-              </div>
 
-              <div class="d-flex justify-content-between mb-2">
-                <span class="text-muted">مبلغ سفارش</span>
-                <span class="fw-bold">{{ order.total|intcomma }} تومان</span>
-              </div>
+                            {# ✅ جزئیات خطا (اختیاری) #}
+                            {% if error_message %}
+                                <div class="alert alert-warning text-start mt-3">
+                                    <div class="fw-bold mb-1">جزئیات خطا</div>
+                                    <div>{{ error_message }}</div>
+                                    {% if error_code is not None %}
+                                        <div class="small text-muted mt-1">کد: {{ error_code }}</div>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
 
-              <div class="d-flex justify-content-between">
-                <span class="text-muted">وضعیت پرداخت</span>
-                <span class="text-danger">ناموفق</span>
-              </div>
+
+                            {# order info box #}
+                            <div class="border rounded-3 p-3 text-start bg-light mb-4">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">شماره سفارش</span>
+                                    <span class="fw-bold">#{{ order.id }}</span>
+                                </div>
+
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">مبلغ سفارش</span>
+                                    <span class="fw-bold">{{ order.total|intcomma }} تومان</span>
+                                </div>
+
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">وضعیت پرداخت</span>
+                                    <span class="text-danger">ناموفق</span>
+                                </div>
+                            </div>
+
+                            {# back to checkout review (try again) #}
+                            <a class="btn btn-primary w-100 mb-2" href="{% url 'checkout:review' %}">
+                                بازگشت به مرور سفارش و تلاش مجدد پرداخت
+                            </a>
+
+                            {# optional: go to orders list / home #}
+                            <a class="btn btn-outline-secondary w-100" href="{% url 'home:home' %}">
+                                بازگشت به صفحه اصلی
+                            </a>
+
+                        </div>
+                    </div>
+                </div>
             </div>
-
-            {# back to checkout review (try again) #}
-            <a class="btn btn-primary w-100 mb-2" href="{% url 'checkout:review' %}">
-              بازگشت به مرور سفارش و تلاش مجدد پرداخت
-            </a>
-
-            {# optional: go to orders list / home #}
-            <a class="btn btn-outline-secondary w-100" href="{% url 'home:home' %}">
-              بازگشت به صفحه اصلی
-            </a>
-
-          </div>
         </div>
-      </div>
-    </div>
-  </div>
-</main>
+    </main>
 
 {% endblock %}

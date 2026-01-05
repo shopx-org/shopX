@@ -2,7 +2,7 @@
 {# home/_banner_card.html #}
 {% if b %}
   <div class="banner {{ extra_banner_class|default:'' }}">
-    <a href="{{ b.link_url|default:'#' }}" class="banner-link-wrap">
+    <a href="{{ b.destination_url }}" class="banner-link-wrap">
       <div class="banner-media">
         <picture>
           {% if b.image_mobile %}
@@ -24,7 +24,7 @@
         <h3 class="banner-title {{ title_class|default:'' }}">{{ b.title|linebreaksbr }}</h3>
       {% endif %}
 
-      <a href="{{ b.link_url|default:'#' }}"
+      <a href="{{ b.destination_url|default:'#' }}"
          class="btn {{ btn_class|default:'btn-outline-gray' }} banner-link">
         {{ b.button_text|default:'مشاهده' }}
         <i class="icon-long-arrow-left"></i>

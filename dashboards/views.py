@@ -14,6 +14,7 @@ from Core.models import Comment
 from orders.models import Order
 from django.http import JsonResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db import IntegrityError
 
 
 
@@ -34,20 +35,53 @@ class PersonalInfoView(View):
         form = DashboardAccountForm(instance=request.user, user=request.user)
         return render(request, self.template_name, {'form': form, 'phone': request.user.phone})
 
+
     def post(self, request):
         form = DashboardAccountForm(request.POST, instance=request.user, user=request.user)
+
         if form.is_valid():
-            form.save()
+            try:
+                form.save()
+            except IntegrityError:
+                # خطای یونیک بودن کد ملی (یا سایر فیلدهای یونیک) -> به فرم اضافه کن تا هم پیام بگیری هم زیر فیلد بشه نشون داد
+                form.add_error("national_id", "این کد ملی قبلاً برای حساب کاربری دیگری ثبت شده است.")
+                # اگر فقط می‌خوای messages داشته باشی:
+                messages.error(request, "این کد ملی قبلاً برای حساب کاربری دیگری ثبت شده است.")
+                return render(request, self.template_name, {'form': form})
+
             messages.success(request, 'اطلاعات با موفقیت ذخیره شد.')
+
             if form.cleaned_data.get('new_password'):
                 messages.success(request, 'رمز عبور تغییر کرد. لطفاً دوباره وارد شوید.')
                 return redirect('account:logout')
+
             return redirect('dashboards:personal_info')
-        else:
-            for field, errors in form.errors.items():
-                for error in errors:
+
+        # فرم نامعتبر
+        for field, errors in form.errors.items():
+            for error in errors:
+                # field ممکنه "__all__" باشه (non-field errors) و اون موقع form.fields[field] نداریم
+                if field in form.fields:
                     messages.error(request, f"{form.fields[field].label}: {error}")
+                else:
+                    messages.error(request, str(error))
+
         return render(request, self.template_name, {'form': form})
+
+    # def post(self, request):
+    #     form = DashboardAccountForm(request.POST, instance=request.user, user=request.user)
+    #     if form.is_valid():
+    #         form.save()
+    #         messages.success(request, 'اطلاعات با موفقیت ذخیره شد.')
+    #         if form.cleaned_data.get('new_password'):
+    #             messages.success(request, 'رمز عبور تغییر کرد. لطفاً دوباره وارد شوید.')
+    #             return redirect('account:logout')
+    #         return redirect('dashboards:personal_info')
+    #     else:
+    #         for field, errors in form.errors.items():
+    #             for error in errors:
+    #                 messages.error(request, f"{form.fields[field].label}: {error}")
+    #     return render(request, self.template_name, {'form': form})
 
 
 @method_decorator(login_required, name='dispatch')

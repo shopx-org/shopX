@@ -1,9 +1,12 @@
 # products/views.py
 
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 from typing import Optional, Any
 from dataclasses import dataclass
-
+from django.db.models import Sum, Q, IntegerField
+from django.db.models.functions import Coalesce
+from django.db.models import Sum, IntegerField, Value
+from django.db.models.functions import Coalesce
 from django.db.models import Q, Count, Sum, Min, Max, Prefetch, Avg
 from django.db.models.functions import Coalesce
 from django.http import Http404, HttpResponse, JsonResponse
@@ -15,17 +18,21 @@ from django.views.generic import ListView, DetailView, TemplateView
 from django.templatetags.static import static
 from django.contrib import messages
 from django.contrib.contenttypes.models import ContentType
-
+from products.services.pricing_adapter import build_pricing_line_public
+from products.models import Product
+from promos.services.pricing import PricingEngine
+from products.services.pricing_adapter import build_pricing_line_public
 from .models import (
     Product, ProductVariant, ProductImage, Color, Brand, Category,
     ProductAttributeValue, Service, CategoryService, ProductService,
     PriceHistory,
 )
+from promos.models import Campaign
 from .services.pricing_adapter import price_single_product
 from products.services.service_pricing import compute_service_unit_price
 from Core.models import Comment
 from Core.forms import CommentForm
-
+from products.services.pricing_adapter import build_pricing_line_public, build_ephemeral_campaigns_for_lines
 
 # ---------------- Utils (single source of truth) ---------------- #
 
@@ -129,6 +136,7 @@ def attr_prefetch_list() -> Prefetch:
         to_attr="attr_values_list",
     )
 
+
 #
 # def compute_pricing_for_item(item, request=None, qty: int = 1, channel: str = "web"):
 #     """
@@ -178,214 +186,196 @@ class ProductBaseQS:
             .distinct()
         )
 
-class ProductListView(ProductBaseQS, ListView):
-    model = Product
+#
+#
+# class ProductListView(ListView):
+#     template_name = "products/product_list.html"
+#     context_object_name = "products"
+#     paginate_by = 24
+#     def base_queryset(self):
+#         return Product.objects.all()
+#     def get_queryset(self):
+#         qs = self.base_queryset()
+#         # اینجا فیلترهای معمول خودت: search/sort/category/... #
+#         # qs = self.apply_filters(qs)
+#         return qs
+# #
+
+
+
+D100 = Decimal("100")
+D0 = Decimal("0")
+D1 = Decimal("1")
+
+class ProductListView(ListView):
     template_name = "products/product_list.html"
     context_object_name = "products"
-    paginate_by = 12
-    MAX_SCROLL_PAGES = 2  # فقط صفحه 1 و 2 اسکرول AJAX → از صفحه 3 به بعد pagination
+    paginate_by = 24
 
-    # ---------------- Category ---------------- #
-
-    def get_category(self) -> Optional[Category]:
-        # مسیر از kwargs (مثلاً /c/electronics/)
-        path = self.kwargs.get("path")
-        if path:
-            return _resolve_category_by_path(path)
-
-        # پارامتر querystring ممکنه نام‌های مختلف داشته باشه: 'category' یا 'cat'
-        cat_id = self.request.GET.get("category") or self.request.GET.get("cat")
-        if cat_id:
-            cat_id = str(cat_id).strip()
-            if cat_id.isdigit():
-                try:
-                    return Category.objects.get(id=int(cat_id))
-                except Category.DoesNotExist:
-                    return None
-            # ممکنه slug ارسال شده باشد
-            try:
-                return Category.objects.get(slug=cat_id)
-            except Category.DoesNotExist:
-                return None
-        return None
-
-    # ---------------- QuerySet ---------------- #
-
-    def get_queryset(self):
-        qs = super().get_queryset()
-
-        # دسته‌بندی
-        category = self.get_category()
-        if category:
-            tree_ids = list(category.get_descendants(include_self=True).values_list("id", flat=True))
-            if hasattr(Product, "additional_categories"):
-                qs = qs.filter(Q(category_id__in=tree_ids) | Q(additional_categories__in=tree_ids))
-            else:
-                qs = qs.filter(category_id__in=tree_ids)
-
-        # برند
-        brand_str = self.request.GET.get("brand", "").strip()
-        if brand_str:
-            try:
-                ids = [int(x) for x in brand_str.split(",") if x]
-                if ids:
-                    qs = qs.filter(brand_fk_id__in=ids)
-            except ValueError:
-                pass
-
-        # قیمت
-        price_min = self.request.GET.get("min")
-        price_max = self.request.GET.get("max")
-        if price_min:
-            try:
-                qs = qs.filter(price__gte=int(price_min))
-            except ValueError:
-                pass
-        if price_max:
-            try:
-                qs = qs.filter(price__lte=int(price_max))
-            except ValueError:
-                pass
-
-        # جستجو
-        q = self.request.GET.get("q", "").strip()
-        if q:
-            qs = qs.filter(
-                Q(name__icontains=q) |
-                Q(short_description__icontains=q) |
-                Q(description__icontains=q)
+    def base_queryset(self):
+        return (
+            Product.objects.all()
+            .select_related("category")
+            .prefetch_related(
+                Prefetch("variants", queryset=ProductVariant.objects.filter(is_active=True).order_by("-stock", "id"),
+                         to_attr="_vlist")
             )
+            .annotate(stock_total=Coalesce(Sum("variants__stock"), Value(0), output_field=IntegerField()))
+            .order_by("-id")
+        )
 
-        # مرتب‌سازی
-        sort = self.request.GET.get("sort", "pop")
-        if sort == "new":
-            qs = qs.order_by("-created_at", "-id")
-        elif sort == "price_asc":
-            qs = qs.order_by("price", "id")
-        elif sort == "price_desc":
-            qs = qs.order_by("-price", "-id")
-        elif sort == "name":
-            qs = qs.order_by("name")
-        else:
-            qs = qs.order_by("-views", "-id") if hasattr(Product, "views") else qs.order_by("-created_at", "-id")
+    def apply_campaign_filter(self, qs):
+        cid = (self.request.GET.get("campaign_id") or "").strip()
+        if not cid:
+            self._active_campaign = None
+            return qs
 
-        # Prefetch‌ها
-        qs = qs.prefetch_related(
-            Prefetch(
-                "variants",
-                queryset=(
-                    ProductVariant.objects
-                    .filter(is_active=True, color__is_active=True)
-                    .select_related("color")
-                    .only(
-                        "id", "product_id", "color_id", "color__id",
-                        "color__name", "color__hex_code", "color__slug"
-                    )
-                ),
-                to_attr="_prefetch_variants",
-            ),
-            images_prefetch(),
-            attr_prefetch_list(),
-        ).distinct()
+        campaign = get_object_or_404(Campaign, pk=cid, is_active=True)
+        self._active_campaign = campaign
 
+        allowed_q = Q()
+        has_scope_rule = False
+
+        for r in campaign.rules.all():
+            p = r.payload or {}
+
+            if r.kind == "product_in":
+                ids = p.get("product_ids") or []
+                if ids:
+                    has_scope_rule = True
+                    allowed_q |= Q(id__in=ids)
+
+            elif r.kind == "variant_in":
+                vids = p.get("variant_ids") or []
+                if vids:
+                    has_scope_rule = True
+                    # فرض: related_name واریانت‌ها "variants" است (تو base_queryset همین را prefetch کردی)
+                    allowed_q |= Q(variants__id__in=vids)
+
+            elif r.kind == "brand_in":
+                bids = p.get("brand_ids") or []
+                if bids:
+                    has_scope_rule = True
+                    allowed_q |= Q(brand_id__in=bids)
+
+            elif r.kind == "category_in":
+                cids = p.get("category_ids") or []
+                if cids:
+                    has_scope_rule = True
+                    allowed_q |= Q(category_id__in=cids)
+
+        # اگر کمپین هیچ rule محدودکننده محصول نداشت، یعنی “عمومی” است => همه محصولات
+        if not has_scope_rule:
+            return qs
+
+        return qs.filter(allowed_q).distinct()
+
+    def apply_filters(self, qs):
+        # فیلترهای خودت
         return qs
 
-    # ---------------- Context ---------------- #
+    def get_queryset(self):
+        qs = self.base_queryset()
+        qs = self.apply_campaign_filter(qs)   # ✅ اول کمپین
+        qs = self.apply_filters(qs)           # ✅ بعد فیلترهای فعلی
+        return qs
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        category = self.get_category()
-        ctx["category"] = category
-        ctx["ancestors"] = list(category.get_ancestors(include_self=True)) if category else []
 
-        # لیست دسته‌ها برای سایدبار
-        if category:
-            ctx["categories"] = list(
-                category.get_children().filter(is_active=True).order_by("position", "name")
-            )
-        else:
-            ctx["categories"] = list(
-                Category.objects.filter(parent__isnull=True, is_active=True).order_by("position", "name")
-            )
+        # ---------- 0) campaign in context (برای نوار بالای template) ----------
+        # فرض: در get_queryset یا قبل‌تر self._active_campaign ست می‌شود
+        ctx["campaign"] = getattr(self, "_active_campaign", None)
 
-        # QuerySet نهایی
-        full_qs = self.get_queryset().order_by()
-
-        # برندها و Facets
-        ctx["brand_facets"] = (
-            full_qs.values("brand_fk_id", "brand_fk__name")
-            .annotate(cnt=Count("id"))
-            .order_by("brand_fk__name")
-        )
-        ctx["brands"] = Brand.objects.filter(
-            id__in=full_qs.values_list("brand_fk_id", flat=True)
-        ).order_by("position", "name")
-
-        # فست دسته‌ها
-        ctx["category_facets"] = full_qs.values("category_id").annotate(cnt=Count("id"))
-
-        # قیمت‌های حداقل/حداکثر
-        agg = full_qs.aggregate(minp=Min("price"), maxp=Max("price"))
-        ctx["price_min"] = agg["minp"]
-        ctx["price_max"] = agg["maxp"]
-
-        # برندهای انتخاب‌شده
-        selected = self.request.GET.get("brand", "")
+        # ---------- 1) total_count (عدد واقعی نتایج با فیلترها) ----------
         try:
-            ctx["selected_brands"] = {int(x) for x in selected.split(",") if x}
-        except ValueError:
-            ctx["selected_brands"] = set()
+            # paginator.count دقیق‌ترین عدد برای queryset نهاییِ همین صفحه است
+            ctx["total_count"] = getattr(ctx.get("paginator"), "count", None)
+        except Exception:
+            ctx["total_count"] = None
 
-        # سایر پارامترهای فیلتر
-        ctx["q"] = self.request.GET.get("q", "").strip()
-        ctx["current_sort"] = self.request.GET.get("sort", "pop")
-        ctx["available"] = self.request.GET.get("available")
+        page_products = list(ctx.get("products") or [])
+        if not page_products:
+            # اگر محصولی نیست، همین کانتکست کافی است
+            return ctx
 
-        # pagination / infinite scroll flags
-        ctx["max_scroll_pages"] = self.MAX_SCROLL_PAGES
-        ctx["paginate_by"] = self.paginate_by
-        ctx["enable_infinite_scroll"] = True
-        ctx["total_count"] = full_qs.count()
+        # ---------- 2) انتخاب آیتم قیمت‌گذاری برای هر محصول (variant یا product) ----------
+        priced_items = []
+        product_to_item = {}  # product_id -> (variant or product)
 
-        # slider global
-        slider_stats = Product.objects.filter(is_active=True).aggregate(slider_min=Min("price"), slider_max=Max("price"))
-        ctx["slider_min"] = slider_stats.get("slider_min") or 0
-        ctx["slider_max"] = slider_stats.get("slider_max") or 1_000_000
+        for p in page_products:
+            vlist = getattr(p, "_vlist", None) or []
+            # base_queryset شما order_by("-stock", "id") دارد؛ پس vlist[0] بهترین گزینه است
+            item = vlist[0] if vlist else p
+            priced_items.append(item)
+            product_to_item[p.id] = item
 
-        # selected_cat_id
-        cat = self.request.GET.get("cat") or self.request.GET.get("category")
-        ctx["selected_cat_id"] = int(cat) if cat and str(cat).isdigit() else (category.id if category else None)
+        # ---------- 3) ساخت lines ----------
+        lines = [build_pricing_line_public(item, qty=1) for item in priced_items]
 
-        # تولید رنگ‌ها برای هر محصول
-        for p in ctx["products"]:
-            uniq = {}
-            for v in getattr(p, "_prefetch_variants", []):
-                c = getattr(v, "color", None)
-                if c and c.id not in uniq:
-                    uniq[c.id] = {
-                        "id": c.id,
-                        "name": c.name,
-                        "hex": c.hex_code,
-                        "slug": c.slug,
-                    }
-            p.colors_list = sorted(uniq.values(), key=lambda x: (x["name"] or "").strip())
+        # ---------- 4) pricing ctx + ephemeral ----------
+        channel = "web"
+        pricing_ctx = {
+            "channel": channel,
+            "coupons": [],
+            "preview": True,  # برای لیست، preview بهتر است
+        }
 
-            # --- قیمت و تخفیف مخصوص کارت ---
-            pricing = compute_pricing_for_item(p, request=self.request, qty=1)
-            p.price_base = pricing["price_base"]
-            p.price_final = pricing["price_final"]
-            p.discount_amount = pricing["discount_amount"]
-            p.discount_percent = pricing["discount_percent"]
-            p.has_discount = bool(p.discount_percent and p.discount_percent > 0)
+        epis = build_ephemeral_campaigns_for_lines(lines, channel=channel)
+        if epis:
+            pricing_ctx["ephemeral_campaigns"] = epis
 
+        # ---------- 5) evaluate ----------
+        result = PricingEngine().evaluate(lines, pricing_ctx)
+
+        # ---------- 6) index خطوط نتیجه با کلید استاندارد ----------
+        # کلید: (product_id, variant_id_or_None)
+        by_key = {}
+        for l in (result.lines or []):
+            by_key[(l.product_id, getattr(l, "variant_id", None))] = l
+
+        # ---------- 7) attach computed fields روی هر محصول ----------
+        for p in page_products:
+            item = product_to_item.get(p.id)
+
+            # اگر item واریانت باشد، معمولاً product_id دارد
+            is_variant = hasattr(item, "product_id")
+            vid = item.id if (item and is_variant) else None
+
+            ln = by_key.get((p.id, vid)) or by_key.get((p.id, None))
+
+            # fallback قیمت پایه از خود محصول (اگر خط قیمت‌گذاری نیامد)
+            base = Decimal(str(getattr(p, "price", 0) or 0))
+            disc = D0
+
+            if ln:
+                # line_subtotal بهتره چون شامل qty و قیمت پایه برای همان line است
+                base = Decimal(str(getattr(ln, "line_subtotal", base) or base))
+                disc = Decimal(str(getattr(ln, "line_discount", 0) or 0))
+
+            final = base - disc
+            if final < 0:
+                final = D0
+
+            if base > 0 and disc > 0:
+                percent = (disc * D100 / base).quantize(Decimal("1"), rounding=ROUND_HALF_UP)
+            else:
+                percent = Decimal("0")
+
+            # فیلدهای قابل استفاده در template
+            p.price_base = base
+            p.price_final = final
+            p.has_discount = disc > 0
+            p.discount_percent = percent
+
+            st = int(getattr(p, "stock_total", 0) or 0)
+            p.in_stock = st > 0
+            p.low_stock = p.in_stock and (st <= 3)
+            p.stock_total = st
+
+        # محصولات همین صفحه (با فیلدهای attach شده)
+        ctx["products"] = page_products
         return ctx
-
-    # ---------------- AJAX HTML Response ---------------- #
-
-    def render_to_response(self, context, **response_kwargs):
-        if self.request.headers.get("X-Requested-With") == "XMLHttpRequest":
-            return render(self.request, "products/_product_items.html", context)
-        return super().render_to_response(context, **response_kwargs)
 
 
 # ---------------- Category Product List ---------------- #
@@ -396,7 +386,6 @@ class CategoryProductListView(ProductListView):
         return _resolve_category_by_path(path)
 
 
-
 # ---------------- Variant Price API ----------------
 class VariantPriceView(View):
     http_method_names = ["get"]
@@ -404,7 +393,7 @@ class VariantPriceView(View):
     def get(self, request, slug):
         product = get_object_or_404(
             Product.objects.filter(is_active=True, status="pub")
-                           .select_related("category", "brand_fk"),
+            .select_related("category", "brand_fk"),
             slug=slug
         )
 
@@ -419,7 +408,7 @@ class VariantPriceView(View):
 
         variant = get_object_or_404(
             product.variants.filter(is_active=True)
-                            .select_related("product", "color", "size"),
+            .select_related("product", "color", "size"),
             id=vid
         )
 
@@ -455,6 +444,7 @@ class OfferDTO:
     availability: str
     sku: str | None = None
 
+
 class ProductDetailView(DetailView):
     model = Product
     template_name = "products/product_detail.html"
@@ -468,7 +458,8 @@ class ProductDetailView(DetailView):
             .select_related("category", "brand_fk")
             .prefetch_related(
                 Prefetch("images", queryset=ProductImage.objects.order_by("position", "id")),  # gallery
-                Prefetch("variants", queryset=ProductVariant.objects.select_related("color", "size").filter(is_active=True)),
+                Prefetch("variants",
+                         queryset=ProductVariant.objects.select_related("color", "size").filter(is_active=True)),
                 Prefetch(  # این یکی برای جدول مشخصات لازم است
                     "attr_values",
                     queryset=(
@@ -496,7 +487,10 @@ class ProductDetailView(DetailView):
     def _pav_value_display(self, pav) -> str:
         k = pav.attribute.kind
         unit = (pav.attribute.unit or "").strip()
-        def _add_unit(txt): return f"{txt} {unit}" if unit else txt
+
+        def _add_unit(txt):
+            return f"{txt} {unit}" if unit else txt
+
         if k == "text": return pav.value_text or ""
         if k == "int":  return _add_unit(f"{pav.value_int:,}") if pav.value_int is not None else ""
         if k == "decimal":
@@ -544,7 +538,7 @@ class ProductDetailView(DetailView):
         qs = (
             PriceHistory.objects
             .filter(product=product, date__lte=today)
-            .values("date")                 # گروه‌بندی بر اساس تاریخ
+            .values("date")  # گروه‌بندی بر اساس تاریخ
             .annotate(
                 min_price=Min("price"),
                 avg_price=Avg("price"),
@@ -594,7 +588,6 @@ class ProductDetailView(DetailView):
             "meta": meta,
         }
 
-
     def _jsonld(self, product: Product) -> str:
         imgs = [img.image.url for img in product.images.all() if getattr(img, "image", None)]
         brand = {"@type": "Brand", "name": product.brand_fk.name} if product.brand_fk_id else None
@@ -626,7 +619,7 @@ class ProductDetailView(DetailView):
                 for o in offers
             ],
         }
-        data = {k:v for k,v in data.items() if v not in (None, [], {})}
+        data = {k: v for k, v in data.items() if v not in (None, [], {})}
         return _json(data)
 
     def _variant_matrix(self, product: Product) -> dict[str, dict[str, Any]]:
@@ -638,7 +631,7 @@ class ProductDetailView(DetailView):
             matrix.setdefault(ckey, {})
             matrix[ckey][skey] = {
                 "variant_id": v.id,
-                "price": _float(v.get_price()),   # قیمت پایه واریانت (قبل از موتور)
+                "price": _float(v.get_price()),  # قیمت پایه واریانت (قبل از موتور)
                 "stock": int(v.stock or 0),
                 "sku": v.sku or None,
             }
@@ -664,12 +657,36 @@ class ProductDetailView(DetailView):
         # واریانت فعال از روی ?variant
         variant_id = self.request.GET.get("variant")
         active_variant = None
+
         if variant_id:
             try:
                 active_variant = p.variants.get(id=variant_id, is_active=True)
             except ProductVariant.DoesNotExist:
                 active_variant = None
+
+        # اگر variant در URL نبود، یک واریانت پیش‌فرض انتخاب کن تا قیمت اولیه با UI یکی باشد
+        if not active_variant:
+            active_variant = (
+                p.variants.filter(is_active=True)
+                .select_related("color", "size")
+                .order_by("-stock", "id")  # اول موجودترین/اولین
+                .first()
+            )
+
+        v_stock = int(getattr(active_variant, "stock", 0) or 0) if active_variant else 0
+        ctx["in_stock"] = v_stock > 0
+        ctx["stock_qty"] = v_stock
+
         priced_item = active_variant or p
+        # # واریانت فعال از روی ?variant
+        # variant_id = self.request.GET.get("variant")
+        # active_variant = None
+        # if variant_id:
+        #     try:
+        #         active_variant = p.variants.get(id=variant_id, is_active=True)
+        #     except ProductVariant.DoesNotExist:
+        #         active_variant = None
+        # priced_item = active_variant or p
 
         # قیمت مؤثر با موتور
         pres = self._price_result_for(priced_item, qty=1)
@@ -687,6 +704,7 @@ class ProductDetailView(DetailView):
             "discount_percent": discount_percent,
             "pricing_explain": pres.explain,
             "active_variant": active_variant,
+            "initial_variant_id": active_variant.id if active_variant else "",
         })
 
         # گالری (با fallback)
@@ -743,17 +761,31 @@ class ProductDetailView(DetailView):
                 vres = self._price_result_for(v, qty=1)
                 variant_prices[str(v.id)] = {
                     "price": _float(vres.total),
+                    "compare_at": _float(vres.subtotal),
                     "stock": int(getattr(v, "stock", 0) or 0),
                     "sku": v.sku or None,
                 }
+
+
             except Exception:
-                # اگر باز هم مشکلی بود، حداقل قیمت خام یا 0 نمایش بده
+                raw = _float(
+                    getattr(v, "price", getattr(v, "product", None).price if getattr(v, "product", None) else 0))
                 variant_prices[str(v.id)] = {
-                    "price": _float(
-                        getattr(v, "price", getattr(v, "product", None).price if getattr(v, "product", None) else 0)),
+                    "price": raw,
+                    "compare_at": raw,  # ✅ اینم اضافه کن
                     "stock": int(getattr(v, "stock", 0) or 0),
                     "sku": v.sku or None,
                 }
+
+            #
+            #     # اگر باز هم مشکلی بود، حداقل قیمت خام یا 0 نمایش بده
+            #
+            #     variant_prices[str(v.id)] = {
+            #         "price": _float(
+            #             getattr(v, "price", getattr(v, "product", None).price if getattr(v, "product", None) else 0)),
+            #         "stock": int(getattr(v, "stock", 0) or 0),
+            #         "sku": v.sku or None,
+            #     }
         try:
             item_unit_price = pres.lines[0].unit_price  # Decimal
         except Exception:
@@ -815,7 +847,8 @@ class ProductDetailView(DetailView):
 
         # پرچم‌های UI
         vqs = p.variants.filter(is_active=True)
-        auto_has_color = vqs.filter(color_id__isnull=False).exists() or any(getattr(im, "color_id", None) for im in images)
+        auto_has_color = vqs.filter(color_id__isnull=False).exists() or any(
+            getattr(im, "color_id", None) for im in images)
         auto_has_size = vqs.filter(size__isnull=False).exists()
         cat = getattr(p, "category", None)
         MOBILE_SLUGS = {"mobile", "smartphone", "phone", "گوشی-موبایل", "موبایل"}
@@ -848,10 +881,59 @@ class ProductDetailView(DetailView):
         ctx["product_jsonld"] = self._jsonld(p)
 
         # مرتبط‌ها (اگر لازم داری)
-        ctx["related_products"] = (
-            Product.objects.filter(is_active=True, status="pub", category=p.category)
-            .exclude(id=p.id).select_related("brand_fk").prefetch_related("images")[:8]
+        # ctx["related_products"] = (
+        #     Product.objects.filter(is_active=True, status="pub", category=p.category)
+        #     .exclude(id=p.id).select_related("brand_fk").prefetch_related("images")[:8]
+        # )
+        # مرتبط‌ها (برای کارت شبیه صفحه اول: قیمت/تخفیف/رنگ/موجودی)
+        related_qs = (
+            Product.objects
+            .filter(is_active=True, status="pub", category=p.category)
+            .exclude(id=p.id)
+            .select_related("category", "brand_fk")
+            .prefetch_related(
+                Prefetch(
+                    "variants",
+                    queryset=(
+                        ProductVariant.objects
+                        .filter(is_active=True)
+                        .select_related("color")
+                        .only("id", "product_id", "stock", "color_id",
+                              "color__id", "color__name", "color__hex_code", "color__slug")
+                    ),
+                    to_attr="_prefetch_variants",
+                ),
+                Prefetch("images", queryset=ProductImage.objects.order_by("position", "id")),
+            )
+            .order_by("-created_at", "-id")[:8]
         )
+
+        related_products = list(related_qs)
+
+        for r in related_products:
+            # قیمت/تخفیف مثل Home
+            pricing = compute_pricing_for_item(r, request=self.request, qty=1)
+            r.price_base = pricing.get("price_base")
+            r.price_final = pricing.get("price_final")
+            r.discount_amount = pricing.get("discount_amount")
+            r.discount_percent = pricing.get("discount_percent") or 0
+            r.has_discount = (r.discount_percent or 0) > 0
+
+            # موجودی از روی واریانت‌ها
+            pref = getattr(r, "_prefetch_variants", []) or []
+            stock_total = sum((getattr(v, "stock", 0) or 0) for v in pref)
+            r.stock_total = int(stock_total or 0)
+            r.in_stock = r.stock_total > 0
+
+            # رنگ‌ها مثل Home
+            uniq = {}
+            for v in pref:
+                c = getattr(v, "color", None)
+                if c and c.id not in uniq:
+                    uniq[c.id] = {"id": c.id, "name": c.name, "hex": c.hex_code, "slug": c.slug}
+            r.colors_list = list(uniq.values())
+
+        ctx["related_products"] = related_products
 
         # breadcrumbs (اگر لازم داری)
         if isinstance(p.category, Category):
@@ -859,31 +941,26 @@ class ProductDetailView(DetailView):
                                   for c in p.category.get_ancestors(include_self=True)]
         else:
             ctx["breadcrumbs"] = []
-            
-        ctx["variant_prices_json"] = _json(variant_prices)  # ← JSON معتبر
 
+        ctx["variant_prices_json"] = _json(variant_prices)  # ← JSON معتبر
 
         content_type = ContentType.objects.get_for_model(p)
 
         comments = Comment.objects.filter(
-        content_type=content_type,
-        object_id=p.id,
-        is_approved=True,   # 🔥 این مهمه
-        parent__isnull=True
-    ).select_related("user").prefetch_related("replies__user")
-
+            content_type=content_type,
+            object_id=p.id,
+            is_approved=True,  # 🔥 این مهمه
+            parent__isnull=True
+        ).select_related("user").prefetch_related("replies__user")
 
         ctx["comments"] = comments
         ctx["comment_form"] = CommentForm()
 
         return ctx
-    
-
-
 
 
 # ---------------- Compare Products -----------------
-   
+
 def add_to_compare(request, product_id):
     compare_list = request.session.get("compare_list", [])
     product = get_object_or_404(Product, id=product_id)
@@ -921,7 +998,7 @@ def remove_from_compare(request, product_id):
 
 def compare_list(request):
     ids = request.session.get("compare_list", [])
-    
+
     products = Product.objects.filter(id__in=ids).prefetch_related(
         "images", "variants", "attr_values__attribute"
     )
@@ -933,7 +1010,7 @@ def compare_list(request):
     for p in ordered_products:
         # موجودی کل
         p.total_stock = p.variants.aggregate(total=Sum("stock"))["total"] or 0
-        
+
         # رنگ‌ها و سایز‌ها از variant یا رنگ اصلی محصول
         # رنگ‌ها را به شکل لیستی از hex_code بسازیم
         p.color_list = sorted({v.color.hex_code for v in p.variants.all() if v.color})

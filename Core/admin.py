@@ -2,8 +2,11 @@ from django.contrib import admin
 from django.utils.html import format_html
 from .models import *
 from django.contrib.contenttypes.models import ContentType
-from ckeditor.widgets import CKEditorWidget
 from django import forms
+
+
+TEXTAREA_WIDGET = forms.Textarea(attrs={"rows": 10, "cols": 80, "style": "width: 95%;"})
+
 
 class ReplyFilter(admin.SimpleListFilter):
     title = 'نوع نظر'
@@ -122,11 +125,12 @@ class WishlistAdmin(admin.ModelAdmin):
 
 # فرم ادمین با CKEditor برای اعضای تیم
 class TeamMemberAdminForm(forms.ModelForm):
-    bio = forms.CharField(widget=CKEditorWidget())
-
     class Meta:
         model = TeamMember
-        fields = '__all__'
+        fields = "__all__"
+        widgets = {
+            "bio": TEXTAREA_WIDGET,
+        }
 
 # Inline اعضای تیم
 class TeamMemberInline(admin.StackedInline):
@@ -136,9 +140,7 @@ class TeamMemberInline(admin.StackedInline):
     fields = ('name', 'role', 'image', 'bio', 'facebook', 'twitter', 'instagram')
     verbose_name = "عضو تیم"
     verbose_name_plural = "اعضای تیم"
-    formfield_overrides = {
-        TeamMember.bio: {'widget': CKEditorWidget(config_name='default', attrs={'cols': 80, 'rows': 10})},
-    }
+
 
 # Inline برندها
 class BrandInline(admin.TabularInline):
@@ -152,10 +154,10 @@ class AboutAdminForm(forms.ModelForm):
         model = About
         fields = '__all__'
         widgets = {
-            'vision_text': CKEditorWidget(),
-            'mission_text': CKEditorWidget(),
-            'who_text': CKEditorWidget(),
-            'brands_text': CKEditorWidget(),
+            "vision_text": TEXTAREA_WIDGET,
+            "mission_text": TEXTAREA_WIDGET,
+            "who_text": TEXTAREA_WIDGET,
+            "brands_text": TEXTAREA_WIDGET,
         }
 
 # ادمین درباره ما

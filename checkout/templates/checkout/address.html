@@ -70,7 +70,6 @@
                                 </div>
 
 
-
                                 <form class="mt-3" method="post" action="{% url 'cart:cart_clear' %}">
                                     {% csrf_token %}
                                     <button class="btn empty-cart btn-outline-dark-2 btn-block w-100" type="submit">
@@ -175,41 +174,106 @@
                                                 <input type="hidden" name="action" value="add">
                                                 <input type="hidden" name="address_id" id="address_id">
 
+                                                {# ✅ ارورهای کلی فرم (اگر مثلا خطا مربوط به ترکیب فیلدها یا save باشد) #}
+                                                {% if form.non_field_errors %}
+                                                    <div class="alert alert-danger mb-3" dir="rtl">
+                                                        {% for e in form.non_field_errors %}
+                                                            <div>{{ e }}</div>
+                                                        {% endfor %}
+                                                    </div>
+                                                {% endif %}
+
                                                 <div class="row g-3">
+
                                                     <div class="col-md-12">
                                                         <label class="form-label">{{ form.title.label }}</label>
                                                         {{ form.title }}
+                                                        {% if form.title.errors %}
+                                                            <div class="invalid-feedback d-block" dir="rtl">
+                                                                {{ form.title.errors.0 }}
+                                                            </div>
+                                                        {% endif %}
                                                     </div>
+
                                                     <div class="col-md-6">
                                                         <label class="form-label">{{ form.province.label }}</label>
                                                         {{ form.province }}
+                                                        {% if form.province.errors %}
+                                                            <div class="invalid-feedback d-block" dir="rtl">
+                                                                {{ form.province.errors.0 }}
+                                                            </div>
+                                                        {% endif %}
                                                     </div>
 
                                                     <div class="col-md-6">
                                                         <label class="form-label">{{ form.city.label }}</label>
                                                         {{ form.city }}
+                                                        {% if form.city.errors %}
+                                                            <div class="invalid-feedback d-block" dir="rtl">
+                                                                {{ form.city.errors.0 }}
+                                                            </div>
+                                                        {% endif %}
                                                     </div>
 
                                                     <div class="col-md-12">
                                                         <label class="form-label">{{ form.address.label }}</label>
                                                         {{ form.address }}
+                                                        {% if form.address.errors %}
+                                                            <div class="invalid-feedback d-block" dir="rtl">
+                                                                {{ form.address.errors.0 }}
+                                                            </div>
+                                                        {% endif %}
                                                     </div>
+
                                                     <div class="col-md-6">
                                                         <label class="form-label">{{ form.number.label }}</label>
                                                         {{ form.number }}
+                                                        {% if form.number.errors %}
+                                                            <div class="invalid-feedback d-block" dir="rtl">
+                                                                {{ form.number.errors.0 }}
+                                                            </div>
+                                                        {% endif %}
                                                     </div>
+
                                                     <div class="col-md-6">
                                                         <label class="form-label">{{ form.unit.label }}</label>
                                                         {{ form.unit }}
+                                                        {% if form.unit.errors %}
+                                                            <div class="invalid-feedback d-block" dir="rtl">
+                                                                {{ form.unit.errors.0 }}
+                                                            </div>
+                                                        {% endif %}
                                                     </div>
 
                                                     <div class="col-md-6">
                                                         <label class="form-label">{{ form.postal_code.label }}</label>
                                                         {{ form.postal_code }}
+                                                        {% if form.postal_code.errors %}
+                                                            <div class="invalid-feedback d-block" dir="rtl">
+                                                                {{ form.postal_code.errors.0 }}
+                                                            </div>
+                                                        {% endif %}
                                                     </div>
 
+                                                    {# اگر اینا hidden هستن همین‌جا بمونن #}
                                                     {{ form.latitude }}
                                                     {{ form.longitude }}
+
+                                                    {# اگر latitude/longitude ارور داشته باشن (کم پیش میاد) #}
+                                                    {% if form.latitude.errors %}
+                                                        <div class="col-12">
+                                                            <div class="invalid-feedback d-block" dir="rtl">
+                                                                {{ form.latitude.errors.0 }}
+                                                            </div>
+                                                        </div>
+                                                    {% endif %}
+                                                    {% if form.longitude.errors %}
+                                                        <div class="col-12">
+                                                            <div class="invalid-feedback d-block" dir="rtl">
+                                                                {{ form.longitude.errors.0 }}
+                                                            </div>
+                                                        </div>
+                                                    {% endif %}
 
                                                     <div class="col-md-12 mt-3">
                                                         <div class="form-check d-flex align-items-center gap-2">
@@ -219,7 +283,13 @@
                                                                 استفاده از این آدرس به عنوان پیش‌فرض
                                                             </label>
                                                         </div>
+                                                        {% if form.is_default.errors %}
+                                                            <div class="invalid-feedback d-block" dir="rtl">
+                                                                {{ form.is_default.errors.0 }}
+                                                            </div>
+                                                        {% endif %}
                                                     </div>
+
                                                 </div>
 
                                                 <div class="d-flex justify-content-end align-items-center mt-4">
@@ -228,6 +298,66 @@
                                                     </button>
                                                 </div>
                                             </form>
+
+                                            {#                                            <form method="post" class="user-form-modern mt-3" novalidate#}
+                                            {#                                                  id="addressForm">#}
+                                            {#                                                {% csrf_token %}#}
+                                            {#                                                <input type="hidden" name="action" value="add">#}
+                                            {#                                                <input type="hidden" name="address_id" id="address_id">#}
+                                            {##}
+                                            {#                                                <div class="row g-3">#}
+                                            {#                                                    <div class="col-md-12">#}
+                                            {#                                                        <label class="form-label">{{ form.title.label }}</label>#}
+                                            {#                                                        {{ form.title }}#}
+                                            {#                                                    </div>#}
+                                            {#                                                    <div class="col-md-6">#}
+                                            {#                                                        <label class="form-label">{{ form.province.label }}</label>#}
+                                            {#                                                        {{ form.province }}#}
+                                            {#                                                    </div>#}
+                                            {##}
+                                            {#                                                    <div class="col-md-6">#}
+                                            {#                                                        <label class="form-label">{{ form.city.label }}</label>#}
+                                            {#                                                        {{ form.city }}#}
+                                            {#                                                    </div>#}
+                                            {##}
+                                            {#                                                    <div class="col-md-12">#}
+                                            {#                                                        <label class="form-label">{{ form.address.label }}</label>#}
+                                            {#                                                        {{ form.address }}#}
+                                            {#                                                    </div>#}
+                                            {#                                                    <div class="col-md-6">#}
+                                            {#                                                        <label class="form-label">{{ form.number.label }}</label>#}
+                                            {#                                                        {{ form.number }}#}
+                                            {#                                                    </div>#}
+                                            {#                                                    <div class="col-md-6">#}
+                                            {#                                                        <label class="form-label">{{ form.unit.label }}</label>#}
+                                            {#                                                        {{ form.unit }}#}
+                                            {#                                                    </div>#}
+                                            {##}
+                                            {#                                                    <div class="col-md-6">#}
+                                            {#                                                        <label class="form-label">{{ form.postal_code.label }}</label>#}
+                                            {#                                                        {{ form.postal_code }}#}
+                                            {#                                                    </div>#}
+                                            {##}
+                                            {#                                                    {{ form.latitude }}#}
+                                            {#                                                    {{ form.longitude }}#}
+                                            {##}
+                                            {#                                                    <div class="col-md-12 mt-3">#}
+                                            {#                                                        <div class="form-check d-flex align-items-center gap-2">#}
+                                            {#                                                            {{ form.is_default }}#}
+                                            {#                                                            <label class="form-check-label fw-bold text-dark mt-1"#}
+                                            {#                                                                   for="{{ form.is_default.id_for_label }}">#}
+                                            {#                                                                استفاده از این آدرس به عنوان پیش‌فرض#}
+                                            {#                                                            </label>#}
+                                            {#                                                        </div>#}
+                                            {#                                                    </div>#}
+                                            {#                                                </div>#}
+                                            {##}
+                                            {#                                                <div class="d-flex justify-content-end align-items-center mt-4">#}
+                                            {#                                                    <button type="submit" class="btn-save px-4">#}
+                                            {#                                                        <i class="fas fa-save ms-2"></i> ذخیره تغییرات#}
+                                            {#                                                    </button>#}
+                                            {#                                                </div>#}
+                                            {#                                            </form>#}
                                         </div>
                                     </div>
 
@@ -261,88 +391,224 @@
                                             {% endif %}
 
 
-                                            <form method="post" class="user-form-modern" novalidate>
+                                            {#                                            <form method="post" class="user-form-modern" novalidate>#}
+                                            {#                                                {% csrf_token %}#}
+                                            {#                                                <input type="hidden" name="action" value="receiver">#}
+                                            {##}
+                                            {#                                                <div class="row g-3">#}
+                                            {#                                                    <div class="col-md-6">#}
+                                            {#                                                        <label class="form-label"#}
+                                            {#                                                               style="margin-top: 1rem; margin-right: 2rem; font-weight: bold">#}
+                                            {#                                                            {{ receiver_form.first_name.label }}#}
+                                            {#                                                        </label>#}
+                                            {#                                                        {{ receiver_form.first_name }}#}
+                                            {#                                                    </div>#}
+                                            {##}
+                                            {#                                                    <div class="col-md-6">#}
+                                            {#                                                        <label class="form-label"#}
+                                            {#                                                               style="margin-top: 1rem; margin-right: 2rem; font-weight: bold">#}
+                                            {#                                                            {{ receiver_form.last_name.label }}#}
+                                            {#                                                        </label>#}
+                                            {#                                                        {{ receiver_form.last_name }}#}
+                                            {#                                                    </div>#}
+                                            {##}
+                                            {#                                                    <div class="col-md-12">#}
+                                            {#                                                        <label class="form-label"#}
+                                            {#                                                               style="margin-top: 1rem; margin-right: 2rem; font-weight: bold">#}
+                                            {#                                                            {{ receiver_form.email.label }}#}
+                                            {#                                                        </label>#}
+                                            {#                                                        {{ receiver_form.email }}#}
+                                            {#                                                    </div>#}
+                                            {##}
+                                            {#                                                    <div class="col-md-6">#}
+                                            {#                                                        <label class="form-label"#}
+                                            {#                                                               style="margin-top: 1rem; margin-right: 2rem; font-weight: bold">#}
+                                            {#                                                            {{ receiver_form.national_id.label }}#}
+                                            {#                                                        </label>#}
+                                            {#                                                        {{ receiver_form.national_id }}#}
+                                            {#                                                    </div>#}
+                                            {#                                                    <div class="col-md-6  mt-2 mb-4">#}
+                                            {#                                                        <label class="form-label mb-4"#}
+                                            {#                                                               style="margin-top: 1rem; margin-right: 2rem; font-weight: bold">شماره#}
+                                            {#                                                            موبایل</label>#}
+                                            {#                                                        <p class="phone-num mt-3"#}
+                                            {#                                                           style="margin-right: 2rem; font-weight: bold; margin-top: 2rem;">{{ phone }}</p>#}
+                                            {#                                                    </div>#}
+                                            {#                                                </div>#}
+                                            {##}
+                                            {#                                                <div class="mt-4 pt-3 border-top">#}
+                                            {#                                                    <h5 class="mb-3" style="font-weight: bold; text-align: right;"#}
+                                            {#                                                        dir="rtl">روش ارسال سفارش</h5>#}
+                                            {#                                                    <div class="row g-3">#}
+                                            {#                                                        <div class="col-md-6">#}
+                                            {#                                                            <div class="form-check">#}
+                                            {#                                                                <input class="form-check-input" type="radio"#}
+                                            {#                                                                       name="shipping_method" id="ship-tipax"#}
+                                            {#                                                                       value="tipax" checked>#}
+                                            {#                                                                <label class="form-check-label" for="ship-tipax">#}
+                                            {#                                                                    ارسال تیپاکس#}
+                                            {#                                                                </label>#}
+                                            {#                                                            </div>#}
+                                            {#                                                        </div>#}
+                                            {#                                                        <div class="col-md-6">#}
+                                            {#                                                            <div class="form-check">#}
+                                            {#                                                                <input class="form-check-input" type="radio"#}
+                                            {#                                                                       name="shipping_method" id="ship-post"#}
+                                            {#                                                                       value="post">#}
+                                            {#                                                                <label class="form-check-label" for="ship-post">#}
+                                            {#                                                                    ارسال پستی#}
+                                            {#                                                                </label>#}
+                                            {#                                                            </div>#}
+                                            {#                                                        </div>#}
+                                            {#                                                    </div>#}
+                                            {#                                                </div>#}
+                                            {##}
+                                            {#                                                <div class="d-flex justify-content-between align-items-center mt-4">#}
+                                            {#                                                    <a href="{% url 'cart:cart_detail' %}"#}
+                                            {#                                                       class="btn btn-outline-secondary" style="">#}
+                                            {#                                                        بازگشت به سبد خرید#}
+                                            {#                                                    </a>#}
+                                            {#                                                    <button type="submit" class="btn btn-primary px-4">#}
+                                            {#                                                        ادامه به مرحله بعد#}
+                                            {#                                                    </button>#}
+                                            {#                                                </div>#}
+                                            {#                                            </form>#}
+
+                                            <form method="post" class="user-form-modern dk-form" novalidate>
                                                 {% csrf_token %}
                                                 <input type="hidden" name="action" value="receiver">
 
+                                                {# پیام‌های مربوط به فرم گیرنده #}
+                                                {% if receiver_messages or receiver_form.non_field_errors %}
+                                                    <div class="dk-form-alerts">
+
+                                                        {% if receiver_messages %}
+                                                            {% for m in receiver_messages %}
+                                                                <div class="dk-alert dk-alert-{{ m.level_tag }}"
+                                                                     role="alert">
+                                                                    <span class="dk-alert-icon"
+                                                                          aria-hidden="true">!</span>
+                                                                    <div class="dk-alert-body">
+                                                                        <div class="dk-alert-title">توجه</div>
+                                                                        <div class="dk-alert-text">{{ m }}</div>
+                                                                    </div>
+                                                                </div>
+                                                            {% endfor %}
+                                                        {% endif %}
+
+                                                        {% if receiver_form.non_field_errors %}
+                                                            <div class="dk-alert dk-alert-danger" role="alert">
+                                                                <span class="dk-alert-icon" aria-hidden="true">!</span>
+                                                                <div class="dk-alert-body">
+                                                                    <div class="dk-alert-title">خطا</div>
+                                                                    <div class="dk-alert-text">
+                                                                        {% for e in receiver_form.non_field_errors %}
+                                                                            <div>{{ e }}</div>
+                                                                        {% endfor %}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        {% endif %}
+
+                                                    </div>
+                                                {% endif %}
+
                                                 <div class="row g-3">
+
+                                                    <!-- first_name -->
                                                     <div class="col-md-6">
-                                                        <label class="form-label"
-                                                               style="margin-top: 1rem; margin-right: 2rem; font-weight: bold">
+                                                        <label class="form-label dk-label">
                                                             {{ receiver_form.first_name.label }}
                                                         </label>
-                                                        {{ receiver_form.first_name }}
+
+                                                        <div class="dk-field {% if receiver_form.first_name.errors %}dk-field-invalid{% endif %}">
+                                                            {{ receiver_form.first_name }}
+                                                        </div>
+
+                                                        {% if receiver_form.first_name.errors %}
+                                                            <div class="dk-field-error">
+                                                                {{ receiver_form.first_name.errors.0 }}
+                                                            </div>
+                                                        {% endif %}
                                                     </div>
 
+                                                    <!-- last_name -->
                                                     <div class="col-md-6">
-                                                        <label class="form-label"
-                                                               style="margin-top: 1rem; margin-right: 2rem; font-weight: bold">
+                                                        <label class="form-label dk-label">
                                                             {{ receiver_form.last_name.label }}
                                                         </label>
-                                                        {{ receiver_form.last_name }}
+
+                                                        <div class="dk-field {% if receiver_form.last_name.errors %}dk-field-invalid{% endif %}">
+                                                            {{ receiver_form.last_name }}
+                                                        </div>
+
+                                                        {% if receiver_form.last_name.errors %}
+                                                            <div class="dk-field-error">
+                                                                {{ receiver_form.last_name.errors.0 }}
+                                                            </div>
+                                                        {% endif %}
                                                     </div>
 
+                                                    <!-- email -->
                                                     <div class="col-md-12">
-                                                        <label class="form-label"
-                                                               style="margin-top: 1rem; margin-right: 2rem; font-weight: bold">
+                                                        <label class="form-label dk-label">
                                                             {{ receiver_form.email.label }}
                                                         </label>
-                                                        {{ receiver_form.email }}
+
+                                                        <div class="dk-field {% if receiver_form.email.errors %}dk-field-invalid{% endif %}">
+                                                            {{ receiver_form.email }}
+                                                        </div>
+
+                                                        {% if receiver_form.email.errors %}
+                                                            <div class="dk-field-error">
+                                                                {{ receiver_form.email.errors.0 }}
+                                                            </div>
+                                                        {% endif %}
                                                     </div>
 
+                                                    <!-- national_id -->
                                                     <div class="col-md-6">
-                                                        <label class="form-label"
-                                                               style="margin-top: 1rem; margin-right: 2rem; font-weight: bold">
+                                                        <label class="form-label dk-label">
                                                             {{ receiver_form.national_id.label }}
                                                         </label>
-                                                        {{ receiver_form.national_id }}
-                                                    </div>
-                                                    <div class="col-md-6  mt-2 mb-4">
-                                                        <label class="form-label mb-4"
-                                                               style="margin-top: 1rem; margin-right: 2rem; font-weight: bold">شماره
-                                                            موبایل</label>
-                                                        <p class="phone-num mt-3"
-                                                           style="margin-right: 2rem; font-weight: bold; margin-top: 2rem;">{{ phone }}</p>
-                                                    </div>
-                                                </div>
 
-{#                                                <div class="mt-4 pt-3 border-top">#}
-{#                                                    <h5 class="mb-3" style="font-weight: bold; text-align: right;"#}
-{#                                                        dir="rtl">روش ارسال سفارش</h5>#}
-{#                                                    <div class="row g-3">#}
-{#                                                        <div class="col-md-6">#}
-{#                                                            <div class="form-check">#}
-{#                                                                <input class="form-check-input" type="radio"#}
-{#                                                                       name="shipping_method" id="ship-tipax"#}
-{#                                                                       value="tipax" checked>#}
-{#                                                                <label class="form-check-label" for="ship-tipax">#}
-{#                                                                    ارسال تیپاکس#}
-{#                                                                </label>#}
-{#                                                            </div>#}
-{#                                                        </div>#}
-{#                                                        <div class="col-md-6">#}
-{#                                                            <div class="form-check">#}
-{#                                                                <input class="form-check-input" type="radio"#}
-{#                                                                       name="shipping_method" id="ship-post"#}
-{#                                                                       value="post">#}
-{#                                                                <label class="form-check-label" for="ship-post">#}
-{#                                                                    ارسال پستی#}
-{#                                                                </label>#}
-{#                                                            </div>#}
-{#                                                        </div>#}
-{#                                                    </div>#}
-{#                                                </div>#}
+                                                        <div class="dk-field {% if receiver_form.national_id.errors %}dk-field-invalid{% endif %}">
+                                                            {{ receiver_form.national_id }}
+                                                        </div>
+
+                                                        {% if receiver_form.national_id.errors %}
+                                                            <div class="dk-field-error">
+                                                                {{ receiver_form.national_id.errors.0 }}
+                                                            </div>
+                                                        {% endif %}
+                                                    </div>
+
+                                                    <!-- phone -->
+                                                    <div class="col-md-6 mt-4 mb-4">
+                                                        <label class="form-label dk-label ml-2">
+                                                            شماره موبایل
+                                                        </label>
+
+                                                        <div class="dk-readonly">
+                                                            <span class="dk-readonly-text">{{ phone }}</span>
+                                                            <span class="dk-readonly-badge">تایید شده</span>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
 
                                                 <div class="d-flex justify-content-between align-items-center mt-4">
                                                     <a href="{% url 'cart:cart_detail' %}"
-                                                       class="btn btn-outline-secondary" style="">
+                                                       class="btn btn-outline-secondary" style="border-radius: 8px">
                                                         بازگشت به سبد خرید
                                                     </a>
-                                                    <button type="submit" class="btn btn-primary px-4">
+                                                    <button type="submit" class="btn btn-outline-primary-2 px-4"
+                                                            style="border-radius: 8px">
                                                         ادامه به مرحله بعد
                                                     </button>
                                                 </div>
                                             </form>
+
                                         </div>
                                     </div>
 

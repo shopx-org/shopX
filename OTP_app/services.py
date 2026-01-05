@@ -75,13 +75,13 @@ class OtpExpired(OtpError): ...
 def _new_code():
     return secrets.randbelow(9000) + 1000  # 1000..9999
 
-def _send_otp_sms(phone: str, code: int):
+def _send_otp_sms(phone: str, code: str):
     # هیچ لاگ/پرینتی از کد نکن!
     SMS.verification({
         "receptor": phone,
         "type": "1",
         "template": settings.OTP_TEMPLATE_NAME,
-        "param1": code
+        "param1": str(code)
     })
 
 @transaction.atomic

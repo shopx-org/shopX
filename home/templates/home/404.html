@@ -2,36 +2,32 @@
 {% load static %}
 {% load imagekit %}
 
-{% block title %}
-    صفحه 404
-{% endblock %}
+{% block title %}صفحه پیدا نشد{% endblock %}
 
 {% block meta_description %}
-    <meta name="description" content="صفحه 404">
+    <meta name="description" content="خطای 404 - صفحه یافت نشد">
 {% endblock %}
 
 {% block content %}
-<main class="main">
-    <div class="error-content">
-        <div class="container">
+    <main class="main">
+        <div class="error-content">
+            <div class="container">
 
-            <!-- تصویر 404 -->
-            <img src="{% static 'images/backgrounds/404-error.png' %}"
-                 alt="خطای ۴۰۴ - صفحه یافت نشد"
-                 class="error-image">
+                <img src="{% static 'images/error.png' %}"
+                     alt="خطای 404 - صفحه یافت نشد"
+                     class="error-image">
 
-            <h1 class="error-title">خطای ۴۰۴</h1>
+                <h1 class="error-title">خطای 404</h1>
 
-            <p class="error-text">
-                متاسفانه صفحه‌ای که دنبالش بودید وجود ندارد یا حذف شده است.
-            </p>
+                <p class="error-text mb-2">
+                    متاسفانه صفحه‌ای که دنبالش بودید پیدا نشد یا حذف شده است.
+                </p>
 
-            <a href="{% url 'home:home' %}" class="btn-home">
-                بازگشت به صفحه اصلی
-            </a>
+                <a href="{% url 'home:home' %}" class="btn-home">
+                    بازگشت به صفحه اصلی
+                </a>
 
+            </div>
         </div>
-    </div>
-</main>
-
+    </main>
 {% endblock %}

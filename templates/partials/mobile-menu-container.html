@@ -51,6 +51,10 @@
                     <ul class="mobile-menu">
 
                         <li><a href="{% url 'home:home' %}">خانه</a></li>
+                        <li><a href="{% url 'products:product_list' %}">محصولات</a></li>
+                        <li><a href="{% url 'faq:faqs' %}">سواالات متداول</a></li>
+                        <li><a href="{% url 'core:about' %}">درباره ما</a></li>
+                        <li><a href="{% url 'contact:contact_page' %}">ارتباط با ما</a></li>
 
                         <!-- منوی دسته‌بندی اصلی شما -->
                         {% include 'partials/navbar.html' %}
@@ -139,10 +143,10 @@
 
         <!-- شبکه‌های اجتماعی -->
         <div class="social-icons">
-            <a href="#" class="social-icon" target="_blank"><i class="icon-facebook-f"></i></a>
-            <a href="#" class="social-icon" target="_blank"><i class="icon-twitter"></i></a>
-            <a href="#" class="social-icon" target="_blank"><i class="icon-instagram"></i></a>
-            <a href="#" class="social-icon" target="_blank"><i class="icon-youtube"></i></a>
+            <a href="{{ site_info.whatsapp|default:'#' }}" class="social-icon" target="_blank"><i class="icon-whatsapp"></i></a>
+            <a href="{{ site_info.twitter|default:'#' }}" class="social-icon" target="_blank"><i class="icon-twitter"></i></a>
+            <a href="{{ site_info.instagram|default:'#' }}" class="social-icon" target="_blank"><i class="icon-instagram"></i></a>
+            <a href="{{ site_info.telegram|default:'#' }}" class="social-icon" target="_blank"><i class="icon-telegram"></i></a>
         </div>
     </div>
 </div>

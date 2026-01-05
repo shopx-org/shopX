@@ -1,0 +1,99 @@
+.terms-wrapper {
+    direction: rtl;
+    text-align: right;
+    padding-top: 40px;
+    padding-bottom: 40px;
+}
+
+.terms-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 35px;
+    line-height: 2.4; /* فاصله خطوط بیشتر */
+    border: 1px solid #e8e8e8;
+}
+
+.terms-title {
+    font-size: 1.9rem;
+    font-weight: 700;
+    margin-bottom: 25px;
+    color: #333;
+    border-right: 5px solid #4c6ef5;
+    padding-right: 12px;
+}
+
+.terms-content {
+    font-size: 1.05rem;
+    color: #444;
+    line-height: 2.4; /* افزایش فاصله خطوط متن */
+}
+
+.terms-content p {
+    margin-bottom: 18px;
+}
+
+.terms-updated {
+    margin-top: 35px;
+    font-size: 0.9rem;
+    color: #777;
+    border-top: 1px dashed #ddd;
+    padding-top: 15px;
+}
+.dk-home-brand-banner .banner-content{
+  padding-right: 24px;  /* فاصله از راست */
+  padding-left: 18px;   /* یه کم از چپ هم */
+}
+[dir="rtl"] .dk-home-brand-banner .banner-content{
+  padding-right: 24px;
+  padding-left: 18px;
+}
+
+.dk-home-brand-banner{
+  position: relative;
+}
+.dk-home-brand-banner .banner-link{
+  position: absolute;
+  right: 24px;     /* همون padding-right */
+  bottom: 18px;
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.dk-home-brand-banner .banner-content{
+  padding-bottom: 46px;  /* جا برای لینک */
+}
+
+.dk-home-brand-banner .banner-title{
+  margin-bottom: 8px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;     /* حداکثر 2 خط */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+
+.dk-home-brand-banner .banner-subtitle{
+  margin-bottom: 6px;
+}
+
+.dk-contact-link{
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .15rem .55rem;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 700;
+  border: 1px solid rgba(0,0,0,.08);
+  background: rgba(0,0,0,.03);
+  transition: transform .15s ease, background .15s ease, border-color .15s ease;
+}
+
+.dk-contact-link:hover{
+  background: rgba(0,0,0,.06);
+  border-color: rgba(0,0,0,.14);
+  transform: translateY(-1px);
+}

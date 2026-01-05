@@ -4,6 +4,7 @@
 
 {% block content %}
     <main class="main">
+
         <br/>
         <div class="header-checkout col-xl-12 align-center pt-2" style="color:#f1f0ef;height:190px">
             <a href="{% url 'home:home' %}" class="logo" style="align-content:center;">
@@ -12,6 +13,7 @@
                 <h2 style="font-weight:bold;">فروشگاه شاپیکس</h2>
             </a>
         </div>
+
 
         <nav aria-label="breadcrumb" class="breadcrumb-nav mb-3">
             <div class="container">
@@ -26,6 +28,16 @@
 
         <div class="page-content">
             <div class="container">
+                {% if messages %}
+                    <div class="container mt-3" dir="rtl">
+                        {% for m in messages %}
+                            <div class="alert {% if m.tags %}alert-{{ m.tags }}{% else %}alert-info{% endif %}">
+                                {{ m }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
                 <div class="row g-4">
 
                     {# ستون اصلی #}
@@ -173,14 +185,23 @@
                                         </div>
                                     {% endwith %}
                                 {% endif %}
-
-                                <form method="post" action="{% url 'checkout:confirm' %}">
+                                <form method="post" action="{% url 'checkout:confirm' %}" id="pay-form">
                                     {% csrf_token %}
                                     <button type="submit"
+                                            id="pay-btn"
                                             class="btn btn-primary payment-link px-4 w-100 w-md-auto mt-3">
                                         تایید و ادامه به درگاه پرداخت
                                     </button>
                                 </form>
+
+
+                                {#                                <form method="post" action="{% url 'checkout:confirm' %}">#}
+                                {#                                    {% csrf_token %}#}
+                                {#                                    <button type="submit"#}
+                                {#                                            class="btn btn-primary payment-link px-4 w-100 w-md-auto mt-3">#}
+                                {#                                        تایید و ادامه به درگاه پرداخت#}
+                                {#                                    </button>#}
+                                {#                                </form>#}
                             </div>
                         </div>
                     </aside>
@@ -244,6 +265,20 @@
                     setMsg('خطا در ارتباط با سرور.', false);
                 }
             });
+        })();
+    </script>
+
+    <script>
+        (function () {
+            const form = document.getElementById('pay-form');
+            const btn = document.getElementById('pay-btn');
+            if (!form || !btn) return;
+
+            form.addEventListener('submit', function () {
+                btn.disabled = true;
+                btn.classList.add('disabled');
+                btn.textContent = 'در حال انتقال...';
+            }, {once: true});
         })();
     </script>
 
