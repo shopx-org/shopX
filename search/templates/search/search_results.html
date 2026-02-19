@@ -308,13 +308,23 @@
                     </div>
 
                     {% if products %}
-                        <div class="products mb-3">
+                        <div class="products mb-3 search-results-grid">
                             <div class="row">
                                 {% for p in products %}
                                     <div class="col-6 col-md-4 col-xl-3">
-                                        <div class="product product-7">
+                                        <div class="product product-7 dk-product-card">
 
                                             <figure class="product-media">
+                                                {# تخفیف #}
+                                                {% if p.has_discount and p.discount_percent|default:0 > 0 %}
+                                                    <span class="product-label label-sale">{{ p.discount_percent|fa_digits }}٪ تخفیف</span>
+                                                {% endif %}
+
+                                                {# ناموجود #}
+                                                {% if p.in_stock is not None and not p.in_stock %}
+                                                    <span class="product-label label-out">ناموجود</span>
+                                                {% endif %}
+
                                                 {% if p.is_new %}
                                                     <span class="product-label label-new">جدید</span>
                                                 {% endif %}
@@ -479,7 +489,6 @@ function updateBrandFilter() {
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const MAX_SCROLL = 2; // ← بعداً بکن 10
-
     {% if page_obj.number == 1 %}
         const API = "{% url 'search:search_results_api' %}";
         let page = 1;
@@ -495,34 +504,47 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const res = await fetch(`${API}?${params}`);
             const data = await res.json();
-
-            if (!data.products?.length) return;
+            if (!data.products?.length) { loading = false; return; }
 
             const row = document.querySelector('.products .row');
+
             data.products.forEach(p => {
                 if (document.querySelector(`[data-product-id="${p.id}"]`)) return;
 
-                const discount = p.discount_percent ? `<span class="product-label label-sale">${p.discount_percent}%</span>` : '';
-                const isNew = p.is_new ? '<span class="product-label label-new">جدید</span>' : '';
-                const price = p.compare_at_price > p.price
+                const discount = p.discount_percent
+                    ? `<span class="product-label label-sale">${p.discount_percent}%</span>`
+                    : '';
+
+                const out = (p.in_stock === false)
+                    ? `<span class="product-label label-out">ناموجود</span>`
+                    : '';
+
+                const isNew = p.is_new
+                    ? '<span class="product-label label-new">جدید</span>'
+                    : '';
+
+                const price = (p.compare_at_price > p.price)
                     ? `<span class="new-price"><span class="num">${p.price.toLocaleString()}</span> <small>تومان</small></span>
                        <span class="old-price"><span class="num">${p.compare_at_price.toLocaleString()}</span> <small>تومان</small></span>`
                     : `<span class="new-price"><span class="num">${p.price.toLocaleString()}</span> <small>تومان</small></span>`;
 
                 row.insertAdjacentHTML('beforeend', `
-                    <div class="col-6 col-md-4 col-xl-3" data-product-id="${p.id}">
-                        <div class="product product-7">
-                            <figure class="product-media">
-                                ${isNew}${discount}
-                                <a href="${p.url}"><img src="${p.cover}" class="product-image" loading="lazy"></a>
-                            </figure>
-                            <div class="product-body">
-                                <h3 class="product-title text-right"><a href="${p.url}">${p.name}</a></h3>
-                                <div class="product-price text-right">${price}</div>
-                            </div>
-                        </div>
+                  <div class="col-6 col-md-4 col-xl-3" data-product-id="${p.id}">
+                    <div class="product product-7 dk-product-card">
+                      <figure class="product-media">
+                        ${isNew}${discount}${out}
+                        <a href="${p.url}">
+                          <img src="${p.cover}" class="product-image" loading="lazy">
+                        </a>
+                      </figure>
+                      <div class="product-body">
+                        <h3 class="product-title text-right"><a href="${p.url}">${p.name}</a></h3>
+                        <div class="product-price text-right">${price}</div>
+                      </div>
                     </div>
+                  </div>
                 `);
+
             });
 
             // فعال کردن عدد ۲ در pagination
@@ -546,6 +568,7 @@ document.addEventListener('DOMContentLoaded', () => {
     {% endif %}
 });
 </script>
+
 
 
 {% endblock %}

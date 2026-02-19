@@ -64,6 +64,8 @@ SHOP_ORIGIN_POSTAL_CODE = os.getenv("SHOP_ORIGIN_POSTAL_CODE", "")
 SECRET_KEY = env("SECRET_KEY")
 DEBUG = env.bool("DEBUG", default=True)
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["127.0.0.1", "localhost"])
+CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
+
 
 # ── Apps ───────────────────────────────────────────────────────────────────────
 INSTALLED_APPS = [
@@ -168,7 +170,8 @@ DATABASES = {
         "USER": env("POSTGRES_USER", default="shopx_user"),
         "PASSWORD": env("POSTGRES_PASSWORD", default=""),
         "HOST": env("POSTGRES_HOST", default="127.0.0.1"),
-        "PORT": env.int("POSTGRES_PORT", default=5433),
+        # "PORT": env.int("POSTGRES_PORT", default=5433),
+        "PORT": env.int("POSTGRES_PORT", default=5432),
         "CONN_MAX_AGE": 60,
         "OPTIONS": {"options": f"-c search_path={env('PG_SCHEMA', default='public')}"},
     }
@@ -282,7 +285,9 @@ X_FRAME_OPTIONS = "DENY"
 SECURE_BROWSER_XSS_FILTER = True
 
 # فقط در prod
-SECURE_SSL_REDIRECT = not DEBUG  # یا از env بخون
+SECURE_SSL_REDIRECT = False  # یا از env بخون
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+USE_X_FORWARDED_HOST = True
 
 SECURE_HSTS_SECONDS = 86400 if not DEBUG else 0
 # روی cPanel بهتره فعلاً false باشه

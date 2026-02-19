@@ -26,5 +26,7 @@ urlpatterns = [
          name="cart_toggle_service_no_variant"),
     path("set-coupon/", views.cart_set_coupon, name="cart_set_coupon"),
     path("api/header-summary/", views.cart_header_summary, name="cart_header_summary"),
+    path("api/header-mini-cart/", views.cart_header_mini_cart, name="cart_header_mini_cart"),
+    path("ajax/remove-item/", views.ajax_remove_item, name="ajax_remove_item"),
 ]
 

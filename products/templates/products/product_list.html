@@ -396,12 +396,22 @@
 
                                                         {# --- نوار بازه قیمت با دو اسلایدر واقعی --- #}
                                                         <div class="price-range-bar mb-3">
+{#                                                            <div class="price-range-track"#}
+{#                                                                 data-min="{{ base_min }}"#}
+{#                                                                 data-max="{{ base_max }}">#}
+{#                                                                <span class="price-range-handle left-handle"></span>#}
+{#                                                                <span class="price-range-handle right-handle"></span>#}
+{#                                                            </div>#}
+
                                                             <div class="price-range-track"
                                                                  data-min="{{ base_min }}"
                                                                  data-max="{{ base_max }}">
+                                                                <span class="price-range-fill"></span>
                                                                 <span class="price-range-handle left-handle"></span>
                                                                 <span class="price-range-handle right-handle"></span>
                                                             </div>
+
+
 
                                                             {# اسلایدرهای واقعی ولی نامرئی #}
                                                             <input type="range"
@@ -729,6 +739,57 @@
                 document.getElementById('filters-form').submit();
             }
         </script>
+
+        <script>
+(function () {
+  const form = document.getElementById("filters-form");
+  if (!form) return;
+
+  const btn = form.querySelector(".btn-price-range");
+  const rMin = document.getElementById("price-range-min");
+  const rMax = document.getElementById("price-range-max");
+  if (!btn || !rMin || !rMax) return;
+
+  function clamp(a, b) {
+    a = parseInt(a, 10);
+    b = parseInt(b, 10);
+    if (Number.isNaN(a) || Number.isNaN(b)) return null;
+    if (a > b) { const t = a; a = b; b = t; }
+    return [a, b];
+  }
+
+  btn.addEventListener("click", function (e) {
+    e.preventDefault();
+
+    const pair = clamp(rMin.value, rMax.value);
+    if (!pair) {
+      // fallback: اگر somehow مقدار قابل خواندن نبود، همون submit معمولی
+      form.submit();
+      return;
+    }
+    const [a, b] = pair;
+
+    // URL فعلی + همه پارامترهای موجود
+    const url = new URL(window.location.href);
+    const params = url.searchParams;
+
+    // پاک کردن صفحه تا روی صفحه 1 بیاد
+    params.delete("page");
+
+    // ست کردن min/max جدید (قطعی)
+    params.set("min", String(a));
+    params.set("max", String(b));
+
+    // اگر cat داخل فرم/صفحه هست، حفظ می‌شود (چون از قبل داخل params هست)
+    // بقیه فیلترها هم همینطور (brand/available/sort/…).
+
+    url.search = params.toString();
+    window.location.assign(url.toString());
+  });
+})();
+</script>
+
+
 
 
     {% endblock %}

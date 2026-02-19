@@ -1,3 +1,4 @@
+/* product.css */
 :root {
     --accent: #000000;
     --ok: #2bbf6a;
@@ -3833,4 +3834,5 @@ body.modal-open {
     border-radius: 999px;
     border: 1px solid #e5e7eb;
 }
+
 

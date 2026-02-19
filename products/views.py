@@ -33,6 +33,9 @@ from products.services.service_pricing import compute_service_unit_price
 from Core.models import Comment
 from Core.forms import CommentForm
 from products.services.pricing_adapter import build_pricing_line_public, build_ephemeral_campaigns_for_lines
+from decimal import Decimal, InvalidOperation
+from django.db.models import Count, Min, Max
+
 
 # ---------------- Utils (single source of truth) ---------------- #
 
@@ -256,7 +259,8 @@ class ProductListView(ListView):
                 bids = p.get("brand_ids") or []
                 if bids:
                     has_scope_rule = True
-                    allowed_q |= Q(brand_id__in=bids)
+                    # allowed_q |= Q(brand_id__in=bids)
+                    allowed_q |= Q(brand_fk_id__in=bids)
 
             elif r.kind == "category_in":
                 cids = p.get("category_ids") or []
@@ -270,9 +274,73 @@ class ProductListView(ListView):
 
         return qs.filter(allowed_q).distinct()
 
+    # def apply_filters(self, qs):
+    #     # فیلترهای خودت
+    #     return qs
+
     def apply_filters(self, qs):
-        # فیلترهای خودت
+        GET = self.request.GET
+
+        # ---------- فیلترها (مثل search) ----------
+        available = (GET.get("available") or "").strip()
+        if available == "1":
+            qs = qs.filter(variants__stock__gt=0).distinct()
+
+        brand_param = (GET.get("brand") or "").strip()
+        selected_brands = [int(x) for x in brand_param.split(",") if x.isdigit()]
+        if selected_brands:
+            qs = qs.filter(brand_fk_id__in=selected_brands)
+
+        cat_id = (GET.get("cat") or "").strip()
+        selected_cat_id = int(cat_id) if cat_id.isdigit() else None
+        if selected_cat_id:
+            qs = qs.filter(category_id=selected_cat_id)
+
+        min_param = (GET.get("min") or "").strip()
+        max_param = (GET.get("max") or "").strip()
+
+        if min_param:
+            try:
+                qs = qs.filter(price__gte=Decimal(min_param))
+            except (InvalidOperation, ValueError, TypeError):
+                pass
+
+        if max_param:
+            try:
+                qs = qs.filter(price__lte=Decimal(max_param))
+            except (InvalidOperation, ValueError, TypeError):
+                pass
+
+        # ---------- مرتب‌سازی ----------
+        sort = (GET.get("sort") or "new").strip()
+        self.current_sort = sort  # برای selected شدن dropdown در template
+
+        if sort == "pop":
+            # اگر فعلاً معیار محبوبیت نداری، همین fallback امنه
+            qs = qs.order_by("-id")
+        elif sort == "new":
+            # اگر created_at نداری، همین خط رو به "-id" تغییر بده
+            qs = qs.order_by("-created_at", "-id")
+        elif sort == "price_asc":
+            qs = qs.order_by("price", "id")
+        elif sort == "price_desc":
+            qs = qs.order_by("-price", "-id")
+        elif sort == "name":
+            qs = qs.order_by("name", "id")
+        else:
+            qs = qs.order_by("-created_at", "-id")
+
+        # برای اینکه template دقیقاً مثل سرچ فیلدها رو داشته باشه:
+        self._filters_ctx = {
+            "available": available,
+            "selected_brands": selected_brands,
+            "selected_cat_id": selected_cat_id,
+            "min_param": min_param,
+            "max_param": max_param,
+            "current_sort": sort,
+        }
         return qs
+
 
     def get_queryset(self):
         qs = self.base_queryset()
@@ -295,6 +363,40 @@ class ProductListView(ListView):
             ctx["total_count"] = None
 
         page_products = list(ctx.get("products") or [])
+
+        # ✅ (اضافه شد) فیلترهای فعلی + sort برای template (همون چیزی که گفتی)
+        f = getattr(self, "_filters_ctx", {})
+        ctx.update(f)
+        ctx.setdefault("current_sort", "new")
+
+        # ✅ (اضافه شد) برندها + فست‌ها + آمار قیمت (مثل سرچ)
+        # نکته: self.object_list کوئری نهایی بعد از apply_filters است (نه فقط همین صفحه)
+        qs = getattr(self, "object_list", None)
+        if qs is not None:
+            # --- برندها مثل سرچ ---
+            brand_facets = (
+                qs.values("brand_fk_id", "brand_fk__name")
+                .annotate(cnt=Count("id", distinct=True))
+                .order_by("brand_fk__name")
+            )
+
+            brand_ids = [b["brand_fk_id"] for b in brand_facets if b.get("brand_fk_id")]
+            ctx["brands"] = Brand.objects.filter(id__in=brand_ids).order_by("name")
+            ctx["brand_facets"] = brand_facets
+
+            # --- آمار قیمت نتایج (برای متن/نمایش) ---
+            price_stats = qs.aggregate(price_min=Min("price"), price_max=Max("price"))
+            ctx["price_min"] = price_stats.get("price_min")
+            ctx["price_max"] = price_stats.get("price_max")
+
+        # --- مین/مکس کل سایت برای track اسلایدر (بدون توجه به فیلتر) ---
+        slider_stats = Product.objects.filter(is_active=True, status="pub").aggregate(
+            slider_min=Min("price"),
+            slider_max=Max("price"),
+        )
+        ctx["slider_min"] = slider_stats.get("slider_min") or 0
+        ctx["slider_max"] = slider_stats.get("slider_max") or 1_000_000
+
         if not page_products:
             # اگر محصولی نیست، همین کانتکست کافی است
             return ctx
@@ -375,7 +477,111 @@ class ProductListView(ListView):
 
         # محصولات همین صفحه (با فیلدهای attach شده)
         ctx["products"] = page_products
+
         return ctx
+
+    # def get_context_data(self, **kwargs):
+    #     ctx = super().get_context_data(**kwargs)
+    #
+    #     # ---------- 0) campaign in context (برای نوار بالای template) ----------
+    #     # فرض: در get_queryset یا قبل‌تر self._active_campaign ست می‌شود
+    #     ctx["campaign"] = getattr(self, "_active_campaign", None)
+    #
+    #     # ---------- 1) total_count (عدد واقعی نتایج با فیلترها) ----------
+    #     try:
+    #         # paginator.count دقیق‌ترین عدد برای queryset نهاییِ همین صفحه است
+    #         ctx["total_count"] = getattr(ctx.get("paginator"), "count", None)
+    #     except Exception:
+    #         ctx["total_count"] = None
+    #
+    #     page_products = list(ctx.get("products") or [])
+    #     if not page_products:
+    #         # اگر محصولی نیست، همین کانتکست کافی است
+    #         return ctx
+    #
+    #     # ---------- 2) انتخاب آیتم قیمت‌گذاری برای هر محصول (variant یا product) ----------
+    #     priced_items = []
+    #     product_to_item = {}  # product_id -> (variant or product)
+    #
+    #     for p in page_products:
+    #         vlist = getattr(p, "_vlist", None) or []
+    #         # base_queryset شما order_by("-stock", "id") دارد؛ پس vlist[0] بهترین گزینه است
+    #         item = vlist[0] if vlist else p
+    #         priced_items.append(item)
+    #         product_to_item[p.id] = item
+    #
+    #     # ---------- 3) ساخت lines ----------
+    #     lines = [build_pricing_line_public(item, qty=1) for item in priced_items]
+    #
+    #     # ---------- 4) pricing ctx + ephemeral ----------
+    #     channel = "web"
+    #     pricing_ctx = {
+    #         "channel": channel,
+    #         "coupons": [],
+    #         "preview": True,  # برای لیست، preview بهتر است
+    #     }
+    #
+    #     epis = build_ephemeral_campaigns_for_lines(lines, channel=channel)
+    #     if epis:
+    #         pricing_ctx["ephemeral_campaigns"] = epis
+    #
+    #     # ---------- 5) evaluate ----------
+    #     result = PricingEngine().evaluate(lines, pricing_ctx)
+    #
+    #     # ---------- 6) index خطوط نتیجه با کلید استاندارد ----------
+    #     # کلید: (product_id, variant_id_or_None)
+    #     by_key = {}
+    #     for l in (result.lines or []):
+    #         by_key[(l.product_id, getattr(l, "variant_id", None))] = l
+    #
+    #     # ---------- 7) attach computed fields روی هر محصول ----------
+    #     for p in page_products:
+    #         item = product_to_item.get(p.id)
+    #
+    #         # اگر item واریانت باشد، معمولاً product_id دارد
+    #         is_variant = hasattr(item, "product_id")
+    #         vid = item.id if (item and is_variant) else None
+    #
+    #         ln = by_key.get((p.id, vid)) or by_key.get((p.id, None))
+    #
+    #         # fallback قیمت پایه از خود محصول (اگر خط قیمت‌گذاری نیامد)
+    #         base = Decimal(str(getattr(p, "price", 0) or 0))
+    #         disc = D0
+    #
+    #         if ln:
+    #             # line_subtotal بهتره چون شامل qty و قیمت پایه برای همان line است
+    #             base = Decimal(str(getattr(ln, "line_subtotal", base) or base))
+    #             disc = Decimal(str(getattr(ln, "line_discount", 0) or 0))
+    #
+    #         final = base - disc
+    #         if final < 0:
+    #             final = D0
+    #
+    #         if base > 0 and disc > 0:
+    #             percent = (disc * D100 / base).quantize(Decimal("1"), rounding=ROUND_HALF_UP)
+    #         else:
+    #             percent = Decimal("0")
+    #
+    #         # فیلدهای قابل استفاده در template
+    #         p.price_base = base
+    #         p.price_final = final
+    #         p.has_discount = disc > 0
+    #         p.discount_percent = percent
+    #
+    #         st = int(getattr(p, "stock_total", 0) or 0)
+    #         p.in_stock = st > 0
+    #         p.low_stock = p.in_stock and (st <= 3)
+    #         p.stock_total = st
+    #
+    #     # محصولات همین صفحه (با فیلدهای attach شده)
+    #     ctx["products"] = page_products
+    #     f = getattr(self, "_filters_ctx", {})
+    #     ctx.update(f)
+    #
+    #     # اگر current_sort ست نشد، پیش‌فرض new
+    #     ctx.setdefault("current_sort", "new")
+    #
+    #     return ctx
 
 
 # ---------------- Category Product List ---------------- #

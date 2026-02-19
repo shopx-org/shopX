@@ -26,7 +26,7 @@
     {% endif %}
 
     {# اسکریپت صفحه #}
-    <script src="{% static 'products/js/product.js' %}" defer></script>
+{#    <script src="{% static 'products/js/product.js' %}" defer></script>#}
 
     <style>
         /* ==== Rating Stars ==== */
@@ -923,9 +923,13 @@
                                 <div class="t2">{{ product.price|floatformat:0|intcomma }} تومان</div>
                             </div>
                         </div>
+                          <div id="pd-message" class="pd-message"></div>
 
                         <button class="btn bb-add"><i class="icon-shopping-cart"></i><span>افزودن به سبد</span></button>
+
                     </div>
+
+
                 </div>
 
             </div>

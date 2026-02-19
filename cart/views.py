@@ -14,15 +14,112 @@ from django.utils import timezone
 from .cart import Cart
 from products.models import Product, ProductVariant, ProductImage
 from promos.services.pricing import PricingEngine
+from decimal import Decimal
+from django.views.decorators.csrf import ensure_csrf_cookie
 from products.services.pricing_adapter import (
     build_pricing_line_public,
     build_service_line_public,
     build_ephemeral_campaigns_for_lines,
 )
+
 from django.views.decorators.http import require_GET
 # =========================
 # Helpers (pure)
 # =========================
+
+
+def build_mini_cart_items(cart, pricing_result, groups, request):
+    items = []
+    lines = getattr(pricing_result, "lines", []) or []
+
+    # جمع‌زدن قیمت/تخفیف برای هر gid (فقط خطوط قابل‌تخفیف؛ سرویس‌ها کنار)
+    per_gid = {}
+    for ln in lines:
+        gid = getattr(ln, "_cart_gid", None)
+        if not gid:
+            continue
+
+        agg = per_gid.setdefault(gid, {"sub": Decimal("0"), "disc": Decimal("0")})
+
+        # سرویس‌ها (exclude) رو برای قیمت واحد محصول قاطی نکن
+        if getattr(ln, "_exclude_from_discounts", False):
+            continue
+
+        agg["sub"]  += getattr(ln, "line_subtotal", Decimal("0"))
+        agg["disc"] += getattr(ln, "line_discount", Decimal("0"))
+
+    for gid, it in groups:
+        product = getattr(it, "product", None)
+        variant = getattr(it, "variant", None)
+
+        if not product:
+            continue
+
+        qty = int(getattr(it, "qty", 1) or 1)
+
+        agg = per_gid.get(gid, {"sub": Decimal("0"), "disc": Decimal("0")})
+        sub  = agg["sub"]
+        disc = agg["disc"]
+        after = max(Decimal("0"), sub - disc)
+
+        unit_before = (sub / qty) if qty else sub
+        unit_after  = (after / qty) if qty else after
+
+        # درصد تخفیف
+        discount_percent = 0
+        if sub > 0 and disc > 0:
+            try:
+                discount_percent = int((disc * Decimal("100") / sub).quantize(Decimal("1")))
+            except Exception:
+                discount_percent = 0
+
+        items.append({
+            "line_id": f"{product.id}:{variant.id if variant else 'none'}",
+            "name": getattr(product, "name", "") or getattr(product, "title", str(product)),
+            "url": product.get_absolute_url() if hasattr(product, "get_absolute_url") else "#",
+            "image": _first_image_url(product) or "",
+            "qty": qty,
+            "unit_price_before": unit_before,
+            "unit_price_after": unit_after,
+            "discount_percent": discount_percent,
+
+            # اگر رنگ/کد رنگ رو روی variant داری
+            "color_name": getattr(getattr(variant, "color", None), "name", "") if variant else "",
+            "color_code": getattr(getattr(variant, "color", None), "hex_code", "") if variant else "",
+        })
+
+    return items
+
+def _render_header_mini_cart_json(request: HttpRequest) -> JsonResponse:
+    cart = Cart(request)
+
+    lines, groups = _build_lines_with_gids(cart)
+    ctx = _pricing_ctx_for(request)
+
+    eps = build_ephemeral_campaigns_for_lines(
+        lines, channel=ctx.get("channel", "web")
+    )
+    if eps:
+        ctx["ephemeral_campaigns"] = eps
+
+    res = PricingEngine().evaluate(lines, ctx)
+    summary = _summary_payload(res, request)
+
+    mini_cart_items = build_mini_cart_items(cart, res, groups, request)
+
+    html = render_to_string(
+        "partials/minicart.html",
+        {
+            "mini_cart_items": mini_cart_items,
+            "mini_cart_total": summary["total"],
+            "cart_count": summary["items_count"],
+        },
+        request=request,
+    )
+
+    return JsonResponse({"ok": True, "html": html, "summary": summary})
+
+
 def _review_rows_from_result(result, groups):
     """
     review_rows مثل checkout_review
@@ -78,6 +175,62 @@ def _review_rows_from_result(result, groups):
         })
 
     return review_rows
+
+
+from django.views.decorators.http import require_POST, require_GET
+from django.template.loader import render_to_string
+
+@require_GET
+
+@require_GET
+@ensure_csrf_cookie
+def cart_header_mini_cart(request: HttpRequest) -> JsonResponse:
+    return _render_header_mini_cart_json(request)
+
+
+
+@require_POST
+def ajax_remove_item(request: HttpRequest) -> JsonResponse:
+    cart = Cart(request)
+
+    line_id = (request.POST.get("line_id") or "").strip()
+
+    product_id = None
+    variant_id = None
+
+    if line_id and ":" in line_id:
+        p, v = line_id.split(":", 1)
+        try:
+            product_id = int(p)
+        except Exception:
+            product_id = None
+
+        v = (v or "").strip().lower()
+        if v in ("none", "null", ""):
+            variant_id = None
+        else:
+            try:
+                variant_id = int(v)
+            except Exception:
+                variant_id = None
+    else:
+        try:
+            product_id = int(request.POST.get("product_id") or 0) or None
+        except Exception:
+            product_id = None
+        try:
+            variant_id = int(request.POST.get("variant_id") or 0) or None
+        except Exception:
+            variant_id = None
+
+    if not product_id:
+        return JsonResponse({"ok": False, "message": "line_id نامعتبر است."}, status=400)
+
+    cart.remove(product_id=product_id, variant_id=variant_id)
+
+    # ✅ مهم‌ترین خط: حتماً HttpResponse برگردون
+    return _render_header_mini_cart_json(request)
+
 
 
 def _to_number(x: Decimal | int | float | None) -> float:
@@ -252,6 +405,7 @@ def _json_cart_summary(request: HttpRequest) -> JsonResponse:
     res = PricingEngine().evaluate(lines, ctx)
     return JsonResponse({"ok": True, "summary": _summary_payload(res, request)})
 
+@ensure_csrf_cookie
 @require_GET
 def cart_header_summary(request: HttpRequest) -> JsonResponse:
     """
@@ -416,7 +570,6 @@ def cart_detail(request: HttpRequest) -> HttpResponse:
 # =========================
 # Mutations
 # =========================
-
 @require_POST
 def cart_add(request: HttpRequest, product_id: int) -> HttpResponse:
     product = get_object_or_404(Product, pk=product_id, is_active=True, status="pub")
@@ -435,10 +588,54 @@ def cart_add(request: HttpRequest, product_id: int) -> HttpResponse:
         variant = get_object_or_404(ProductVariant, pk=int(variant_id_raw), product=product, is_active=True)
 
     cart = Cart(request)
-    cart.add(product_id=product.id, variant_id=(variant.id if variant else None), qty=qty, services=services)
+    cart.add(
+        product_id=product.id,
+        variant_id=(variant.id if variant else None),
+        qty=qty,
+        services=services
+    )
 
+    # ✅ اگر درخواست Ajax بود: JSON بده و ریدایرکت نکن
+    if _ajax(request):
+        # یک خلاصه‌ی به‌روز برای بج هدر و ...
+        lines, _ = _build_lines_with_gids(cart)
+        ctx = _pricing_ctx_for(request)
+        eps = build_ephemeral_campaigns_for_lines(lines, channel=ctx.get("channel", "web"))
+        if eps:
+            ctx["ephemeral_campaigns"] = eps
+        res = PricingEngine().evaluate(lines, ctx)
+
+        return JsonResponse({
+            "ok": True,
+            "message": "کالا با موفقیت به سبد اضافه شد.",
+            "summary": _summary_payload(res, request),
+        })
+
+    # حالت معمولی (غیر Ajax): همون رفتار قبلی
     messages.success(request, "به سبد خرید اضافه شد.")
     return redirect("cart:cart_detail")
+# @require_POST
+# def cart_add(request: HttpRequest, product_id: int) -> HttpResponse:
+#     product = get_object_or_404(Product, pk=product_id, is_active=True, status="pub")
+#     variant_id_raw = request.POST.get("variant_id")
+#     qty_raw = request.POST.get("quantity") or "1"
+#     services = request.POST.getlist("services[]") or request.POST.getlist("services") or []
+#
+#     try:
+#         qty = int(qty_raw)
+#     except ValueError:
+#         qty = 1
+#     qty = max(1, min(qty, 999))
+#
+#     variant: ProductVariant | None = None
+#     if variant_id_raw not in (None, "", "null", "None"):
+#         variant = get_object_or_404(ProductVariant, pk=int(variant_id_raw), product=product, is_active=True)
+#
+#     cart = Cart(request)
+#     cart.add(product_id=product.id, variant_id=(variant.id if variant else None), qty=qty, services=services)
+#
+#     messages.success(request, "به سبد خرید اضافه شد.")
+#     return redirect("cart:cart_detail")
 
 @require_POST
 def cart_update_qty(request: HttpRequest, product_id: int, variant_id: int) -> HttpResponse:

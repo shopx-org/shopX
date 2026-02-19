@@ -1,4 +1,26 @@
 // Main Js File
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+        const cookies = document.cookie.split(";");
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + "=")) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function getCSRFToken() {
+  const el = document.querySelector('input[name="csrfmiddlewaretoken"]');
+  return el ? el.value : null;
+}
+
+
 $(document).ready(function () {
     'use strict';
 
@@ -877,88 +899,38 @@ document.addEventListener('click', function (e) {
   input.value = v;
 });
 
-    // ---- Cart header summary (badge + total) ----
-    (function () {
-        var $badge = $('.cart-dropdown .cart-count');
-        var $total = $('.cart-dropdown .cart-total-price');
+ // ---- Cart header summary (badge + total) ----
+window.refreshHeaderCart = function () {
+  var $badge = $('.cart-dropdown .cart-count');
+  var $total = $('.cart-dropdown .cart-total-value');
 
-        if (!$badge.length && !$total.length) {
-            return;
-        }
+  if (!$badge.length && !$total.length) return;
 
-        $.ajax({
-            url: '/cart/api/header-summary/',
-            method: 'GET',
-            headers: {'X-Requested-With': 'XMLHttpRequest'}
-        }).done(function (data) {
-            if (!data || !data.ok || !data.summary) return;
+  $.ajax({
+    url: '/cart/api/header-summary/',
+    method: 'GET',
+    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+  }).done(function (data) {
+    if (!data || !data.ok || !data.summary) return;
 
-            var sum = data.summary;
+    var sum = data.summary;
 
-            // تعداد آیتم‌ها
-            if ($badge.length) {
-                $badge.text(sum.items_count || 0);
-            }
+    if ($badge.length) $badge.text(sum.items_count || 0);
 
-            // مبلغ کل پرداختی
-            if ($total.length) {
-                var formatter = new Intl.NumberFormat('fa-IR');
-                var t = sum.total || 0;
-                $total.text(formatter.format(t) + ' تومان');
-            }
-        }).fail(function () {
-            // در صورت خطا چیزی تغییر نده
-        });
-    })();
-
-    // ---- Cart header summary (badge + total) ----
-    (function () {
-        var $badge = $('.cart-dropdown .cart-count');
-        var $total = $('.cart-dropdown .cart-total-price');
-
-        if (!$badge.length && !$total.length) {
-            return;
-        }
-
-        $.ajax({
-            url: '/cart/api/header-summary/',
-            method: 'GET',
-            headers: {'X-Requested-With': 'XMLHttpRequest'}
-        }).done(function (data) {
-            if (!data || !data.ok || !data.summary) return;
-
-            var sum = data.summary;
-
-            // تعداد آیتم‌ها
-            if ($badge.length) {
-                $badge.text(sum.items_count || 0);
-            }
-
-            // مبلغ کل پرداختی
-            if ($total.length) {
-                var formatter = new Intl.NumberFormat('fa-IR');
-                var t = sum.total || 0;
-                $total.text(formatter.format(t) + ' تومان');
-            }
-        }).fail(function () {
-            // در صورت خطا چیزی تغییر نده
-        });
-    })();
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== "") {
-        const cookies = document.cookie.split(";");
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            // Does this cookie string begin with the name we want?
-            if (cookie.substring(0, name.length + 1) === (name + "=")) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
+    if ($total.length) {
+      var formatter = new Intl.NumberFormat('fa-IR');
+      var t = sum.total || 0;
+      $total.text(formatter.format(t) + ' تومان');
     }
-    return cookieValue;
-}
+  });
+};
+
+// یک بار هم موقع لود اجرا کن
+$(function () {
+  if (window.refreshHeaderCart) window.refreshHeaderCart();
+});
+
+
 
 document.addEventListener("DOMContentLoaded", function () {
     const methodInputs = document.querySelectorAll('input[name="shipping_method"]');
@@ -1038,3 +1010,109 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 });
+window.refreshHeaderCart = async function () {
+  try {
+    // اگر dataset داری از اون بخون، وگرنه fallback به URL ثابت
+    const host = document.querySelector(".cart-dropdown");
+    const url = host?.dataset?.miniCartUrl || "/cart/api/header-mini-cart/";
+    if (!url) return;
+
+    const res = await fetch(url, {
+      headers: { "X-Requested-With": "XMLHttpRequest" },
+      credentials: "same-origin",
+    });
+    if (!res.ok) return;
+
+    const data = await res.json().catch(() => null);
+    if (!data || data.ok !== true) return;
+
+    // اگر بک‌اند کل HTML رو داد (data.html) → replace کل پنل
+    if (data.html) {
+      const panel = document.querySelector(".cart-panel-menu");
+      if (panel) panel.innerHTML = data.html;
+    }
+
+    // اگر بک‌اند تکه‌ای داد (items_html / total_text / items_count) → patch جزئی
+    if (typeof data.items_count === "number") {
+      document.querySelectorAll(".cart-count").forEach((el) => (el.textContent = String(data.items_count)));
+      const sub = document.querySelector(".cart-panel-sub");
+      if (sub) sub.textContent = `${data.items_count} کالا`;
+    }
+
+    if (data.total_text) {
+      const totalEl = document.querySelector(".cart-total-value");
+      if (totalEl) totalEl.textContent = data.total_text;
+    }
+
+    if (data.items_html) {
+      const body = document.querySelector(".cart-panel-body");
+      if (body) body.innerHTML = data.items_html;
+    }
+
+    // اگر بک‌اند فقط summary میده (مثل refreshMiniCart قبلی)
+    if (data.summary && typeof data.summary.items_count === "number") {
+      document.querySelectorAll(".cart-count").forEach((el) => (el.textContent = String(data.summary.items_count)));
+    }
+  } catch (e) {}
+};
+
+// alias (اگه جای دیگه refreshMiniCart صدا زده بودی)
+window.refreshMiniCart = window.refreshHeaderCart;
+
+
+function getCSRFTokenFromDOM() {
+  const el = document.querySelector('input[name="csrfmiddlewaretoken"]');
+  return el ? el.value : null;
+}
+
+
+document.addEventListener("click", async (e) => {
+  const btn = e.target.closest(".cart-item-remove");
+  if (!btn) return;
+
+  e.preventDefault();
+
+  const url = btn.dataset.removeUrl;
+  const lineId = btn.dataset.lineId;
+  if (!url || !lineId) return;
+
+  // ✅ توکن را از DOM می‌گیریم (نه از cookie)
+  const token = getCSRFTokenFromDOM();
+  if (!token) {
+    console.warn("csrf token not found in DOM");
+    return;
+  }
+
+  try {
+    const fd = new FormData();
+    fd.append("line_id", lineId);
+
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "X-Requested-With": "XMLHttpRequest",
+        "X-CSRFToken": token,
+      },
+      body: fd,
+      credentials: "same-origin",
+    });
+
+    const data = await res.json().catch(() => null);
+    if (!res.ok || !data || data.ok !== true) {
+      console.warn("remove failed", res.status, data);
+      return;
+    }
+
+    // ✅ view html کامل می‌دهد
+    const panel = document.querySelector(".cart-panel-menu");
+    if (panel && data.html) panel.innerHTML = data.html;
+
+    // ✅ badge های تعداد
+    document.querySelectorAll(".cart-count").forEach((el) => {
+      el.textContent = String(data.summary?.items_count ?? 0);
+    });
+  } catch (err) {
+    console.error("remove exception", err);
+  }
+});
+
