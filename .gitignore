@@ -18,6 +18,9 @@ htmlcov/
 static_root/
 static_collected/
 
+# IDE / run configs
+.run/
+
 # IDE
 .idea/
 .vscode/
